@@ -3,7 +3,7 @@
   "repository": "https://github.com/maayanalbert/stamper2.git",
   "description": "CRA + Electron sitting in a tree",
   "author": "Kitze",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "private": true,
   "dependencies": {
     "cross-env": "^6.0.2",
