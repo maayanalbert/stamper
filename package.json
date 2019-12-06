@@ -1,13 +1,15 @@
 {
   "name": "cra-electron",
+  "repository": "https://github.com/maayanalbert/stamper2.git",
   "description": "CRA + Electron sitting in a tree",
   "author": "Kitze",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "dependencies": {
     "cross-env": "^6.0.2",
     "electron-is-dev": "1.1.0",
-    "electron-log": "^3.0.8",
+    "electron-log": "^3.0.9",
+    "electron-updater": "^4.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "update-electron-app": "^1.2.0"
