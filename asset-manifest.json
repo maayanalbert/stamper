@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "./static/css/main.fac02449.chunk.css",
-    "main.js": "./static/js/main.fcd765ed.chunk.js",
-    "main.js.map": "./static/js/main.fcd765ed.chunk.js.map",
+    "main.js": "./static/js/main.e97939d1.chunk.js",
+    "main.js.map": "./static/js/main.e97939d1.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.d0e6e0f4.js",
     "runtime-main.js.map": "./static/js/runtime-main.d0e6e0f4.js.map",
     "static/js/2.2789f1a5.chunk.js": "./static/js/2.2789f1a5.chunk.js",
@@ -409,7 +409,7 @@
     "theme-gruvbox.js": "./feff703ce532f20391dfed8199b6971e.js",
     "jsx.js": "./ff7acf7df3cdb56d704a5bd29f08fd55.js",
     "index.html": "./index.html",
-    "precache-manifest.c384a5b84e79a1c343627435c91b7fbd.js": "./precache-manifest.c384a5b84e79a1c343627435c91b7fbd.js",
+    "precache-manifest.7db5673746ebd1d1ce1e4fc9a61179cb.js": "./precache-manifest.7db5673746ebd1d1ce1e4fc9a61179cb.js",
     "service-worker.js": "./service-worker.js",
     "static/css/main.fac02449.chunk.css.map": "./static/css/main.fac02449.chunk.css.map",
     "static/js/2.2789f1a5.chunk.js.LICENSE": "./static/js/2.2789f1a5.chunk.js.LICENSE",
@@ -419,6 +419,6 @@
     "static/js/runtime-main.d0e6e0f4.js",
     "static/js/2.2789f1a5.chunk.js",
     "static/css/main.fac02449.chunk.css",
-    "static/js/main.fcd765ed.chunk.js"
+    "static/js/main.e97939d1.chunk.js"
   ]
 }
