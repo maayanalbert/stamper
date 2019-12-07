@@ -105,6 +105,9 @@ $theme-colors: (
   lightGrey:rgb(145, 155, 158)
 );
 
+html, body {
+  overflow: hidden;
+}
 
 .name{
   border:none;

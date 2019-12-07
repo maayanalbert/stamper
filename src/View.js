@@ -6,8 +6,11 @@ import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import VariableStamp from "./VariableStamp.js";
 import { Mutex } from "async-mutex";
-
 import { Line } from "react-lineto";
+const electron = window.require('electron');
+const ipc = electron.ipcRenderer;
+
+
 
 export default class View extends Component {
   constructor(props) {
@@ -16,15 +19,25 @@ export default class View extends Component {
       fnStamps: {},
       scale: 1,
       counter: 0,
-      varStamps: {}
+      varStamps: {},
+      html:"",
+      css:""
     };
-
     this.counterMutex = new Mutex();
-  }
 
+      ipc.on('writeToView', (event, project) => {
+
+      this.setState({html:project.html, css:project.css});
+      
+      project.stamper.fns.map(data => this.addFnStamp(data))
+      project.stamper.vars.map(data => this.addVarStamp(data))
+
+    });
+  }
   componentDidMount() {
-    this.addSetupFnStamp();
-    this.addFnStamp({ name: "draw" });
+
+    // this.addSetupFnStamp();
+    // this.addFnStamp({ name: "draw" });
   }
 
   // resetScale(mouseX, mouseY) {
@@ -42,25 +55,25 @@ export default class View extends Component {
   //   this.setState({ scale: 1 });
   // }
 
-  getIframeDimensions() {
-    return { width: this.state.iframeWidth, height: this.state.iframeHeight };
-  }
+  // getIframeDimensions() {
+  //   return { width: this.state.iframeWidth, height: this.state.iframeHeight };
+  // }
 
-  addSetupFnStamp() {
-    var setupCode =
-      "createCanvas(" +
-      globals.defaultIframeWidth.toString() +
-      ", " +
-      globals.defaultEditorHeight.toString() +
-      ")";
-    var fnStampData = {
-      code: setupCode,
-      name: "setup",
-      args: " ",
-      isSetup: true
-    };
-    this.addFnStamp(fnStampData, false);
-  }
+  // addSetupFnStamp() {
+  //   var setupCode =
+  //     "createCanvas(" +
+  //     globals.defaultIframeWidth.toString() +
+  //     ", " +
+  //     globals.defaultEditorHeight.toString() +
+  //     ")";
+  //   var fnStampData = {
+  //     code: setupCode,
+  //     name: "setup",
+  //     args: " ",
+  //     isSetup: true
+  //   };
+  //   this.addFnStamp(fnStampData, false);
+  // }
 
   defaultStarterPos(offset = 0) {
     return Math.random() * globals.marginVariance + globals.margin * 2 + offset;

@@ -252,7 +252,6 @@ export default class FunctionStamp extends Component {
               <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
               <meta charset="utf-8" />
               <script type="text/javascript">${runnableCode}</script>
-              <script type="text/javascript">document.addEventListener("wheel", (e) => {if(e.ctrlKey){e.preventDefault()} })</script>
             </head>
             <body>
             </body>

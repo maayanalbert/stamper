@@ -105,7 +105,6 @@ var Cristal = (function(_super) {
 
         _this.setState({ scale: _this.props.initialScale });
       }
-      console.log(initialSize)
       _this.setState({ width: width, height: height,originalHeight:height });
       _this.setInitialPosition({ width: width, height: height});
     };

@@ -224,7 +224,7 @@ var Cristal = (function(_super) {
       _this.setState({ mouseIsDown: true });
     };
     _this.onMouseMove = function(e) {
-                   console.log("HELLO IS ANYONE HOME?")
+            
       var isResizing = _this.isResizing;
       var _a = _this.state,
         isDragging = _a.isDragging,
