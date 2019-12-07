@@ -9,12 +9,8 @@ module.exports = class ProjectManager {
     this.css = undefined;
     this.js = undefined;
     this.stamper = undefined;
-    this.cssName = undefined;
-    this.jsName = undefined;
   }
   setDefault() {
-    this.jsName = "sketch.js"
-    this.cssName = "style.css"
     this.html = `
 <html>
   <head>

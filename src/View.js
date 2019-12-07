@@ -8,6 +8,9 @@ import VariableStamp from "./VariableStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio"
+
+import jsToStamps from "./parser.js"
+
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
 
@@ -23,28 +26,36 @@ export default class View extends Component {
       varStamps: {},
       html:"",
       css:"",
-      jsName:"",
-      cssName:""
     };
     this.counterMutex = new Mutex();
 
       ipc.on('writeToView', (event, project) => {
 
-      this.setState({html:project.html, css:project.css, jsName:project.jsName, 
-        cssName:project.cssName});
+      this.setState({html:project.html, css:project.css});
       
       project.stamper.fns.map(data => this.addFnStamp(data))
       project.stamper.vars.map(data => this.addVarStamp(data))
 
     });
+
+ ipc.on('jsToStamps', (event, rawCode) => {
+
+      jsToStamps(rawCode)
+
+    });
+
   }
+
+
+
+
 
   getHTML(id){
     const parser = cheerio.load(this.state.html);
     var jsBlockStr ="<script type='text/javascript'>"+this.getRunnableCode(id)+"</script>"
     var cssBlockStr = "<style>"+this.state.css+"</style>"
-    var jsSelector = '[src="'+this.state.jsName+'"]'
-    var cssSelector = '[href="'+this.state.cssName+'"]'
+    var jsSelector = '[src="sketch.js"]'
+    var cssSelector = '[href=style.css]'
     console.log(jsSelector)
 
     var jsBlock = parser(jsBlockStr)
