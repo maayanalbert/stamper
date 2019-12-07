@@ -15,7 +15,7 @@ require("update-electron-app")({
 
 
 function createWindow() {
-  autoUpdater.checkForUpdatesAndNotify()
+  autoUpdater.checkForUpdates()
   mainWindow = new BrowserWindow({ width: 900, height: 680, webPreferences: { nodeIntegration: true }});
   mainWindow.loadURL(
     isDev
@@ -43,7 +43,7 @@ app.on("activate", () => {
 //////////
 
 app.on('ready', function()  {
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 });
 
 autoUpdater.logger = log;

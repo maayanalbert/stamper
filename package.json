@@ -1,9 +1,9 @@
 {
-  "name": "stamper",
-  "repository": "https://github.com/maayanalbert/stamper2.git",
+  "name": "Stamper",
+  "repository": "https://github.com/maayanalbert/stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "private": true,
   "dependencies": {
     "cross-env": "^6.0.2",
@@ -55,7 +55,7 @@
     "react-test": "react-scripts test --env=jsdom",
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder",
-    "release": "yarn react-build && electron-builder --publish=always",
+    "deploy": "yarn react-build && electron-builder --publish=always",
     "build": "yarn react-build && yarn electron-build",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\""
   },
