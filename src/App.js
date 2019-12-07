@@ -1,24 +1,19 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.scss';
 
-const {app} = window.require('electron').remote;
+import React, {Component} from "react";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>React + Electron = <span role="img" aria-label="love">😍</span></h2>
-        </div>
-        <p className="App-intro">
-          <b> Release 0.2.9 </b>
-          Version: {app.getVersion()}
-        </p>
-      </div>
-    );
-  }
+import View from "./View.js"
+
+
+
+function App() {
+      document.title = "Stamper"
+  return (
+    <div>
+    	<View/>
+    </div>
+  );
+
 }
 
 export default App;

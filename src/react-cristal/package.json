@@ -1,0 +1,73 @@
+{
+  "_args": [
+    [
+      "react-cristal@0.0.12",
+      "/Users/maayan/repos/p5-authoring"
+    ]
+  ],
+  "_from": "react-cristal@0.0.12",
+  "_id": "react-cristal@0.0.12",
+  "_inBundle": false,
+  "_integrity": "sha512-1aerLtjDv+59omo4BC7z6gxBpN4+4H2/2/Q1tDObLNwJcWCO5/Gq12IjVQ4FjYh1BLBtuBZe0HalIbVAFVPzqg==",
+  "_location": "/react-cristal",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "react-cristal@0.0.12",
+    "name": "react-cristal",
+    "escapedName": "react-cristal",
+    "rawSpec": "0.0.12",
+    "saveSpec": null,
+    "fetchSpec": "0.0.12"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-cristal/-/react-cristal-0.0.12.tgz",
+  "_spec": "0.0.12",
+  "_where": "/Users/maayan/repos/p5-authoring",
+  "author": {
+    "name": "Hector Leon Zarco Garcia",
+    "email": "hezarco@gmail.com"
+  },
+  "description": "Convert any component into a window",
+  "devDependencies": {
+    "@atlaskit/button": "^8.2.4",
+    "@atlaskit/checkbox": "^4.0.0",
+    "@atlaskit/field-text": "^6.1.2",
+    "@atlaskit/single-select": "^5.2.4",
+    "ts-react-toolbox": "^0.1.21"
+  },
+  "engines": {
+    "node": ">=8.5.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "jsnext:main": "dist/es2015/index.js",
+  "keywords": [],
+  "license": "MIT",
+  "main": "dist/es5/index.js",
+  "module": "dist/es2015/index.js",
+  "name": "react-cristal",
+  "peerDependencies": {
+    "react": "^16.3.0",
+    "styled-components": "^3.3.3"
+  },
+  "repository": "",
+  "scripts": {
+    "analyze": "ts-react-toolbox analyze",
+    "bootstrap": "ts-react-toolbox init",
+    "build": "ts-react-toolbox build",
+    "dev": "ts-react-toolbox dev",
+    "format": "ts-react-toolbox format",
+    "lint": "ts-react-toolbox lint",
+    "release": "ts-react-toolbox release",
+    "static": "ts-react-toolbox publish",
+    "test": "ts-react-toolbox test",
+    "test:ci": "ts-react-toolbox test --runInBand --coverage"
+  },
+  "types": "dist/es5/index.d.ts",
+  "version": "0.0.12"
+}
