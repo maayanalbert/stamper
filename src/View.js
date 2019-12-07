@@ -7,6 +7,7 @@ import FunctionStamp from "./FunctionStamp.js";
 import VariableStamp from "./VariableStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
+import cheerio from "cheerio"
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
 
@@ -21,18 +22,38 @@ export default class View extends Component {
       counter: 0,
       varStamps: {},
       html:"",
-      css:""
+      css:"",
+      jsName:"",
+      cssName:""
     };
     this.counterMutex = new Mutex();
 
       ipc.on('writeToView', (event, project) => {
 
-      this.setState({html:project.html, css:project.css});
+      this.setState({html:project.html, css:project.css, jsName:project.jsName, 
+        cssName:project.cssName});
       
       project.stamper.fns.map(data => this.addFnStamp(data))
       project.stamper.vars.map(data => this.addVarStamp(data))
 
     });
+  }
+
+  getHTML(id){
+    const parser = cheerio.load(this.state.html);
+    var jsBlockStr ="<script type='text/javascript'>"+this.getRunnableCode(id)+"</script>"
+    var cssBlockStr = "<style>"+this.state.css+"</style>"
+    var jsSelector = '[src="'+this.state.jsName+'"]'
+    var cssSelector = '[href="'+this.state.cssName+'"]'
+    console.log(jsSelector)
+
+    var jsBlock = parser(jsBlockStr)
+    var cssBlock = parser(cssBlockStr)
+
+    parser(jsSelector).replaceWith(jsBlock)
+    parser(cssSelector).replaceWith(cssBlock)
+
+    return parser.html()
   }
   componentDidMount() {
 
@@ -168,6 +189,7 @@ export default class View extends Component {
         disablePan={this.disablePan.bind(this)}
         iframeDisabled={iframeDisabled}
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
+        getHTML={this.getHTML.bind(this)}
       />
     );
 

@@ -202,7 +202,6 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
-    var runnableCode = this.props.getRunnableCode(this.props.id);
 
     // console.log(runnableCode)
     return (
@@ -246,17 +245,7 @@ export default class FunctionStamp extends Component {
                 margin: "-" + globals.iframeMargin.toString() + "px",
                 // pointerEvents:"none"
               }}
-              srcdoc={`
-          <html>
-            <head>
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
-              <meta charset="utf-8" />
-              <script type="text/javascript">${runnableCode}</script>
-            </head>
-            <body>
-            </body>
-          </html>
-        `}
+              srcdoc={this.props.getHTML(this.props.id)}
               sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
               allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
             />
