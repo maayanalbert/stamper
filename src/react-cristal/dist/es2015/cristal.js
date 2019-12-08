@@ -5,8 +5,10 @@ import {
   Wrapper,
   Header,
   BottomRightResizeHandle,
+  BottomLeftResizeHandle,
   RightResizeHandle,
   BottomResizeHandle,
+  LeftResizeHandle,
   ContentWrapper,
   padding,
   CloseIcon,
@@ -60,6 +62,7 @@ var Cristal = (function(_super) {
       isDragging: false,
       isResizingX: false,
       isResizingY: false,
+      isResizingXLeft:false,
       zIndex: Stacker.getNextIndex(),
       downKey: -1,
       isMoving: false,
@@ -233,6 +236,8 @@ var Cristal = (function(_super) {
     _this.onMouseMove = function(e) {
            
       var isResizing = _this.isResizing;
+
+
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
@@ -286,23 +291,48 @@ var Cristal = (function(_super) {
       var newY = currentY + movementY;
       var _c = _this.state,
         isResizingX = _c.isResizingX,
-        isResizingY = _c.isResizingY;
+        isResizingY = _c.isResizingY,
+        isResizingXLeft = _c.isResizingXLeft;
 
-      if (isResizingX) {
+      if(isResizingX && isResizingY){
+        var maxWidth = innerWidth - newX - padding;
+        var newWidth = (currentWidth || 0) + movementX;
+        var width = newWidth;
+        var newHeight = (currentHeight || 0) + movementY;
+        var maxHeight = innerHeight - newY - padding;
+        var height =  newHeight;
+        _this.setState({ width: width, height:height }, () => _this.notifyResize(currentWidth, currentHeight) );
+      }else if(isResizingXLeft && isResizingY){
+        console.log("RESIZING")
+        var maxWidth = innerWidth - newX - padding;
+        var newWidth = (currentWidth || 0) - movementX;
+        var width = newWidth;
+
+        var newHeight = (currentHeight || 0) + movementY;
+        var maxHeight = innerHeight - newY - padding;
+        var height =  newHeight;
+        _this.setState({ width: width, height:height, x:currentX + e.movementX }, () => _this.notifyResize(currentWidth, currentHeight) );
+
+      }else if (isResizingX) {
         var maxWidth = innerWidth - newX - padding;
         var newWidth = (currentWidth || 0) + movementX;
         var width = newWidth;
         _this.setState({ width: width }, () => _this.notifyResize(currentWidth, currentHeight) );
-      }
-      if (isResizingY) {
+      }else if(isResizingXLeft) {
+        var maxWidth = innerWidth - newX - padding;
+        var newWidth = (currentWidth || 0) - movementX;
+        var width = newWidth;
+        _this.setState({ width: width, x:currentX + e.movementX }, () => _this.notifyResize(currentWidth, currentHeight) );
+      }else if (isResizingY) {
         var newHeight = (currentHeight || 0) + movementY;
         var maxHeight = innerHeight - newY - padding;
         var height =  newHeight;
 
-
           _this.setState({ height: height }, () => _this.notifyResize(currentWidth, currentHeight));
       }
     };
+
+
 
     _this.onStoppedMove = function() {
       if (this.state.isMoving) {
@@ -361,25 +391,38 @@ var Cristal = (function(_super) {
 
     _this.onMouseUp = function() {
       _this.onStoppedMove();
-      if(_this.state.isResizingY || _this.state.isResizingX){
+      if(_this.state.isResizingY || _this.state.isResizingX ||_this.state.isResizingXLeft){
         _this.notifyStopResize();
       }
       _this.setState({
         isDragging: false,
         isResizingX: false,
+        isResizingXLeft:false,
         isResizingY: false,
         mouseIsDown: false
       });
     };
     _this.startFullResize = function() {
+      _this.notifyStartResize()
       _this.setState({
         isResizingX: true,
+        isResizingY: true
+      });
+    };
+    _this.startFullLeftResize = function() {
+      _this.notifyStartResize()
+      _this.setState({
+        isResizingXLeft: true,
         isResizingY: true
       });
     };
     _this.startXResize = function() {
         _this.notifyStartResize()
       return _this.setState({ isResizingX: true });
+    };
+    _this.startXLeftResize = function() {
+        _this.notifyStartResize()
+      return _this.setState({ isResizingXLeft: true });
     };
     _this.startYResize = function() {
 
@@ -391,18 +434,28 @@ var Cristal = (function(_super) {
       if (!isResizable) return;
 
       var scale = _this.state.scale
+      var height = _this.state.height
+      var width = _this.state.width
       return [
         React.createElement(RightResizeHandle, {
           key: "right-resize",
-          onMouseDown: _this.startXResize, style:{ width:20/scale}
+          onMouseDown: _this.startXResize, style:{ width:20/scale, bottom:20/scale, height:height - 30- 20/scale}
         }),
-        // React.createElement(BottomRightResizeHandle, {
-        //   key: "bottom-right-resize",
-        //   onMouseDown: _this.startFullResize
-        // }),
+        React.createElement(LeftResizeHandle, {
+          key: "left-resize",
+          onMouseDown: _this.startXLeftResize, style:{ width:20/scale, bottom:20/scale, height:height - 30- 20/scale},
+        }),
+        React.createElement(BottomRightResizeHandle, {
+          key: "bottom-right-resize",
+          onMouseDown: _this.startFullResize, style:{ width:20/scale, height:20/scale}
+        }),
+        React.createElement(BottomLeftResizeHandle, {
+          key: "bottom-right-resize",
+          onMouseDown: _this.startFullLeftResize, style:{ width:20/scale, height:20/scale}
+        }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
-          onMouseDown: _this.startYResize, style:{height:20/scale}
+          onMouseDown: _this.startYResize, style:{height:20/scale, left:20/scale, width:width - 2*20/scale}
         })
       ];
     };
@@ -438,8 +491,9 @@ var Cristal = (function(_super) {
     get: function() {
       var _a = this.state,
         isResizingX = _a.isResizingX,
-        isResizingY = _a.isResizingY;
-      return isResizingX || isResizingY;
+        isResizingY = _a.isResizingY,
+        isResizingXLeft = _a.isResizingXLeft;
+      return isResizingX || isResizingY || isResizingXLeft;
     },
     enumerable: true,
     configurable: true
