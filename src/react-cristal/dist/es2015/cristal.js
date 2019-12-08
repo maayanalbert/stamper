@@ -248,6 +248,7 @@ var Cristal = (function(_super) {
 
       if (_this.state.downKey === _this.space && _this.state.mouseIsDown) {
         _this.pan(e.movementX, e.movementY);
+
         return;
       } else if (isDragging) {
         ipc.send("edited")
@@ -260,14 +261,11 @@ var Cristal = (function(_super) {
           y = _b.y;
         _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
-      } else {
-        _this.onStoppedMove();
-      }
-      if (isResizing) {
+      } else if(isResizing) {
         ipc.send("edited")
-
           _this.resizeCristal(e);
-
+      }else{
+        _this.onStoppedMove();
       }
     };
 
