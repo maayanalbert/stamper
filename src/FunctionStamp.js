@@ -12,7 +12,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
 
-const electron = window.require('electron');
+const electron = window.require("electron");
 const ipc = electron.ipcRenderer;
 
 export default class FunctionStamp extends Component {
@@ -24,7 +24,7 @@ export default class FunctionStamp extends Component {
       args: this.props.starterArgs,
       fullFun: "",
       drawableFun: "",
-      runnableInnerCode:"",
+      runnableInnerCode: "",
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
       iframeHeight: this.props.starterIframeHeight,
@@ -33,12 +33,11 @@ export default class FunctionStamp extends Component {
       editorHidden: false,
       duplicateName: false,
       isSpecialFn: false,
-      editorScrolling: false,
+      editorScrolling: false
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
-
   }
   updateFuns(fromEdit = false) {
     var name = this.state.name;
@@ -55,13 +54,18 @@ export default class FunctionStamp extends Component {
     var drawableFun = name + "()";
 
     var isSpecialFn = name in globals.specialFns;
-    if(this.props.isHtml || this.props.isCss){
-      fullFun = ""
-      drawableFun = ""
+    if (this.props.isHtml || this.props.isCss) {
+      fullFun = "";
+      drawableFun = "";
     }
 
-    this.setState({ fullFun: fullFun, drawableFun: drawableFun, runnableInnerCode:this.state.code }, () =>
-      this.props.forceUpdateStamps(this.props.id, fromEdit)
+    this.setState(
+      {
+        fullFun: fullFun,
+        drawableFun: drawableFun,
+        runnableInnerCode: this.state.code
+      },
+      () => this.props.forceUpdateStamps(this.props.id, fromEdit)
     );
   }
 
@@ -105,16 +109,15 @@ export default class FunctionStamp extends Component {
     var oldWidth = this.state.iframeWidth,
       oldHeight = this.state.iframeHeight;
     var widthDiff = width - oldWidth;
-    var heightDiff = height - oldHeight
+    var heightDiff = height - oldHeight;
     if (width < 20) {
       widthDiff = 0;
-      width = 20
+      width = 20;
     }
     if (height < 10) {
       heightDiff = 0;
-      height = 10
+      height = 10;
     }
-
 
     this.setState({ iframeWidth: width, iframeHeight: height });
     this.cristalRef.current.manualResize(widthDiff, heightDiff);
@@ -137,18 +140,20 @@ export default class FunctionStamp extends Component {
           this.updateFuns(true);
           this.setEditorScrolling(false);
         }}
-
         hidden={this.state.editorHidden}
       >
         <br />
         <AceEditor
           style={{
             width: this.state.editorWidth,
-            height: this.state.editorHeight,
+            height: this.state.editorHeight
           }}
           mode="javascript"
           theme="solarized_light"
-          onChange={value => {this.setState({ code: value });ipc.send("edited")  }}
+          onChange={value => {
+            this.setState({ code: value });
+            ipc.send("edited");
+          }}
           fontSize={globals.codeSize}
           showPrintMargin={false}
           wrapEnabled={false}
@@ -163,7 +168,7 @@ export default class FunctionStamp extends Component {
             enableSnippets: false,
             showLineNumbers: true,
             tabSize: 2,
-            hasCssTransforms: true 
+            hasCssTransforms: true
           }}
         />
       </div>
@@ -187,11 +192,10 @@ export default class FunctionStamp extends Component {
         <input
           placeholder="function name..."
           disabled={this.props.isHtml || this.props.isCss}
-          onChange={event =>{
-            this.setState({ name: event.target.value }, () => this.checkName())
-            ipc.send("edited")  
-            }
-          }
+          onChange={event => {
+            this.setState({ name: event.target.value }, () => this.checkName());
+            ipc.send("edited");
+          }}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.name}
           class={"text-" + nameColor + " name"}
@@ -202,16 +206,12 @@ export default class FunctionStamp extends Component {
         <input
           placeholder="arguments..."
           disabled={this.props.isHtml || this.props.isCss}
-          onChange={event => 
-            {
-            this.setState({ args: event.target.value })
-            ipc.send("edited") 
-            }
-
-        }
+          onChange={event => {
+            this.setState({ args: event.target.value });
+            ipc.send("edited");
+          }}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
-
           class="text-greyish args"
         />
       </div>
@@ -219,14 +219,12 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
-
-
     return (
       <div>
         <Resizable
           className="ml-1 bg-white shadow rounded"
           onResize={e => {
-            ipc.send("edited")
+            ipc.send("edited");
             this.updateIframeDimensions(
               e.movementX + this.state.iframeWidth,
               e.movementY + this.state.iframeHeight
@@ -241,7 +239,7 @@ export default class FunctionStamp extends Component {
             zIndex: 1
           }}
         >
-          <div >
+          <div>
             <div
               style={{
                 position: "absolute",
@@ -260,7 +258,7 @@ export default class FunctionStamp extends Component {
                 border: "none",
                 height: this.state.iframeHeight + globals.iframeMargin,
                 width: this.state.iframeWidth + globals.iframeMargin,
-                margin: "-" + globals.iframeMargin.toString() + "px",
+                margin: "-" + globals.iframeMargin.toString() + "px"
                 // pointerEvents:"none"
               }}
               srcdoc={this.props.getHTML(this.props.id)}
@@ -278,10 +276,9 @@ export default class FunctionStamp extends Component {
   }
 
   copyAndOpt(isOpt = false) {
-    if(this.props.isCss || this.props.isHtml){
-      return
+    if (this.props.isCss || this.props.isHtml) {
+      return;
     }
-
 
     var data = this.getData();
 
@@ -315,10 +312,10 @@ export default class FunctionStamp extends Component {
       y: this.cristalRef.current.state.y,
       editorWidth: this.state.editorWidth,
       editorHeight: this.state.editorHeight,
-      iframeWidth:this.state.iframeWidth,
-      iframeHeight:this.state.iframeHeight,
-      isHtml:this.props.isHtml,
-      isCss:this.props.isCss
+      iframeWidth: this.state.iframeWidth,
+      iframeHeight: this.state.iframeHeight,
+      isHtml: this.props.isHtml,
+      isCss: this.props.isCss
     };
 
     return data;
@@ -354,10 +351,8 @@ export default class FunctionStamp extends Component {
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
-
         >
           <div
-  
             class="bg-white"
             style={{
               position: "absolute",
@@ -365,28 +360,21 @@ export default class FunctionStamp extends Component {
               left: 0,
               width: "100%",
               height: globals.fnTitleHeight,
-              color: "transparent",
+              color: "transparent"
             }}
           >
             {" "}
           </div>
 
-
           <div class="p-2">
             {this.renderFunctionName()}
-        
 
-           <div class="row m-0 " >
-
+            <div class="row m-0 ">
               {this.renderEditor()}
-
 
               {this.renderIframe()}
             </div>
-            </div>
-       
-         
-      
+          </div>
         </Cristal>
       </div>
     );

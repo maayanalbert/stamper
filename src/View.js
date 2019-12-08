@@ -7,14 +7,10 @@ import FunctionStamp from "./FunctionStamp.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
-import cheerio from "cheerio"
+import cheerio from "cheerio";
 
-
-
-const electron = window.require('electron');
+const electron = window.require("electron");
 const ipc = electron.ipcRenderer;
-
-
 
 export default class View extends Component {
   constructor(props) {
@@ -24,67 +20,67 @@ export default class View extends Component {
       scale: 1,
       counter: 0,
       blobStamps: {},
-      htmlID:-1,
-      cssID:-1
+      htmlID: -1,
+      cssID: -1
     };
     this.counterMutex = new Mutex();
 
-      ipc.on('writeToView', (event, files) => {
-
-
-      this.setState({fnStamps:{}, blobStamps:{}, counter:0, htmlID:-1, cssID:-1, scale:files.stamper.scale}, () => {
-  
-        files.stamper.fns.map(data => this.addFnStamp(data))
-        files.stamper.blobs.map(data => this.addBlobStamp(data))
-
-
-      })
-
+    ipc.on("writeToView", (event, files) => {
+      this.setState(
+        {
+          fnStamps: {},
+          blobStamps: {},
+          counter: 0,
+          htmlID: -1,
+          cssID: -1,
+          scale: files.stamper.scale
+        },
+        () => {
+          files.stamper.fns.map(data => this.addFnStamp(data));
+          files.stamper.blobs.map(data => this.addBlobStamp(data));
+        }
+      );
     });
 
-    ipc.on('requestSave', (event, rawCode) => {
-
-      this.sendSaveData()
-
+    ipc.on("requestSave", (event, rawCode) => {
+      this.sendSaveData();
     });
-
   }
 
-
-
-
-
-  getHTML(id){
-    if(this.state.htmlID in this.state.fnStamps === false || this.state.cssID in this.state.fnStamps === false){
-      return ""
+  getHTML(id) {
+    if (
+      this.state.htmlID in this.state.fnStamps === false ||
+      this.state.cssID in this.state.fnStamps === false
+    ) {
+      return "";
     }
 
-    if(id === this.state.htmlID || id === this.state.cssID){
-      var getRunnableCode = ""
-    }else{
-      var runnableCode = this.getRunnableCode(id)
+    if (id === this.state.htmlID || id === this.state.cssID) {
+      var getRunnableCode = "";
+    } else {
+      var runnableCode = this.getRunnableCode(id);
     }
 
-    var htmlStamp = this.state.fnStamps[this.state.htmlID]
-    var cssStamp = this.state.fnStamps[this.state.cssID]
-
+    var htmlStamp = this.state.fnStamps[this.state.htmlID];
+    var cssStamp = this.state.fnStamps[this.state.cssID];
 
     const parser = cheerio.load(htmlStamp.ref.current.state.runnableInnerCode);
-    var jsBlockStr ="<script type='text/javascript'>"+runnableCode+"</script>"
-    var cssBlockStr = "<style>"+cssStamp.ref.current.state.runnableInnerCode+"</style>"
-    var jsSelector = '[src="sketch.js"]'
-    var cssSelector = '[href="style.css"]'
+    var jsBlockStr =
+      "<script type='text/javascript'>" + runnableCode + "</script>";
+    var cssBlockStr =
+      "<style>" + cssStamp.ref.current.state.runnableInnerCode + "</style>";
+    var jsSelector = '[src="sketch.js"]';
+    var cssSelector = '[href="style.css"]';
 
-    var jsBlock = parser(jsBlockStr)
-    var cssBlock = parser(cssBlockStr)
+    var jsBlock = parser(jsBlockStr);
+    var cssBlock = parser(cssBlockStr);
 
-    parser(jsSelector).replaceWith(jsBlock)
-    parser(cssSelector).replaceWith(cssBlock)
+    parser(jsSelector).replaceWith(jsBlock);
+    parser(cssSelector).replaceWith(cssBlock);
 
-    return parser.html()
+    return parser.html();
   }
   componentDidMount() {
-
     // this.addSetupFnStamp();
     // this.addFnStamp({ name: "draw" });
   }
@@ -134,7 +130,6 @@ export default class View extends Component {
     updatePosition = false,
     setIframeDisabled = false
   ) {
-
     var defaults = {
       name: "sketch",
       code: "ellipse(x, y, 50, 50)",
@@ -144,10 +139,10 @@ export default class View extends Component {
       iframeDisabled: false,
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
-      iframeWidth:globals.defaultIframeWidth,
-      iframeHeight:globals.defaultEditorHeight,
-      isHtml:false,
-      isCss:false
+      iframeWidth: globals.defaultIframeWidth,
+      iframeHeight: globals.defaultEditorHeight,
+      isHtml: false,
+      isCss: false
     };
 
     Object.keys(defaults).map(setting => {
@@ -227,10 +222,10 @@ export default class View extends Component {
 
     fnStamps[counter] = { elem: elem, ref: ref };
     this.setState({ fnStamps: fnStamps });
-    if(isHtml){
-      this.setState({htmlID:counter})
-    }else if(isCss){
-      this.setState({cssID:counter})
+    if (isHtml) {
+      this.setState({ htmlID: counter });
+    } else if (isCss) {
+      this.setState({ cssID: counter });
     }
   }
 
@@ -240,8 +235,7 @@ export default class View extends Component {
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(400),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
-      editorHeight: globals.defaultVarEditorHeight,
-   
+      editorHeight: globals.defaultVarEditorHeight
     };
 
     Object.keys(defaults).map(setting => {
@@ -276,7 +270,6 @@ export default class View extends Component {
         starterCode={code}
         initialPosition={{ x: x, y: y }}
         id={counter}
-
         deleteFrame={this.deleteFrame}
         getRunnableCode={this.getRunnableCode.bind(this)}
         onStartMove={this.onStartMove.bind(this)}
@@ -295,39 +288,37 @@ export default class View extends Component {
     this.setState({ blobStamps: blobStamps });
   }
 
-  sendSaveData(){
-
-    if(this.state.htmlID in this.state.fnStamps === false || this.state.cssID in this.state.fnStamps === false){
-      return 
+  sendSaveData() {
+    if (
+      this.state.htmlID in this.state.fnStamps === false ||
+      this.state.cssID in this.state.fnStamps === false
+    ) {
+      return;
     }
-    var htmlStamp = this.state.fnStamps[this.state.htmlID]
-    var cssStamp = this.state.fnStamps[this.state.cssID]
+    var htmlStamp = this.state.fnStamps[this.state.htmlID];
+    var cssStamp = this.state.fnStamps[this.state.cssID];
 
     var message = {
       html: htmlStamp.ref.current.state.runnableInnerCode,
       stamper: this.getAllData(),
       css: cssStamp.ref.current.state.runnableInnerCode,
-      js:this.getExportableCode()
-    } 
+      js: this.getExportableCode()
+    };
 
-    ipc.send("save", message) 
-
+    ipc.send("save", message);
   }
 
   forceUpdateStamps(id = -1, fromEdit) {
-
-    if(fromEdit){
-      this.sendSaveData()
+    if (fromEdit) {
+      this.sendSaveData();
     }
 
-    Object.values(this.state.fnStamps).map((stamp) => {
-  
+    Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
       if (stampRef && stampRef.props.id != id) {
         stampRef.forceUpdate();
       }
     });
-
   }
 
   disablePan(status) {
@@ -362,24 +353,22 @@ export default class View extends Component {
     });
   }
 
-  getExportableCode(){
-    var code = null
-    Object.values(this.state.fnStamps).map( stamp => {
-      if(stamp.ref.current.state.name === "draw"){
-        code = this.getRunnableCode(stamp.ref.current.props.id)
+  getExportableCode() {
+    var code = null;
+    Object.values(this.state.fnStamps).map(stamp => {
+      if (stamp.ref.current.state.name === "draw") {
+        code = this.getRunnableCode(stamp.ref.current.props.id);
       }
-    })
+    });
 
-    if(code === null){
-      code = this.getRunnableCode(-1)
+    if (code === null) {
+      code = this.getRunnableCode(-1);
     }
-    return code
-
+    return code;
   }
 
   getRunnableCode(id) {
     var runnableCode = [];
-
 
     Object.values(this.state.blobStamps).map(varStamp => {
       if (varStamp.ref.current) {
@@ -401,16 +390,15 @@ export default class View extends Component {
     }
 
     var fnStamp = this.state.fnStamps[id].ref.current;
-    if(fnStamp.state.name === "draw"){
-      runnableCode.push(fnStamp.state.fullFun) 
-    }else if(fnStamp.state.name === "setup"){
+    if (fnStamp.state.name === "draw") {
+      runnableCode.push(fnStamp.state.fullFun);
+    } else if (fnStamp.state.name === "setup") {
       // do nothing
-    }else{
+    } else {
       runnableCode.push(
         "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
-      );      
+      );
     }
-
 
     return runnableCode.join("\n\n");
   }
@@ -420,10 +408,10 @@ export default class View extends Component {
     var blobStamps = this.state.blobStamps;
 
     if (id in fnStamps) {
-      ipc.send("edited") 
+      ipc.send("edited");
       delete fnStamps[id];
     } else if (id in blobStamps) {
-      ipc.send("edited") 
+      ipc.send("edited");
       delete blobStamps[id];
     }
 
@@ -431,15 +419,17 @@ export default class View extends Component {
     this.refreshBlobStamps(blobStamps);
   }
 
-  getAllData(){
-    var data = {fns:[], blobs:[], scale:this.state.scale}
-    Object.values(this.state.fnStamps).map(stamp => 
-      data.fns.push(stamp.ref.current.getData()))
+  getAllData() {
+    var data = { fns: [], blobs: [], scale: this.state.scale };
+    Object.values(this.state.fnStamps).map(stamp =>
+      data.fns.push(stamp.ref.current.getData())
+    );
 
-    Object.values(this.state.blobStamps).map(stamp => 
-      data.blobs.push(stamp.ref.current.getData()))
+    Object.values(this.state.blobStamps).map(stamp =>
+      data.blobs.push(stamp.ref.current.getData())
+    );
 
-    return data
+    return data;
   }
 
   refreshFnStamps(fnStamps) {

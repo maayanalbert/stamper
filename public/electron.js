@@ -15,7 +15,6 @@ const isDev = require("electron-is-dev");
 
 const FileManager = require("./FileManager.js");
 
-
 let mainWindow;
 let fileManager;
 
@@ -32,17 +31,19 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.webContents.openDevTools();
-  mainWindow.on("closed", () => {mainWindow = null; 
+  mainWindow.on("closed", () => {
+    mainWindow = null;
     ipcMain.removeAllListeners("edited");
-    ipcMain.removeAllListeners("save")
-    ipcMain:null});
+    ipcMain.removeAllListeners("save");
+    ipcMain: null;
+  });
 
   setMenu();
 
   mainWindow.webContents.once("dom-ready", () => {
     fileManager = new FileManager(mainWindow);
 
-    fileManager.onNewProject()
+    fileManager.onNewProject();
   });
 }
 
@@ -60,7 +61,6 @@ app.on("activate", () => {
   }
 });
 
-
 function setMenu() {
   var menu = Menu.buildFromTemplate([
     {
@@ -70,24 +70,54 @@ function setMenu() {
     {
       label: "File",
       submenu: [
-        { label: "New Project", click(){fileManager.onNewProject()}, accelerator: "Cmd+N", },
-        
-        { label: "Open", click(){fileManager.onOpenCommand()}, accelerator: "Cmd+O", },
-    
-        { label: "Save", click(){fileManager.onSaveCommand()}, accelerator: "Cmd+S", },
-        { label: "Save As...", click(){fileManager.onSaveAsCommand()}, accelerator: "Shift+Cmd+S", }
+        {
+          label: "New Project",
+          click() {
+            fileManager.onNewProject();
+          },
+          accelerator: "Cmd+N"
+        },
+
+        {
+          label: "Open",
+          click() {
+            fileManager.onOpenCommand();
+          },
+          accelerator: "Cmd+O"
+        },
+
+        {
+          label: "Save",
+          click() {
+            fileManager.onSaveCommand();
+          },
+          accelerator: "Cmd+S"
+        },
+        {
+          label: "Save As...",
+          click() {
+            fileManager.onSaveAsCommand();
+          },
+          accelerator: "Shift+Cmd+S"
+        }
       ]
-    },{
-    label: "Edit",
-    submenu: [
+    },
+    {
+      label: "Edit",
+      submenu: [
         { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
         { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
         { type: "separator" },
         { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
         { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
         { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-    ]}
+        {
+          label: "Select All",
+          accelerator: "CmdOrCtrl+A",
+          selector: "selectAll:"
+        }
+      ]
+    }
   ]);
   Menu.setApplicationMenu(menu);
 }
