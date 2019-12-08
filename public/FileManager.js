@@ -37,8 +37,6 @@ module.exports = class FileManager {
   onNewProject(){
     var setup = defaultSetup.getSetup()
     this.name = setup.name
-    this.html = setup.html
-    this.css = setup.css
     this.stamper = setup.stamper
     this.mainWindow.setTitle(this.name)
     this.writeToView()
@@ -171,9 +169,7 @@ module.exports = class FileManager {
 
   writeToView() {
     this.mainWindow.webContents.send("writeToView", {
-      html: this.html,
-      stamper: this.stamper,
-      css: this.css
+      stamper: this.stamper
     });
   }
 };

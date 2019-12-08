@@ -23,18 +23,19 @@ export default class View extends Component {
       fnStamps: {},
       scale: 1,
       counter: 0,
-      varStamps: {},
-      html:"",
-      css:"",
+      blobStamps: {},
+      htmlID:-1,
+      cssID:-1
     };
     this.counterMutex = new Mutex();
 
       ipc.on('writeToView', (event, files) => {
 
 
-      this.setState({html:files.html, css:files.css, fnStamps:{}, varStamps:{}, counter:0, scale:files.stamper.scale}, () => {
+      this.setState({fnStamps:{}, blobStamps:{}, counter:0, scale:files.stamper.scale}, () => {
         files.stamper.fns.map(data => this.addFnStamp(data))
-        files.stamper.vars.map(data => this.addBlobStamp(data))
+        files.stamper.blobs.map(data => this.addBlobStamp(data))
+
 
       })
 
@@ -59,9 +60,23 @@ export default class View extends Component {
 
 
   getHTML(id){
-    const parser = cheerio.load(this.state.html);
-    var jsBlockStr ="<script type='text/javascript'>"+this.getRunnableCode(id)+"</script>"
-    var cssBlockStr = "<style>"+this.state.css+"</style>"
+    if(this.state.htmlID in this.state.fnStamps === false){
+      return ""
+    }
+
+    if(id === this.state.htmlID || id === this.state.cssID){
+      var getRunnableCode = ""
+    }else{
+      var runnableCode = this.getRunnableCode(id)
+    }
+
+    var htmlStamp = this.state.fnStamps[this.state.htmlID]
+    var cssStamp = this.state.fnStamps[this.state.cssID]
+
+
+    const parser = cheerio.load(htmlStamp.ref.current.state.runnableInnerCode);
+    var jsBlockStr ="<script type='text/javascript'>"+runnableCode+"</script>"
+    var cssBlockStr = "<style>"+cssStamp.ref.current.state.runnableInnerCode+"</style>"
     var jsSelector = '[src="sketch.js"]'
     var cssSelector = '[href="style.css"]'
 
@@ -87,7 +102,7 @@ export default class View extends Component {
   //   Object.values(this.state.fnStamps).map(fnStamp =>
   //     fnStamp.ref.current.cristalRef.current.zoom(1, mouseX, mouseY, true)
   //   );
-  //   Object.values(this.state.varStamps).map(varStamp =>
+  //   Object.values(this.state.blobStamps).map(varStamp =>
   //     varStamp.ref.current.cristalRef.current.zoom(1, mouseX, mouseY, true)
   //   );
 
@@ -135,7 +150,9 @@ export default class View extends Component {
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
       iframeWidth:globals.defaultIframeWidth,
-      iframeHeight:globals.defaultEditorHeight
+      iframeHeight:globals.defaultEditorHeight,
+      isHtml:false,
+      isCss:false
     };
 
     Object.keys(defaults).map(setting => {
@@ -158,7 +175,7 @@ export default class View extends Component {
     data.iframeDisabled = setIframeDisabled;
 
     this.createFnStamp(data);
-    this.refreshBlobStamps(this.state.varStamps);
+    this.refreshBlobStamps(this.state.blobStamps);
     return newName;
   }
 
@@ -173,7 +190,9 @@ export default class View extends Component {
       editorWidth = data.editorWidth,
       editorHeight = data.editorHeight,
       iframeWidth = data.iframeWidth,
-      iframeHeight = data.iframeHeight;
+      iframeHeight = data.iframeHeight,
+      isHtml = data.isHtml,
+      isCss = data.isCss;
 
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
@@ -185,7 +204,8 @@ export default class View extends Component {
     var elem = (
       <FunctionStamp
         ref={ref}
-
+        isHtml={isHtml}
+        isCss={isCss}
         starterCode={code}
         starterArgs={args}
         starterName={name}
@@ -212,6 +232,11 @@ export default class View extends Component {
 
     fnStamps[counter] = { elem: elem, ref: ref };
     this.setState({ fnStamps: fnStamps });
+    if(isHtml){
+      this.setState({htmlID:counter})
+    }else if(isCss){
+      this.setState({cssID:counter})
+    }
   }
 
   addBlobStamp(data, updatePosition = false) {
@@ -220,7 +245,8 @@ export default class View extends Component {
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(400),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
-      editorHeight: globals.defaultVarEditorHeight
+      editorHeight: globals.defaultVarEditorHeight,
+   
     };
 
     Object.keys(defaults).map(setting => {
@@ -246,7 +272,7 @@ export default class View extends Component {
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, release());
 
-    var varStamps = this.state.varStamps;
+    var blobStamps = this.state.blobStamps;
     var ref = React.createRef();
 
     var elem = (
@@ -255,6 +281,7 @@ export default class View extends Component {
         starterCode={code}
         initialPosition={{ x: x, y: y }}
         id={counter}
+
         deleteFrame={this.deleteFrame}
         getRunnableCode={this.getRunnableCode.bind(this)}
         onStartMove={this.onStartMove.bind(this)}
@@ -262,7 +289,6 @@ export default class View extends Component {
         addStamp={this.addBlobStamp.bind(this)}
         onDelete={this.onDelete.bind(this)}
         initialScale={this.state.scale}
-
         disablePan={this.disablePan.bind(this)}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
@@ -270,8 +296,8 @@ export default class View extends Component {
       />
     );
 
-    varStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ varStamps: varStamps });
+    blobStamps[counter] = { elem: elem, ref: ref };
+    this.setState({ blobStamps: blobStamps });
   }
 
   sendSaveData(){
@@ -308,7 +334,7 @@ export default class View extends Component {
       cristalRef.current.disablePan(status);
     });
 
-    Object.values(this.state.varStamps).map(stamp => {
+    Object.values(this.state.blobStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
       cristalRef.current.disablePan(status);
     });
@@ -352,7 +378,8 @@ export default class View extends Component {
   getRunnableCode(id) {
     var runnableCode = [];
 
-    Object.values(this.state.varStamps).map(varStamp => {
+
+    Object.values(this.state.blobStamps).map(varStamp => {
       if (varStamp.ref.current) {
         runnableCode.push(varStamp.ref.current.state.runnableCode);
       }
@@ -383,33 +410,32 @@ export default class View extends Component {
     }
 
 
-
     return runnableCode.join("\n\n");
   }
 
   onDelete(id) {
     var fnStamps = this.state.fnStamps;
-    var varStamps = this.state.varStamps;
+    var blobStamps = this.state.blobStamps;
 
     if (id in fnStamps) {
       ipc.send("edited") 
       delete fnStamps[id];
-    } else if (id in varStamps) {
+    } else if (id in blobStamps) {
       ipc.send("edited") 
-      delete varStamps[id];
+      delete blobStamps[id];
     }
 
     this.refreshFnStamps(fnStamps);
-    this.refreshBlobStamps(varStamps);
+    this.refreshBlobStamps(blobStamps);
   }
 
   getAllData(){
-    var data = {fns:[], vars:[], scale:this.state.scale}
+    var data = {fns:[], blobs:[], scale:this.state.scale}
     Object.values(this.state.fnStamps).map(stamp => 
       data.fns.push(stamp.ref.current.getData()))
 
-    Object.values(this.state.varStamps).map(stamp => 
-      data.vars.push(stamp.ref.current.getData()))
+    Object.values(this.state.blobStamps).map(stamp => 
+      data.blobs.push(stamp.ref.current.getData()))
 
     return data
   }
@@ -428,16 +454,16 @@ export default class View extends Component {
     );
   }
 
-  refreshBlobStamps(varStamps) {
+  refreshBlobStamps(blobStamps) {
     var varStampData = [];
-    for (var i in varStamps) {
-      var stamp = varStamps[i];
+    for (var i in blobStamps) {
+      var stamp = blobStamps[i];
       var data = stamp.ref.current.getData();
 
       varStampData.push(data);
     }
 
-    this.setState({ varStamps: {} }, () =>
+    this.setState({ blobStamps: {} }, () =>
       varStampData.map(data => this.createBlobStamp(data))
     );
   }
@@ -471,7 +497,7 @@ export default class View extends Component {
   render() {
     var elems = [];
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
-    Object.values(this.state.varStamps).map(stamp => elems.push(stamp.elem));
+    Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh" }}>
@@ -498,12 +524,12 @@ export default class View extends Component {
             onClick={() => this.addBlobStamp({})}
           >
             {" "}
-            add global vars
+            add global blobs
           </button>
           <button
             class="btn btn btn-lightGrey shadow m-1 text-white"
             onClick={() =>
-              this.setState({ fnStamps: {}, varStamps: {} }, () =>
+              this.setState({ fnStamps: {}, blobStamps: {} }, () =>
                 this.addSetupFnStamp()
               )
             }

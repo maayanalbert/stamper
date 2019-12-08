@@ -24,6 +24,7 @@ export default class FunctionStamp extends Component {
       args: this.props.starterArgs,
       fullFun: "",
       drawableFun: "",
+      runnableInnerCode:"",
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
       iframeHeight: this.props.starterIframeHeight,
@@ -54,8 +55,12 @@ export default class FunctionStamp extends Component {
     var drawableFun = name + "()";
 
     var isSpecialFn = name in globals.specialFns;
+    if(this.props.isHtml || this.props.isCss){
+      fullFun = ""
+      drawableFun = ""
+    }
 
-    this.setState({ fullFun: fullFun, drawableFun: drawableFun }, () =>
+    this.setState({ fullFun: fullFun, drawableFun: drawableFun, runnableInnerCode:this.state.code }, () =>
       this.props.forceUpdateStamps(this.props.id, fromEdit)
     );
   }
@@ -181,6 +186,7 @@ export default class FunctionStamp extends Component {
       <div>
         <input
           placeholder="function name..."
+          disabled={this.props.isHtml || this.props.isCss}
           onChange={event =>{
             this.setState({ name: event.target.value }, () => this.checkName())
             ipc.send("edited")  
@@ -195,6 +201,7 @@ export default class FunctionStamp extends Component {
 
         <input
           placeholder="arguments..."
+          disabled={this.props.isHtml || this.props.isCss}
           onChange={event => 
             {
             this.setState({ args: event.target.value })
@@ -271,6 +278,9 @@ export default class FunctionStamp extends Component {
   }
 
   copyAndOpt(isOpt = false) {
+    if(this.props.isCss || this.props.isHtml){
+      return
+    }
 
 
     var data = this.getData();
@@ -306,7 +316,9 @@ export default class FunctionStamp extends Component {
       editorWidth: this.state.editorWidth,
       editorHeight: this.state.editorHeight,
       iframeWidth:this.state.iframeWidth,
-      iframeHeight:this.state.iframeHeight
+      iframeHeight:this.state.iframeHeight,
+      isHtml:this.props.isHtml,
+      isCss:this.props.isCss
     };
 
     return data;
@@ -334,7 +346,8 @@ export default class FunctionStamp extends Component {
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-
+          closeHidden={this.props.isHtml || this.props.isCss}
+          copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
           className={"shadow bg-paleYellow"}
