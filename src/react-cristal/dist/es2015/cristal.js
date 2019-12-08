@@ -153,6 +153,7 @@ var Cristal = (function(_super) {
     }
 
     _this.pan = function(changeX, changeY) {
+      ipc.send("edited")
     if(_this.state.panDisabled){
         return
     }
@@ -172,6 +173,7 @@ var Cristal = (function(_super) {
     }
 
     _this.zoom = function(newScale, mouseX, mouseY, manual = false, center = false) {
+      ipc.send("edited")
 
       var scale = _this.state.scale,
         x = _this.state.x,
