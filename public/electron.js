@@ -32,7 +32,10 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.webContents.openDevTools();
-  mainWindow.on("closed", () => {mainWindow = null; ipcMain:null});
+  mainWindow.on("closed", () => {mainWindow = null; 
+    ipcMain.removeAllListeners("edited");
+    ipcMain.removeAllListeners("save")
+    ipcMain:null});
 
   setMenu();
 
