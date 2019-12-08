@@ -62,6 +62,7 @@ module.exports = class FileManager {
   }
 
   stamperMatches(html, js, css, stamper) {
+    if(stamper === undefined){return false}
     var stamperHtml = LZUTF8.decompress(stamper.compressedHtml, {
       inputEncoding: "StorageBinaryString"
     });
@@ -73,7 +74,7 @@ module.exports = class FileManager {
     });
     return html === stamperHtml && stamperCss === css && stamperJs === js;
   }
-  openFile(html, js, css, stamper = {}) {
+  openFile(html, js, css, stamper) {
     if (html === undefined || js === undefined) {
       dialog.showMessageBox(this.mainWindow, {
         message:
