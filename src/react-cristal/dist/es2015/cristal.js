@@ -303,7 +303,6 @@ var Cristal = (function(_super) {
         var height =  newHeight;
         _this.setState({ width: width, height:height }, () => _this.notifyResize(currentWidth, currentHeight) );
       }else if(isResizingXLeft && isResizingY){
-        console.log("RESIZING")
         var maxWidth = innerWidth - newX - padding;
         var newWidth = (currentWidth || 0) - movementX;
         var width = newWidth;
@@ -450,7 +449,7 @@ var Cristal = (function(_super) {
           onMouseDown: _this.startFullResize, style:{ width:20/scale, height:20/scale}
         }),
         React.createElement(BottomLeftResizeHandle, {
-          key: "bottom-right-resize",
+          key: "bottom-left-resize",
           onMouseDown: _this.startFullLeftResize, style:{ width:20/scale, height:20/scale}
         }),
         React.createElement(BottomResizeHandle, {

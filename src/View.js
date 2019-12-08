@@ -217,6 +217,7 @@ export default class View extends Component {
         iframeDisabled={iframeDisabled}
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
         getHTML={this.getHTML.bind(this)}
+        getScale={() => this.state.scale}
       />
     );
 

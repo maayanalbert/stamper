@@ -33,7 +33,7 @@ export default class FunctionStamp extends Component {
       editorHidden: false,
       duplicateName: false,
       isSpecialFn: false,
-      editorScrolling: false
+      editorScrolling: false,
     };
 
     this.cristalRef = React.createRef();
@@ -225,9 +225,10 @@ export default class FunctionStamp extends Component {
           className="ml-1 bg-white shadow rounded"
           onResize={e => {
             ipc.send("edited");
+            var scale = this.props.getScale()
             this.updateIframeDimensions(
-              e.movementX + this.state.iframeWidth,
-              e.movementY + this.state.iframeHeight
+              e.movementX/scale + this.state.iframeWidth,
+              e.movementY/scale + this.state.iframeHeight
             );
           }}
           onResizeStart={this.props.onStartMove}
