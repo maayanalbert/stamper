@@ -15,6 +15,7 @@ const isDev = require("electron-is-dev");
 
 const FileManager = require("./FileManager.js");
 
+
 let mainWindow;
 let fileManager;
 
@@ -31,13 +32,14 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.webContents.openDevTools();
-  mainWindow.on("closed", () => (mainWindow = null));
+  mainWindow.on("closed", () => {mainWindow = null; ipcMain:null});
 
   setMenu();
 
   mainWindow.webContents.once("dom-ready", () => {
     fileManager = new FileManager(mainWindow);
     fileManager.setDefault();
+    mainWindow.setTitle(fileManager.name)
     fileManager.writeToView();
   });
 }

@@ -36,7 +36,7 @@ export default class FunctionStamp extends Component {
     this.editorRef = React.createRef();
 
   }
-  updateFuns() {
+  updateFuns(fromEdit = false) {
     var name = this.state.name;
 
     var fullFun =
@@ -53,7 +53,7 @@ export default class FunctionStamp extends Component {
     var isSpecialFn = name in globals.specialFns;
 
     this.setState({ fullFun: fullFun, drawableFun: drawableFun }, () =>
-      this.props.forceUpdateStamps(this.props.id)
+      this.props.forceUpdateStamps(this.props.id, fromEdit)
     );
   }
 
@@ -126,7 +126,7 @@ export default class FunctionStamp extends Component {
     return (
       <div
         onMouseOut={() => {
-          this.updateFuns();
+          this.updateFuns(true);
           this.setEditorScrolling(false);
         }}
 
@@ -181,7 +181,7 @@ export default class FunctionStamp extends Component {
           onChange={event =>
             this.setState({ name: event.target.value }, () => this.checkName())
           }
-          onMouseOut={() => this.updateFuns()}
+          onMouseOut={() => this.updateFuns(true)}
           value={this.state.name}
           class={"text-" + nameColor + " name"}
         />
@@ -191,7 +191,7 @@ export default class FunctionStamp extends Component {
         <input
           placeholder="arguments..."
           onChange={event => this.setState({ args: event.target.value })}
-          onMouseOut={() => this.updateFuns()}
+          onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
 
           class="text-greyish args"
@@ -202,7 +202,7 @@ export default class FunctionStamp extends Component {
 
   renderIframe() {
 
-    // console.log(runnableCode)
+
     return (
       <div>
         <Resizable

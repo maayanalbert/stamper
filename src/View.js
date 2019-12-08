@@ -24,21 +24,22 @@ export default class View extends Component {
       scale: 1,
       counter: 0,
       varStamps: {},
-      html:"",
-      css:"",
+      html:undefined,
+      css:undefined,
     };
     this.counterMutex = new Mutex();
 
-      ipc.on('writeToView', (event, project) => {
+      ipc.on('writeToView', (event, files) => {
 
-      this.setState({html:project.html, css:project.css});
+
+      this.setState({html:files.html, css:files.css});
       
-      project.stamper.fns.map(data => this.addFnStamp(data))
-      project.stamper.vars.map(data => this.addBlobStamp(data))
+      files.stamper.fns.map(data => this.addFnStamp(data))
+      files.stamper.vars.map(data => this.addBlobStamp(data))
 
     });
 
- ipc.on('jsToStamps', (event, rawCode) => {
+    ipc.on('jsToStamps', (event, rawCode) => {
 
       jsToStamps(rawCode)
 
@@ -116,6 +117,7 @@ export default class View extends Component {
     updatePosition = false,
     setIframeDisabled = false
   ) {
+
     var defaults = {
       name: "sketch",
       code: "ellipse(x, y, 50, 50)",
@@ -224,10 +226,10 @@ export default class View extends Component {
       data.x += data.editorWidth + 50;
     }
 
-    this.createVarStamp(data);
+    this.createBlobStamp(data);
   }
 
-  async createVarStamp(data) {
+  async createBlobStamp(data) {
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -265,7 +267,17 @@ export default class View extends Component {
     this.setState({ varStamps: varStamps });
   }
 
-  forceUpdateStamps(id = -1) {
+  forceUpdateStamps(id = -1, fromEdit) {
+
+    var message = {
+      html: this.state.html,
+      stamper: this.getAllData(),
+      css: this.state.css,
+      js:undefined
+    }
+    if(fromEdit){
+    ipc.send("autosave", message)
+    }
 
     Object.values(this.state.fnStamps).map((stamp) => {
   
@@ -274,6 +286,7 @@ export default class View extends Component {
         stampRef.forceUpdate();
       }
     });
+
   }
 
   disablePan(status) {
@@ -359,6 +372,17 @@ export default class View extends Component {
     this.refreshBlobStamps(varStamps);
   }
 
+  getAllData(){
+    var data = {fns:[], vars:[]}
+    Object.values(this.state.fnStamps).map(stamp => 
+      data.fns.push(stamp.ref.current.getData()))
+
+    Object.values(this.state.varStamps).map(stamp => 
+      data.vars.push(stamp.ref.current.getData()))
+
+    return data
+  }
+
   refreshFnStamps(fnStamps) {
     var fnStampData = [];
     for (var i in fnStamps) {
@@ -383,7 +407,7 @@ export default class View extends Component {
     }
 
     this.setState({ varStamps: {} }, () =>
-      varStampData.map(data => this.createVarStamp(data))
+      varStampData.map(data => this.createBlobStamp(data))
     );
   }
 
