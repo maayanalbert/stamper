@@ -3,7 +3,7 @@
   "repository": "https://github.com/maayanalbert/stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
