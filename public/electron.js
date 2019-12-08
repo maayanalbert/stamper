@@ -38,9 +38,8 @@ function createWindow() {
 
   mainWindow.webContents.once("dom-ready", () => {
     fileManager = new FileManager(mainWindow);
-    fileManager.setDefault();
-    mainWindow.setTitle(fileManager.name)
-    fileManager.writeToView();
+
+    fileManager.onNewProject()
   });
 }
 
@@ -68,7 +67,7 @@ function setMenu() {
     {
       label: "File",
       submenu: [
-        { label: "New Project" },
+        { label: "New Project", click(){fileManager.onNewProject()}, accelerator: "Cmd+N", },
         
         { label: "Open", click(){fileManager.onOpenCommand()}, accelerator: "Cmd+O", },
     

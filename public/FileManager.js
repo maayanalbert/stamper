@@ -10,6 +10,7 @@ const {
   electron,
   dialog
 } = require("electron");
+const defaultSetup = require("./defaultSetup.js");
 
 module.exports = class FileManager {
   constructor(mainWindow) {
@@ -23,10 +24,20 @@ module.exports = class FileManager {
     this.editedAndUnsaved = false;
 
 
-
     ipcMain.on('save', (event, files) => {
       this.saveFiles(files)
     })
+
+  }
+
+  onNewProject(){
+    var setup = defaultSetup.getSetup()
+    this.name = setup.name
+    this.html = setup.html
+    this.css = setup.css
+    this.stamper = setup.stamper
+    this.mainWindow.setTitle(this.name)
+    this.writeToView()
 
   }
 
@@ -39,6 +50,7 @@ module.exports = class FileManager {
   }
 
   onOpenCommand(){
+ 
     dialog.showOpenDialog(this.mainWindow, { properties: ["openDirectory"] }).then(result =>
     {
       if(result.canceled === false){
@@ -61,7 +73,10 @@ module.exports = class FileManager {
       
 
                 if(this.html === undefined || this.sketch === undefined){
-                  // surface an error
+                  dialog.showMessageBox(this.mainWindow, 
+                    {message: "Oh no! It looks like you're missing some files. Stamper projects must have an index.html file and a sketch.js file.",
+                    buttons:["Ok"]})
+                    return
                 }
                 if(this.css === undefined){
                   this.css = ""
@@ -69,7 +84,7 @@ module.exports = class FileManager {
                 if(this.stamper === undefined){
                   /// agh write parser
                 }
-         
+
                 this.writeToView()
                 this.mainWindow.setTitle(this.name)
           
@@ -153,40 +168,6 @@ module.exports = class FileManager {
 
 
 
-  setDefault() {
-    this.name = "Untitled"
-    this.html = `
-<html>
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.dom.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-  </head>
-  <body>
-    <script src='sketch.js'></script>
-  </body>
-</html>
-`;
-    this.css = `
-html, body {
-  margin: 0;
-  padding: 0;
-}
-`;
-    this.stamper = {
-      fns: [
-        {
-          name: "setup",
-          args: "",
-          code: "createCanvas(400, 400)"
-        },
-        { name: "draw", args: "", code: "background(220)" }
-      ],
-      vars: [], 
-      scale:1
-    };
-  }
   writeToView() {
     this.mainWindow.webContents.send("writeToView", {
       html: this.html,
