@@ -294,41 +294,33 @@ var Cristal = (function(_super) {
         isResizingY = _c.isResizingY,
         isResizingXLeft = _c.isResizingXLeft;
 
-      if(isResizingX && isResizingY){
+      var height = currentHeight
+      var width = currentWidth
+      var x = currentX
+
+
+      if (isResizingX) {
         var maxWidth = innerWidth - newX - padding;
         var newWidth = (currentWidth || 0) + movementX;
         var width = newWidth;
-        var newHeight = (currentHeight || 0) + movementY;
-        var maxHeight = innerHeight - newY - padding;
-        var height =  newHeight;
-        _this.setState({ width: width, height:height }, () => _this.notifyResize(currentWidth, currentHeight) );
-      }else if(isResizingXLeft && isResizingY){
-        var maxWidth = innerWidth - newX - padding;
-        var newWidth = (currentWidth || 0) - movementX;
-        var width = newWidth;
 
-        var newHeight = (currentHeight || 0) + movementY;
-        var maxHeight = innerHeight - newY - padding;
-        var height =  newHeight;
-        _this.setState({ width: width, height:height, x:currentX + e.movementX }, () => _this.notifyResize(currentWidth, currentHeight) );
-
-      }else if (isResizingX) {
-        var maxWidth = innerWidth - newX - padding;
-        var newWidth = (currentWidth || 0) + movementX;
-        var width = newWidth;
-        _this.setState({ width: width }, () => _this.notifyResize(currentWidth, currentHeight) );
-      }else if(isResizingXLeft) {
-        var maxWidth = innerWidth - newX - padding;
-        var newWidth = (currentWidth || 0) - movementX;
-        var width = newWidth;
-        _this.setState({ width: width, x:currentX + e.movementX }, () => _this.notifyResize(currentWidth, currentHeight) );
-      }else if (isResizingY) {
-        var newHeight = (currentHeight || 0) + movementY;
-        var maxHeight = innerHeight - newY - padding;
-        var height =  newHeight;
-
-          _this.setState({ height: height }, () => _this.notifyResize(currentWidth, currentHeight));
       }
+      if(isResizingXLeft) {
+        var maxWidth = innerWidth - newX - padding;
+        var newWidth = (currentWidth || 0) - movementX;
+        var width = newWidth;
+        var x = currentX + e.movementX
+    
+      }
+      if (isResizingY) {
+        var newHeight = (currentHeight || 0) + movementY;
+        var maxHeight = innerHeight - newY - padding;
+        var height =  newHeight;
+      
+      }
+
+      _this.notifyResize(width, height, x)
+
     };
 
 
@@ -355,13 +347,17 @@ var Cristal = (function(_super) {
       var onMove = _this.props.onMove;
       onMove && onMove(_this.state);
     };
-    _this.notifyResize = function(oldWidth, oldHeight) {
+    _this.notifyResize = function(newWidth, newHeight, newX) {
 
       var onResize = _this.props.onResize;
-      var heightDiff = _this.state.height - oldHeight
-      var widthDiff = _this.state.width - oldWidth
+      var heightDiff = newHeight - _this.state.height
+      var widthDiff = newWidth - _this.state.width
+      var resizeBlocked = false
       if (onResize) {
-        onResize(widthDiff, heightDiff);
+        var resizeBlocked = onResize(widthDiff, heightDiff);
+      }
+      if(!resizeBlocked){
+        _this.setState({height:newHeight, width:newWidth, x:newX})
       }
     };
     

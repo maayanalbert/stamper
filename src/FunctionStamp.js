@@ -323,11 +323,16 @@ export default class FunctionStamp extends Component {
   }
 
   resizeEditor(widthDiff, heightDiff) {
-    var height = this.state.editorHeight;
-    var width = this.state.editorWidth;
+    var height = this.state.editorHeight + heightDiff
+    var width = this.state.editorWidth + widthDiff
+
+    if(height < 0 || width < 0){
+      return true
+    }
+
     this.setState({
-      editorHeight: height + heightDiff,
-      editorWidth: width + widthDiff
+      editorHeight: height,
+      editorWidth: width
     });
     this.editorRef.current.editor.resize();
   }
@@ -337,7 +342,7 @@ export default class FunctionStamp extends Component {
       <div>
         <Cristal
           ref={this.cristalRef}
-          onResize={s => this.setState({ height: s.height, width: s.width })}
+  
           isResizable={true}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
