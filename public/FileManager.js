@@ -12,6 +12,7 @@ const {
 } = require("electron");
 const defaultSetup = require("./defaultSetup.js");
 var parser = require('./parser');
+var LZUTF8 = require('lzutf8');
 
 module.exports = class FileManager {
   constructor(mainWindow) {
@@ -35,13 +36,21 @@ module.exports = class FileManager {
 
   }
 
+  resetFiles(){
+    this.path = undefined;
+    this.name = undefined;
+    this.html = undefined;
+    this.css = undefined;
+    this.js = undefined;
+    this.stamper = undefined;    
+  }
+
   onNewProject(){
+
+    this.resetFiles()
+
     var setup = defaultSetup.getSetup()
-    this.path = undefined
     this.name = setup.name
-    this.html = undefined
-    this.css = undefined
-    this.js = undefined
     this.stamper = setup.stamper
 
     this.mainWindow.setTitle(this.name)
@@ -58,7 +67,10 @@ module.exports = class FileManager {
   }
 
 stamperMatches(html, js, css, stamper){
-  return false
+  var stamperHtml = LZUTF8.decompress(stamper.compressedHtml,{inputEncoding:"StorageBinaryString"});
+  var stamperCss = LZUTF8.decompress(stamper.compressedCss,{inputEncoding:"StorageBinaryString"});
+  var stamperJs = LZUTF8.decompress(stamper.compressedJs,{inputEncoding:"StorageBinaryString"});
+  return html === stamperHtml && stamperCss === css && stamperJs === js
 }
   openFile(html, js, css, stamper = {}){
                 if(html === undefined || js === undefined){
@@ -68,6 +80,20 @@ stamperMatches(html, js, css, stamper){
                     return
                 }
                 
+
+
+                if(this.stamperMatches(html, js, css, stamper)){
+             
+                  this.stamper = stamper
+                }else{
+             
+
+                  var newStamper = parser.jsToStamps(js)
+                  newStamper.fns.push({name:"style.css", args:" ", code:css, isCss:true})
+                  newStamper.fns.push({name:"index.html", args:" ", code:html, isHtml:true})
+             
+                  this.stamper = newStamper
+                }
 
                 if(css === undefined){
                   this.css = ""
@@ -79,17 +105,6 @@ stamperMatches(html, js, css, stamper){
                 this.html = html
                 this.js = js
                 this.name = this.path.replace(/^.*[\\\/]/, '')
-
-
-                if(this.stamperMatches(html, js, css, stamper)){
-                  this.stamper = stamper
-                }else{
-                  var newStamper = parser.jsToStamps(js)
-                  newStamper.fns.push({name:"style.css", args:" ", code:css, isCss:true})
-                  newStamper.fns.push({name:"index.html", args:" ", code:html, isHtml:true})
-             
-                  this.stamper = newStamper
-                }
 
 
                 this.writeToView()
@@ -138,31 +153,31 @@ stamperMatches(html, js, css, stamper){
     })
   }
 
-  defaultEquals(stamps){
-    var editableStamps = _.clone(stamps)
-    Object.values(editableStamps.fns).map(stamp => 
-    {
-      var neededKeys = {code:"", name:"", args:""}
-      Object.keys(stamp).map(key => {
-        if(key in neededKeys === false){
-          delete stamp[key]
+  // defaultEquals(stamps){
+  //   var editableStamps = _.clone(stamps)
+  //   Object.values(editableStamps.fns).map(stamp => 
+  //   {
+  //     var neededKeys = {code:"", name:"", args:""}
+  //     Object.keys(stamp).map(key => {
+  //       if(key in neededKeys === false){
+  //         delete stamp[key]
 
-        }
-      })
-    })
+  //       }
+  //     })
+  //   })
 
-    Object.values(editableStamps.vars).map(stamp => 
-    {
-      var neededKeys = {code:""}
-      Object.keys(stamp).map(key => {
-        if(key in neededKeys === false){
-          delete stamp[key]
-        }
-      })
-    })
+  //   Object.values(editableStamps.vars).map(stamp => 
+  //   {
+  //     var neededKeys = {code:""}
+  //     Object.keys(stamp).map(key => {
+  //       if(key in neededKeys === false){
+  //         delete stamp[key]
+  //       }
+  //     })
+  //   })
 
-      return _.isEqual(this.stamper, editableStamps)
-  }
+  //     return _.isEqual(this.stamper, editableStamps)
+  // }
 
 
 
@@ -180,6 +195,11 @@ stamperMatches(html, js, css, stamper){
       this.js = files.js
       this.css = files.css
       this.mainWindow.setTitle(this.name)
+
+      this.stamper.compressedHtml = LZUTF8.compress(this.html, {outputEncoding:"StorageBinaryString"});
+      this.stamper.compressedCss = LZUTF8.compress(this.css, {outputEncoding:"StorageBinaryString"});
+      this.stamper.compressedJs = LZUTF8.compress(this.js, {outputEncoding:"StorageBinaryString"});
+
       jetpack.writeAsync(this.path + "/sketch.js", this.js)
       jetpack.writeAsync(this.path + "/style.css", this.css)
       jetpack.writeAsync(this.path + "/index.html", this.html)
