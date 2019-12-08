@@ -10,7 +10,6 @@ import { Line } from "react-lineto";
 import cheerio from "cheerio"
 
 import jsToStamps from "./parser.js"
-const prettier = window.require("prettier");
 
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
