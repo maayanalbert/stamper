@@ -393,8 +393,10 @@ export default class View extends Component {
     var varStamps = this.state.varStamps;
 
     if (id in fnStamps) {
+      ipc.send("edited") 
       delete fnStamps[id];
     } else if (id in varStamps) {
+      ipc.send("edited") 
       delete varStamps[id];
     }
 

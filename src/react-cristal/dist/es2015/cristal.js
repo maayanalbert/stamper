@@ -23,7 +23,8 @@ import { Stacker } from "./stacker";
 import CopyImg from "./../../../copy.png";
 import CloseImg from "./../../../close.png";
 import styled from "styled-components";
-// import Camera from "./camera.png"
+const electron = window.require('electron');
+const ipc = electron.ipcRenderer;
 
 var __extends =
   (this && this.__extends) ||
@@ -138,6 +139,7 @@ var Cristal = (function(_super) {
     };
 
     _this.onMouseDown = function() {
+
       var isDraggable = _this.props.isDraggable;
       if (!isDraggable) return;
 
@@ -227,7 +229,6 @@ var Cristal = (function(_super) {
       _this.setState({ mouseIsDown: true });
     };
     _this.onMouseMove = function(e) {
-      
            
       var isResizing = _this.isResizing;
       var _a = _this.state,
@@ -247,6 +248,7 @@ var Cristal = (function(_super) {
         _this.pan(e.movementX, e.movementY);
         return;
       } else if (isDragging) {
+        ipc.send("edited")
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
@@ -260,6 +262,7 @@ var Cristal = (function(_super) {
         _this.onStoppedMove();
       }
       if (isResizing) {
+        ipc.send("edited")
 
           _this.resizeCristal(e);
 

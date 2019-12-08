@@ -11,6 +11,9 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
+const electron = window.require('electron');
+const ipc = electron.ipcRenderer;
+
 export default class BlobStamp extends Component {
   constructor(props) {
     super(props);
@@ -58,7 +61,10 @@ export default class BlobStamp extends Component {
           }}
           mode="javascript"
           theme="solarized_light"
-          onChange={value => this.setState({ code: value })}
+          onChange={value => {
+            this.setState({ code: value });ipc.send("edited") 
+          }
+          }
           fontSize={globals.globalVarCodeSize}
           showPrintMargin={false}
           wrapEnabled={true}

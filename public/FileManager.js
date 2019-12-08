@@ -21,11 +21,15 @@ module.exports = class FileManager {
     this.css = undefined;
     this.js = undefined;
     this.stamper = undefined;
-    this.editedAndUnsaved = false;
+
 
 
     ipcMain.on('save', (event, files) => {
       this.saveFiles(files)
+    })
+
+    ipcMain.on('edited', (event) => {
+      this.mainWindow.setTitle(this.name + " - Edited")
     })
 
   }
@@ -60,31 +64,34 @@ module.exports = class FileManager {
 
         this.path = result.filePaths[0]
        
-        this.name = this.path.replace(/^.*[\\\/]/, '')
+        
 
-        jetpack.readAsync(this.path + "/index.html").then(index =>{
-          this.index = index
+        jetpack.readAsync(this.path + "/index.html").then(html =>{
           jetpack.readAsync(this.path + "/sketch.js").then(js => {
-            this.js = js
             jetpack.readAsync(this.path + "/style.css").then(css => {
-              this.css = css
               jetpack.readAsync(this.path+ "/pls_dont_touch.stamper", "json").then(stamper => {
-                this.stamper = stamper
-      
+    
 
-                if(this.html === undefined || this.sketch === undefined){
+                if(html === undefined || js === undefined){
                   dialog.showMessageBox(this.mainWindow, 
                     {message: "Oh no! It looks like you're missing some files. Stamper projects must have an index.html file and a sketch.js file.",
                     buttons:["Ok"]})
                     return
                 }
-                if(this.css === undefined){
-                  this.css = ""
-                }
-                if(this.stamper === undefined){
+                if(stamper === undefined){
                   /// agh write parser
                 }
 
+                if(css === undefined){
+                  this.css = ""
+                }else{
+                  this.css = css
+                }
+
+                this.html = html
+                this.js = js
+                this.stamper = stamper
+                this.name = this.path.replace(/^.*[\\\/]/, '')
                 this.writeToView()
                 this.mainWindow.setTitle(this.name)
           
@@ -104,9 +111,8 @@ module.exports = class FileManager {
      dialog.showSaveDialog(this.mainWindow).then(result => {
       if(result.canceled === false){
         this.name = result.filePath.replace(/^.*[\\\/]/, '')
-        this.mainWindow.setTitle(this.name)
         this.path = result.filePath
-        this.editedAndUnsaved = false
+      
         this.mainWindow.send("requestSave")
       }
     })
@@ -138,15 +144,10 @@ module.exports = class FileManager {
       return _.isEqual(this.stamper, editableStamps)
   }
 
+
+
   saveFiles(files){
-
-
     if(this.path === undefined){
-        if(this.html === files.html && this.css === files.css && this.defaultEquals(files.stamper)){
-          return
-        }
-        this.editedAndUnsaved = true
-        this.mainWindow.setTitle(this.name + " - Edited")
         return       
     }
 
@@ -158,7 +159,7 @@ module.exports = class FileManager {
       this.stamper = files.stamper
       this.js = files.js
       this.css = files.css
-
+      this.mainWindow.setTitle(this.name)
       jetpack.writeAsync(this.path + "/sketch.js", this.js)
       jetpack.writeAsync(this.path + "/style.css", this.css)
       jetpack.writeAsync(this.path + "/index.html", this.html)

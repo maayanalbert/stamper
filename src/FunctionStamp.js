@@ -12,6 +12,9 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
 
+const electron = window.require('electron');
+const ipc = electron.ipcRenderer;
+
 export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
@@ -140,7 +143,7 @@ export default class FunctionStamp extends Component {
           }}
           mode="javascript"
           theme="solarized_light"
-          onChange={value => this.setState({ code: value })}
+          onChange={value => {this.setState({ code: value });ipc.send("edited")  }}
           fontSize={globals.codeSize}
           showPrintMargin={false}
           wrapEnabled={false}
@@ -178,8 +181,10 @@ export default class FunctionStamp extends Component {
       <div>
         <input
           placeholder="function name..."
-          onChange={event =>
+          onChange={event =>{
             this.setState({ name: event.target.value }, () => this.checkName())
+            ipc.send("edited")  
+            }
           }
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.name}
@@ -190,7 +195,13 @@ export default class FunctionStamp extends Component {
 
         <input
           placeholder="arguments..."
-          onChange={event => this.setState({ args: event.target.value })}
+          onChange={event => 
+            {
+            this.setState({ args: event.target.value })
+            ipc.send("edited") 
+            }
+
+        }
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
 
@@ -208,6 +219,7 @@ export default class FunctionStamp extends Component {
         <Resizable
           className="ml-1 bg-white shadow rounded"
           onResize={e => {
+            ipc.send("edited")
             this.updateIframeDimensions(
               e.movementX + this.state.iframeWidth,
               e.movementY + this.state.iframeHeight
