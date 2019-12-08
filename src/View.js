@@ -10,6 +10,7 @@ import { Line } from "react-lineto";
 import cheerio from "cheerio"
 
 import jsToStamps from "./parser.js"
+const prettier = window.require("prettier");
 
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
@@ -32,10 +33,11 @@ export default class View extends Component {
       ipc.on('writeToView', (event, files) => {
 
 
-      this.setState({html:files.html, css:files.css});
-      
-      files.stamper.fns.map(data => this.addFnStamp(data))
-      files.stamper.vars.map(data => this.addBlobStamp(data))
+      this.setState({html:files.html, css:files.css, fnStamps:{}, varStamps:{}, counter:0, scale:files.stamper.scale}, () => {
+        files.stamper.fns.map(data => this.addFnStamp(data))
+        files.stamper.vars.map(data => this.addBlobStamp(data))
+
+      })
 
     });
 
@@ -278,7 +280,7 @@ export default class View extends Component {
       html: this.state.html,
       stamper: this.getAllData(),
       css: this.state.css,
-      js:""
+      js:this.getExportableCode()
     } 
 
     ipc.send("save", message) 
@@ -333,12 +335,33 @@ export default class View extends Component {
     });
   }
 
+  getExportableCode(){
+    var code = null
+    Object.values(this.state.fnStamps).map( stamp => {
+      if(stamp.ref.current.state.name === "draw"){
+        code = this.getRunnableCode(stamp.ref.current.props.id)
+      }
+    })
+
+    if(code === null){
+      code = this.getRunnableCode(-1)
+    }
+    return code
+
+  }
+
   getRunnableCode(id) {
     var runnableCode = [];
 
     Object.values(this.state.varStamps).map(varStamp => {
       if (varStamp.ref.current) {
         runnableCode.push(varStamp.ref.current.state.runnableCode);
+      }
+    });
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      if (stamp.ref.current && stamp.ref.current.state.name != "draw") {
+        runnableCode.push(stamp.ref.current.state.fullFun);
       }
     });
 
@@ -361,11 +384,6 @@ export default class View extends Component {
     }
 
 
-    Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current && stamp.ref.current.state.name != "draw") {
-        runnableCode.push(stamp.ref.current.state.fullFun);
-      }
-    });
 
     return runnableCode.join("\n\n");
   }
@@ -385,7 +403,7 @@ export default class View extends Component {
   }
 
   getAllData(){
-    var data = {fns:[], vars:[]}
+    var data = {fns:[], vars:[], scale:this.state.scale}
     Object.values(this.state.fnStamps).map(stamp => 
       data.fns.push(stamp.ref.current.getData()))
 

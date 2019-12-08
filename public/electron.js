@@ -69,12 +69,9 @@ function setMenu() {
       label: "File",
       submenu: [
         { label: "New Project" },
-        {
-          label: "Open...",
-          click() {
-            dialog.showOpenDialog(null, { properties: ["openDirectory"] });
-          }
-        },
+        
+        { label: "Open", click(){fileManager.onOpenCommand()}, accelerator: "Cmd+O", },
+    
         { label: "Save", click(){fileManager.onSaveCommand()}, accelerator: "Cmd+S", },
         { label: "Save As...", click(){fileManager.onSaveAsCommand()}, accelerator: "Shift+Cmd+S", }
       ]

@@ -39,6 +39,49 @@ module.exports = class FileManager {
   }
 
   onOpenCommand(){
+    dialog.showOpenDialog(this.mainWindow, { properties: ["openDirectory"] }).then(result =>
+    {
+      if(result.canceled === false){
+        if(result.filePaths.length != 1){
+          return
+        }
+
+        this.path = result.filePaths[0]
+       
+        this.name = this.path.replace(/^.*[\\\/]/, '')
+
+        jetpack.readAsync(this.path + "/index.html").then(index =>{
+          this.index = index
+          jetpack.readAsync(this.path + "/sketch.js").then(js => {
+            this.js = js
+            jetpack.readAsync(this.path + "/style.css").then(css => {
+              this.css = css
+              jetpack.readAsync(this.path+ "/pls_dont_touch.stamper", "json").then(stamper => {
+                this.stamper = stamper
+      
+
+                if(this.html === undefined || this.sketch === undefined){
+                  // surface an error
+                }
+                if(this.css === undefined){
+                  this.css = ""
+                }
+                if(this.stamper === undefined){
+                  /// agh write parser
+                }
+         
+                this.writeToView()
+                this.mainWindow.setTitle(this.name)
+          
+              })
+            })
+          })
+        })
+
+
+      }
+    })
+
   }
 
 
@@ -88,7 +131,7 @@ module.exports = class FileManager {
           return
         }
         this.editedAndUnsaved = true
-        this.mainWindow.setTitle(this.name + " --unsaved")
+        this.mainWindow.setTitle(this.name + " - Edited")
         return       
     }
 
@@ -104,7 +147,7 @@ module.exports = class FileManager {
       jetpack.writeAsync(this.path + "/sketch.js", this.js)
       jetpack.writeAsync(this.path + "/style.css", this.css)
       jetpack.writeAsync(this.path + "/index.html", this.html)
-      jetpack.writeAsync(this.path + "/meta.stamper", JSON.stringify(this.stamper))
+      jetpack.writeAsync(this.path + "/pls_dont_touch.stamper", JSON.stringify(this.stamper))
 
   }
 
@@ -140,12 +183,10 @@ html, body {
         },
         { name: "draw", args: "", code: "background(220)" }
       ],
-      vars: []
+      vars: [], 
+      scale:1
     };
   }
-  readFromDir() {}
-  save() {}
-  readFromView() {}
   writeToView() {
     this.mainWindow.webContents.send("writeToView", {
       html: this.html,
