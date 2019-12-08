@@ -13,7 +13,7 @@ import {
   padding,
   CloseIcon,
   Title,
-  CopyIcon
+  CopyIcon, minWidth, minHeight
 } from "./styled";
 import { isSmartPosition } from "./domain";
 import {
@@ -300,24 +300,24 @@ var Cristal = (function(_super) {
 
 
       if (isResizingX) {
-        var maxWidth = innerWidth - newX - padding;
+   
         var newWidth = (currentWidth || 0) + movementX;
-        var width = newWidth;
+        var width = Math.max(newWidth, minWidth);
 
       }
       if(isResizingXLeft) {
-        var maxWidth = innerWidth - newX - padding;
+      
         var newWidth = (currentWidth || 0) - movementX;
-        var width = newWidth;
+        var width = Math.max(newWidth, minWidth);
         var x = currentX + e.movementX
     
       }
       if (isResizingY) {
         var newHeight = (currentHeight || 0) + movementY;
-        var maxHeight = innerHeight - newY - padding;
-        var height =  newHeight;
+        var height = Math.max(newHeight, minHeight);
       
       }
+
 
       _this.notifyResize(width, height, x)
 

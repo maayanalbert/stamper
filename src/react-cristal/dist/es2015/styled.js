@@ -5,8 +5,8 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     return cooked;
 };
 
-export var minWidth = 10;
-export var minHeight = 10;
+export var minWidth = 60;
+export var minHeight = 60;
 export var padding = 10;
 var wrapperStyles = function (_a) {
     var isActive = _a.isActive;
