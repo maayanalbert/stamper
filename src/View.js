@@ -9,7 +9,7 @@ import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio"
 
-import jsToStamps from "./parser.js"
+
 
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
@@ -32,18 +32,13 @@ export default class View extends Component {
       ipc.on('writeToView', (event, files) => {
 
 
-      this.setState({fnStamps:{}, blobStamps:{}, counter:0, scale:files.stamper.scale}, () => {
+      this.setState({fnStamps:{}, blobStamps:{}, counter:0, htmlID:-1, cssID:-1, scale:files.stamper.scale}, () => {
+  
         files.stamper.fns.map(data => this.addFnStamp(data))
         files.stamper.blobs.map(data => this.addBlobStamp(data))
 
 
       })
-
-    });
-
-    ipc.on('jsToStamps', (event, rawCode) => {
-
-      jsToStamps(rawCode)
 
     });
 
@@ -60,7 +55,7 @@ export default class View extends Component {
 
 
   getHTML(id){
-    if(this.state.htmlID in this.state.fnStamps === false){
+    if(this.state.htmlID in this.state.fnStamps === false || this.state.cssID in this.state.fnStamps === false){
       return ""
     }
 
@@ -301,10 +296,17 @@ export default class View extends Component {
   }
 
   sendSaveData(){
+
+    if(this.state.htmlID in this.state.fnStamps === false || this.state.cssID in this.state.fnStamps === false){
+      return 
+    }
+    var htmlStamp = this.state.fnStamps[this.state.htmlID]
+    var cssStamp = this.state.fnStamps[this.state.cssID]
+
     var message = {
-      html: this.state.html,
+      html: htmlStamp.ref.current.state.runnableInnerCode,
       stamper: this.getAllData(),
-      css: this.state.css,
+      css: cssStamp.ref.current.state.runnableInnerCode,
       js:this.getExportableCode()
     } 
 

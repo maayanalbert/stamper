@@ -11,6 +11,7 @@ const {
   dialog
 } = require("electron");
 const defaultSetup = require("./defaultSetup.js");
+var parser = require('./parser');
 
 module.exports = class FileManager {
   constructor(mainWindow) {
@@ -36,8 +37,13 @@ module.exports = class FileManager {
 
   onNewProject(){
     var setup = defaultSetup.getSetup()
+    this.path = undefined
     this.name = setup.name
+    this.html = undefined
+    this.css = undefined
+    this.js = undefined
     this.stamper = setup.stamper
+
     this.mainWindow.setTitle(this.name)
     this.writeToView()
 
@@ -51,6 +57,45 @@ module.exports = class FileManager {
     }
   }
 
+stamperMatches(html, js, css, stamper){
+  return false
+}
+  openFile(html, js, css, stamper = {}){
+                if(html === undefined || js === undefined){
+                  dialog.showMessageBox(this.mainWindow, 
+                    {message: "Oh no! It looks like you're missing some files. Stamper projects must have an index.html file and a sketch.js file.",
+                    buttons:["Ok"]})
+                    return
+                }
+                
+
+                if(css === undefined){
+                  this.css = ""
+                }else{
+                  this.css = css
+                }
+
+
+                this.html = html
+                this.js = js
+                this.name = this.path.replace(/^.*[\\\/]/, '')
+
+
+                if(this.stamperMatches(html, js, css, stamper)){
+                  this.stamper = stamper
+                }else{
+                  var newStamper = parser.jsToStamps(js)
+                  newStamper.fns.push({name:"style.css", args:" ", code:css, isCss:true})
+                  newStamper.fns.push({name:"index.html", args:" ", code:html, isHtml:true})
+             
+                  this.stamper = newStamper
+                }
+
+
+                this.writeToView()
+                this.mainWindow.setTitle(this.name)
+
+  }
   onOpenCommand(){
  
     dialog.showOpenDialog(this.mainWindow, { properties: ["openDirectory"] }).then(result =>
@@ -68,30 +113,7 @@ module.exports = class FileManager {
           jetpack.readAsync(this.path + "/sketch.js").then(js => {
             jetpack.readAsync(this.path + "/style.css").then(css => {
               jetpack.readAsync(this.path+ "/pls_dont_touch.stamper", "json").then(stamper => {
-    
-
-                if(html === undefined || js === undefined){
-                  dialog.showMessageBox(this.mainWindow, 
-                    {message: "Oh no! It looks like you're missing some files. Stamper projects must have an index.html file and a sketch.js file.",
-                    buttons:["Ok"]})
-                    return
-                }
-                if(stamper === undefined){
-                  /// agh write parser
-                }
-
-                if(css === undefined){
-                  this.css = ""
-                }else{
-                  this.css = css
-                }
-
-                this.html = html
-                this.js = js
-                this.stamper = stamper
-                this.name = this.path.replace(/^.*[\\\/]/, '')
-                this.writeToView()
-                this.mainWindow.setTitle(this.name)
+                this.openFile(html, js, css, stamper)
           
               })
             })
