@@ -24,8 +24,8 @@ export default class View extends Component {
       scale: 1,
       counter: 0,
       varStamps: {},
-      html:undefined,
-      css:undefined,
+      html:"",
+      css:"",
     };
     this.counterMutex = new Mutex();
 
@@ -42,6 +42,12 @@ export default class View extends Component {
     ipc.on('jsToStamps', (event, rawCode) => {
 
       jsToStamps(rawCode)
+
+    });
+
+    ipc.on('requestSave', (event, rawCode) => {
+
+      this.sendSaveData()
 
     });
 
@@ -267,16 +273,22 @@ export default class View extends Component {
     this.setState({ varStamps: varStamps });
   }
 
-  forceUpdateStamps(id = -1, fromEdit) {
-
+  sendSaveData(){
     var message = {
       html: this.state.html,
       stamper: this.getAllData(),
       css: this.state.css,
-      js:undefined
-    }
+      js:""
+    } 
+
+    ipc.send("save", message) 
+
+  }
+
+  forceUpdateStamps(id = -1, fromEdit) {
+
     if(fromEdit){
-    ipc.send("autosave", message)
+      this.sendSaveData()
     }
 
     Object.values(this.state.fnStamps).map((stamp) => {

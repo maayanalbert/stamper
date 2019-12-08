@@ -58,6 +58,7 @@ app.on("activate", () => {
   }
 });
 
+
 function setMenu() {
   var menu = Menu.buildFromTemplate([
     {
@@ -74,12 +75,20 @@ function setMenu() {
             dialog.showOpenDialog(null, { properties: ["openDirectory"] });
           }
         },
-        { label: "Save" ,          click() {
-            fileManager.writeToView()
-          }},
-        { label: "Save As..." }
+        { label: "Save", click(){fileManager.onSaveCommand()}, accelerator: "Cmd+S", },
+        { label: "Save As...", click(){fileManager.onSaveAsCommand()}, accelerator: "Shift+Cmd+S", }
       ]
-    }
+    },{
+    label: "Edit",
+    submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+    ]}
   ]);
   Menu.setApplicationMenu(menu);
 }

@@ -1,4 +1,5 @@
 const log = require("electron-log");
+const jetpack = require('fs-jetpack');
 var _ = require('lodash');
 const {
   app,
@@ -19,29 +20,95 @@ module.exports = class FileManager {
     this.css = undefined;
     this.js = undefined;
     this.stamper = undefined;
-    this.editedAndUnsaved = false
+    this.editedAndUnsaved = false;
 
 
-    ipcMain.on('autosave', (event, files) => {
 
+    ipcMain.on('save', (event, files) => {
+      this.saveFiles(files)
     })
 
   }
 
-  save(){
-      if(this.html === files.html && this.stamper === files.stamper
-        && this.js === files.js && this.css === files.css){return}
+  onSaveCommand(){
+    if(this.path === undefined){
+      this.onSaveAsCommand()
+    }else{
+      this.mainWindow.send("requestSave")
+    }
+  }
+
+  onOpenCommand(){
+  }
+
+
+  onSaveAsCommand(){
+     dialog.showSaveDialog(this.mainWindow).then(result => {
+      if(result.canceled === false){
+        this.name = result.filePath.replace(/^.*[\\\/]/, '')
+        this.mainWindow.setTitle(this.name)
+        this.path = result.filePath
+        this.editedAndUnsaved = false
+        this.mainWindow.send("requestSave")
+      }
+    })
+  }
+
+  defaultEquals(stamps){
+    var editableStamps = _.clone(stamps)
+    Object.values(editableStamps.fns).map(stamp => 
+    {
+      var neededKeys = {code:"", name:"", args:""}
+      Object.keys(stamp).map(key => {
+        if(key in neededKeys === false){
+          delete stamp[key]
+
+        }
+      })
+    })
+
+    Object.values(editableStamps.vars).map(stamp => 
+    {
+      var neededKeys = {code:""}
+      Object.keys(stamp).map(key => {
+        if(key in neededKeys === false){
+          delete stamp[key]
+        }
+      })
+    })
+
+      return _.isEqual(this.stamper, editableStamps)
+  }
+
+  saveFiles(files){
+
+
+    if(this.path === undefined){
+        if(this.html === files.html && this.css === files.css && this.defaultEquals(files.stamper)){
+          return
+        }
+        this.editedAndUnsaved = true
+        this.mainWindow.setTitle(this.name + " --unsaved")
+        return       
+    }
+
+        if(this.html === files.html && _.isEqual(this.stamper, files.stamper)
+      && this.js === files.js && this.css === files.css){return}
+
+
       this.html = files.html
       this.stamper = files.stamper
       this.js = files.js
       this.css = files.css
-      if(this.path){
 
-      }else{
-        this.editedAndUnsaved = true
-        mainWindow.setTitle(this.name + "*")
-      }    
+      jetpack.writeAsync(this.path + "/sketch.js", this.js)
+      jetpack.writeAsync(this.path + "/style.css", this.css)
+      jetpack.writeAsync(this.path + "/index.html", this.html)
+      jetpack.writeAsync(this.path + "/meta.stamper", JSON.stringify(this.stamper))
+
   }
+
+
 
   setDefault() {
     this.name = "Untitled"
