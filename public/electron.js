@@ -13,10 +13,10 @@ const log = require("electron-log");
 const path = require("path");
 const isDev = require("electron-is-dev");
 
-const ProjectManager = require("./ProjectManager.js");
+const FileManager = require("./FileManager.js");
 
 let mainWindow;
-let project;
+let fileManager;
 
 function createWindow() {
   autoUpdater.checkForUpdates();
@@ -36,9 +36,9 @@ function createWindow() {
   setMenu();
 
   mainWindow.webContents.once("dom-ready", () => {
-    project = new ProjectManager(mainWindow);
-    project.setDefault();
-    project.writeToView();
+    fileManager = new FileManager(mainWindow);
+    fileManager.setDefault();
+    fileManager.writeToView();
   });
 }
 
@@ -73,9 +73,9 @@ function setMenu() {
           }
         },
         { label: "Save" ,          click() {
-            project.writeToView()
+            fileManager.writeToView()
           }},
-        { label: "Save as..." }
+        { label: "Save As..." }
       ]
     }
   ]);

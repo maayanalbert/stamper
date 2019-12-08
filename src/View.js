@@ -4,7 +4,7 @@ import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
-import VariableStamp from "./VariableStamp.js";
+import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio"
@@ -34,7 +34,7 @@ export default class View extends Component {
       this.setState({html:project.html, css:project.css});
       
       project.stamper.fns.map(data => this.addFnStamp(data))
-      project.stamper.vars.map(data => this.addVarStamp(data))
+      project.stamper.vars.map(data => this.addBlobStamp(data))
 
     });
 
@@ -55,8 +55,7 @@ export default class View extends Component {
     var jsBlockStr ="<script type='text/javascript'>"+this.getRunnableCode(id)+"</script>"
     var cssBlockStr = "<style>"+this.state.css+"</style>"
     var jsSelector = '[src="sketch.js"]'
-    var cssSelector = '[href=style.css]'
-    console.log(jsSelector)
+    var cssSelector = '[href="style.css"]'
 
     var jsBlock = parser(jsBlockStr)
     var cssBlock = parser(cssBlockStr)
@@ -126,7 +125,6 @@ export default class View extends Component {
       iframeDisabled: false,
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
-      isSetup: false,
       iframeWidth:globals.defaultIframeWidth,
       iframeHeight:globals.defaultEditorHeight
     };
@@ -151,7 +149,7 @@ export default class View extends Component {
     data.iframeDisabled = setIframeDisabled;
 
     this.createFnStamp(data);
-    this.refreshVarStamps(this.state.varStamps);
+    this.refreshBlobStamps(this.state.varStamps);
     return newName;
   }
 
@@ -162,7 +160,6 @@ export default class View extends Component {
       args = data.args,
       x = data.x,
       y = data.y,
-      isSetup = data.isSetup,
       iframeDisabled = data.iframeDisabled,
       editorWidth = data.editorWidth,
       editorHeight = data.editorHeight,
@@ -179,7 +176,7 @@ export default class View extends Component {
     var elem = (
       <FunctionStamp
         ref={ref}
-        isSetup={isSetup}
+
         starterCode={code}
         starterArgs={args}
         starterName={name}
@@ -208,7 +205,7 @@ export default class View extends Component {
     this.setState({ fnStamps: fnStamps });
   }
 
-  addVarStamp(data, updatePosition = false) {
+  addBlobStamp(data, updatePosition = false) {
     var defaults = {
       code: "var z = 10",
       x: this.defaultStarterPos(),
@@ -244,7 +241,7 @@ export default class View extends Component {
     var ref = React.createRef();
 
     var elem = (
-      <VariableStamp
+      <BlobStamp
         ref={ref}
         starterCode={code}
         initialPosition={{ x: x, y: y }}
@@ -253,7 +250,7 @@ export default class View extends Component {
         getRunnableCode={this.getRunnableCode.bind(this)}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
-        addStamp={this.addVarStamp.bind(this)}
+        addStamp={this.addBlobStamp.bind(this)}
         onDelete={this.onDelete.bind(this)}
         initialScale={this.state.scale}
 
@@ -359,7 +356,7 @@ export default class View extends Component {
     }
 
     this.refreshFnStamps(fnStamps);
-    this.refreshVarStamps(varStamps);
+    this.refreshBlobStamps(varStamps);
   }
 
   refreshFnStamps(fnStamps) {
@@ -376,7 +373,7 @@ export default class View extends Component {
     );
   }
 
-  refreshVarStamps(varStamps) {
+  refreshBlobStamps(varStamps) {
     var varStampData = [];
     for (var i in varStamps) {
       var stamp = varStamps[i];
@@ -443,7 +440,7 @@ export default class View extends Component {
           </button>
           <button
             class="btn btn btn-blue shadow m-1"
-            onClick={() => this.addVarStamp({})}
+            onClick={() => this.addBlobStamp({})}
           >
             {" "}
             add global vars

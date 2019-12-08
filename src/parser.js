@@ -74,7 +74,7 @@ import esprima from "esprima"
     }
 
     var code = rawCode.substr(item.body.range[0], item.body.range[1])
-    stamps.push({category:category, data:{code:code, name:name, args:args, isSetup:(name === setup)}})
+    stamps.push({category:category, data:{code:code, name:name, args:args}})
   }
 
   function getSnippets(rawCode){

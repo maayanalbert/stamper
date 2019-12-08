@@ -11,7 +11,7 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
-export default class HtmlStamp extends Component {
+export default class BlobStamp extends Component {
   constructor(props) {
     super(props);
     this.state = {

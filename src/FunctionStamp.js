@@ -184,7 +184,6 @@ export default class FunctionStamp extends Component {
           onMouseOut={() => this.updateFuns()}
           value={this.state.name}
           class={"text-" + nameColor + " name"}
-          disabled={this.props.isSetup}
         />
 
         <br />
@@ -194,7 +193,7 @@ export default class FunctionStamp extends Component {
           onChange={event => this.setState({ args: event.target.value })}
           onMouseOut={() => this.updateFuns()}
           value={this.state.args}
-          disabled={this.props.isSetup}
+
           class="text-greyish args"
         />
       </div>
@@ -260,9 +259,7 @@ export default class FunctionStamp extends Component {
   }
 
   copyAndOpt(isOpt = false) {
-    if (this.props.isSetup) {
-      return;
-    }
+
 
     var data = this.getData();
 
@@ -325,15 +322,14 @@ export default class FunctionStamp extends Component {
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-          copyHidden={this.props.isSetup}
-          closeHidden={this.props.isSetup}
+
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
           className={"shadow bg-paleYellow"}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
-          initialSize={{width:globals.fnStampWidth, height:globals.fnStampHeight}}
+
         >
           <div
   

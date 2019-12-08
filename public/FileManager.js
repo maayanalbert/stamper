@@ -1,6 +1,6 @@
 const log = require("electron-log");
 
-module.exports = class ProjectManager {
+module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
     this.path = undefined;
