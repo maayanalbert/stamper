@@ -220,7 +220,7 @@ export default class FunctionStamp extends Component {
 
   renderIframe() {
     return (
-      <div>
+      <div hidden={this.props.isCss}>
         <Resizable
           className="ml-1 bg-white shadow rounded"
           onResize={e => {
