@@ -78,6 +78,10 @@ module.exports = class FileManager {
 
 
       var newStamper = parser.jsToStamps(js);
+      log.info("NEW STAMPER")
+      log.info(newStamper)
+
+      if(newStamper === null){return null}
       newStamper.fns.push({
         name: "style.css",
         args: " ",
@@ -105,8 +109,16 @@ module.exports = class FileManager {
       return;
     }
 
-    
-      this.stamper = this.updateStamperJs(js, stamper)
+      var newStamper = this.updateStamperJs(js, stamper)
+      if(newStamper === null){
+      dialog.showMessageBox(this.mainWindow, {
+        message:
+          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into stamper land :(.`,
+        buttons: ["Ok"]
+      });
+        return
+      }
+      this.stamper = newStamper
 
       this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
       this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})

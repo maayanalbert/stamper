@@ -447,6 +447,7 @@ function reportError(message, lineno){
   }
 
   forceUpdateStamps(id = -1, fromEdit) {
+    console.log("FORCE UPDATING")
     if (fromEdit) {
       this.sendSaveData();
     }
@@ -651,6 +652,7 @@ function reportError(message, lineno){
   }
 
   onStopMove(s) {
+
     if(s){
     this.setState({ scale: s.scale });
     }

@@ -1,13 +1,19 @@
 var esprima = require("esprima");
 var _ = require("lodash");
+const log = require("electron-log");
 
 function jsToStamps(rawCode) {
-  var program = esprima.parseScript(rawCode, {
-    range: true,
-    comment: true,
-    tolerant: true,
-    loc: true
-  });
+  try{
+    var program = esprima.parseScript(rawCode, {
+      range: true,
+      comment: true,
+      tolerant: true,
+      loc: true
+    });
+  }catch(error){
+    return null
+  }
+
   var body = _.cloneDeep(program.body);
   insertComments(body, program.comments);
   var stamps = { fns: [], blobs: [] };

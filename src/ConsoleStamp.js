@@ -36,6 +36,7 @@ export default class ConsoleStamp extends Component {
   addNewIframeConsole(newConsole) {
 
     Hook(newConsole, newLogs => {
+      console.log("HEARD SETUP")
       newLogs.map(log => {
         if (log.method === "log") {
           this.checkLastLog(log);
@@ -78,7 +79,6 @@ this.checkLastLog({ method: "error", data: [message] });
       consoleHeight: this.state.consoleHeight,
     };
 
-    console.log(data.x)
 
     return data;
   }
