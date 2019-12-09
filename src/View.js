@@ -89,7 +89,6 @@ export default class View extends Component {
     }, false);
 window.onerror = function (errorMsg, url, lineNumber) {
       window.parent.postMessage({errorMsg, url, lineNumber}, '*')
-    console.log(`+id.toString()+`)
 
 }
 
