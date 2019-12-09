@@ -1,4 +1,4 @@
-![stamper logo](https://files.cargocollective.com/c46725/Stamper-logo-3x.png =100x20)
+![stamper logo](https://files.cargocollective.com/c46725/Stamper-logo-3x.png)
 
 ## Stamper
 ### Art-Board Oriented Programming for p5.js
