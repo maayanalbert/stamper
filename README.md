@@ -1,20 +1,5 @@
-### 🙋‍♂️ Made by [@thekitze](https://twitter.com/thekitze)  
+![stamper logo](https://previews.dropbox.com/p/thumb/AAoZEQsND1ZXmWyYDaH2tUqex3IYE7BQcvk31sMuOt6SEItSxh11kmqJ5_ODyDVH3YHa18aK8JjUD5mMA--Di2MXvHqO84z71LAfSXHwQU7Z7lAwMoFXZEycB7ISa-XanZstYuDDGou8zpP7GiJJKoVpSX-McGrnr_JK9tBYRvyQJXXFe7zfib1iSkQ0tQIt6xYe5ixHvT6PE-OhYsaX_oNVUGPLN2EGThH_hYUDDG7241X-Jt-r3l2xwaAgMr-O-fyzEhSmRbaNA05a3E9hbS_Ko0zedB91K4InBrU0zWv3VhoeFuEX7orcGxGSRhF4jVOd9GNNzVcDKnGXy-oQtuDg/p.png?size=2048x1536&size_mode=3)
 
-### Other projects:
-- 🏫 [React Academy](https://reactacademy.io) - Interactive React and GraphQL workshops
-- 💌 [Twizzy](https://twizzy.app) - A standalone app for Twitter DM
-- 💻 [Sizzy](https://sizzy.co) - A tool for testing responsive design on multiple devices at once
-- 🤖 [JSUI](https://github.com/kitze/JSUI) - A powerful UI toolkit for managing JavaScript apps
+##Stamper: art-board oriented programming for p5.js
 
----
-
-# React + Electron = 😍
-
-An example of using create-react-app and Electron.
-
-## Scripts
-```yarn start``` will start the Electron app and the React app at the same time.  
-```yarn build``` will build the React app and package it along the Electron app.
-
-## Read more
-You can read more about it in [my Medium article](https://medium.com/@kitze/%EF%B8%8F-from-react-to-an-electron-app-ready-for-production-a0468ecb1da3).
+Stamper is a novel art-board oriented programming environment designed for use with p5.js. It was conceived by combining the best of the p5.js Web Editor with the ergonomics of art-board based digital design software (like Sketch).
