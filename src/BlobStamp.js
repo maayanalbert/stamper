@@ -6,10 +6,10 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-solarized_light";
-import "ace-builds/src-min-noconflict/ext-language_tools";
-import "ace-builds/src-noconflict/snippets/javascript";
+// import "ace-builds/src-noconflict/mode-javascript";
+// import "ace-builds/src-noconflict/theme-solarized_light";
+// import "ace-builds/src-min-noconflict/ext-language_tools";
+// import "ace-builds/src-noconflict/snippets/javascript";
 
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
@@ -57,7 +57,8 @@ export default class BlobStamp extends Component {
         <AceEditor
           style={{
             width: this.state.editorWidth,
-            height: this.state.editorHeight
+            height: this.state.editorHeight,
+
           }}
           mode="javascript"
           theme="solarized_light"
@@ -73,7 +74,7 @@ export default class BlobStamp extends Component {
           highlightActiveLine={false}
           value={this.state.code}
           ref={this.editorRef}
-          className="bg-grey"
+          className="bg-jsArea"
           setOptions={{
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
@@ -134,9 +135,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className="bg-grey"
-          border="2px solid white"
-          outline="2px solid rgb(215,215,215)"
+          className="shadow-sm bg-jsArea"
         >
           <div class="row m-0">{this.renderEditor()}</div>
         </Cristal>

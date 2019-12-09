@@ -6,8 +6,11 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
+import "./theme-p5.js";
+
 import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-solarized_light";
+
+// import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
@@ -151,10 +154,11 @@ export default class FunctionStamp extends Component {
         <AceEditor
           style={{
             width: this.state.editorWidth,
-            height: this.state.editorHeight
+            height: this.state.editorHeight,
+  
           }}
           mode="javascript"
-          theme="solarized_light"
+          theme="p5"
           onChange={value => {
             this.setState({ code: value });
             ipc.send("edited");
@@ -217,7 +221,7 @@ export default class FunctionStamp extends Component {
           }}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
-          class="text-greyish args"
+          class="text-lightGreyText args"
         />
       </div>
     );
@@ -227,7 +231,7 @@ export default class FunctionStamp extends Component {
     return (
       <div hidden={this.props.isCss}>
         <Resizable
-          className="ml-1 bg-white shadow rounded"
+          className="ml-1 bg-white shadow"
           onResize={e => {
             this.updateIframeDimensions(
               e.movementX,
@@ -356,7 +360,7 @@ export default class FunctionStamp extends Component {
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow bg-paleYellow"}
+          className={"shadow-sm bg-jsArea border border-borderGrey"}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}

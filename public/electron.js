@@ -21,7 +21,7 @@ let fileManager;
 function createWindow() {
   autoUpdater.checkForUpdates();
   mainWindow = new BrowserWindow({
-    width: 900,
+    width: 1100,
     height: 680,
     webPreferences: { nodeIntegration: true }
   });

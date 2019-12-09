@@ -76,12 +76,6 @@
 
 
 
-
-
-
-
-
-
 $size: 225;
 $placeholder: rgb(200, 200, 200);
 
@@ -91,18 +85,22 @@ $placeholder: rgb(200, 200, 200);
 
 $theme-colors: (
 
-  grey:rgb(215,215,215),
-  purple:rgb(134,98,167),
-  blueishGrey:rgb(98,116,120),
-  pink:rgb(220,60,110),
-  blue:rgb(69,139,205),
-  greyish:rgb(145, 155, 158),
-  green:rgb(81,159,152),
-  gold:rgb(178,142,52),
-  darkBlue:rgb(22,53,65),
-  borderGrey:rgb(204,204,204),
-  paleYellow:rgb(252,246,229),
-  lightGrey:rgb(145, 155, 158)
+  grey:rgb(240,240,240),
+  pink:rgb(218,16,96),
+  blue:rgb(70,160,206),
+  borderGrey:rgb(215,215,215),
+  jsArea:rgb(245, 248, 252),
+  lightGreyText:rgb(150, 150, 150)
+
+
+
+/*  background:rgb(215,215,215),
+  jsArea:rgb(145, 155, 158),
+  fnName:rgb(69,139,205),
+  specialFnName:rgb(220,60,110),
+
+  cssArea:rgb(145, 155, 158),
+  htmlArea:rgb(145, 155, 158)*/
 );
 
 html, body {
