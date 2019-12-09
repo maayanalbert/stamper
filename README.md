@@ -1,4 +1,4 @@
-![stamper logo](https://files.cargocollective.com/c46725/Subtract.png)
+![stamper logo](https://files.cargocollective.com/c46725/Stamper-logo-3x.png)
 
 ##Stamper: art-board oriented programming for p5.js
 
