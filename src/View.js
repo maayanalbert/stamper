@@ -9,7 +9,7 @@ import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
-import reactParser from "./reactParser.js"
+
 var esprima = require("esprima");
 
 
@@ -483,10 +483,21 @@ window.onerror = function (errorMsg, url, lineNumber) {
     return codeData.runnableCode;
   }
 
+  getNumLines(code){
+    var numLines = 0
+    for(var i = 0; i< code.length; i++){
+      if(code[i] === "\n"){
+        numLines += 1
+      }
+    }
+
+    return numLines
+  }
+
   addCodeBlock(code, id, runnableCode, ranges, curLine, isFn){
     code = code.trim() + "\n"
     var start = curLine
-    var end = curLine + reactParser.getNumLines(code) - 1
+    var end = curLine + this.getNumLines(code) - 1
     runnableCode.push(code);
     ranges.push([start, end, id, isFn])
     return end + 1
@@ -536,9 +547,6 @@ window.onerror = function (errorMsg, url, lineNumber) {
         
   
     }
-
-    console.log(runnableCode.join(""))
-        console.log(ranges)
     return {ranges:ranges, runnableCode: runnableCode.join("")};
   }
 
