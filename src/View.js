@@ -9,6 +9,8 @@ import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
+import reactParser from "./reactParser.js"
+var esprima = require("esprima");
 
 
 const electron = window.require("electron");
@@ -48,7 +50,35 @@ export default class View extends Component {
     ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
+
+    window.addEventListener("message", event => {
+      if(this.consoleStamp){
+        this.consoleStamp.ref.current.reportError(event.data.errorMsg)
+      }
+    });
   }
+
+  // getIframeErrorCallBack(ranges){
+  //   window.onerror = function (msg, url, lineNumber) {
+  //     var adjLineNum = -1
+  //     var stampId = -1
+  //     for(var i = 0; i< ${ranges.length}; i++){
+  //       var start = ${ranges[i][0]}
+  //       var end = ${ranges[i][1]}
+  //       var id = ${ranges[i][2]}
+  //       var isFN = ${ranges[i][3]}
+  //       if(start <= lineNumber && lineNumber <= end){
+  //         var stampId = id
+  //         var adjLineNum = (lineNumber) - start + 1
+  //         if(isFN){
+  //           adjLineNum -= 1
+  //         }
+  //       }
+  //     }
+  //     window.parent.postMessage({msg:msg, lineNumber:adjLineNum, id:stampId}, '*')
+
+  //   }
+  // }
 
   getHTML(id) {
     if (
@@ -60,9 +90,14 @@ export default class View extends Component {
 
     if (id === this.state.htmlID || id === this.state.cssID) {
       var getRunnableCode = "";
+      var ranges = []
     } else {
-      var runnableCode = this.getRunnableCode(id);
+      var codeData = this.getRunnableCode(id);
+          var runnableCode = codeData.runnableCode
+          var ranges = codeData.ranges
     }
+
+
 
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
     var cssStamp = this.state.fnStamps[this.state.cssID];
@@ -435,53 +470,76 @@ window.onerror = function (errorMsg, url, lineNumber) {
   }
 
   getExportableCode() {
-    var code = null;
+    var codeData = null;
     Object.values(this.state.fnStamps).map(stamp => {
       if (stamp.ref.current.state.name === "draw") {
-        code = this.getRunnableCode(stamp.ref.current.props.id);
+        codeData = this.getRunnableCode(stamp.ref.current.props.id);
       }
     });
 
-    if (code === null) {
-      code = this.getRunnableCode(-1);
+    if (codeData === null) {
+      codeData = this.getRunnableCode(-1);
     }
-    return code;
+    return codeData.runnableCode;
+  }
+
+  addCodeBlock(code, id, runnableCode, ranges, curLine, isFn){
+    code = code.trim() + "\n"
+    var start = curLine
+    var end = curLine + reactParser.getNumLines(code) - 1
+    runnableCode.push(code);
+    ranges.push([start, end, id, isFn])
+    return end + 1
   }
 
   getRunnableCode(id) {
     var runnableCode = [];
+    var ranges = []
+    var curLine = 1
+    var code;
 
     Object.values(this.state.blobStamps).map(varStamp => {
       if (varStamp.ref.current) {
-        runnableCode.push(varStamp.ref.current.state.runnableCode);
+        code = varStamp.ref.current.state.runnableCode
+        curLine = this.addCodeBlock(code, varStamp.ref.current.props.id, runnableCode, ranges, curLine, false)
       }
     });
 
+
+
     Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current && stamp.ref.current.state.name != "draw") {
-        runnableCode.push(stamp.ref.current.state.fullFun);
+      if (stamp.ref.current && stamp.ref.current.state.name != "draw" && stamp.ref.current.props.isCss === false
+        && stamp.ref.current.props.isHtml === false) {
+        code = stamp.ref.current.state.fullFun 
+        curLine = this.addCodeBlock(code, stamp.ref.current.props.id, runnableCode, ranges, curLine, true)
       }
     });
+
 
     if (
       id in this.state.fnStamps == false ||
       this.state.fnStamps[id].ref.current === null
     ) {
-      return runnableCode.join("\n\n");
+      return runnableCode.join("");
     }
 
     var fnStamp = this.state.fnStamps[id].ref.current;
     if (fnStamp.state.name === "draw") {
-      runnableCode.push(fnStamp.state.fullFun);
+      code = fnStamp.state.fullFun
+      curLine = this.addCodeBlock(code, fnStamp.props.id, runnableCode, ranges, curLine, true)
     } else if (fnStamp.state.name === "setup") {
       // do nothing
     } else {
-      runnableCode.push(
-        "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
-      );
+      
+        code = "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
+        curLine = this.addCodeBlock(code, -1, runnableCode, ranges, curLine, false)
+        
+  
     }
 
-    return runnableCode.join("\n\n");
+    console.log(runnableCode.join(""))
+        console.log(ranges)
+    return {ranges:ranges, runnableCode: runnableCode.join("")};
   }
 
   onDelete(id) {

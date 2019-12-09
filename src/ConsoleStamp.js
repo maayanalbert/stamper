@@ -8,6 +8,7 @@ import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
 var _ = require("lodash");
 
+
 const electron = window.require("electron");
 const ipc = electron.ipcRenderer;
 
@@ -62,15 +63,10 @@ export default class ConsoleStamp extends Component {
     }
   }
 
-  componentDidMount() {
-    window.addEventListener("message", event => {
-      console.log(event);
-      var logs = this.state.logs;
-      this.checkLastLog({ method: "error", data: [event.data.errorMsg] });
-      var consoleContainer = document.getElementById("consoleContainer");
-      consoleContainer.scrollTop = consoleContainer.scrollHeight;
-    });
+  reportError(message){
+this.checkLastLog({ method: "error", data: [message] });
   }
+
 
   resizeConsole(widthDiff, heightDiff) {
     var height = this.state.consoleHeight;
