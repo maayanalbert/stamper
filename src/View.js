@@ -269,6 +269,7 @@ export default class View extends Component {
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
         getHTML={this.getHTML.bind(this)}
         getScale={() => {return this.state.scale }}
+        provideConsole={this.provideConsole.bind(this)}
       />
     );
 
@@ -278,6 +279,12 @@ export default class View extends Component {
       this.setState({ htmlID: counter });
     } else if (isCss) {
       this.setState({ cssID: counter });
+    }
+  }
+
+  provideConsole(newConsole){
+    if(this.state.consoleStamp){
+      this.state.consoleStamp.ref.current.addConsole(newConsole)
     }
   }
 

@@ -29,12 +29,20 @@ export default class ConsoleStamp extends Component {
     this.props.disablePan(isScrolling);
   }
 
-  componentDidMount() {
-    Hook(window.console, log => {
+  addConsole(newConsole){
+
+    Hook(console, log => {
+
+      
       this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }))
       var consoleContainer = document.getElementById("consoleContainer")
       consoleContainer.scrollTop = consoleContainer.scrollHeight;
     })
+  }
+
+  componentDidMount() {
+
+
  
  
   }
