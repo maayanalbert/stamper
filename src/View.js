@@ -217,7 +217,7 @@ export default class View extends Component {
         iframeDisabled={iframeDisabled}
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
         getHTML={this.getHTML.bind(this)}
-        getScale={() => this.state.scale}
+        getScale={() => {return this.state.scale }}
       />
     );
 
@@ -471,7 +471,9 @@ export default class View extends Component {
   }
 
   onStopMove(s) {
+    if(s){
     this.setState({ scale: s.scale });
+    }
     var fnStamps = this.state.fnStamps;
     for (var i in fnStamps) {
       var fnStamp = fnStamps[i].ref.current;

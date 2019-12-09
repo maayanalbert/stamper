@@ -103,24 +103,29 @@ export default class FunctionStamp extends Component {
   }
 
   updateIframeDimensions(
-    width = this.state.iframeWidth,
-    height = this.state.iframeHeight
+    movementX = 0,
+    movementY = 0
   ) {
-    var oldWidth = this.state.iframeWidth,
-      oldHeight = this.state.iframeHeight;
-    var widthDiff = width - oldWidth;
-    var heightDiff = height - oldHeight;
-    if (width < 20) {
-      widthDiff = 0;
-      width = 20;
+
+
+    ipc.send("edited");
+    var scale = this.props.getScale()
+
+
+    var width = this.state.iframeWidth + movementX/scale;
+    var height = this.state.iframeHeight + movementY/scale;
+    if (width < 30) {
+      movementX = 0;
+      width = 30;
     }
-    if (height < 10) {
-      heightDiff = 0;
-      height = 10;
+    if (height < 30) {
+      movementY = 0;
+      height = 30;
     }
 
+
     this.setState({ iframeWidth: width, iframeHeight: height });
-    this.cristalRef.current.manualResize(widthDiff, heightDiff);
+    this.cristalRef.current.manualResize(movementX/scale, movementY/scale);
   }
 
   setEditorScrolling(isScrolling) {
@@ -156,7 +161,7 @@ export default class FunctionStamp extends Component {
           }}
           fontSize={globals.codeSize}
           showPrintMargin={false}
-          wrapEnabled={false}
+          wrapEnabled={true}
           showGutter={false}
           highlightActiveLine={false}
           value={this.state.code}
@@ -224,15 +229,13 @@ export default class FunctionStamp extends Component {
         <Resizable
           className="ml-1 bg-white shadow rounded"
           onResize={e => {
-            ipc.send("edited");
-            var scale = this.props.getScale()
             this.updateIframeDimensions(
-              e.movementX/scale + this.state.iframeWidth,
-              e.movementY/scale + this.state.iframeHeight
+              e.movementX,
+              e.movementY
             );
           }}
           onResizeStart={this.props.onStartMove}
-          onResizeStop={this.props.onStopMove}
+          onResizeStop={(e) =>  this.props.onStopMove() }
           width={this.state.iframeHeight}
           height={this.state.iframeWidth}
           style={{

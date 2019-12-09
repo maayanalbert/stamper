@@ -31,6 +31,8 @@ module.exports = class FileManager {
     ipcMain.on("edited", event => {
       this.mainWindow.setTitle(this.name + " - Edited");
     });
+
+
   }
 
   resetFiles() {
@@ -61,20 +63,38 @@ module.exports = class FileManager {
     }
   }
 
-  stamperMatches(html, js, css, stamper) {
-    if(stamper === undefined){return false}
-    var stamperHtml = LZUTF8.decompress(stamper.compressedHtml, {
-      inputEncoding: "StorageBinaryString"
-    });
-    var stamperCss = LZUTF8.decompress(stamper.compressedCss, {
-      inputEncoding: "StorageBinaryString"
-    });
-    var stamperJs = LZUTF8.decompress(stamper.compressedJs, {
-      inputEncoding: "StorageBinaryString"
-    });
-    return html === stamperHtml && stamperCss === css && stamperJs === js;
+  updateStamperJs(js, stamper) {
+    if(stamper === undefined){
+      var oldJs = undefined
+    }else{
+          var oldJs = LZUTF8.decompress(stamper.compressedJs, {
+       inputEncoding: "StorageBinaryString"
+     })
+    }
+
+    if(oldJs === js){
+      return stamper
+    }
+
+
+      var newStamper = parser.jsToStamps(js);
+      newStamper.fns.push({
+        name: "style.css",
+        args: " ",
+        code: "",
+        isCss: true
+      });
+      newStamper.fns.push({
+        name: "index.html",
+        args: " ",
+        code: "",
+        isHtml: true
+      });
+      newStamper.scale = 1
+
+      return newStamper
   }
-  openFile(html, js, css, stamper) {
+  openFiles(html, js, css = "", stamper) {
     if (html === undefined || js === undefined) {
       dialog.showMessageBox(this.mainWindow, {
         message:
@@ -84,39 +104,38 @@ module.exports = class FileManager {
       return;
     }
 
-    if (this.stamperMatches(html, js, css, stamper)) {
-      this.stamper = stamper;
-    } else {
-      var newStamper = parser.jsToStamps(js);
-      newStamper.fns.push({
-        name: "style.css",
-        args: " ",
-        code: css,
-        isCss: true
-      });
-      newStamper.fns.push({
-        name: "index.html",
-        args: " ",
-        code: html,
-        isHtml: true
-      });
+    
+      this.stamper = this.updateStamperJs(js, stamper)
 
-      this.stamper = newStamper;
-    }
+      this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
+      this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})
+    
 
-    if (css === undefined) {
-      this.css = "";
-    } else {
-      this.css = css;
-    }
 
     this.html = html;
     this.js = js;
+    this.css = css
     this.name = this.path.replace(/^.*[\\\/]/, "");
 
     this.writeToView();
     this.mainWindow.setTitle(this.name);
   }
+
+  readOpenedProject(path){
+this.path = path
+          jetpack.readAsync(this.path + "/index.html").then(html => {
+            jetpack.readAsync(this.path + "/sketch.js").then(js => {
+              jetpack.readAsync(this.path + "/style.css").then(css => {
+                jetpack
+                  .readAsync(this.path + "/pls_dont_touch.stamper", "json")
+                  .then(stamper => {
+                    this.openFiles(html, js, css, stamper);
+                  });
+              });
+            });
+          });
+  }
+
   onOpenCommand() {
     dialog
       .showOpenDialog(this.mainWindow, { properties: ["openDirectory"] })
@@ -126,21 +145,11 @@ module.exports = class FileManager {
             return;
           }
 
-          this.path = result.filePaths[0];
-
-          jetpack.readAsync(this.path + "/index.html").then(html => {
-            jetpack.readAsync(this.path + "/sketch.js").then(js => {
-              jetpack.readAsync(this.path + "/style.css").then(css => {
-                jetpack
-                  .readAsync(this.path + "/pls_dont_touch.stamper", "json")
-                  .then(stamper => {
-                    this.openFile(html, js, css, stamper);
-                  });
-              });
-            });
-          });
+          this.readOpenedProject(result.filePaths[0])
         }
+        
       });
+
   }
 
   onSaveAsCommand() {
@@ -200,12 +209,6 @@ module.exports = class FileManager {
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
 
-    this.stamper.compressedHtml = LZUTF8.compress(this.html, {
-      outputEncoding: "StorageBinaryString"
-    });
-    this.stamper.compressedCss = LZUTF8.compress(this.css, {
-      outputEncoding: "StorageBinaryString"
-    });
     this.stamper.compressedJs = LZUTF8.compress(this.js, {
       outputEncoding: "StorageBinaryString"
     });
