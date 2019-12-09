@@ -10,6 +10,7 @@ import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
 
+
 const electron = window.require("electron");
 const ipc = electron.ipcRenderer;
 
@@ -79,6 +80,23 @@ export default class View extends Component {
 
     parser(jsSelector).replaceWith(jsBlock);
     parser(cssSelector).replaceWith(cssBlock);
+
+    parser("head").prepend(
+
+     `<script>
+    window.addEventListener('error', function(e) { 
+      window.parent.postMessage(e, '*')
+    }, false);
+window.onerror = function (errorMsg, url, lineNumber) {
+      window.parent.postMessage({errorMsg, url, lineNumber}, '*')
+    console.log(`+id.toString()+`)
+
+}
+
+      </script>`)
+
+
+
 
     return parser.html();
   }
@@ -378,6 +396,8 @@ export default class View extends Component {
         stampRef.forceUpdate();
       }
     });
+
+    this.state.consoleStamp.ref.current.clearConsole()
   }
 
   disablePan(status) {

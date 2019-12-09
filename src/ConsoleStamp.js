@@ -6,6 +6,8 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from 'console-feed'
+var _ = require("lodash");
+
 
 const electron = window.require('electron');
 const ipc = electron.ipcRenderer;
@@ -18,12 +20,18 @@ export default class ConsoleStamp extends Component {
     this.state = {
       logs: [],
       consoleHeight: this.props.starterConsoleHeight,
-      consoleWidth: this.props.starterConsoleWidth
+      consoleWidth: this.props.starterConsoleWidth,
+      lastFreq:0
     };
 
     this.cristalRef = React.createRef();
 
   }
+
+  clearConsole(){
+    this.setState({logs:[], lastFreq:0})
+  }
+
   setEditorScrolling(isScrolling) {
  
     this.props.disablePan(isScrolling);
@@ -31,18 +39,60 @@ export default class ConsoleStamp extends Component {
 
   addConsole(newConsole){
 
-    Hook(console, log => {
+    Hook(newConsole, newLogs => {
+ 
 
-      
-      this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }))
+      newLogs.map(log => {
+
+      var logs = this.state.logs
+      if(log.method === "log"){
+
+
+        if(logs.length < 1){
+          this.setState({logs:[log], lastFreq:0})
       var consoleContainer = document.getElementById("consoleContainer")
       consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }else{
+        var lastLog = logs[logs.length-1]
+
+        if(_.isEqual(lastLog.data, log.data)){
+          this.setState({lastFreq:this.state.lastFreq + 1})
+        }else{
+          logs.push(log)
+          this.setState({logs:logs, lastFreq:1})
+        var consoleContainer = document.getElementById("consoleContainer")
+      consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }
+
+        }
+
+      }
+
+
+
+      })
+
     })
   }
 
   componentDidMount() {
+window.addEventListener('message', (event) => {
+    console.log(event);
+});
 
+// window.addEventListener('error', function(e) { 
+//   console.log(e);
+// }, false);
+// window.onerror = function (errorMsg, url, lineNumber) { 
+//   console.log(errorMsg)
+// };
 
+    // Hook(window.console, log => {
+      
+    //   this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }))
+    //   var consoleContainer = document.getElementById("consoleContainer")
+    //   consoleContainer.scrollTop = consoleContainer.scrollHeight;
+    // })
  
  
   }
@@ -58,6 +108,10 @@ export default class ConsoleStamp extends Component {
        
 
   render() {
+    var renderedLogs = _.cloneDeep(this.state.logs)
+    if(this.state.lastFreq > 1){
+      renderedLogs.push({method:"log", data:["(" + this.state.lastFreq.toString() + ")"]})
+    }
 
     return (
       <Cristal ref={this.cristalRef} 
@@ -76,7 +130,7 @@ onMouseOut={() => this.setEditorScrolling(false)}
       style={{width:this.state.consoleWidth, height:this.state.consoleHeight,
       "overflow":"hidden", 
       "overflow-y":"scroll", "white-space": "nowrap", backgroundColor: '#242424' }}>
-<Console logs={this.state.logs}  variant="dark"/>
+<Console logs={renderedLogs}  variant="dark"/>
       </div>
   
 
