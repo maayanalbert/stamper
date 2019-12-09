@@ -33,7 +33,8 @@ export default class ConsoleStamp extends Component {
     this.props.disablePan(isScrolling);
   }
 
-  addConsole(newConsole) {
+  addNewIframeConsole(newConsole) {
+
     Hook(newConsole, newLogs => {
       newLogs.map(log => {
         if (log.method === "log") {
@@ -64,7 +65,22 @@ export default class ConsoleStamp extends Component {
   }
 
   reportError(message){
+
 this.checkLastLog({ method: "error", data: [message] });
+  }
+
+    getData() {
+    var data = {
+
+      x: this.cristalRef.current.state.x,
+      y: this.cristalRef.current.state.y,
+      consoleWidth: this.state.consoleWidth,
+      consoleHeight: this.state.consoleHeight,
+    };
+
+    console.log(data.x)
+
+    return data;
   }
 
 
@@ -88,9 +104,11 @@ this.checkLastLog({ method: "error", data: [message] });
     return (
       <Cristal
         ref={this.cristalRef}
+        initialScale={this.props.initialScale}
         closeHidden={true}
         copyHidden={true}
         onResize={this.resizeConsole.bind(this)}
+        initialPosition={this.props.initialPosition}
       >
         <div
           id="consoleContainer"

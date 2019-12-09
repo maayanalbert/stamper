@@ -90,6 +90,7 @@ module.exports = class FileManager {
         code: "",
         isHtml: true
       });
+      newStamper.console = {}
       newStamper.scale = 1
 
       return newStamper

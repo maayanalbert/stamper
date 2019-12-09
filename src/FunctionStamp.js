@@ -262,7 +262,7 @@ export default class FunctionStamp extends Component {
               {" "}
             </div>
             <iframe ref={(iframeElem) => {if(iframeElem){
-              this.props.provideConsole(iframeElem.contentWindow.console)
+              this.props.addNewIframeConsole(iframeElem.contentWindow.console)
 
             }}
 

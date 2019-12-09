@@ -38,11 +38,14 @@ export default class View extends Component {
           counter: 0,
           htmlID: -1,
           cssID: -1,
-          scale: files.stamper.scale
+          scale: files.stamper.scale,
+          consoleStamp:null
         },
         () => {
+          this.addConsoleStamp(files.stamper.console)
           files.stamper.fns.map(data => this.addFnStamp(data));
           files.stamper.blobs.map(data => this.addBlobStamp(data));
+          
         }
       );
     });
@@ -51,36 +54,60 @@ export default class View extends Component {
       this.sendSaveData();
     });
 
-    window.addEventListener("message", event => {
-      if(this.consoleStamp){
-        this.consoleStamp.ref.current.reportError(event.data.errorMsg)
-      }
+    window.addEventListener("message", e => {
+      console.log("result",e.data.lineno)
+ 
+   
+    
+        this.state.consoleStamp.ref.current.reportError(e.data.message)
     });
   }
 
-  // getIframeErrorCallBack(ranges){
-  //   window.onerror = function (msg, url, lineNumber) {
-  //     var adjLineNum = -1
-  //     var stampId = -1
-  //     for(var i = 0; i< ${ranges.length}; i++){
-  //       var start = ${ranges[i][0]}
-  //       var end = ${ranges[i][1]}
-  //       var id = ${ranges[i][2]}
-  //       var isFN = ${ranges[i][3]}
-  //       if(start <= lineNumber && lineNumber <= end){
-  //         var stampId = id
-  //         var adjLineNum = (lineNumber) - start + 1
-  //         if(isFN){
-  //           adjLineNum -= 1
-  //         }
-  //       }
-  //     }
-  //     window.parent.postMessage({msg:msg, lineNumber:adjLineNum, id:stampId}, '*')
+  getIframeErrorCallBack(ranges, offset =0){
+    var strRanges = JSON.stringify(ranges)
+    return `
+  // window.addEventListener('error', function(e) { 
+  //   console.log("addEventListener")
+  //     reportError(e.message, e.lineno)
+  //   }, false);
 
-  //   }
-  // }
+window.onerror = function (message, url, lineno, colno) {
+
+  reportError(message, lineno)
+}
+
+function reportError(message, lineno){
+
+ 
+      var adjLineNum = -1
+      var stampId = -1
+      var ranges = `+strRanges+`
+
+        console.log("lineno",lineno)
+        console.log("offset",${offset})
+        console.log("ranges",ranges)
+
+      ranges.map(range => {
+        var start = range.start
+        var end = range.end
+        var id = range.id
+        var isFN = range.isFN
+        if(start + ${offset} <= lineno && lineno <= end + ${offset}){
+          adjLineNum = lineNumber - start - offset + 1
+          if(isFN){
+            adjLineNum -= 1
+          }
+        }
+      })
+      window.parent.postMessage({message:message, lineno:adjLineNum, id:stampId}, '*')
+
+    }`
+
+
+  }
 
   getHTML(id) {
+
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -102,7 +129,9 @@ export default class View extends Component {
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
     var cssStamp = this.state.fnStamps[this.state.cssID];
 
-    const parser = cheerio.load(htmlStamp.ref.current.state.runnableInnerCode);
+    var html = htmlStamp.ref.current.state.runnableInnerCode
+
+    const parser = cheerio.load(html, { withStartIndices: true });
     var jsBlockStr =
       "<script type='text/javascript'>" + runnableCode + "</script>";
     var cssBlockStr =
@@ -113,21 +142,15 @@ export default class View extends Component {
     var jsBlock = parser(jsBlockStr);
     var cssBlock = parser(cssBlockStr);
 
+    const start = parser(jsSelector).get(0).startIndex;
+   
+    const offset = html.substr(0, start).split("\n").length 
+
     parser(jsSelector).replaceWith(jsBlock);
     parser(cssSelector).replaceWith(cssBlock);
 
-    parser("head").prepend(
 
-     `<script>
-    window.addEventListener('error', function(e) { 
-      window.parent.postMessage(e, '*')
-    }, false);
-window.onerror = function (errorMsg, url, lineNumber) {
-      window.parent.postMessage({errorMsg, url, lineNumber}, '*')
-
-}
-
-      </script>`)
+    parser("head").prepend("<script>" + this.getIframeErrorCallBack(ranges, offset) + "</script>")
 
 
 
@@ -135,7 +158,8 @@ window.onerror = function (errorMsg, url, lineNumber) {
     return parser.html();
   }
   componentDidMount() {
-    this.addConsoleStamp({})
+
+
     // this.addSetupFnStamp();
     // this.addFnStamp({ name: "draw" });
   }
@@ -176,6 +200,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
   // }
 
    addConsoleStamp(data) {
+
     var defaults = {
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(),
@@ -184,6 +209,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
     };
 
     Object.keys(defaults).map(setting => {
+
       if (!(setting in data)) {
         data[setting] = defaults[setting];
       }
@@ -194,7 +220,6 @@ window.onerror = function (errorMsg, url, lineNumber) {
   }
 
   async createConsoleStamp(data) {
-
     var x = data.x,
       y = data.y,
       consoleWidth = data.consoleWidth,
@@ -207,6 +232,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
 
     var elem = (
       <ConsoleStamp
+      initialScale={this.state.scale}
         ref={ref}
         initialPosition={{ x: x, y: y }}
         id={counter}
@@ -321,7 +347,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
         getHTML={this.getHTML.bind(this)}
         getScale={() => {return this.state.scale }}
-        provideConsole={this.provideConsole.bind(this)}
+        addNewIframeConsole={this.addNewIframeConsole.bind(this)}
       />
     );
 
@@ -334,10 +360,11 @@ window.onerror = function (errorMsg, url, lineNumber) {
     }
   }
 
-  provideConsole(newConsole){
-    if(this.state.consoleStamp){
-      this.state.consoleStamp.ref.current.addConsole(newConsole)
-    }
+  addNewIframeConsole(newConsole){
+    if(this.state.consoleStamp === null){return}
+      this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole)
+
+
   }
 
   addBlobStamp(data, updatePosition = false) {
@@ -499,7 +526,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
     var start = curLine
     var end = curLine + this.getNumLines(code) - 1
     runnableCode.push(code);
-    ranges.push([start, end, id, isFn])
+    ranges.push({start:start, end:end, id:id, isFn:isFn})
     return end + 1
   }
 
@@ -564,10 +591,16 @@ window.onerror = function (errorMsg, url, lineNumber) {
 
     this.refreshFnStamps(fnStamps);
     this.refreshBlobStamps(blobStamps);
+    this.refreshConsoleStamp(this.state.consoleStamp)
+  }
+
+  refreshConsoleStamp(consoleStamp){
+    var data = consoleStamp.ref.current.getData()
+    this.setState({consoleStamp:null}, () => this.addConsoleStamp(data))
   }
 
   getAllData() {
-    var data = { fns: [], blobs: [], scale: this.state.scale };
+    var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())
     );
@@ -592,6 +625,7 @@ window.onerror = function (errorMsg, url, lineNumber) {
       fnStampData.map(data => this.addFnStamp(data))
     );
   }
+
 
   refreshBlobStamps(blobStamps) {
     var varStampData = [];
