@@ -29,6 +29,7 @@ export default class BlobStamp extends Component {
     this.editorRef = React.createRef();
   }
   updateCode() {
+    
     this.setState({ runnableCode: this.state.code }, () =>
       this.props.forceUpdateStamps()
     );

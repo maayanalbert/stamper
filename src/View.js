@@ -4,6 +4,7 @@ import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
+import ConsoleStamp from "./ConsoleStamp.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
@@ -21,7 +22,8 @@ export default class View extends Component {
       counter: 0,
       blobStamps: {},
       htmlID: -1,
-      cssID: -1
+      cssID: -1,
+      consoleStamp:null
     };
     this.counterMutex = new Mutex();
 
@@ -81,6 +83,7 @@ export default class View extends Component {
     return parser.html();
   }
   componentDidMount() {
+    this.addConsoleStamp({})
     // this.addSetupFnStamp();
     // this.addFnStamp({ name: "draw" });
   }
@@ -119,6 +122,54 @@ export default class View extends Component {
   //   };
   //   this.addFnStamp(fnStampData, false);
   // }
+
+   addConsoleStamp(data) {
+    var defaults = {
+      x: this.defaultStarterPos(),
+      y: this.defaultStarterPos(),
+      consoleWidth: (globals.defaultEditorWidth * 2) / 3,
+      consoleHeight: globals.defaultVarEditorHeight
+    };
+
+    Object.keys(defaults).map(setting => {
+      if (!(setting in data)) {
+        data[setting] = defaults[setting];
+      }
+    });
+
+
+    this.createConsoleStamp(data);
+  }
+
+  async createConsoleStamp(data) {
+
+    var x = data.x,
+      y = data.y,
+      consoleWidth = data.consoleWidth,
+      consoleHeight = data.consoleHeight;
+    const release = await this.counterMutex.acquire();
+    var counter = this.state.counter;
+    this.setState({ counter: counter + 1 }, release());
+
+    var ref = React.createRef();
+
+    var elem = (
+      <ConsoleStamp
+        ref={ref}
+        initialPosition={{ x: x, y: y }}
+        id={counter}
+        onStartMove={this.onStartMove.bind(this)}
+        onStopMove={this.onStopMove.bind(this)}
+        initialScale={this.state.scale}
+        disablePan={this.disablePan.bind(this)}
+        starterConsoleWidth={consoleWidth}
+        starterConsoleHeight={consoleHeight}
+      />
+    );
+
+    var consoleStamp = { elem: elem, ref: ref };
+    this.setState({ consoleStamp: consoleStamp });
+  }
 
   defaultStarterPos(offset = 0) {
     return Math.random() * globals.marginVariance + globals.margin * 2 + offset;
@@ -323,6 +374,7 @@ export default class View extends Component {
   }
 
   disablePan(status) {
+
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
       cristalRef.current.disablePan(status);
@@ -332,6 +384,8 @@ export default class View extends Component {
       var cristalRef = stamp.ref.current.cristalRef;
       cristalRef.current.disablePan(status);
     });
+
+    this.state.consoleStamp.ref.current.cristalRef.current.disablePan(status)
   }
   checkAllNames() {
     var nameDict = {};
@@ -490,13 +544,22 @@ export default class View extends Component {
   // }
 
   render() {
+    if(this.state.consoleStamp){
+      var consoleElem = this.state.consoleStamp.elem
+    }else{
+      var consoleElem = null
+    }
+
     var elems = [];
+
+
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
+          {consoleElem}
         </div>
         <div
           class="topButtons"
