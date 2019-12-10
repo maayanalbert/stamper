@@ -10,6 +10,7 @@ import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
 
+
 var esprima = require("esprima");
 
 
@@ -55,11 +56,21 @@ export default class View extends Component {
     });
 
     window.addEventListener("message", e => {
-
-    console.log(e)
-   
     
         this.state.consoleStamp.ref.current.reportError(e.data.message)
+
+
+        var lineNum = e.data.lineno
+        var message = e.data.message
+        var id = e.data.id
+
+        if(id in this.state.fnStamps){
+          this.state.fnStamps[id].ref.current.addErrorLine(lineNum)
+        }else if(id in this.state.blobStamps){
+          this.state.blobStamps[id].ref.current.addErrorLine(lineNum)
+        }
+
+
     });
   }
 
@@ -168,7 +179,6 @@ function reportError(message, lineno){
 
    parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs-3) + "</script>")
    parser(jsSelector).replaceWith(jsBlock);
-   console.log(runnableCode)
     return parser.html();
   }
   componentDidMount() {
@@ -285,7 +295,8 @@ function reportError(message, lineno){
       iframeWidth: globals.defaultIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
-      isCss: false
+      isCss: false,
+      errorLines:{}
     };
 
     Object.keys(defaults).map(setting => {
@@ -325,7 +336,8 @@ function reportError(message, lineno){
       iframeWidth = data.iframeWidth,
       iframeHeight = data.iframeHeight,
       isHtml = data.isHtml,
-      isCss = data.isCss;
+      isCss = data.isCss,
+      errorLines = data.errorLines;
 
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
@@ -342,6 +354,7 @@ function reportError(message, lineno){
         starterCode={code}
         starterArgs={args}
         starterName={name}
+        errorLines = {errorLines}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         initialPosition={{ x: x, y: y }}
@@ -387,7 +400,8 @@ function reportError(message, lineno){
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(400),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
-      editorHeight: globals.defaultVarEditorHeight
+      editorHeight: globals.defaultVarEditorHeight,
+      errorLines:{}
     };
 
     Object.keys(defaults).map(setting => {
@@ -408,7 +422,8 @@ function reportError(message, lineno){
       y = data.y,
       code = data.code,
       editorWidth = data.editorWidth,
-      editorHeight = data.editorHeight;
+      editorHeight = data.editorHeight,
+      errorLines = data.errorLines;
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, release());
@@ -420,6 +435,7 @@ function reportError(message, lineno){
       <BlobStamp
         ref={ref}
         starterCode={code}
+        errorLines={errorLines}
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
@@ -505,7 +521,12 @@ function reportError(message, lineno){
       if (stamp.ref.current) {
         var stampRef = stamp.ref.current;
         var name = stamp.ref.current.state.name;
-        stampRef.setDuplicateStatus(nameDict[name] > 1);
+        if(nameDict[name] > 1){
+          stampRef.addErrorLine(0)
+          this.state.consoleStamp.ref.current.reportError
+          (`Multiple functions shouldn't have the same name. Consider channging one of your ${name}s to something else.`)
+
+        }
       }
     });
   }

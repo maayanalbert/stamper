@@ -104,7 +104,8 @@ $theme-colors: (
   blue:rgb(70,160,206),
   borderGrey:rgb(215,215,215),
   jsArea:rgb(245, 248, 252),
-  lightGreyText:rgb(150, 150, 150)
+  lightGreyText:rgb(150, 150, 150),
+  warningOrange:rgb(245, 185, 64)
 
 
 
@@ -119,6 +120,14 @@ $theme-colors: (
 
 html, body {
   overflow: hidden;
+}
+
+.marker{
+  position: absolute;
+ 
+    width: 100% !important;
+    border-radius: unset !important;
+    left: 0 !important;
 }
 
 .name{

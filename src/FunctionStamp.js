@@ -34,9 +34,9 @@ export default class FunctionStamp extends Component {
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
       editorHidden: false,
-      duplicateName: false,
       isSpecialFn: false,
       editorScrolling: false,
+      errorLines:this.props.errorLines
     };
 
     this.cristalRef = React.createRef();
@@ -78,9 +78,7 @@ export default class FunctionStamp extends Component {
     this.props.checkAllNames();
   }
 
-  setDuplicateStatus(status) {
-    this.setState({ duplicateName: status });
-  }
+
 
   componentDidMount() {
 
@@ -89,6 +87,17 @@ export default class FunctionStamp extends Component {
 
       this.loadp5Lib();
 
+  }
+
+  addErrorLine(lineNum){
+    var errorLines = this.state.errorLines
+    errorLines[lineNum] = ""
+    this.setState({errorLines:errorLines})
+
+  }
+
+  clearErrorLines(){
+    this.setState({errorLines:{}})
   }
 
   loadp5Lib() {
@@ -143,6 +152,15 @@ export default class FunctionStamp extends Component {
   }
 
   renderEditor() {
+    var markers = []
+    for(var i in this.state.errorLines){
+
+      console.log(i)
+    }
+          markers.push({startRow:1, endRow:2, type:"fullLine", className:"bg-warningOrange marker"});
+
+    console.log(markers)
+
     return (
       <div
         onMouseOut={() => {
@@ -153,6 +171,7 @@ export default class FunctionStamp extends Component {
       >
         <br />
         <AceEditor
+        markers={[{startRow:3, endRow:5, type:"fullLine", className:"bg-warningOrange marker"}]}
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
@@ -192,9 +211,7 @@ export default class FunctionStamp extends Component {
     }
 
     var nameColor = "blue";
-    if (this.state.duplicateName) {
-      nameColor = "danger";
-    } else if (this.state.isSpecialFn) {
+    if (this.state.isSpecialFn) {
       nameColor = "pink";
     }
     return (
@@ -206,6 +223,7 @@ export default class FunctionStamp extends Component {
             this.setState({ name: event.target.value }, () => this.checkName());
             ipc.send("edited");
           }}
+          style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.name}
           class={"text-" + nameColor + " name"}
@@ -220,6 +238,7 @@ export default class FunctionStamp extends Component {
             this.setState({ args: event.target.value });
             ipc.send("edited");
           }}
+          style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
           class="text-lightGreyText args"
@@ -245,7 +264,7 @@ export default class FunctionStamp extends Component {
           height={this.state.iframeWidth}
           style={{
             overflow: "hidden",
-            zIndex: 1
+            zIndex: 5
           }}
         >
           <div>
@@ -330,7 +349,8 @@ export default class FunctionStamp extends Component {
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
-      isCss: this.props.isCss
+      isCss: this.props.isCss,
+      errorLines:this.state.errorLines
     };
 
     return data;
@@ -352,6 +372,10 @@ export default class FunctionStamp extends Component {
   }
 
   render() {
+    var headerColor = "bg-white"
+    if(0 in this.state.errorLines){
+      headerColor = "bg-warningOrange"
+    }
     return (
       <div>
         <Cristal
@@ -373,7 +397,7 @@ export default class FunctionStamp extends Component {
           onStopResize={this.props.onStopMove}
         >
           <div
-            class="bg-white"
+            class={headerColor}
             style={{
               position: "absolute",
               top: globals.headerHeight,

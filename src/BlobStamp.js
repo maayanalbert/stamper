@@ -22,14 +22,15 @@ export default class BlobStamp extends Component {
       runnableCode: "",
       editorScrolling: false,
       editorHeight: this.props.starterEditorHeight,
-      editorWidth: this.props.starterEditorWidth
+      editorWidth: this.props.starterEditorWidth,
+      errorLines:this.props.errorLines
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
   updateCode() {
-    
+
     this.setState({ runnableCode: this.state.code }, () =>
       this.props.forceUpdateStamps()
     );
@@ -100,13 +101,24 @@ export default class BlobStamp extends Component {
     this.props.addStamp(data, updatePosition);
   }
 
+  addErrorLine(lineNum){
+    var errorLines = this.state.errorLines
+    errorLines[lineNum] = ""
+    this.setState({errorLines:errorLines})
+  }
+
+  clearErrorLines(){
+    this.setState({errorLines:{}})
+  }
+
   getData() {
     var data = {
       code: this.state.code,
       x: this.cristalRef.current.state.x,
       y: this.cristalRef.current.state.y,
       editorWidth: this.state.editorWidth,
-      editorHeight: this.state.editorHeight
+      editorHeight: this.state.editorHeight,
+      errorLines:this.state.errorLines
     };
 
     return data;
