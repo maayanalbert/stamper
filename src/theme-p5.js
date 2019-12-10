@@ -8,6 +8,9 @@ exports.cssText = ".ace-p5 .ace_gutter {\
 	color: #333 !important;\
 }\
 \
+.ace-p5 .ace_identifier {\
+	color: #000000;\
+}\
 .ace-p5 .ace_print-margin {\
 	width: 1px;\
 	background: #F5F8FC;\
@@ -23,7 +26,7 @@ exports.cssText = ".ace-p5 .ace_gutter {\
 }\
 \
 .ace-p5 .ace_marker-layer .ace_selection {\
-	background: rgba(7, 54, 67, 0.09)\
+	background: rgb(181, 213, 255)\
 }\
 \
 .ace-p5.ace_multiselect .ace_selection.ace_start {\
@@ -54,13 +57,22 @@ exports.cssText = ".ace-p5 .ace_gutter {\
 	color: rgba(147, 161, 161, 0.50)\
 }\
 \
-.ace-p5 .ace_keyword,\
+.ace-p5 .ace_keyword  {\
+	color: #00A1D3\
+}\
+\
+.ace-p5 .ace_keyword.ace_operator {\
+	color: #A67F59\
+}\
 .ace-p5 .ace_meta,\
 .ace-p5 .ace_support.ace_class,\
 .ace-p5 .ace_support.ace_type {\
 	color: #859900\
 }\
 \
+.ace-p5 .ace_paren{\
+	color: #666\
+}\
 .ace-p5 .ace_constant.ace_character,\
 .ace-p5 .ace_constant.ace_other {\
 	color: #CB4B16\
@@ -86,10 +98,10 @@ exports.cssText = ".ace-p5 .ace_gutter {\
 	color: #00a1d3 !important\
 }\
 .ace-p5 .ace_storage {\
-color: #073642\
+	color: #704f21 !important\
 }\
 .ace-p5 .ace_string {\
-color: #a67f59 !important;\
+color: #00a1d3 !important;\
 }\
 .ace-p5 .ace_string.ace_regexp {\
 color: #D30102\

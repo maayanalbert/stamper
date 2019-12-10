@@ -175,7 +175,7 @@ export default class FunctionStamp extends Component {
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
-  
+
           }}
           mode="javascript"
           theme="p5"
@@ -232,6 +232,7 @@ export default class FunctionStamp extends Component {
         <br />
 
         <input
+        // @cameron styling for arguments field
           placeholder="arguments..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
@@ -372,15 +373,19 @@ export default class FunctionStamp extends Component {
   }
 
   render() {
+
     var headerColor = "bg-white"
     if(0 in this.state.errorLines){
       headerColor = "bg-warningOrange"
     }
+
+    // <!-- @cameron little white div thing --> scroll down to style
+
     return (
       <div>
         <Cristal
           ref={this.cristalRef}
-  
+
           isResizable={true}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
@@ -396,8 +401,14 @@ export default class FunctionStamp extends Component {
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
         >
+
           <div
+<<<<<<< HEAD
             class={headerColor}
+=======
+
+            class="bg-white"
+>>>>>>> ff9ffc9220300947bfe8bc0aefee808df6e5883c
             style={{
               position: "absolute",
               top: globals.headerHeight,
