@@ -78,8 +78,6 @@ module.exports = class FileManager {
 
 
       var newStamper = parser.jsToStamps(js);
-      log.info("NEW STAMPER")
-      log.info(newStamper)
 
       if(newStamper === null){return null}
       newStamper.fns.push({

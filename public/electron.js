@@ -18,6 +18,7 @@ const FileManager = require("./FileManager.js");
 let mainWindow;
 let fileManager;
 
+
 function createWindow() {
   autoUpdater.checkForUpdates();
   mainWindow = new BrowserWindow({
@@ -36,6 +37,7 @@ function createWindow() {
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
     ipcMain: null;
+    Menu.setApplicationMenu(null) 
   });
 
   setMenu();
