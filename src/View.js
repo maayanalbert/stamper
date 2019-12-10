@@ -520,11 +520,11 @@ function reportError(message, lineno){
       if (stampRef) {
         var newErrors = []
 
-        if(newSetupExists === false){
+        if(newSetupExists === false && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.push(-1)
         }
 
-        if(stamp.ref.current.props.id in duplateNamedStamps){
+        if(stamp.ref.current.props.id in duplateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.append(0)
         }
         stampRef.clearErrorsAndUpdate(editsMade,newErrors);
@@ -674,10 +674,10 @@ function reportError(message, lineno){
     var blobStamps = this.state.blobStamps;
 
     if (id in fnStamps) {
-      ipc.send("edited");
+      ipc && ipc.send("edited");
       delete fnStamps[id];
     } else if (id in blobStamps) {
-      ipc.send("edited");
+      ipc && ipc.send("edited");
       delete blobStamps[id];
     }
 
