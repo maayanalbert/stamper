@@ -223,7 +223,7 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
-      e.preventDefault();
+      // e.preventDefault();
       if (e.ctrlKey) {
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {

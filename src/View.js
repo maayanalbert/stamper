@@ -4,10 +4,14 @@ import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
+import ConsoleStamp from "./ConsoleStamp.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
+
+var esprima = require("esprima");
+
 
 const electron = window.require("electron");
 const ipc = electron.ipcRenderer;
@@ -21,7 +25,8 @@ export default class View extends Component {
       counter: 0,
       blobStamps: {},
       htmlID: -1,
-      cssID: -1
+      cssID: -1,
+      consoleStamp:null
     };
     this.counterMutex = new Mutex();
 
@@ -33,11 +38,14 @@ export default class View extends Component {
           counter: 0,
           htmlID: -1,
           cssID: -1,
-          scale: files.stamper.scale
+          scale: files.stamper.scale,
+          consoleStamp:null
         },
         () => {
+          this.addConsoleStamp(files.stamper.console)
           files.stamper.fns.map(data => this.addFnStamp(data));
           files.stamper.blobs.map(data => this.addBlobStamp(data));
+          
         }
       );
     });
@@ -45,9 +53,61 @@ export default class View extends Component {
     ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
+
+    window.addEventListener("message", e => {
+      console.log("result",e.data.lineno)
+ 
+   
+    
+        this.state.consoleStamp.ref.current.reportError(e.data.message)
+    });
+  }
+
+  getIframeErrorCallBack(ranges, offset =0){
+    var strRanges = JSON.stringify(ranges)
+    return `
+  // window.addEventListener('error', function(e) { 
+  //   console.log("addEventListener")
+  //     reportError(e.message, e.lineno)
+  //   }, false);
+
+window.onerror = function (message, url, lineno, colno) {
+
+  reportError(message, lineno)
+}
+
+function reportError(message, lineno){
+
+ 
+      var adjLineNum = -1
+      var stampId = -1
+      var ranges = `+strRanges+`
+
+        console.log("lineno",lineno)
+        console.log("offset",${offset})
+        console.log("ranges",ranges)
+
+      ranges.map(range => {
+        var start = range.start
+        var end = range.end
+        var id = range.id
+        var isFN = range.isFN
+        if(start + ${offset} <= lineno && lineno <= end + ${offset}){
+          adjLineNum = lineNumber - start - offset + 1
+          if(isFN){
+            adjLineNum -= 1
+          }
+        }
+      })
+      window.parent.postMessage({message:message, lineno:adjLineNum, id:stampId}, '*')
+
+    }`
+
+
   }
 
   getHTML(id) {
+
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -57,14 +117,21 @@ export default class View extends Component {
 
     if (id === this.state.htmlID || id === this.state.cssID) {
       var getRunnableCode = "";
+      var ranges = []
     } else {
-      var runnableCode = this.getRunnableCode(id);
+      var codeData = this.getRunnableCode(id);
+          var runnableCode = codeData.runnableCode
+          var ranges = codeData.ranges
     }
+
+
 
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
     var cssStamp = this.state.fnStamps[this.state.cssID];
 
-    const parser = cheerio.load(htmlStamp.ref.current.state.runnableInnerCode);
+    var html = htmlStamp.ref.current.state.runnableInnerCode
+
+    const parser = cheerio.load(html, { withStartIndices: true });
     var jsBlockStr =
       "<script type='text/javascript'>" + runnableCode + "</script>";
     var cssBlockStr =
@@ -75,12 +142,24 @@ export default class View extends Component {
     var jsBlock = parser(jsBlockStr);
     var cssBlock = parser(cssBlockStr);
 
+    const start = parser(jsSelector).get(0).startIndex;
+   
+    const offset = html.substr(0, start).split("\n").length 
+
     parser(jsSelector).replaceWith(jsBlock);
     parser(cssSelector).replaceWith(cssBlock);
+
+
+    parser("head").prepend("<script>" + this.getIframeErrorCallBack(ranges, offset) + "</script>")
+
+
+
 
     return parser.html();
   }
   componentDidMount() {
+
+
     // this.addSetupFnStamp();
     // this.addFnStamp({ name: "draw" });
   }
@@ -119,6 +198,56 @@ export default class View extends Component {
   //   };
   //   this.addFnStamp(fnStampData, false);
   // }
+
+   addConsoleStamp(data) {
+
+    var defaults = {
+      x: this.defaultStarterPos(),
+      y: this.defaultStarterPos(),
+      consoleWidth: (globals.defaultEditorWidth * 2) / 3,
+      consoleHeight: globals.defaultVarEditorHeight
+    };
+
+    Object.keys(defaults).map(setting => {
+
+      if (!(setting in data)) {
+        data[setting] = defaults[setting];
+      }
+    });
+
+
+    this.createConsoleStamp(data);
+  }
+
+  async createConsoleStamp(data) {
+    var x = data.x,
+      y = data.y,
+      consoleWidth = data.consoleWidth,
+      consoleHeight = data.consoleHeight;
+    const release = await this.counterMutex.acquire();
+    var counter = this.state.counter;
+    this.setState({ counter: counter + 1 }, release());
+
+    var ref = React.createRef();
+
+    var elem = (
+      <ConsoleStamp
+      initialScale={this.state.scale}
+        ref={ref}
+        initialPosition={{ x: x, y: y }}
+        id={counter}
+        onStartMove={this.onStartMove.bind(this)}
+        onStopMove={this.onStopMove.bind(this)}
+        initialScale={this.state.scale}
+        disablePan={this.disablePan.bind(this)}
+        starterConsoleWidth={consoleWidth}
+        starterConsoleHeight={consoleHeight}
+      />
+    );
+
+    var consoleStamp = { elem: elem, ref: ref };
+    this.setState({ consoleStamp: consoleStamp });
+  }
 
   defaultStarterPos(offset = 0) {
     return Math.random() * globals.marginVariance + globals.margin * 2 + offset;
@@ -218,6 +347,7 @@ export default class View extends Component {
         forceUpdateStamps={this.forceUpdateStamps.bind(this)}
         getHTML={this.getHTML.bind(this)}
         getScale={() => {return this.state.scale }}
+        addNewIframeConsole={this.addNewIframeConsole.bind(this)}
       />
     );
 
@@ -228,6 +358,13 @@ export default class View extends Component {
     } else if (isCss) {
       this.setState({ cssID: counter });
     }
+  }
+
+  addNewIframeConsole(newConsole){
+    if(this.state.consoleStamp === null){return}
+      this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole)
+
+
   }
 
   addBlobStamp(data, updatePosition = false) {
@@ -310,6 +447,7 @@ export default class View extends Component {
   }
 
   forceUpdateStamps(id = -1, fromEdit) {
+    console.log("FORCE UPDATING")
     if (fromEdit) {
       this.sendSaveData();
     }
@@ -320,9 +458,12 @@ export default class View extends Component {
         stampRef.forceUpdate();
       }
     });
+
+    this.state.consoleStamp.ref.current.clearConsole()
   }
 
   disablePan(status) {
+
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
       cristalRef.current.disablePan(status);
@@ -332,6 +473,8 @@ export default class View extends Component {
       var cristalRef = stamp.ref.current.cristalRef;
       cristalRef.current.disablePan(status);
     });
+
+    this.state.consoleStamp.ref.current.cristalRef.current.disablePan(status)
   }
   checkAllNames() {
     var nameDict = {};
@@ -355,53 +498,84 @@ export default class View extends Component {
   }
 
   getExportableCode() {
-    var code = null;
+    var codeData = null;
     Object.values(this.state.fnStamps).map(stamp => {
       if (stamp.ref.current.state.name === "draw") {
-        code = this.getRunnableCode(stamp.ref.current.props.id);
+        codeData = this.getRunnableCode(stamp.ref.current.props.id);
       }
     });
 
-    if (code === null) {
-      code = this.getRunnableCode(-1);
+    if (codeData === null) {
+      codeData = this.getRunnableCode(-1);
     }
-    return code;
+    return codeData.runnableCode;
+  }
+
+  getNumLines(code){
+    var numLines = 0
+    for(var i = 0; i< code.length; i++){
+      if(code[i] === "\n"){
+        numLines += 1
+      }
+    }
+
+    return numLines
+  }
+
+  addCodeBlock(code, id, runnableCode, ranges, curLine, isFn){
+    code = code.trim() + "\n"
+    var start = curLine
+    var end = curLine + this.getNumLines(code) - 1
+    runnableCode.push(code);
+    ranges.push({start:start, end:end, id:id, isFn:isFn})
+    return end + 1
   }
 
   getRunnableCode(id) {
     var runnableCode = [];
+    var ranges = []
+    var curLine = 1
+    var code;
 
     Object.values(this.state.blobStamps).map(varStamp => {
       if (varStamp.ref.current) {
-        runnableCode.push(varStamp.ref.current.state.runnableCode);
+        code = varStamp.ref.current.state.runnableCode
+        curLine = this.addCodeBlock(code, varStamp.ref.current.props.id, runnableCode, ranges, curLine, false)
       }
     });
 
+
+
     Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current && stamp.ref.current.state.name != "draw") {
-        runnableCode.push(stamp.ref.current.state.fullFun);
+      if (stamp.ref.current && stamp.ref.current.state.name != "draw" && stamp.ref.current.props.isCss === false
+        && stamp.ref.current.props.isHtml === false) {
+        code = stamp.ref.current.state.fullFun 
+        curLine = this.addCodeBlock(code, stamp.ref.current.props.id, runnableCode, ranges, curLine, true)
       }
     });
+
 
     if (
       id in this.state.fnStamps == false ||
       this.state.fnStamps[id].ref.current === null
     ) {
-      return runnableCode.join("\n\n");
+      return runnableCode.join("");
     }
 
     var fnStamp = this.state.fnStamps[id].ref.current;
     if (fnStamp.state.name === "draw") {
-      runnableCode.push(fnStamp.state.fullFun);
+      code = fnStamp.state.fullFun
+      curLine = this.addCodeBlock(code, fnStamp.props.id, runnableCode, ranges, curLine, true)
     } else if (fnStamp.state.name === "setup") {
       // do nothing
     } else {
-      runnableCode.push(
-        "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
-      );
+      
+        code = "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
+        curLine = this.addCodeBlock(code, -1, runnableCode, ranges, curLine, false)
+        
+  
     }
-
-    return runnableCode.join("\n\n");
+    return {ranges:ranges, runnableCode: runnableCode.join("")};
   }
 
   onDelete(id) {
@@ -418,10 +592,16 @@ export default class View extends Component {
 
     this.refreshFnStamps(fnStamps);
     this.refreshBlobStamps(blobStamps);
+    this.refreshConsoleStamp(this.state.consoleStamp)
+  }
+
+  refreshConsoleStamp(consoleStamp){
+    var data = consoleStamp.ref.current.getData()
+    this.setState({consoleStamp:null}, () => this.addConsoleStamp(data))
   }
 
   getAllData() {
-    var data = { fns: [], blobs: [], scale: this.state.scale };
+    var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())
     );
@@ -447,6 +627,7 @@ export default class View extends Component {
     );
   }
 
+
   refreshBlobStamps(blobStamps) {
     var varStampData = [];
     for (var i in blobStamps) {
@@ -471,6 +652,7 @@ export default class View extends Component {
   }
 
   onStopMove(s) {
+
     if(s){
     this.setState({ scale: s.scale });
     }
@@ -490,13 +672,22 @@ export default class View extends Component {
   // }
 
   render() {
+    if(this.state.consoleStamp){
+      var consoleElem = this.state.consoleStamp.elem
+    }else{
+      var consoleElem = null
+    }
+
     var elems = [];
+
+
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
+          {consoleElem}
         </div>
         <div
           class="topButtons"

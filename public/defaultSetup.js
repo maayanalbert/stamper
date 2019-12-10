@@ -31,7 +31,8 @@ var setup = {
       { name: "index.html", args: " ", code: htmlCode, isHtml: true }
     ],
     blobs: [],
-    scale: 1
+    scale: 1,
+    console:{}
   }
 };
 

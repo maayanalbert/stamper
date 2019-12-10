@@ -83,6 +83,7 @@ export default class FunctionStamp extends Component {
   }
 
   componentDidMount() {
+
     this.updateFuns();
     this.checkName();
     if (this.props.id === 0) {
@@ -261,7 +262,13 @@ export default class FunctionStamp extends Component {
             >
               {" "}
             </div>
-            <iframe
+            <iframe ref={(iframeElem) => {if(iframeElem){
+              this.props.addNewIframeConsole(iframeElem.contentWindow.console)
+
+            }}
+
+              
+            }
               scrolling="no"
               style={{
                 border: "none",
