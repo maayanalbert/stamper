@@ -172,7 +172,7 @@ export const p5Lib = [
   "p5.TypedDict",
   "p5.NumberDict",
   "append()",
-  "arrayCopy()",
+  "arrayCopy()", //src,dst,(length) arrayCopy": ["src","dst","(length)"]
   "concat()",
   "reverse()",
   "shorten()",
