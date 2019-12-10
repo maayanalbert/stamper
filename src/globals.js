@@ -175,6 +175,7 @@ export const p5Lib = [
 "random()",
 "randomGaussian()",
 "randomSeed()",
+"rect(x,y,width,height)",
 "rectMode(mode)",
 "red(color)",
 "requestImage(filename)",

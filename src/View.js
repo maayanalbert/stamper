@@ -671,7 +671,7 @@ function reportError(message, lineno){
 
     this.refreshFnStamps(fnStamps);
     this.refreshBlobStamps(blobStamps);
-    this.refreshConsoleStamp(this.state.consoleStamp)
+    // this.refreshConsoleStamp(this.state.consoleStamp)
   }
 
   refreshConsoleStamp(consoleStamp){
