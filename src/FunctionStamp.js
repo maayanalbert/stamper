@@ -155,7 +155,7 @@ export default class FunctionStamp extends Component {
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
-  
+
           }}
           mode="javascript"
           theme="p5"
@@ -213,6 +213,7 @@ export default class FunctionStamp extends Component {
         <br />
 
         <input
+        // @cameron styling for arguments field
           placeholder="arguments..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
@@ -345,11 +346,12 @@ export default class FunctionStamp extends Component {
   }
 
   render() {
+    // <!-- @cameron little white div thing --> scroll down to style
     return (
       <div>
         <Cristal
           ref={this.cristalRef}
-  
+
           isResizable={true}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
@@ -365,7 +367,9 @@ export default class FunctionStamp extends Component {
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
         >
+
           <div
+
             class="bg-white"
             style={{
               position: "absolute",
