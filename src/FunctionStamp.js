@@ -15,8 +15,16 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
 
-const electron = window.require("electron");
-const ipc = electron.ipcRenderer;
+
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
+
 
 export default class FunctionStamp extends Component {
   constructor(props) {
@@ -138,7 +146,7 @@ export default class FunctionStamp extends Component {
   ) {
 
 
-    ipc.send("edited");
+    ipc && ipc.send("edited");
     var scale = this.props.getScale()
 
 
@@ -197,7 +205,7 @@ export default class FunctionStamp extends Component {
           theme="p5"
           onChange={value => {
             this.setState({ code: value });
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           name= {"id" + this.props.id.toString()}
           fontSize={globals.codeSize}
@@ -242,7 +250,7 @@ export default class FunctionStamp extends Component {
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
             this.setState({ name: event.target.value }, () => this.checkName());
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
@@ -258,7 +266,7 @@ export default class FunctionStamp extends Component {
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
             this.setState({ args: event.target.value });
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}

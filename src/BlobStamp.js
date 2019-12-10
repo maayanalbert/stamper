@@ -11,8 +11,14 @@ import pf, { globals, p5Lib } from "./globals.js";
 // import "ace-builds/src-min-noconflict/ext-language_tools";
 // import "ace-builds/src-noconflict/snippets/javascript";
 
-const electron = window.require('electron');
-const ipc = electron.ipcRenderer;
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
 
 export default class BlobStamp extends Component {
   constructor(props) {
@@ -78,7 +84,7 @@ export default class BlobStamp extends Component {
           mode="javascript"
           theme="solarized_light"
           onChange={value => {
-            this.setState({ code: value });ipc.send("edited") 
+            this.setState({ code: value });ipc && ipc.send("edited") 
           }
           }
                  markers={markers}

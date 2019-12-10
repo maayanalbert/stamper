@@ -15,6 +15,7 @@ const isDev = require("electron-is-dev");
 
 const FileManager = require("./FileManager.js");
 
+
 let mainWindow;
 let fileManager;
 
@@ -44,8 +45,9 @@ function createWindow() {
 
   mainWindow.webContents.once("dom-ready", () => {
     fileManager = new FileManager(mainWindow);
+      fileManager.name = 'Untitled';
+    mainWindow.setTitle(fileManager.name);
 
-    fileManager.onNewProject();
   });
 }
 

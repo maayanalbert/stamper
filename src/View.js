@@ -11,11 +11,18 @@ import { Line } from "react-lineto";
 import cheerio from "cheerio";
 
 
+
 var esprima = require("esprima");
 
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
 
-const electron = window.require("electron");
-const ipc = electron.ipcRenderer;
+const defaultSetup = require("./defaultSetup.js");
 
 export default class View extends Component {
   constructor(props) {
@@ -32,7 +39,7 @@ export default class View extends Component {
     };
     this.counterMutex = new Mutex();
 
-    ipc.on("writeToView", (event, files) => {
+    ipc && ipc.on("writeToView", (event, files) => {
       this.setState(
         {
           fnStamps: {},
@@ -52,7 +59,7 @@ export default class View extends Component {
       );
     });
 
-    ipc.on("requestSave", (event, rawCode) => {
+    ipc && ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
 
@@ -73,6 +80,8 @@ export default class View extends Component {
 
 
     });
+  
+
   }
 
   getIframeErrorCallBack(ranges, offset =0){
@@ -111,7 +120,7 @@ function reportError(message, lineno){
         }
       })
 
-      window.parent.postMessage({message:message, lineno:adjLineNum, id:stampId}, '*')
+      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
 
     }`
 
@@ -183,7 +192,11 @@ function reportError(message, lineno){
     return parser.html();
   }
   componentDidMount() {
-
+    console.log(defaultSetup.getSetup())
+    var initialSetup = defaultSetup.getSetup()
+    this.addConsoleStamp(initialSetup.console)
+    initialSetup.fns.map(data => this.addFnStamp(data));
+    initialSetup.blobs.map(data => this.addBlobStamp(data));
 
     // this.addSetupFnStamp();
     // this.addFnStamp({ name: "draw" });
@@ -470,8 +483,7 @@ function reportError(message, lineno){
       css: cssStamp.ref.current.state.runnableInnerCode,
       js: this.getExportableCode()
     };
-
-    ipc.send("save", message);
+    ipc && ipc.send("save", message);
   }
 
 

@@ -10,8 +10,8 @@ const {
   electron,
   dialog
 } = require("electron");
-const defaultSetup = require("./defaultSetup.js");
-var parser = require("./parser");
+const defaultSetup = require("./../src/defaultSetup.js");
+var parser = require("./../src/parser.js");
 var LZUTF8 = require("lzutf8");
 
 module.exports = class FileManager {
@@ -31,8 +31,6 @@ module.exports = class FileManager {
     ipcMain.on("edited", event => {
       this.mainWindow.setTitle(this.name + " - Edited");
     });
-
-
   }
 
   resetFiles() {
@@ -48,8 +46,8 @@ module.exports = class FileManager {
     this.resetFiles();
 
     var setup = defaultSetup.getSetup();
-    this.name = setup.name;
-    this.stamper = setup.stamper;
+    this.name = 'Untitled';
+    this.stamper = setup;
 
     this.mainWindow.setTitle(this.name);
     this.writeToView();

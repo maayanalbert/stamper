@@ -25,8 +25,16 @@ import { Stacker } from "./stacker";
 import CopyImg from "./../../../copy.png"; // @cameron update this to material icon
 import CloseImg from "./../../../close.png"; // @cameron update this to material icon
 import styled from "styled-components"; 
-const electron = window.require('electron');
-const ipc = electron.ipcRenderer;
+
+
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
 
 var __extends =
   (this && this.__extends) ||
@@ -156,7 +164,8 @@ var Cristal = (function(_super) {
     }
 
     _this.pan = function(changeX, changeY) {
-      ipc.send("edited")
+      console.log(ipc)
+      ipc && ipc.send("edited")
     if(_this.state.panDisabled){
         return
     }
@@ -176,7 +185,7 @@ var Cristal = (function(_super) {
     }
 
     _this.zoom = function(newScale, mouseX, mouseY, manual = false, center = false) {
-      ipc.send("edited")
+      ipc && ipc.send("edited")
 
       var scale = _this.state.scale,
         x = _this.state.x,
@@ -256,7 +265,7 @@ var Cristal = (function(_super) {
 
         return;
       } else if (isDragging) {
-        ipc.send("edited")
+        ipc && ipc.send("edited")
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
@@ -267,7 +276,7 @@ var Cristal = (function(_super) {
         _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
       } else if(isResizing) {
-        ipc.send("edited")
+        ipc && ipc.send("edited")
           _this.resizeCristal(e);
       }else{
         _this.onStoppedMove();
