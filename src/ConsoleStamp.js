@@ -36,7 +36,6 @@ export default class ConsoleStamp extends Component {
   addNewIframeConsole(newConsole) {
 
     Hook(newConsole, newLogs => {
-      console.log("HEARD SETUP")
       newLogs.map(log => {
         if (log.method === "log") {
           this.checkLastLog(log);

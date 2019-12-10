@@ -86,9 +86,9 @@ export default class FunctionStamp extends Component {
 
     this.updateFuns();
     this.checkName();
-    if (this.props.id === 0) {
+
       this.loadp5Lib();
-    }
+
   }
 
   loadp5Lib() {

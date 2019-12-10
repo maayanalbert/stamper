@@ -55,8 +55,8 @@ export default class View extends Component {
     });
 
     window.addEventListener("message", e => {
-      console.log("result",e.data.lineno)
- 
+
+    console.log(e)
    
     
         this.state.consoleStamp.ref.current.reportError(e.data.message)
@@ -78,27 +78,27 @@ window.onerror = function (message, url, lineno, colno) {
 
 function reportError(message, lineno){
 
- 
       var adjLineNum = -1
       var stampId = -1
-      var ranges = `+strRanges+`
-
-        console.log("lineno",lineno)
-        console.log("offset",${offset})
-        console.log("ranges",ranges)
+      var ranges = ${strRanges}
 
       ranges.map(range => {
         var start = range.start
         var end = range.end
         var id = range.id
         var isFN = range.isFN
-        if(start + ${offset} <= lineno && lineno <= end + ${offset}){
-          adjLineNum = lineNumber - start - offset + 1
-          if(isFN){
+        var isInRange = start + ${offset} < lineno + 1 && lineno -1 < end + ${offset}
+
+        
+        if(isInRange){
+          adjLineNum = lineno - start - ${offset} + 1
+          stampId = id
+          if(range.isFn){
             adjLineNum -= 1
           }
         }
       })
+
       window.parent.postMessage({message:message, lineno:adjLineNum, id:stampId}, '*')
 
     }`
@@ -116,14 +116,14 @@ function reportError(message, lineno){
     }
 
     if (id === this.state.htmlID || id === this.state.cssID) {
-      var getRunnableCode = "";
+      var runnableCode = "";
       var ranges = []
     } else {
+
       var codeData = this.getRunnableCode(id);
           var runnableCode = codeData.runnableCode
           var ranges = codeData.ranges
     }
-
 
 
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
@@ -142,19 +142,33 @@ function reportError(message, lineno){
     var jsBlock = parser(jsBlockStr);
     var cssBlock = parser(cssBlockStr);
 
-    const start = parser(jsSelector).get(0).startIndex;
-   
-    const offset = html.substr(0, start).split("\n").length 
+    // const start = parser(jsSelector).get(0).startIndex;
 
-    parser(jsSelector).replaceWith(jsBlock);
+
+    
     parser(cssSelector).replaceWith(cssBlock);
 
 
-    parser("head").prepend("<script>" + this.getIframeErrorCallBack(ranges, offset) + "</script>")
+    parser("head").prepend("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges) + "</script>")
 
 
+   var htmlStr = parser.html()
+   var linesToJs = 0
+   for(var i = 0; i< htmlStr.length; i++){
+ 
+    if(htmlStr[i] === "\n" ){
+      linesToJs += 1
+    }
+    if(htmlStr.substr(i, jsSelector.length) === jsSelector){
+      break
+    }
+   }
 
+  
 
+   parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs-3) + "</script>")
+   parser(jsSelector).replaceWith(jsBlock);
+   console.log(runnableCode)
     return parser.html();
   }
   componentDidMount() {
@@ -447,7 +461,6 @@ function reportError(message, lineno){
   }
 
   forceUpdateStamps(id = -1, fromEdit) {
-    console.log("FORCE UPDATING")
     if (fromEdit) {
       this.sendSaveData();
     }
