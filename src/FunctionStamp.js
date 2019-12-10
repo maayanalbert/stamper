@@ -42,7 +42,7 @@ export default class FunctionStamp extends Component {
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
-  updateFuns(fromEdit = false) {
+  updateFuns(fromComponentDidMount) {
     var name = this.state.name;
 
     var fullFun =
@@ -62,27 +62,35 @@ export default class FunctionStamp extends Component {
       drawableFun = "";
     }
 
+    var runnableInnerCode = this.state.code
+
+    var editsMade = true
+    if((fullFun === this.state.fullFun 
+      && drawableFun === this.state.drawableFun 
+      && runnableInnerCode === this.state.runnableInnerCode)){
+      editsMade = false
+    }
+
     this.setState(
       {
         fullFun: fullFun,
         drawableFun: drawableFun,
-        runnableInnerCode: this.state.code
+        runnableInnerCode: runnableInnerCode
       },
-      () => this.props.forceUpdateStamps(this.props.id, fromEdit)
+      () => this.props.compileCode(editsMade)
     );
   }
 
   checkName() {
     var isSpecialFn = this.state.name in globals.specialFns;
     this.setState({ isSpecialFn: isSpecialFn });
-    this.props.checkAllNames();
   }
 
 
 
   componentDidMount() {
 
-    this.updateFuns();
+    this.updateFuns(true);
     this.checkName();
 
       this.loadp5Lib();
@@ -96,8 +104,17 @@ export default class FunctionStamp extends Component {
 
   }
 
-  clearErrorLines(){
-    this.setState({errorLines:{}})
+  clearErrorsAndUpdate(editsMade,newErrors=[]){
+    var newErrorLines = this.state.errorLines
+    if(editsMade){
+      var newErrorLines = {}
+    }
+    this.setState({errorLines:newErrorLines}, () => {
+      this.forceUpdate()
+      for(var i = 0; i < newErrors.length; i++){
+        this.addErrorLine(newErrors[i])
+      }
+    })
   }
 
   loadp5Lib() {
@@ -154,12 +171,11 @@ export default class FunctionStamp extends Component {
   renderEditor() {
     var markers = []
     for(var i in this.state.errorLines){
-
-      console.log(i)
+      if(i != 0){
+        markers.push({startRow:i-1, endRow:i, type:"background", className:"bg-warningOrange marker"});
+      }
     }
-          markers.push({startRow:1, endRow:2, type:"fullLine", className:"bg-warningOrange marker"});
-
-    console.log(markers)
+      
 
     return (
       <div
@@ -171,7 +187,7 @@ export default class FunctionStamp extends Component {
       >
         <br />
         <AceEditor
-        markers={[{startRow:3, endRow:5, type:"fullLine", className:"bg-warningOrange marker"}]}
+        markers={markers}
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
@@ -183,6 +199,7 @@ export default class FunctionStamp extends Component {
             this.setState({ code: value });
             ipc.send("edited");
           }}
+          name= {"id" + this.props.id.toString()}
           fontSize={globals.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -214,6 +231,10 @@ export default class FunctionStamp extends Component {
     if (this.state.isSpecialFn) {
       nameColor = "pink";
     }
+
+    var argsColor = "lightGreyText"
+   
+
     return (
       <div>
         <input
@@ -242,7 +263,7 @@ export default class FunctionStamp extends Component {
           style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
           value={this.state.args}
-          class="text-lightGreyText args"
+          class={"text-" + argsColor + " args"}
         />
       </div>
     );
@@ -350,8 +371,7 @@ export default class FunctionStamp extends Component {
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
-      isCss: this.props.isCss,
-      errorLines:this.state.errorLines
+      isCss: this.props.isCss
     };
 
     return data;
@@ -379,6 +399,13 @@ export default class FunctionStamp extends Component {
       headerColor = "bg-warningOrange"
     }
 
+
+    var border = "border border-borderGrey"
+    if(Object.keys(this.state.errorLines).length > 0){
+      border = "border border-warningOrange"
+    }
+
+
     // <!-- @cameron little white div thing --> scroll down to style
 
     return (
@@ -396,19 +423,15 @@ export default class FunctionStamp extends Component {
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow-sm bg-jsArea border border-borderGrey"}
+          className={"shadow-sm bg-jsArea " + border}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
         >
 
           <div
-<<<<<<< HEAD
-            class={headerColor}
-=======
 
-            class="bg-white"
->>>>>>> ff9ffc9220300947bfe8bc0aefee808df6e5883c
+            class={headerColor}
             style={{
               position: "absolute",
               top: globals.headerHeight,

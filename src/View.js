@@ -27,7 +27,8 @@ export default class View extends Component {
       blobStamps: {},
       htmlID: -1,
       cssID: -1,
-      consoleStamp:null
+      consoleStamp:null,
+      setupExists:true
     };
     this.counterMutex = new Mutex();
 
@@ -295,8 +296,7 @@ function reportError(message, lineno){
       iframeWidth: globals.defaultIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
-      isCss: false,
-      errorLines:{}
+      isCss: false
     };
 
     Object.keys(defaults).map(setting => {
@@ -336,8 +336,7 @@ function reportError(message, lineno){
       iframeWidth = data.iframeWidth,
       iframeHeight = data.iframeHeight,
       isHtml = data.isHtml,
-      isCss = data.isCss,
-      errorLines = data.errorLines;
+      isCss = data.isCss;
 
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
@@ -354,7 +353,7 @@ function reportError(message, lineno){
         starterCode={code}
         starterArgs={args}
         starterName={name}
-        errorLines = {errorLines}
+        errorLines = {{}}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         initialPosition={{ x: x, y: y }}
@@ -371,7 +370,7 @@ function reportError(message, lineno){
         checkAllNames={this.checkAllNames.bind(this)}
         disablePan={this.disablePan.bind(this)}
         iframeDisabled={iframeDisabled}
-        forceUpdateStamps={this.forceUpdateStamps.bind(this)}
+        compileCode={this.compileCode.bind(this)}
         getHTML={this.getHTML.bind(this)}
         getScale={() => {return this.state.scale }}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
@@ -400,8 +399,7 @@ function reportError(message, lineno){
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(400),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
-      editorHeight: globals.defaultVarEditorHeight,
-      errorLines:{}
+      editorHeight: globals.defaultVarEditorHeight
     };
 
     Object.keys(defaults).map(setting => {
@@ -435,7 +433,7 @@ function reportError(message, lineno){
       <BlobStamp
         ref={ref}
         starterCode={code}
-        errorLines={errorLines}
+        errorLines={{}}
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
@@ -448,7 +446,7 @@ function reportError(message, lineno){
         disablePan={this.disablePan.bind(this)}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
-        forceUpdateStamps={this.forceUpdateStamps.bind(this)}
+        compileCode={this.compileCode.bind(this)}
       />
     );
 
@@ -476,19 +474,63 @@ function reportError(message, lineno){
     ipc.send("save", message);
   }
 
-  forceUpdateStamps(id = -1, fromEdit) {
-    if (fromEdit) {
-      this.sendSaveData();
+
+  checkForSetup(){
+    var newSetupExists = false
+    var fnStamps = Object.values(this.state.fnStamps)
+    for(var i = 0; i< fnStamps.length; i++){
+      var fnStamp = fnStamps[i]
+      if(fnStamp.ref.current.state.name === 'setup'){
+        newSetupExists =  true
+      } 
     }
+
+    if(this.state.setupExists && newSetupExists === false){
+    this.state.consoleStamp.ref.current.reportError
+    (`Stamper Error: You don't have a setup. This will stop your p5 sketches from running.`)
+
+    }
+
+    this.setState({setupExists:newSetupExists})
+  
+
+    return newSetupExists
+  }
+  compileCode(editsMade) {
+    
+    var duplateNamedStamps = this.checkAllNames()
+
+    var newSetupExists = this.checkForSetup()
+    // console.log(setupExists)
 
     Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
-      if (stampRef && stampRef.props.id != id) {
-        stampRef.forceUpdate();
+      if (stampRef) {
+        var newErrors = []
+
+        if(newSetupExists === false){
+          newErrors.push(-1)
+        }
+
+        if(stamp.ref.current.props.id in duplateNamedStamps){
+          newErrors.append(0)
+        }
+        stampRef.clearErrorsAndUpdate(editsMade,newErrors);
       }
     });
 
-    this.state.consoleStamp.ref.current.clearConsole()
+    Object.values(this.state.blobStamps).map(stamp => {
+      var stampRef = stamp.ref.current;
+      if (stampRef) {
+        stampRef.clearErrorsAndUpdate(editsMade, []);
+      }
+    });
+
+
+
+    
+    this.sendSaveData();
+
   }
 
   disablePan(status) {
@@ -517,18 +559,21 @@ function reportError(message, lineno){
       }
     });
 
+    var duplicateNamedStamps = {}
     Object.values(this.state.fnStamps).map(stamp => {
       if (stamp.ref.current) {
         var stampRef = stamp.ref.current;
         var name = stamp.ref.current.state.name;
         if(nameDict[name] > 1){
-          stampRef.addErrorLine(0)
+          duplicateNamedStamps[stamp.ref.current.props.id] = ""
           this.state.consoleStamp.ref.current.reportError
-          (`Multiple functions shouldn't have the same name. Consider channging one of your ${name}s to something else.`)
+          (`Stamper Error: Multiple functions shouldn't have the same name. Consider channging one of your ${name}s to something else.`)
 
         }
       }
     });
+
+    return duplicateNamedStamps
   }
 
   getExportableCode() {

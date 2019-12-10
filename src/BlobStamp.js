@@ -30,9 +30,14 @@ export default class BlobStamp extends Component {
     this.editorRef = React.createRef();
   }
   updateCode() {
+    var editsMade = true
+    if(this.state.code === this.state.runnableCode){
+      editsMade = false
+    }
+
 
     this.setState({ runnableCode: this.state.code }, () =>
-      this.props.forceUpdateStamps()
+      this.props.compileCode(editsMade)
     );
   }
 
@@ -49,6 +54,14 @@ export default class BlobStamp extends Component {
     }
   }
   renderEditor() {
+
+    var markers = []
+    for(var i in this.state.errorLines){
+      if(i != 0){
+        markers.push({startRow:i-1, endRow:i, type:"background", className:"bg-warningOrange marker"});
+      }
+    }
+
     return (
       <div
         onMouseOut={() => {
@@ -68,6 +81,8 @@ export default class BlobStamp extends Component {
             this.setState({ code: value });ipc.send("edited") 
           }
           }
+                 markers={markers}
+        name= {"id" + this.props.id.toString()}
           fontSize={globals.globalVarCodeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -107,8 +122,17 @@ export default class BlobStamp extends Component {
     this.setState({errorLines:errorLines})
   }
 
-  clearErrorLines(){
-    this.setState({errorLines:{}})
+  clearErrorsAndUpdate(editsMade, newErrors=[]){
+    var newErrorLines = this.state.errorLines
+    if(editsMade){
+      var newErrorLines = {}
+    }
+    this.setState({errorLines:newErrorLines}, () => {
+      this.forceUpdate()
+      for(var i = 0; i < newErrors.length; i++){
+        this.addErrorLine(newErrors[i])
+      }
+    })
   }
 
   getData() {
@@ -117,8 +141,7 @@ export default class BlobStamp extends Component {
       x: this.cristalRef.current.state.x,
       y: this.cristalRef.current.state.y,
       editorWidth: this.state.editorWidth,
-      editorHeight: this.state.editorHeight,
-      errorLines:this.state.errorLines
+      editorHeight: this.state.editorHeight
     };
 
     return data;
