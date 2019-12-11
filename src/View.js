@@ -12,6 +12,9 @@ import cheerio from "cheerio";
 import { SteppedLineTo } from 'react-lineto';
 import parser from "./parser.js"
 
+import ScrollEvents from "scroll-events"
+
+
 
 var esprima = require("esprima");
 
@@ -522,7 +525,7 @@ function reportError(message, lineno){
     var duplateNamedStamps = this.checkAllNames()
 
     var newSetupExists = this.checkForSetup()
-    // console.log(setupExists)
+
 
     Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
@@ -676,7 +679,7 @@ function reportError(message, lineno){
       }
     })
 
-    console.log(lines)
+
 
     this.setState({lines:lines})
 
@@ -807,7 +810,7 @@ function reportError(message, lineno){
   }
 
   onStopMove(s) {
-    console.log("stopped moving")
+
 
     if(s){
     this.setState({ scale: s.scale });
@@ -841,7 +844,7 @@ function reportError(message, lineno){
 
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
-    console.log(this.state.lines)
+
 
     return (
       <div>

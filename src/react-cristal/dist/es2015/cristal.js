@@ -27,6 +27,7 @@ import CloseImg from "./../../../close.png"; // @cameron update this to material
 import styled from "styled-components"; 
 
 
+
 var userAgent = navigator.userAgent.toLowerCase();
 if(userAgent.indexOf(' electron/') > -1){
   const electron = window.require("electron");
@@ -77,8 +78,10 @@ var Cristal = (function(_super) {
       mouseIsDown: false,
       scale: 1,
       panDisabled:false,
-      originalHeight:null
+      originalHeight:null,
+      mouseWheelTimeout:null
     };
+
     _this.space = 32;
     _this.opt = 18;
     _this.onWindowResize = function() {
@@ -235,6 +238,12 @@ var Cristal = (function(_super) {
 
     _this.onWheel = function(e) {
       e.preventDefault();
+
+      if(_this.state.mouseWheelTimeout){
+        clearTimeout(_this.state.mouseWheelTimeout)
+      }
+      var newTimeOut = setTimeout(_this.notifyStopMove, 250)
+      _this.setState({mouseWheelTimeout:newTimeOut})
       if (e.ctrlKey) {
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
@@ -280,8 +289,6 @@ var Cristal = (function(_super) {
       } else if(isResizing) {
         ipc && ipc.send("edited")
           _this.resizeCristal(e);
-      }else{
-        _this.onStoppedMove();
       }
     };
 
