@@ -98,6 +98,7 @@ var Cristal = (function(_super) {
     };
     _this.saveWrapperRef = function(el) {
 
+
       _this.childrenElement = el;
       if (!_this.childrenElement) return;
       var initialSize = _this.props.initialSize;
@@ -122,6 +123,7 @@ var Cristal = (function(_super) {
     };
     _this.setInitialPosition = function(size) {
       var initialPosition = _this.props.initialPosition;
+
       if (!initialPosition) return;
       var cords;
       if (isSmartPosition(initialPosition)) {
@@ -589,6 +591,7 @@ var Cristal = (function(_super) {
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
 
+
     return ReactDOM.createPortal(
       React.createElement(
         Wrapper,
@@ -596,8 +599,8 @@ var Cristal = (function(_super) {
           style: style,
           ref: this.saveWrapperRef,
           isActive: isActive,
-          className: className + " rounded",
-          onMouseDown: this.changeZIndex
+          className: className + " rounded " + this.props.wrapperName,
+          onMouseDown: this.changeZIndex,
         },
         <div>{HeaderComponent}</div>,
         ContentComponent,

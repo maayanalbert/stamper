@@ -184,7 +184,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow-sm bg-jsArea " + border}
+          className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
         >
           <div class="row m-0">{this.renderEditor()}</div>
         </Cristal>

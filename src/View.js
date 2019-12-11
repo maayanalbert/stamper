@@ -9,7 +9,8 @@ import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
-
+import { SteppedLineTo } from 'react-lineto';
+import parser from "./parser.js"
 
 
 var esprima = require("esprima");
@@ -37,7 +38,8 @@ export default class View extends Component {
       consoleStamp:null,
       setupExists:true,
       htmlAsksForCss:true,
-      htmlAsksForJs:true
+      htmlAsksForJs:true,
+      lines:[]
     };
     this.counterMutex = new Mutex();
 
@@ -53,7 +55,7 @@ export default class View extends Component {
           consoleStamp:null
         },
         () => {
-          console.log(files.stamper.console)
+
           this.addConsoleStamp(files.stamper.console)
           files.stamper.fns.map(data => this.addFnStamp(data));
           files.stamper.blobs.map(data => this.addBlobStamp(data));
@@ -216,14 +218,15 @@ function reportError(message, lineno){
     return parser.html();
   }
   componentDidMount() {
-    console.log(defaultSetup.getSetup())
+
+
+
     var initialSetup = defaultSetup.getSetup()
     this.addConsoleStamp(initialSetup.console)
     initialSetup.fns.map(data => this.addFnStamp(data));
     initialSetup.blobs.map(data => this.addBlobStamp(data));
 
-    // this.addSetupFnStamp();
-    // this.addFnStamp({ name: "draw" });
+
   }
 
   // resetScale(mouseX, mouseY) {
@@ -239,26 +242,6 @@ function reportError(message, lineno){
   //   );
 
   //   this.setState({ scale: 1 });
-  // }
-
-  // getIframeDimensions() {
-  //   return { width: this.state.iframeWidth, height: this.state.iframeHeight };
-  // }
-
-  // addSetupFnStamp() {
-  //   var setupCode =
-  //     "createCanvas(" +
-  //     globals.defaultIframeWidth.toString() +
-  //     ", " +
-  //     globals.defaultEditorHeight.toString() +
-  //     ")";
-  //   var fnStampData = {
-  //     code: setupCode,
-  //     name: "setup",
-  //     args: " ",
-  //     isSetup: true
-  //   };
-  //   this.addFnStamp(fnStampData, false);
   // }
 
    addConsoleStamp(data) {
@@ -421,6 +404,7 @@ function reportError(message, lineno){
     } else if (isCss) {
       this.setState({ cssID: counter });
     }
+
   }
 
   addNewIframeConsole(newConsole){
@@ -647,7 +631,60 @@ function reportError(message, lineno){
     return end + 1
   }
 
+
+  setLines(){
+    var declaredDict = {}
+    var undeclaredArr = []
+    var lines = []
+    var setupID = -1
+
+    Object.keys(this.state.blobStamps).map(id => {
+      var stampRef = this.state.blobStamps[id].ref.current
+        var code = stampRef.state.runnableCode
+        var identifiers = parser.getIdentifiers(code)
+        if(identifiers){
+        identifiers.declared.map(identifier => declaredDict[identifier] = id)
+        identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
+        } 
+    });
+
+    Object.keys(this.state.fnStamps).map(id => {
+      var stampRef = this.state.fnStamps[id].ref.current
+      if(stampRef.state.name === "setup"){
+        setupID = id
+      }
+        var code = stampRef.state.fullFun
+        var identifiers = parser.getIdentifiers(code)
+        if(identifiers){
+        identifiers.declared.map(identifier => declaredDict[identifier] = id)
+        identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
+      }  
+    });
+
+    undeclaredArr.map(undeclaredItem => {
+      var undeclaredIdentifier = undeclaredItem[0]
+      var startId = undeclaredItem[1]
+      var endId = declaredDict[undeclaredIdentifier]
+      if(startId && endId){
+        lines.push(<SteppedLineTo from={"vertex" + startId} to={'vertex' + endId} orientation="v" />)
+      }
+    })
+
+    Object.keys(this.state.fnStamps).map(id =>{
+      if(id != this.state.htmlID && id != this.state.cssID){
+        lines.push(<SteppedLineTo from={"vertex" + setupID} to={'vertex' + id} orientation="v" />)
+      }
+    })
+
+    console.log(lines)
+
+    this.setState({lines:lines})
+
+
+  }
+
   getRunnableCode(id) {
+
     var runnableCode = [];
     var ranges = []
     var curLine = 1
@@ -765,9 +802,12 @@ function reportError(message, lineno){
 
       fnStamp.setIframeDisabled(true);
     }
+
+    this.setState({lines:[]})
   }
 
   onStopMove(s) {
+    console.log("stopped moving")
 
     if(s){
     this.setState({ scale: s.scale });
@@ -777,6 +817,8 @@ function reportError(message, lineno){
       var fnStamp = fnStamps[i].ref.current;
       fnStamp.setIframeDisabled(false);
     }
+
+    this.setLines()
   }
 
   // updateIframeDimensions(width, height) {
@@ -799,11 +841,14 @@ function reportError(message, lineno){
 
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
+    console.log(this.state.lines)
+
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
           {consoleElem}
+          {this.state.lines}
         </div>
         <div
           class="topButtons"
@@ -831,9 +876,8 @@ function reportError(message, lineno){
           <button
             class="btn btn btn-lightGrey shadow m-1 text-white"
             onClick={() =>
-              this.setState({ fnStamps: {}, blobStamps: {} }, () =>
-                this.addSetupFnStamp()
-              )
+                 console.log(parser.getIdentifiers("function setup(x, y){var z = k + 1}; "))
+              
             }
           >
             clear

@@ -43,7 +43,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
   var lastBlobLine = 0;
   var tempBlobStamps = [];
   for (var i = 0; i < body.length; i++) {
-    item = body[i];
+    var item = body[i];
     if (item.type === "FunctionDeclaration") {
       addFn(fnStamps, item, rawCode);
     } else if (item.type === "Block" || item.type === "Line") {
@@ -60,7 +60,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
   }
 
   for (var i = 0; i < tempBlobStamps.length; i++) {
-    blobStamp = tempBlobStamps[i];
+    var blobStamp = tempBlobStamps[i];
     if (blobStamp.code != "") {
       blobStamps.push(blobStamp);
     }
@@ -69,7 +69,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
 
 function insertComments(body, comments) {
   for (var i = 0; i < comments.length; i++) {
-    comment = comments[i];
+    var comment = comments[i];
     var pos = getPos(body, comment);
 
     if (pos >= 0) {
@@ -106,7 +106,7 @@ function addBlob(blobStamps, item, rawCode, lastBlobLine, isComment) {
     blobStamps.push({ code: "" });
   }
 
-  lastStamp = blobStamps[blobStamps.length - 1];
+  var lastStamp = blobStamps[blobStamps.length - 1];
 
   var lineDiff = item.loc.start.line - lastBlobLine;
   if (lineDiff == 0) {
@@ -146,11 +146,15 @@ function isDeclaration(typeName){
 }
 
 function getIdentifiers(rawCode) {
+
+
   try {
     var fullDict = esprima.parseScript(rawCode);
   } catch (error) {
     // throw error i guess
   }
+
+
   var declared = {};
   var undeclared = {};
 
@@ -208,20 +212,23 @@ function getIdentifiers(rawCode) {
     
   }
 
-  var relevantDeclared = {}
+
+  var result = {declared:[], undeclared:[]}
   Object.keys(declared).map(name => {
     if (declared[name][1] === 3 && declared[name][0].includes("Declaration") ) {
-      relevantDeclared[name] = ""
+      result.declared.push(name)
     }else if(declared[name][1] === 5 && declared[name][0].includes("Declarator")){
-    relevantDeclared[name] = ""
+    result.declared.push(name)
     }
   });
 
   var relevantUndeclared = {}
   Object.keys(undeclared).map(name => {
-    relevantUndeclared[name] = ""
+    result.undeclared.push(name)
   })
 
-  return { declared: relevantDeclared, undeclared: relevantUndeclared };
+  return result
 }
 
+
+exports.getIdentifiers = getIdentifiers;

@@ -106,6 +106,8 @@ this.checkLastLog({ method: method, data: [message] });
         data: ["(" + this.state.lastFreq.toString() + ")"]
       });
     }
+
+
     return (
       <Cristal
         ref={this.cristalRef}

@@ -452,7 +452,7 @@ export default class FunctionStamp extends Component {
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow-sm " + bgColor + " " + border}
+          className={"shadow-sm " + bgColor + " " + border + " vertex" + this.props.id}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
