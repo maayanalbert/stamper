@@ -12,8 +12,6 @@ import cheerio from "cheerio";
 import { SteppedLineTo } from 'react-lineto';
 import parser from "./parser.js"
 
-import ScrollEvents from "scroll-events"
-
 
 
 var esprima = require("esprima");
@@ -534,9 +532,9 @@ function reportError(message, lineno){
       if (stampRef) {
         var newErrors = []
 
-        if(newSetupExists === false && stampRef.props.isCss === false && stampRef.props.isHtml === false){
-          newErrors.push(-1)
-        }
+        // if(newSetupExists === false && stampRef.props.isCss === false && stampRef.props.isHtml === false){
+        //   newErrors.push(-1)
+        // }
 
         if(stamp.ref.current.props.id in duplateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.append(0)
@@ -641,6 +639,8 @@ function reportError(message, lineno){
     var lines = []
     var borderColorInt = 205 + 15 - 15*this.state.scale
     var style = {borderColor:`rgb(${borderColorInt}, ${borderColorInt}, ${borderColorInt})`, borderWidth:1}
+
+
     this.state.lineData.map(singleLineData => {
 
       lines.push(<SteppedLineTo {...style} from={"vertex" + singleLineData[0]} to={'vertex' + singleLineData[1]} orientation="v" />)
