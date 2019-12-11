@@ -17,11 +17,11 @@ var LZUTF8 = require("lzutf8");
 module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
-    this.path = undefined;
-    this.name = undefined;
-    this.html = undefined;
-    this.css = undefined;
-    this.js = undefined;
+    this.path = undefined
+    this.name = "";
+    this.html = "";
+    this.css = "";
+    this.js = "";
     this.stamper = undefined;
 
     ipcMain.on("save", (event, files) => {
@@ -34,11 +34,11 @@ module.exports = class FileManager {
   }
 
   resetFiles() {
-    this.path = undefined;
-    this.name = undefined;
-    this.html = undefined;
-    this.css = undefined;
-    this.js = undefined;
+    this.path = "";
+    this.name = "";
+    this.html = "";
+    this.css = "";
+    this.js = "";
     this.stamper = undefined;
   }
 
@@ -63,7 +63,7 @@ module.exports = class FileManager {
 
   updateStamperJs(js, stamper) {
     if(stamper === undefined){
-      var oldJs = undefined
+      var oldJs = ""
     }else{
           var oldJs = LZUTF8.decompress(stamper.compressedJs, {
        inputEncoding: "StorageBinaryString"

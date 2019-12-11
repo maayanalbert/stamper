@@ -53,6 +53,7 @@ export default class View extends Component {
           consoleStamp:null
         },
         () => {
+          console.log(files.stamper.console)
           this.addConsoleStamp(files.stamper.console)
           files.stamper.fns.map(data => this.addFnStamp(data));
           files.stamper.blobs.map(data => this.addBlobStamp(data));
