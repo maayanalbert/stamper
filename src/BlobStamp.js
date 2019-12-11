@@ -29,7 +29,8 @@ export default class BlobStamp extends Component {
       editorScrolling: false,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
-      errorLines:this.props.errorLines
+      errorLines:this.props.errorLines,
+      exportableCode:""
     };
 
     this.cristalRef = React.createRef();
@@ -134,7 +135,7 @@ export default class BlobStamp extends Component {
       var newErrorLines = {}
     }
     this.setState({errorLines:newErrorLines}, () => {
-      this.forceUpdate()
+      this.setState({exportableCode:this.props.getExportableCode()})
       for(var i = 0; i < newErrors.length; i++){
         this.addErrorLine(newErrors[i])
       }

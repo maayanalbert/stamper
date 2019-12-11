@@ -35,7 +35,9 @@ export default class View extends Component {
       htmlID: -1,
       cssID: -1,
       consoleStamp:null,
-      setupExists:true
+      setupExists:true,
+      htmlAsksForCss:true,
+      htmlAsksForJs:true
     };
     this.counterMutex = new Mutex();
 
@@ -166,8 +168,29 @@ function reportError(message, lineno){
     // const start = parser(jsSelector).get(0).startIndex;
 
 
-    
+
+    var htmlAsksForCss = parser(cssSelector).length > 0
+    if(htmlAsksForCss === false && this.state.htmlAsksForCss === true){
+      this.state.consoleStamp.ref.current.reportError
+        (`Stamper Error: Your index.html is missing a div for style.css. Make sure you're linking to style.css and not another stylesheet.`)
+      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
+      this.setState({htmlAsksForCss:htmlAsksForCss})
+    }else if(htmlAsksForCss === true && this.state.htmlAsksForCss === false){
+      this.setState({htmlAsksForCss:htmlAsksForCss})
+    }
+
+    var htmlAsksForJs = parser(jsSelector).length > 0
+    if(htmlAsksForJs === false && this.state.htmlAsksForJs === true){
+      this.state.consoleStamp.ref.current.reportError
+        (`Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`)
+      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
+      this.setState({htmlAsksForJs:htmlAsksForJs})
+    }else if(htmlAsksForJs === true && this.state.htmlAsksForJs === false){
+      this.setState({htmlAsksForJs:htmlAsksForJs})
+    }
+
     parser(cssSelector).replaceWith(cssBlock);
+
 
 
     parser("head").prepend("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges) + "</script>")
@@ -460,6 +483,7 @@ function reportError(message, lineno){
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         compileCode={this.compileCode.bind(this)}
+        getExportableCode={this.getExportableCode.bind(this)}
       />
     );
 

@@ -45,7 +45,8 @@ export default class FunctionStamp extends Component {
       editorHidden: false,
       isSpecialFn: false,
       editorScrolling: false,
-      errorLines:this.props.errorLines
+      errorLines:this.props.errorLines,
+      iframeCode:""
     };
 
     this.cristalRef = React.createRef();
@@ -119,7 +120,7 @@ export default class FunctionStamp extends Component {
       var newErrorLines = {}
     }
     this.setState({errorLines:newErrorLines}, () => {
-      this.forceUpdate()
+      this.setState({iframeCode:this.props.getHTML(this.props.id)})
       for(var i = 0; i < newErrors.length; i++){
         this.addErrorLine(newErrors[i])
       }
@@ -340,7 +341,7 @@ export default class FunctionStamp extends Component {
                 margin: "-" + globals.iframeMargin.toString() + "px"
                 // pointerEvents:"none"
               }}
-              srcdoc={this.props.getHTML(this.props.id)}
+              srcdoc={this.state.iframeCode}
               sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
               allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
             />
