@@ -9,8 +9,14 @@ import { Hook, Console, Decode } from "console-feed";
 var _ = require("lodash");
 
 
-const electron = window.require("electron");
-const ipc = electron.ipcRenderer;
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
 
 export default class ConsoleStamp extends Component {
   constructor(props) {
@@ -64,9 +70,9 @@ export default class ConsoleStamp extends Component {
     }
   }
 
-  reportError(message){
+  reportError(message, method = "error"){
 
-this.checkLastLog({ method: "error", data: [message] });
+this.checkLastLog({ method: method, data: [message] });
   }
 
     getData() {
@@ -100,6 +106,8 @@ this.checkLastLog({ method: "error", data: [message] });
         data: ["(" + this.state.lastFreq.toString() + ")"]
       });
     }
+
+
     return (
       <Cristal
         ref={this.cristalRef}

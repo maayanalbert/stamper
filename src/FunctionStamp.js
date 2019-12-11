@@ -9,14 +9,23 @@ import pf, { globals, p5Lib } from "./globals.js";
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";
-
-// import "ace-builds/src-noconflict/theme-solarized_light";
+import "ace-builds/src-noconflict/mode-css";
+import "ace-builds/src-noconflict/mode-html";
+import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
 
-const electron = window.require("electron");
-const ipc = electron.ipcRenderer;
+
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
+
 
 export default class FunctionStamp extends Component {
   constructor(props) {
@@ -36,7 +45,8 @@ export default class FunctionStamp extends Component {
       editorHidden: false,
       isSpecialFn: false,
       editorScrolling: false,
-      errorLines:this.props.errorLines
+      errorLines:this.props.errorLines,
+      iframeCode:""
     };
 
     this.cristalRef = React.createRef();
@@ -110,7 +120,7 @@ export default class FunctionStamp extends Component {
       var newErrorLines = {}
     }
     this.setState({errorLines:newErrorLines}, () => {
-      this.forceUpdate()
+      this.setState({iframeCode:this.props.getHTML(this.props.id)})
       for(var i = 0; i < newErrors.length; i++){
         this.addErrorLine(newErrors[i])
       }
@@ -138,7 +148,7 @@ export default class FunctionStamp extends Component {
   ) {
 
 
-    ipc.send("edited");
+    ipc && ipc.send("edited");
     var scale = this.props.getScale()
 
 
@@ -176,6 +186,17 @@ export default class FunctionStamp extends Component {
       }
     }
       
+    var theme = "p5"
+    var mode = "javascript"
+    if(this.props.isHtml || this.props.isCss){
+      theme = "solarized_light"
+    }
+
+    if(this.props.isCss){
+      mode = "css"
+    }else if(this.props.isHtml){
+      mode = "html"
+    }
 
     return (
       <div
@@ -191,13 +212,14 @@ export default class FunctionStamp extends Component {
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
+            background:"transparent"
 
           }}
-          mode="javascript"
-          theme="p5"
+          mode={mode}
+          theme={theme}
           onChange={value => {
             this.setState({ code: value });
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           name= {"id" + this.props.id.toString()}
           fontSize={globals.codeSize}
@@ -230,9 +252,11 @@ export default class FunctionStamp extends Component {
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
+    }else if(this.props.isHtml || this.props.isCss){
+      nameColor = "htmlCssName"
     }
 
-    var argsColor = "lightGreyText"
+    var argsColor = "greyText"
    
 
     return (
@@ -242,7 +266,7 @@ export default class FunctionStamp extends Component {
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
             this.setState({ name: event.target.value }, () => this.checkName());
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
@@ -258,7 +282,7 @@ export default class FunctionStamp extends Component {
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
             this.setState({ args: event.target.value });
-            ipc.send("edited");
+            ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
           onMouseOut={() => this.updateFuns(true)}
@@ -317,7 +341,7 @@ export default class FunctionStamp extends Component {
                 margin: "-" + globals.iframeMargin.toString() + "px"
                 // pointerEvents:"none"
               }}
-              srcdoc={this.props.getHTML(this.props.id)}
+              srcdoc={this.state.iframeCode}
               sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
               allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
             />
@@ -408,6 +432,11 @@ export default class FunctionStamp extends Component {
 
     // <!-- @cameron little white div thing --> scroll down to style
 
+    var bgColor = "bg-jsArea"
+    if(this.props.isHtml || this.props.isCss){
+      bgColor = "bg-htmlCssArea"
+    }
+
     return (
       <div>
         <Cristal
@@ -423,7 +452,7 @@ export default class FunctionStamp extends Component {
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow-sm bg-jsArea " + border}
+          className={"shadow-sm " + bgColor + " " + border + " vertex" + this.props.id}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}

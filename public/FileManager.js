@@ -10,18 +10,18 @@ const {
   electron,
   dialog
 } = require("electron");
-const defaultSetup = require("./defaultSetup.js");
-var parser = require("./parser");
+const defaultSetup = require("./../src/defaultSetup.js");
+var parser = require("./../src/parser.js");
 var LZUTF8 = require("lzutf8");
 
 module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
-    this.path = undefined;
-    this.name = undefined;
-    this.html = undefined;
-    this.css = undefined;
-    this.js = undefined;
+    this.path = undefined
+    this.name = "";
+    this.html = "";
+    this.css = "";
+    this.js = "";
     this.stamper = undefined;
 
     ipcMain.on("save", (event, files) => {
@@ -31,16 +31,14 @@ module.exports = class FileManager {
     ipcMain.on("edited", event => {
       this.mainWindow.setTitle(this.name + " - Edited");
     });
-
-
   }
 
   resetFiles() {
-    this.path = undefined;
-    this.name = undefined;
-    this.html = undefined;
-    this.css = undefined;
-    this.js = undefined;
+    this.path = "";
+    this.name = "";
+    this.html = "";
+    this.css = "";
+    this.js = "";
     this.stamper = undefined;
   }
 
@@ -48,8 +46,8 @@ module.exports = class FileManager {
     this.resetFiles();
 
     var setup = defaultSetup.getSetup();
-    this.name = setup.name;
-    this.stamper = setup.stamper;
+    this.name = 'Untitled';
+    this.stamper = setup;
 
     this.mainWindow.setTitle(this.name);
     this.writeToView();
@@ -65,7 +63,7 @@ module.exports = class FileManager {
 
   updateStamperJs(js, stamper) {
     if(stamper === undefined){
-      var oldJs = undefined
+      var oldJs = ""
     }else{
           var oldJs = LZUTF8.decompress(stamper.compressedJs, {
        inputEncoding: "StorageBinaryString"

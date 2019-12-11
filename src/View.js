@@ -9,13 +9,24 @@ import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
+import { SteppedLineTo } from 'react-lineto';
+import parser from "./parser.js"
+
+import ScrollEvents from "scroll-events"
+
 
 
 var esprima = require("esprima");
 
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
 
-const electron = window.require("electron");
-const ipc = electron.ipcRenderer;
+const defaultSetup = require("./defaultSetup.js");
 
 export default class View extends Component {
   constructor(props) {
@@ -28,11 +39,15 @@ export default class View extends Component {
       htmlID: -1,
       cssID: -1,
       consoleStamp:null,
-      setupExists:true
+      setupExists:true,
+      htmlAsksForCss:true,
+      htmlAsksForJs:true,
+      lines:[],
+      lineData:[]
     };
     this.counterMutex = new Mutex();
 
-    ipc.on("writeToView", (event, files) => {
+    ipc && ipc.on("writeToView", (event, files) => {
       this.setState(
         {
           fnStamps: {},
@@ -44,6 +59,7 @@ export default class View extends Component {
           consoleStamp:null
         },
         () => {
+
           this.addConsoleStamp(files.stamper.console)
           files.stamper.fns.map(data => this.addFnStamp(data));
           files.stamper.blobs.map(data => this.addBlobStamp(data));
@@ -52,7 +68,7 @@ export default class View extends Component {
       );
     });
 
-    ipc.on("requestSave", (event, rawCode) => {
+    ipc && ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
 
@@ -73,6 +89,8 @@ export default class View extends Component {
 
 
     });
+  
+
   }
 
   getIframeErrorCallBack(ranges, offset =0){
@@ -111,7 +129,7 @@ function reportError(message, lineno){
         }
       })
 
-      window.parent.postMessage({message:message, lineno:adjLineNum, id:stampId}, '*')
+      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
 
     }`
 
@@ -157,8 +175,29 @@ function reportError(message, lineno){
     // const start = parser(jsSelector).get(0).startIndex;
 
 
-    
+
+    var htmlAsksForCss = parser(cssSelector).length > 0
+    if(htmlAsksForCss === false && this.state.htmlAsksForCss === true){
+      this.state.consoleStamp.ref.current.reportError
+        (`Stamper Error: Your index.html is missing a div for style.css. Make sure you're linking to style.css and not another stylesheet.`)
+      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
+      this.setState({htmlAsksForCss:htmlAsksForCss})
+    }else if(htmlAsksForCss === true && this.state.htmlAsksForCss === false){
+      this.setState({htmlAsksForCss:htmlAsksForCss})
+    }
+
+    var htmlAsksForJs = parser(jsSelector).length > 0
+    if(htmlAsksForJs === false && this.state.htmlAsksForJs === true){
+      this.state.consoleStamp.ref.current.reportError
+        (`Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`)
+      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
+      this.setState({htmlAsksForJs:htmlAsksForJs})
+    }else if(htmlAsksForJs === true && this.state.htmlAsksForJs === false){
+      this.setState({htmlAsksForJs:htmlAsksForJs})
+    }
+
     parser(cssSelector).replaceWith(cssBlock);
+
 
 
     parser("head").prepend("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges) + "</script>")
@@ -185,8 +224,13 @@ function reportError(message, lineno){
   componentDidMount() {
 
 
-    // this.addSetupFnStamp();
-    // this.addFnStamp({ name: "draw" });
+
+    var initialSetup = defaultSetup.getSetup()
+    this.addConsoleStamp(initialSetup.console)
+    initialSetup.fns.map(data => this.addFnStamp(data));
+    initialSetup.blobs.map(data => this.addBlobStamp(data));
+
+
   }
 
   // resetScale(mouseX, mouseY) {
@@ -202,26 +246,6 @@ function reportError(message, lineno){
   //   );
 
   //   this.setState({ scale: 1 });
-  // }
-
-  // getIframeDimensions() {
-  //   return { width: this.state.iframeWidth, height: this.state.iframeHeight };
-  // }
-
-  // addSetupFnStamp() {
-  //   var setupCode =
-  //     "createCanvas(" +
-  //     globals.defaultIframeWidth.toString() +
-  //     ", " +
-  //     globals.defaultEditorHeight.toString() +
-  //     ")";
-  //   var fnStampData = {
-  //     code: setupCode,
-  //     name: "setup",
-  //     args: " ",
-  //     isSetup: true
-  //   };
-  //   this.addFnStamp(fnStampData, false);
   // }
 
    addConsoleStamp(data) {
@@ -384,6 +408,7 @@ function reportError(message, lineno){
     } else if (isCss) {
       this.setState({ cssID: counter });
     }
+
   }
 
   addNewIframeConsole(newConsole){
@@ -447,6 +472,7 @@ function reportError(message, lineno){
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         compileCode={this.compileCode.bind(this)}
+        getExportableCode={this.getExportableCode.bind(this)}
       />
     );
 
@@ -470,8 +496,7 @@ function reportError(message, lineno){
       css: cssStamp.ref.current.state.runnableInnerCode,
       js: this.getExportableCode()
     };
-
-    ipc.send("save", message);
+    ipc && ipc.send("save", message);
   }
 
 
@@ -498,21 +523,22 @@ function reportError(message, lineno){
   }
   compileCode(editsMade) {
     
+    this.setLineData()
     var duplateNamedStamps = this.checkAllNames()
 
     var newSetupExists = this.checkForSetup()
-    // console.log(setupExists)
+
 
     Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
       if (stampRef) {
         var newErrors = []
 
-        if(newSetupExists === false){
+        if(newSetupExists === false && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.push(-1)
         }
 
-        if(stamp.ref.current.props.id in duplateNamedStamps){
+        if(stamp.ref.current.props.id in duplateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.append(0)
         }
         stampRef.clearErrorsAndUpdate(editsMade,newErrors);
@@ -528,7 +554,7 @@ function reportError(message, lineno){
 
 
 
-    
+    this.state.consoleStamp.ref.current.reportError("Running code", "debug")
     this.sendSaveData();
 
   }
@@ -610,7 +636,75 @@ function reportError(message, lineno){
     return end + 1
   }
 
+  setLines(){
+
+    var lines = []
+    var borderColorInt = 205 + 15 - 15*this.state.scale
+    var style = {borderColor:`rgb(${borderColorInt}, ${borderColorInt}, ${borderColorInt})`, borderWidth:1}
+    this.state.lineData.map(singleLineData => {
+
+      lines.push(<SteppedLineTo {...style} from={"vertex" + singleLineData[0]} to={'vertex' + singleLineData[1]} orientation="v" />)
+    }); 
+
+    this.setState({lines:lines}) 
+
+  }
+
+  setLineData(){
+    var declaredDict = {}
+    var undeclaredArr = []
+    var lineData = []
+    var setupID = -1
+
+    Object.keys(this.state.blobStamps).map(id => {
+      var stampRef = this.state.blobStamps[id].ref.current
+        var code = stampRef.state.runnableCode
+        var identifiers = parser.getIdentifiers(code)
+        if(identifiers){
+        identifiers.declared.map(identifier => declaredDict[identifier] = id)
+        identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
+        } 
+    });
+
+    Object.keys(this.state.fnStamps).map(id => {
+      var stampRef = this.state.fnStamps[id].ref.current
+      if(stampRef.state.name === "setup"){
+        setupID = id
+      }
+        var code = stampRef.state.fullFun
+        var identifiers = parser.getIdentifiers(code)
+        if(identifiers){
+        identifiers.declared.map(identifier => declaredDict[identifier] = id)
+        identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
+      }  
+    });
+
+    var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
+
+    undeclaredArr.map(undeclaredItem => {
+      var undeclaredIdentifier = undeclaredItem[0]
+      var startId = undeclaredItem[1]
+      var endId = declaredDict[undeclaredIdentifier]
+      if(startId && endId){
+        lineData.push([startId, endId])
+      }
+    })
+
+    Object.keys(this.state.fnStamps).map(id =>{
+      if(id != this.state.htmlID && id != this.state.cssID){
+        lineData.push([id, setupID])
+      }
+    })
+
+
+
+    this.setState({lineData:lineData}, () => this.setLines())
+
+
+  }
+
   getRunnableCode(id) {
+
     var runnableCode = [];
     var ranges = []
     var curLine = 1
@@ -662,10 +756,10 @@ function reportError(message, lineno){
     var blobStamps = this.state.blobStamps;
 
     if (id in fnStamps) {
-      ipc.send("edited");
+      ipc && ipc.send("edited");
       delete fnStamps[id];
     } else if (id in blobStamps) {
-      ipc.send("edited");
+      ipc && ipc.send("edited");
       delete blobStamps[id];
     }
 
@@ -728,9 +822,12 @@ function reportError(message, lineno){
 
       fnStamp.setIframeDisabled(true);
     }
+
+    this.setState({lines:[]})
   }
 
   onStopMove(s) {
+
 
     if(s){
     this.setState({ scale: s.scale });
@@ -740,6 +837,8 @@ function reportError(message, lineno){
       var fnStamp = fnStamps[i].ref.current;
       fnStamp.setIframeDisabled(false);
     }
+
+    this.setLines()
   }
 
   // updateIframeDimensions(width, height) {
@@ -762,11 +861,14 @@ function reportError(message, lineno){
 
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
+
+
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
           {consoleElem}
+          {this.state.lines}
         </div>
         <div
           class="topButtons"
@@ -794,9 +896,8 @@ function reportError(message, lineno){
           <button
             class="btn btn btn-lightGrey shadow m-1 text-white"
             onClick={() =>
-              this.setState({ fnStamps: {}, blobStamps: {} }, () =>
-                this.addSetupFnStamp()
-              )
+                 console.log(parser.getIdentifiers("function setup(x, y){var z = k + 1}; "))
+              
             }
           >
             clear

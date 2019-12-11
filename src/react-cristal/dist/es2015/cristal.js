@@ -25,8 +25,17 @@ import { Stacker } from "./stacker";
 import CopyImg from "./../../../copy.png"; // @cameron update this to material icon
 import CloseImg from "./../../../close.png"; // @cameron update this to material icon
 import styled from "styled-components"; 
-const electron = window.require('electron');
-const ipc = electron.ipcRenderer;
+
+
+
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
 
 var __extends =
   (this && this.__extends) ||
@@ -69,8 +78,10 @@ var Cristal = (function(_super) {
       mouseIsDown: false,
       scale: 1,
       panDisabled:false,
-      originalHeight:null
+      originalHeight:null,
+      mouseWheelTimeout:null
     };
+
     _this.space = 32;
     _this.opt = 18;
     _this.onWindowResize = function() {
@@ -89,6 +100,7 @@ var Cristal = (function(_super) {
       });
     };
     _this.saveWrapperRef = function(el) {
+
 
       _this.childrenElement = el;
       if (!_this.childrenElement) return;
@@ -114,6 +126,7 @@ var Cristal = (function(_super) {
     };
     _this.setInitialPosition = function(size) {
       var initialPosition = _this.props.initialPosition;
+
       if (!initialPosition) return;
       var cords;
       if (isSmartPosition(initialPosition)) {
@@ -156,7 +169,9 @@ var Cristal = (function(_super) {
     }
 
     _this.pan = function(changeX, changeY) {
-      ipc.send("edited")
+
+
+      ipc && ipc.send("edited")
     if(_this.state.panDisabled){
         return
     }
@@ -176,7 +191,7 @@ var Cristal = (function(_super) {
     }
 
     _this.zoom = function(newScale, mouseX, mouseY, manual = false, center = false) {
-      ipc.send("edited")
+      ipc && ipc.send("edited")
 
       var scale = _this.state.scale,
         x = _this.state.x,
@@ -223,10 +238,19 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
-      // e.preventDefault();
+
+
+      if(_this.state.mouseWheelTimeout){
+        clearTimeout(_this.state.mouseWheelTimeout)
+      }
+      var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250)
+      _this.setState({mouseWheelTimeout:newTimeOut})
       if (e.ctrlKey) {
+        console.log("preventing default")
+        e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
+
         _this.pan(-e.deltaX, -e.deltaY);
       }
     };
@@ -256,7 +280,7 @@ var Cristal = (function(_super) {
 
         return;
       } else if (isDragging) {
-        ipc.send("edited")
+        ipc && ipc.send("edited")
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
@@ -267,10 +291,8 @@ var Cristal = (function(_super) {
         _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
       } else if(isResizing) {
-        ipc.send("edited")
+        ipc && ipc.send("edited")
           _this.resizeCristal(e);
-      }else{
-        _this.onStoppedMove();
       }
     };
 
@@ -334,8 +356,10 @@ var Cristal = (function(_super) {
     };
 
     _this.onStartMove = function(panning = false) {
+     
       _this.notifyMove();
       if (_this.state.isMoving === false) {
+
         _this.notifyStartMove();
         if (_this.state.downKey === _this.opt && panning === false) {
           _this.notifyOptMove();
@@ -580,6 +604,7 @@ var Cristal = (function(_super) {
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
 
+
     return ReactDOM.createPortal(
       React.createElement(
         Wrapper,
@@ -587,8 +612,8 @@ var Cristal = (function(_super) {
           style: style,
           ref: this.saveWrapperRef,
           isActive: isActive,
-          className: className + " rounded",
-          onMouseDown: this.changeZIndex
+          className: className + " rounded " + this.props.wrapperName,
+          onMouseDown: this.changeZIndex,
         },
         <div>{HeaderComponent}</div>,
         ContentComponent,

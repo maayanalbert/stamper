@@ -7,12 +7,18 @@ import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
 // import "ace-builds/src-noconflict/mode-javascript";
-// import "ace-builds/src-noconflict/theme-solarized_light";
+// import "ace-builds/src-noconflict/theme-tomorrow";
 // import "ace-builds/src-min-noconflict/ext-language_tools";
 // import "ace-builds/src-noconflict/snippets/javascript";
 
-const electron = window.require('electron');
-const ipc = electron.ipcRenderer;
+var userAgent = navigator.userAgent.toLowerCase();
+if(userAgent.indexOf(' electron/') > -1){
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+}else{
+  var ipc = false
+}
+
 
 export default class BlobStamp extends Component {
   constructor(props) {
@@ -23,7 +29,8 @@ export default class BlobStamp extends Component {
       editorScrolling: false,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
-      errorLines:this.props.errorLines
+      errorLines:this.props.errorLines,
+      exportableCode:""
     };
 
     this.cristalRef = React.createRef();
@@ -76,9 +83,9 @@ export default class BlobStamp extends Component {
 
           }}
           mode="javascript"
-          theme="solarized_light"
+          theme="p5"
           onChange={value => {
-            this.setState({ code: value });ipc.send("edited") 
+            this.setState({ code: value });ipc && ipc.send("edited") 
           }
           }
                  markers={markers}
@@ -128,7 +135,7 @@ export default class BlobStamp extends Component {
       var newErrorLines = {}
     }
     this.setState({errorLines:newErrorLines}, () => {
-      this.forceUpdate()
+      this.setState({exportableCode:this.props.getExportableCode()})
       for(var i = 0; i < newErrors.length; i++){
         this.addErrorLine(newErrors[i])
       }
@@ -157,7 +164,13 @@ export default class BlobStamp extends Component {
     this.editorRef.current.editor.resize();
   }
 
+
   render() {
+
+          var border = "border border-borderGrey"
+    if(Object.keys(this.state.errorLines).length > 0){
+      border = "border border-warningOrange"
+    }
     return (
       <div>
         <Cristal
@@ -171,7 +184,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className="shadow-sm bg-jsArea"
+          className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
         >
           <div class="row m-0">{this.renderEditor()}</div>
         </Cristal>

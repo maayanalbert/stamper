@@ -18,8 +18,6 @@ var htmlCode = `<html>
 `;
 
 var setup = {
-  name: "Untitled",
-  stamper: {
     fns: [
       {
         name: "setup",
@@ -34,6 +32,6 @@ var setup = {
     scale: 1,
     console:{}
   }
-};
+
 
 exports.getSetup = () => setup;
