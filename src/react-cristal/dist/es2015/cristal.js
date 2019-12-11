@@ -238,7 +238,7 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
-      e.preventDefault();
+
 
       if(_this.state.mouseWheelTimeout){
         clearTimeout(_this.state.mouseWheelTimeout)
@@ -246,8 +246,11 @@ var Cristal = (function(_super) {
       var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250)
       _this.setState({mouseWheelTimeout:newTimeOut})
       if (e.ctrlKey) {
+        console.log("preventing default")
+        e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
+
         _this.pan(-e.deltaX, -e.deltaY);
       }
     };
