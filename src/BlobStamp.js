@@ -25,31 +25,20 @@ export default class BlobStamp extends Component {
     super(props);
     this.state = {
       code: this.props.starterCode,
-      runnableCode: "",
       editorScrolling: false,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
       errorLines:this.props.errorLines,
-      exportableCode:""
+      exportableCode:"",
+      editsMade:""
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
-  updateCode() {
-    var editsMade = true
-    if(this.state.code === this.state.runnableCode){
-      editsMade = false
-    }
-
-
-    this.setState({ runnableCode: this.state.code }, () =>
-      this.props.compileCode(editsMade)
-    );
-  }
 
   componentDidMount() {
-    this.updateCode();
+
   }
   setEditorScrolling(isScrolling) {
     if (isScrolling && this.state.editorScrolling == false) {
@@ -59,6 +48,14 @@ export default class BlobStamp extends Component {
       this.setState({ editorScrolling: false });
       this.props.disablePan(false);
     }
+  }
+
+    mouseOutCallback(){
+    if(this.state.editsMade){
+              this.props.requestCompile(this.props.id)
+              this.setState({editsMade:false})
+    }
+
   }
   renderEditor() {
 
@@ -72,7 +69,7 @@ export default class BlobStamp extends Component {
     return (
       <div
         onMouseOut={() => {
-          this.updateCode();
+          this.mouseOutCallback();
           this.setEditorScrolling(false);
         }}
       >
@@ -85,7 +82,8 @@ export default class BlobStamp extends Component {
           mode="javascript"
           theme="p5"
           onChange={value => {
-            this.setState({ code: value });ipc && ipc.send("edited") 
+            this.setState({ code: value });ipc && ipc.send("edited")
+            this.setState({editsMade:true}) 
           }
           }
                  markers={markers}

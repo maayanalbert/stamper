@@ -34,9 +34,6 @@ export default class FunctionStamp extends Component {
       code: this.props.starterCode,
       name: this.props.starterName,
       args: this.props.starterArgs,
-      fullFun: "",
-      drawableFun: "",
-      runnableInnerCode: "",
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
       iframeHeight: this.props.starterIframeHeight,
@@ -46,50 +43,52 @@ export default class FunctionStamp extends Component {
       isSpecialFn: false,
       editorScrolling: false,
       errorLines:this.props.errorLines,
-      iframeCode:""
+      iframeCode:"",
+      editsMade:true
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
-  updateFuns(fromComponentDidMount) {
-    var name = this.state.name;
 
-    var fullFun =
-      "function " +
-      name +
-      "(" +
-      this.state.args +
-      "){\n" +
-      this.state.code +
-      "\n}";
+  // updateFuns(fromComponentDidMount) {
+  //   var name = this.state.name;
 
-    var drawableFun = name + "()";
+  //   var fullFun =
+  //     "function " +
+  //     name +
+  //     "(" +
+  //     this.state.args +
+  //     "){\n" +
+  //     this.state.code +
+  //     "\n}";
 
-    var isSpecialFn = name in globals.specialFns;
-    if (this.props.isHtml || this.props.isCss) {
-      fullFun = "";
-      drawableFun = "";
-    }
+  //   var drawableFun = name + "()";
 
-    var runnableInnerCode = this.state.code
+  //   var isSpecialFn = name in globals.specialFns;
+  //   if (this.props.isHtml || this.props.isCss) {
+  //     fullFun = "";
+  //     drawableFun = "";
+  //   }
 
-    var editsMade = true
-    if((fullFun === this.state.fullFun 
-      && drawableFun === this.state.drawableFun 
-      && runnableInnerCode === this.state.runnableInnerCode)){
-      editsMade = false
-    }
+  //   var runnableInnerCode = this.state.code
 
-    this.setState(
-      {
-        fullFun: fullFun,
-        drawableFun: drawableFun,
-        runnableInnerCode: runnableInnerCode
-      },
-      () => this.props.compileCode(editsMade)
-    );
-  }
+  //   var editsMade = true
+  //   if((fullFun === this.state.fullFun 
+  //     && drawableFun === this.state.drawableFun 
+  //     && runnableInnerCode === this.state.runnableInnerCode)){
+  //     editsMade = false
+  //   }
+
+  //   this.setState(
+  //     {
+  //       fullFun: fullFun,
+  //       drawableFun: drawableFun,
+  //       runnableInnerCode: runnableInnerCode
+  //     },
+  //     () => this.props.compileCode(editsMade)
+  //   );
+  // }
 
   checkName() {
     var isSpecialFn = this.state.name in globals.specialFns;
@@ -100,11 +99,9 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
 
-    this.updateFuns(true);
+    this.props.requestCompile();
     this.checkName();
-
-      this.loadp5Lib();
-
+    this.loadp5Lib();
   }
 
   addErrorLine(lineNum){
@@ -114,11 +111,10 @@ export default class FunctionStamp extends Component {
 
   }
 
-  clearErrorsAndUpdate(editsMade,newErrors=[]){
+  clearErrorsAndUpdate(newErrors=[]){
     var newErrorLines = this.state.errorLines
-    if(editsMade){
       var newErrorLines = {}
-    }
+
     this.setState({errorLines:newErrorLines}, () => {
       this.setState({iframeCode:this.props.getHTML(this.props.id)})
       for(var i = 0; i < newErrors.length; i++){
@@ -201,9 +197,10 @@ export default class FunctionStamp extends Component {
     return (
       <div
         onMouseOut={() => {
-          this.updateFuns(true);
-          this.setEditorScrolling(false);
-        }}
+          this.mouseOutCallback()
+          this.setEditorScrolling(false)
+        }
+        }
         hidden={this.state.editorHidden}
       >
         <br />
@@ -218,7 +215,7 @@ export default class FunctionStamp extends Component {
           mode={mode}
           theme={theme}
           onChange={value => {
-            this.setState({ code: value });
+            this.setState({ code: value, editsMade:true });
             ipc && ipc.send("edited");
           }}
           name= {"id" + this.props.id.toString()}
@@ -243,6 +240,14 @@ export default class FunctionStamp extends Component {
     );
   }
 
+  mouseOutCallback(){
+    if(this.state.editsMade){
+              this.props.requestCompile(this.props.id)
+              this.setState({editsMade:false})
+    }
+
+  }
+
   renderFunctionName() {
     var displayName = "";
     if (this.state.name != this.props.starterName) {
@@ -265,11 +270,13 @@ export default class FunctionStamp extends Component {
           placeholder="function name..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
-            this.setState({ name: event.target.value }, () => this.checkName());
+            this.setState({ name: event.target.value, editsMade:true }, () => this.checkName());
+
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.updateFuns(true)}
+          onMouseOut={() => this.mouseOutCallback()}
+
           value={this.state.name}
           class={"text-" + nameColor + " name"}
         />
@@ -281,11 +288,11 @@ export default class FunctionStamp extends Component {
           placeholder="arguments..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
-            this.setState({ args: event.target.value });
+            this.setState({ args: event.target.value, editsMade:true });
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.updateFuns(true)}
+          onMouseOut={() => this.mouseOutCallback()}
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />

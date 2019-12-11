@@ -11,6 +11,7 @@ import { Line } from "react-lineto";
 import cheerio from "cheerio";
 import { SteppedLineTo } from 'react-lineto';
 import parser from "./parser.js"
+var _ = require("lodash");
 
 
 
@@ -41,7 +42,8 @@ export default class View extends Component {
       htmlAsksForCss:true,
       htmlAsksForJs:true,
       lines:[],
-      lineData:[]
+      lineData:[],
+      traversalGraph:{}
     };
     this.counterMutex = new Mutex();
 
@@ -69,24 +71,6 @@ export default class View extends Component {
     ipc && ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
-
-    window.addEventListener("message", e => {
-    
-        this.state.consoleStamp.ref.current.reportError(e.data.message)
-
-
-        var lineNum = e.data.lineno
-        var message = e.data.message
-        var id = e.data.id
-
-        if(id in this.state.fnStamps){
-          this.state.fnStamps[id].ref.current.addErrorLine(lineNum)
-        }else if(id in this.state.blobStamps){
-          this.state.blobStamps[id].ref.current.addErrorLine(lineNum)
-        }
-
-
-    });
   
 
   }
@@ -96,15 +80,15 @@ export default class View extends Component {
     return `
   // window.addEventListener('error', function(e) { 
   //   console.log("addEventListener")
-  //     reportError(e.message, e.lineno)
+  //     logToConsole(e.message, e.lineno)
   //   }, false);
 
 window.onerror = function (message, url, lineno, colno) {
 
-  reportError(message, lineno)
+  logToConsole(message, lineno)
 }
 
-function reportError(message, lineno){
+function logToConsole(message, lineno){
 
       var adjLineNum = -1
       var stampId = -1
@@ -157,7 +141,8 @@ function reportError(message, lineno){
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
     var cssStamp = this.state.fnStamps[this.state.cssID];
 
-    var html = htmlStamp.ref.current.state.runnableInnerCode
+    var html = htmlStamp.ref.current.state.code
+
 
     const parser = cheerio.load(html, { withStartIndices: true });
     var jsBlockStr =
@@ -176,7 +161,8 @@ function reportError(message, lineno){
 
     var htmlAsksForCss = parser(cssSelector).length > 0
     if(htmlAsksForCss === false && this.state.htmlAsksForCss === true){
-      this.state.consoleStamp.ref.current.reportError
+
+      this.state.consoleStamp.ref.current.logToConsole
         (`Stamper Error: Your index.html is missing a div for style.css. Make sure you're linking to style.css and not another stylesheet.`)
       this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
       this.setState({htmlAsksForCss:htmlAsksForCss})
@@ -186,7 +172,8 @@ function reportError(message, lineno){
 
     var htmlAsksForJs = parser(jsSelector).length > 0
     if(htmlAsksForJs === false && this.state.htmlAsksForJs === true){
-      this.state.consoleStamp.ref.current.reportError
+
+      this.state.consoleStamp.ref.current.logToConsole
         (`Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`)
       this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1)
       this.setState({htmlAsksForJs:htmlAsksForJs})
@@ -229,6 +216,15 @@ function reportError(message, lineno){
     initialSetup.blobs.map(data => this.addBlobStamp(data));
 
 
+  }
+
+
+  addErrorLine(lineNum, id){
+        if(id in this.state.fnStamps){
+          this.state.fnStamps[id].ref.current.addErrorLine(lineNum)
+        }else if(id in this.state.blobStamps){
+          this.state.blobStamps[id].ref.current.addErrorLine(lineNum)
+        }
   }
 
   // resetScale(mouseX, mouseY) {
@@ -289,6 +285,7 @@ function reportError(message, lineno){
         disablePan={this.disablePan.bind(this)}
         starterConsoleWidth={consoleWidth}
         starterConsoleHeight={consoleHeight}
+        addErrorLine={this.addErrorLine.bind(this)}
       />
     );
 
@@ -360,6 +357,7 @@ function reportError(message, lineno){
       isHtml = data.isHtml,
       isCss = data.isCss;
 
+
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, release());
@@ -369,7 +367,7 @@ function reportError(message, lineno){
 
     var elem = (
       <FunctionStamp
-        ref={ref}
+        ref={(e) => {ref(e) ; this.compileStamp(counter)}}
         isHtml={isHtml}
         isCss={isCss}
         starterCode={code}
@@ -381,7 +379,7 @@ function reportError(message, lineno){
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
-        getRunnableCode={this.getRunnableCode.bind(this)}
+
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addFnStamp.bind(this)}
@@ -392,20 +390,24 @@ function reportError(message, lineno){
         checkAllNames={this.checkAllNames.bind(this)}
         disablePan={this.disablePan.bind(this)}
         iframeDisabled={iframeDisabled}
-        compileCode={this.compileCode.bind(this)}
+        requestCompile={this.requestCompile.bind(this)}
         getHTML={this.getHTML.bind(this)}
         getScale={() => {return this.state.scale }}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
       />
     );
 
+
     fnStamps[counter] = { elem: elem, ref: ref };
+
     this.setState({ fnStamps: fnStamps });
+
     if (isHtml) {
       this.setState({ htmlID: counter });
     } else if (isCss) {
       this.setState({ cssID: counter });
     }
+
 
   }
 
@@ -454,13 +456,13 @@ function reportError(message, lineno){
 
     var elem = (
       <BlobStamp
-        ref={ref}
+        ref={(e) => {ref(e) ; this.compileStamp(counter)}}
         starterCode={code}
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
-        getRunnableCode={this.getRunnableCode.bind(this)}
+ 
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addBlobStamp.bind(this)}
@@ -469,7 +471,7 @@ function reportError(message, lineno){
         disablePan={this.disablePan.bind(this)}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
-        compileCode={this.compileCode.bind(this)}
+        requestCompile={this.requestCompile.bind(this)}
         getExportableCode={this.getExportableCode.bind(this)}
       />
     );
@@ -479,6 +481,7 @@ function reportError(message, lineno){
   }
 
   sendSaveData() {
+
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -499,17 +502,23 @@ function reportError(message, lineno){
 
 
   checkForSetup(){
+
     var newSetupExists = false
     var fnStamps = Object.values(this.state.fnStamps)
     for(var i = 0; i< fnStamps.length; i++){
-      var fnStamp = fnStamps[i]
-      if(fnStamp.ref.current.state.name === 'setup'){
+      var fnStampRef = fnStamps[i].ref.current
+      if(fnStampRef){
+      if(fnStampRef.state.name === 'setup'){
         newSetupExists =  true
       } 
+      }
+
     }
 
     if(this.state.setupExists && newSetupExists === false){
-    this.state.consoleStamp.ref.current.reportError
+
+
+    this.state.consoleStamp.ref.current.logToConsole
     (`Stamper Error: You don't have a setup. This will constrain your canvas to a default width and hight.`)
 
     }
@@ -519,42 +528,71 @@ function reportError(message, lineno){
 
     return newSetupExists
   }
-  compileCode(editsMade) {
-    
-    this.setLineData()
-    var duplateNamedStamps = this.checkAllNames()
 
-    var newSetupExists = this.checkForSetup()
+  requestCompile(id){
 
-
-    Object.values(this.state.fnStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
-      if (stampRef) {
-        var newErrors = []
-
-        // if(newSetupExists === false && stampRef.props.isCss === false && stampRef.props.isHtml === false){
-        //   newErrors.push(-1)
-        // }
-
-        if(stamp.ref.current.props.id in duplateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
-          newErrors.append(0)
-        }
-        stampRef.clearErrorsAndUpdate(editsMade,newErrors);
-      }
-    });
-
-    Object.values(this.state.blobStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
-      if (stampRef) {
-        stampRef.clearErrorsAndUpdate(editsMade, []);
-      }
-    });
+    var newTraversalGraph = this.setLineData()
+    var oldTravarsalGraph = this.state.traversalGraph
+    this.setState({traversalGraph:newTraversalGraph})
 
 
+    var duplicateNamedStamps = this.checkAllNames()
 
-    this.state.consoleStamp.ref.current.reportError("Updated code", "debug")
+    this.checkForSetup()
+
+    this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug")
+ 
     this.sendSaveData();
 
+
+
+ 
+
+    this.compileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
+     
+    this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
+   
+console.log("requestCompile",this.state.fnStamps)
+   
+
+  }
+  compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
+
+
+    
+    if(id in seen){
+      return
+    }else{
+      seen[id] = ""
+    }
+
+
+
+    if(id in this.state.fnStamps){
+      var stampRef = this.state.fnStamps[id].ref.current
+    }else if(id in this.state.blobStamps){
+      var stampRef = this.state.blobStamps[id].ref.current
+    }else{
+      return
+    }
+
+
+
+   
+    if(stampRef){
+        var newErrors = []
+
+        if(stampRef.props.id in duplicateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
+          newErrors.append(0)
+        }
+        stampRef.clearErrorsAndUpdate(newErrors);
+
+      if(id in traversalGraph === false){
+        return
+      }
+      traversalGraph[id].map(id => this.compileStamp(id, seen, traversalGraph, duplicateNamedStamps))
+
+    }
   }
 
   disablePan(status) {
@@ -590,7 +628,8 @@ function reportError(message, lineno){
         var name = stamp.ref.current.state.name;
         if(nameDict[name] > 1){
           duplicateNamedStamps[stamp.ref.current.props.id] = ""
-          this.state.consoleStamp.ref.current.reportError
+
+          this.state.consoleStamp.ref.current.logToConsole
           (`Stamper Error: Multiple functions shouldn't have the same name. Consider channging one of your ${name}s to something else.`)
 
         }
@@ -655,52 +694,83 @@ function reportError(message, lineno){
     var undeclaredArr = []
     var lineData = []
     var setupID = -1
+    var traversalGraph = {}
 
     Object.keys(this.state.blobStamps).map(id => {
       var stampRef = this.state.blobStamps[id].ref.current
-        var code = stampRef.state.runnableCode
+        var code = stampRef.state.code
         var identifiers = parser.getIdentifiers(code)
+
         if(identifiers){
-        identifiers.declared.map(identifier => declaredDict[identifier] = id)
-        identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
+          identifiers.declared.map(identifier => declaredDict[identifier] = id)
+          identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
         } 
+
     });
 
+
+
     Object.keys(this.state.fnStamps).map(id => {
+
+
+        
+      
+
       var stampRef = this.state.fnStamps[id].ref.current
+      if(stampRef){
+
+     
       if(stampRef.state.name === "setup"){
         setupID = id
       }
-        var code = stampRef.state.fullFun
+        var state = stampRef.state
+        var code = `function ${state.name}(${state.args}){\n${state.code}\n}`
         var identifiers = parser.getIdentifiers(code)
         if(identifiers){
         identifiers.declared.map(identifier => declaredDict[identifier] = id)
         identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
-      }  
+      }
+    }
+
+  
     });
+
+
 
     var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
 
     undeclaredArr.map(undeclaredItem => {
-      var undeclaredIdentifier = undeclaredItem[0]
-      var startId = undeclaredItem[1]
-      var endId = declaredDict[undeclaredIdentifier]
-      if(startId && endId){
-        lineData.push([startId, endId])
+      var identifier = undeclaredItem[0]
+      var usingFn = undeclaredItem[1]
+      var declaringFn = declaredDict[identifier]
+      if(declaringFn   && usingFn ){
+        lineData.push([usingFn, declaringFn])
+        if(declaringFn in traversalGraph === false){
+          traversalGraph[declaringFn] = []
+        }
+        traversalGraph[declaringFn].push(usingFn)
       }
+      
+
     })
+
+       
 
     Object.keys(this.state.fnStamps).map(id =>{
       if(id != this.state.htmlID && id != this.state.cssID){
         lineData.push([id, setupID])
+            if(setupID in traversalGraph === false){
+          traversalGraph[setupID] = []
+        }
+        traversalGraph[setupID].push(id)
       }
     })
-
-
 
     this.setState({lineData:lineData}, () => this.setLines())
 
 
+
+    return traversalGraph
   }
 
   getRunnableCode(id) {
@@ -710,19 +780,20 @@ function reportError(message, lineno){
     var curLine = 1
     var code;
 
-    Object.values(this.state.blobStamps).map(varStamp => {
-      if (varStamp.ref.current) {
-        code = varStamp.ref.current.state.runnableCode
-        curLine = this.addCodeBlock(code, varStamp.ref.current.props.id, runnableCode, ranges, curLine, false)
-      }
+    Object.values(this.state.blobStamps).map(blobStamp => {
+
+        code = blobStamp.ref.current.state.code
+        curLine = this.addCodeBlock(code, blobStamp.ref.current.props.id, runnableCode, ranges, curLine, false)
+
     });
 
 
 
     Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current && stamp.ref.current.state.name != "draw" && stamp.ref.current.props.isCss === false
+      if (stamp.ref.current.state.name != "draw" && stamp.ref.current.props.isCss === false
         && stamp.ref.current.props.isHtml === false) {
-        code = stamp.ref.current.state.fullFun 
+        var state =  stamp.ref.current.state
+      code = `function ${state.name}(${state.args}){\n${state.code}\n}`
         curLine = this.addCodeBlock(code, stamp.ref.current.props.id, runnableCode, ranges, curLine, true)
       }
     });
@@ -735,15 +806,16 @@ function reportError(message, lineno){
       return runnableCode.join("");
     }
 
-    var fnStamp = this.state.fnStamps[id].ref.current;
-    if (fnStamp.state.name === "draw") {
-      code = fnStamp.state.fullFun
-      curLine = this.addCodeBlock(code, fnStamp.props.id, runnableCode, ranges, curLine, true)
-    } else if (fnStamp.state.name === "setup") {
+    var fnStampRef = this.state.fnStamps[id].ref.current;
+    var state = fnStampRef.state
+    if (state.name === "draw") {
+      var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`
+      curLine = this.addCodeBlock(fullFun, fnStampRef.props.id, runnableCode, ranges, curLine, true)
+    } else if (state.name === "setup") {
       // do nothing
     } else {
       
-        code = "function draw(){\n" + fnStamp.state.drawableFun + "\n}"
+        code = `function draw(){\n"${state.name}()\n}`
         curLine = this.addCodeBlock(code, -1, runnableCode, ranges, curLine, false)
         
   
@@ -774,6 +846,8 @@ function reportError(message, lineno){
   }
 
   getAllData() {
+console.log('getalldata')
+    console.log(this.state.fnStamps)
     var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())

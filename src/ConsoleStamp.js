@@ -29,6 +29,25 @@ export default class ConsoleStamp extends Component {
     };
 
     this.cristalRef = React.createRef();
+
+
+  }
+
+  componentDidMount(){
+
+    window.addEventListener("message", e => {
+
+         
+        this.logToConsole(e.data.message)
+  
+
+        var lineNum = e.data.lineno
+        var message = e.data.message
+        var id = e.data.id
+
+        this.props.addErrorLine(lineNum, id)
+    });
+
   }
 
   clearConsole() {
@@ -51,10 +70,16 @@ export default class ConsoleStamp extends Component {
   }
 
   checkLastLog(log) {
+
+    var consoleContainer = document.getElementById("consoleContainer");
+    if(consoleContainer === null){
+      return
+    }
+
     var logs = this.state.logs;
     if (logs.length < 1) {
       this.setState({ logs: [log], lastFreq: 0 });
-      var consoleContainer = document.getElementById("consoleContainer");
+      consoleContainer = document.getElementById("consoleContainer");
       consoleContainer.scrollTop = consoleContainer.scrollHeight;
     } else {
       var lastLog = logs[logs.length - 1];
@@ -64,13 +89,13 @@ export default class ConsoleStamp extends Component {
       } else {
         logs.push(log);
         this.setState({ logs: logs, lastFreq: 1 });
-        var consoleContainer = document.getElementById("consoleContainer");
+        consoleContainer = document.getElementById("consoleContainer");
         consoleContainer.scrollTop = consoleContainer.scrollHeight;
       }
     }
   }
 
-  reportError(message, method = "error"){
+  logToConsole(message, method = "error"){
 
 this.checkLastLog({ method: method, data: [message] });
   }
@@ -99,6 +124,7 @@ this.checkLastLog({ method: method, data: [message] });
   }
 
   render() {
+
     var renderedLogs = _.cloneDeep(this.state.logs);
     if (this.state.lastFreq > 1) {
       renderedLogs.push({
