@@ -170,6 +170,7 @@ var Cristal = (function(_super) {
 
     _this.pan = function(changeX, changeY) {
 
+
       ipc && ipc.send("edited")
     if(_this.state.panDisabled){
         return
@@ -242,7 +243,7 @@ var Cristal = (function(_super) {
       if(_this.state.mouseWheelTimeout){
         clearTimeout(_this.state.mouseWheelTimeout)
       }
-      var newTimeOut = setTimeout(_this.notifyStopMove, 250)
+      var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250)
       _this.setState({mouseWheelTimeout:newTimeOut})
       if (e.ctrlKey) {
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
@@ -352,8 +353,10 @@ var Cristal = (function(_super) {
     };
 
     _this.onStartMove = function(panning = false) {
+     
       _this.notifyMove();
       if (_this.state.isMoving === false) {
+
         _this.notifyStartMove();
         if (_this.state.downKey === _this.opt && panning === false) {
           _this.notifyOptMove();

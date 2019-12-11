@@ -42,7 +42,8 @@ export default class View extends Component {
       setupExists:true,
       htmlAsksForCss:true,
       htmlAsksForJs:true,
-      lines:[]
+      lines:[],
+      lineData:[]
     };
     this.counterMutex = new Mutex();
 
@@ -522,6 +523,7 @@ function reportError(message, lineno){
   }
   compileCode(editsMade) {
     
+    this.setLineData()
     var duplateNamedStamps = this.checkAllNames()
 
     var newSetupExists = this.checkForSetup()
@@ -634,11 +636,23 @@ function reportError(message, lineno){
     return end + 1
   }
 
-
   setLines(){
+
+    var lines = []
+    var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
+    this.state.lineData.map(singleLineData => {
+
+      lines.push(<SteppedLineTo {...style} from={"vertex" + singleLineData[0]} to={'vertex' + singleLineData[1]} orientation="v" />)
+    }); 
+
+    this.setState({lines:lines}) 
+
+  }
+
+  setLineData(){
     var declaredDict = {}
     var undeclaredArr = []
-    var lines = []
+    var lineData = []
     var setupID = -1
 
     Object.keys(this.state.blobStamps).map(id => {
@@ -664,24 +678,26 @@ function reportError(message, lineno){
       }  
     });
 
+    var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
+
     undeclaredArr.map(undeclaredItem => {
       var undeclaredIdentifier = undeclaredItem[0]
       var startId = undeclaredItem[1]
       var endId = declaredDict[undeclaredIdentifier]
       if(startId && endId){
-        lines.push(<SteppedLineTo from={"vertex" + startId} to={'vertex' + endId} orientation="v" />)
+        lineData.push([startId, endId])
       }
     })
 
     Object.keys(this.state.fnStamps).map(id =>{
       if(id != this.state.htmlID && id != this.state.cssID){
-        lines.push(<SteppedLineTo from={"vertex" + setupID} to={'vertex' + id} orientation="v" />)
+        lineData.push([setupID, id])
       }
     })
 
 
 
-    this.setState({lines:lines})
+    this.setState({lineData:lineData}, () => this.setLines())
 
 
   }
