@@ -510,7 +510,7 @@ function reportError(message, lineno){
 
     if(this.state.setupExists && newSetupExists === false){
     this.state.consoleStamp.ref.current.reportError
-    (`Stamper Error: You don't have a setup. This will stop your p5 sketches from running.`)
+    (`Stamper Error: You don't have a setup. This will constrain your canvas to a default width and hight.`)
 
     }
 
@@ -552,7 +552,7 @@ function reportError(message, lineno){
 
 
 
-    this.state.consoleStamp.ref.current.reportError("Running code", "debug")
+    this.state.consoleStamp.ref.current.reportError("Updated code", "debug")
     this.sendSaveData();
 
   }
