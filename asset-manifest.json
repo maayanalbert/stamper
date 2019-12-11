@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.css": "./static/css/main.6ff8c46a.chunk.css",
-    "main.js": "./static/js/main.ff66523a.chunk.js",
-    "main.js.map": "./static/js/main.ff66523a.chunk.js.map",
+    "main.css": "./static/css/main.ee5f7d5c.chunk.css",
+    "main.js": "./static/js/main.dab208b7.chunk.js",
+    "main.js.map": "./static/js/main.dab208b7.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.1c1ba878.js",
     "runtime-main.js.map": "./static/js/runtime-main.1c1ba878.js.map",
-    "static/js/2.275e24a8.chunk.js": "./static/js/2.275e24a8.chunk.js",
-    "static/js/2.275e24a8.chunk.js.map": "./static/js/2.275e24a8.chunk.js.map",
+    "static/js/2.26501f7e.chunk.js": "./static/js/2.26501f7e.chunk.js",
+    "static/js/2.26501f7e.chunk.js.map": "./static/js/2.26501f7e.chunk.js.map",
     "crystal.js": "./00c719096ea6c0678627c6447bd356bb.js",
     "mode-xml.js": "./01eade92f3c728f412f540d90ac988ee.js",
     "theme-chaos.js": "./02166e7c61b02863c22f426ad1c697bb.js",
@@ -409,9 +409,9 @@
     "theme-gruvbox.js": "./feff703ce532f20391dfed8199b6971e.js",
     "jsx.js": "./ff7acf7df3cdb56d704a5bd29f08fd55.js",
     "index.html": "./index.html",
-    "precache-manifest.867419cb4efa7657ae1d48bd993770cc.js": "./precache-manifest.867419cb4efa7657ae1d48bd993770cc.js",
+    "precache-manifest.5c36a98ba7143a5a261b67466f13ba75.js": "./precache-manifest.5c36a98ba7143a5a261b67466f13ba75.js",
     "service-worker.js": "./service-worker.js",
-    "static/css/main.6ff8c46a.chunk.css.map": "./static/css/main.6ff8c46a.chunk.css.map",
+    "static/css/main.ee5f7d5c.chunk.css.map": "./static/css/main.ee5f7d5c.chunk.css.map",
     "static/media/copy.abfe978c.png": "./static/media/copy.abfe978c.png"
   }
 }
