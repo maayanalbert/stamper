@@ -70,9 +70,9 @@ export default class ConsoleStamp extends Component {
     }
   }
 
-  reportError(message){
+  reportError(message, method = "error"){
 
-this.checkLastLog({ method: "error", data: [message] });
+this.checkLastLog({ method: method, data: [message] });
   }
 
     getData() {

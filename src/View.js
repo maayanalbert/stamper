@@ -564,7 +564,7 @@ function reportError(message, lineno){
 
 
 
-    
+    this.state.consoleStamp.ref.current.reportError("Running code", "debug")
     this.sendSaveData();
 
   }
