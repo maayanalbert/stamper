@@ -249,14 +249,14 @@ export default class FunctionStamp extends Component {
       var displayName = this.state.Name;
     }
 
-    var nameColor = "greyText";
+    var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
     }else if(this.props.isHtml || this.props.isCss){
       nameColor = "htmlCssName"
     }
 
-    var argsColor = "lightGreyText"
+    var argsColor = "greyText"
    
 
     return (
