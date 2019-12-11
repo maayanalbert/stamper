@@ -305,7 +305,7 @@ function logToConsole(message, lineno){
   ) {
     var defaults = {
       name: "sketch",
-      code: "ellipse(x, y, 50, 50)",
+      code: "rect(50, 50, 50, 50)",
       args: "x=mouseX, y=mouseY",
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(),
@@ -367,7 +367,7 @@ function logToConsole(message, lineno){
 
     var elem = (
       <FunctionStamp
-        ref={(e) => {ref(e) ; this.compileStamp(counter)}}
+        ref={ref}
         isHtml={isHtml}
         isCss={isCss}
         starterCode={code}
@@ -456,7 +456,7 @@ function logToConsole(message, lineno){
 
     var elem = (
       <BlobStamp
-        ref={(e) => {ref(e) ; this.compileStamp(counter)}}
+        ref={ref}
         starterCode={code}
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
@@ -482,6 +482,7 @@ function logToConsole(message, lineno){
 
   sendSaveData() {
 
+
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -492,9 +493,9 @@ function logToConsole(message, lineno){
     var cssStamp = this.state.fnStamps[this.state.cssID];
 
     var message = {
-      html: htmlStamp.ref.current.state.runnableInnerCode,
+      html: htmlStamp.ref.current.state.code,
       stamper: this.getAllData(),
-      css: cssStamp.ref.current.state.runnableInnerCode,
+      css: cssStamp.ref.current.state.code,
       js: this.getExportableCode()
     };
     ipc && ipc.send("save", message);
@@ -507,10 +508,10 @@ function logToConsole(message, lineno){
     var fnStamps = Object.values(this.state.fnStamps)
     for(var i = 0; i< fnStamps.length; i++){
       var fnStampRef = fnStamps[i].ref.current
-      if(fnStampRef){
+ 
       if(fnStampRef.state.name === 'setup'){
         newSetupExists =  true
-      } 
+  
       }
 
     }
@@ -530,6 +531,8 @@ function logToConsole(message, lineno){
   }
 
   requestCompile(id){
+
+
 
     var newTraversalGraph = this.setLineData()
     var oldTravarsalGraph = this.state.traversalGraph
@@ -552,11 +555,10 @@ function logToConsole(message, lineno){
      
     this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
    
-console.log("requestCompile",this.state.fnStamps)
-   
 
   }
   compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
+
 
 
     
@@ -585,7 +587,9 @@ console.log("requestCompile",this.state.fnStamps)
         if(stampRef.props.id in duplicateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
           newErrors.append(0)
         }
+         
         stampRef.clearErrorsAndUpdate(newErrors);
+
 
       if(id in traversalGraph === false){
         return
@@ -717,7 +721,7 @@ console.log("requestCompile",this.state.fnStamps)
       
 
       var stampRef = this.state.fnStamps[id].ref.current
-      if(stampRef){
+
 
      
       if(stampRef.state.name === "setup"){
@@ -730,7 +734,7 @@ console.log("requestCompile",this.state.fnStamps)
         identifiers.declared.map(identifier => declaredDict[identifier] = id)
         identifiers.undeclared.map(identifier => undeclaredArr.push([identifier, id]))
       }
-    }
+
 
   
     });
@@ -815,7 +819,7 @@ console.log("requestCompile",this.state.fnStamps)
       // do nothing
     } else {
       
-        code = `function draw(){\n"${state.name}()\n}`
+        code = `function draw(){\n${state.name}()\n}`
         curLine = this.addCodeBlock(code, -1, runnableCode, ranges, curLine, false)
         
   
@@ -846,8 +850,7 @@ console.log("requestCompile",this.state.fnStamps)
   }
 
   getAllData() {
-console.log('getalldata')
-    console.log(this.state.fnStamps)
+
     var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())

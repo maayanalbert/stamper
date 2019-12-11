@@ -95,11 +95,13 @@ export default class FunctionStamp extends Component {
     this.setState({ isSpecialFn: isSpecialFn });
   }
 
+  componentDidUnmount(){
 
+  }
 
   componentDidMount() {
-
-    this.props.requestCompile();
+    console.log("mounting")
+    this.setState({errorLines:{}}, () => this.props.requestCompile(this.props.id))
     this.checkName();
     this.loadp5Lib();
   }
@@ -112,6 +114,7 @@ export default class FunctionStamp extends Component {
   }
 
   clearErrorsAndUpdate(newErrors=[]){
+
     var newErrorLines = this.state.errorLines
       var newErrorLines = {}
 
@@ -197,7 +200,7 @@ export default class FunctionStamp extends Component {
     return (
       <div
         onMouseOut={() => {
-          this.mouseOutCallback()
+      
           this.setEditorScrolling(false)
         }
         }
@@ -275,7 +278,7 @@ export default class FunctionStamp extends Component {
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.mouseOutCallback()}
+         
 
           value={this.state.name}
           class={"text-" + nameColor + " name"}
@@ -292,7 +295,7 @@ export default class FunctionStamp extends Component {
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.mouseOutCallback()}
+   
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />
@@ -311,6 +314,7 @@ export default class FunctionStamp extends Component {
               e.movementY
             );
           }}
+          onMouseOver={() => this.mouseOutCallback()}
           onResizeStart={this.props.onStartMove}
           onResizeStop={(e) =>  this.props.onStopMove() }
           width={this.state.iframeHeight}
@@ -445,7 +449,7 @@ export default class FunctionStamp extends Component {
     }
 
     return (
-      <div>
+      <div onMouseOut={() => this.mouseOutCallback()}>
         <Cristal
           ref={this.cristalRef}
 
@@ -463,6 +467,7 @@ export default class FunctionStamp extends Component {
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
+          
         >
 
           <div

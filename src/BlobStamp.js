@@ -38,7 +38,7 @@ export default class BlobStamp extends Component {
   }
 
   componentDidMount() {
-
+this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id))
   }
   setEditorScrolling(isScrolling) {
     if (isScrolling && this.state.editorScrolling == false) {
