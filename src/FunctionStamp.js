@@ -9,8 +9,9 @@ import pf, { globals, p5Lib } from "./globals.js";
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";
-
-// import "ace-builds/src-noconflict/theme-solarized_light";
+import "ace-builds/src-noconflict/mode-css";
+import "ace-builds/src-noconflict/mode-html";
+import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
@@ -184,6 +185,17 @@ export default class FunctionStamp extends Component {
       }
     }
       
+    var theme = "p5"
+    var mode = "javascript"
+    if(this.props.isHtml || this.props.isCss){
+      theme = "solarized_light"
+    }
+
+    if(this.props.isCss){
+      mode = "css"
+    }else if(this.props.isHtml){
+      mode = "html"
+    }
 
     return (
       <div
@@ -199,10 +211,11 @@ export default class FunctionStamp extends Component {
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
+            background:"transparent"
 
           }}
-          mode="javascript"
-          theme="p5"
+          mode={mode}
+          theme={theme}
           onChange={value => {
             this.setState({ code: value });
             ipc && ipc.send("edited");
@@ -416,6 +429,11 @@ export default class FunctionStamp extends Component {
 
     // <!-- @cameron little white div thing --> scroll down to style
 
+    var bgColor = "bg-jsArea"
+    if(this.props.isHtml || this.props.isCss){
+      bgColor = "bg-htmlCssArea"
+    }
+
     return (
       <div>
         <Cristal
@@ -431,7 +449,7 @@ export default class FunctionStamp extends Component {
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className={"shadow-sm bg-jsArea " + border}
+          className={"shadow-sm " + bgColor + " " + border}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}

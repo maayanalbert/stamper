@@ -164,7 +164,7 @@ var Cristal = (function(_super) {
     }
 
     _this.pan = function(changeX, changeY) {
-      console.log(ipc)
+
       ipc && ipc.send("edited")
     if(_this.state.panDisabled){
         return

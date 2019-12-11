@@ -7,7 +7,7 @@ import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
 // import "ace-builds/src-noconflict/mode-javascript";
-// import "ace-builds/src-noconflict/theme-solarized_light";
+// import "ace-builds/src-noconflict/theme-tomorrow";
 // import "ace-builds/src-min-noconflict/ext-language_tools";
 // import "ace-builds/src-noconflict/snippets/javascript";
 
@@ -82,7 +82,7 @@ export default class BlobStamp extends Component {
 
           }}
           mode="javascript"
-          theme="solarized_light"
+          theme="p5"
           onChange={value => {
             this.setState({ code: value });ipc && ipc.send("edited") 
           }
@@ -163,7 +163,13 @@ export default class BlobStamp extends Component {
     this.editorRef.current.editor.resize();
   }
 
+
   render() {
+
+          var border = "border border-borderGrey"
+    if(Object.keys(this.state.errorLines).length > 0){
+      border = "border border-warningOrange"
+    }
     return (
       <div>
         <Cristal
@@ -177,7 +183,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={this.props.initialPosition}
           initialScale={this.props.initialScale}
-          className="shadow-sm bg-jsArea"
+          className={"shadow-sm bg-jsArea " + border}
         >
           <div class="row m-0">{this.renderEditor()}</div>
         </Cristal>
