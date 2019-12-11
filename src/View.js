@@ -639,7 +639,8 @@ function reportError(message, lineno){
   setLines(){
 
     var lines = []
-    var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
+    var borderColorInt = 205 + 15 - 15*this.state.scale
+    var style = {borderColor:`rgb(${borderColorInt}, ${borderColorInt}, ${borderColorInt})`, borderWidth:1}
     this.state.lineData.map(singleLineData => {
 
       lines.push(<SteppedLineTo {...style} from={"vertex" + singleLineData[0]} to={'vertex' + singleLineData[1]} orientation="v" />)
@@ -691,7 +692,7 @@ function reportError(message, lineno){
 
     Object.keys(this.state.fnStamps).map(id =>{
       if(id != this.state.htmlID && id != this.state.cssID){
-        lineData.push([setupID, id])
+        lineData.push([id, setupID])
       }
     })
 
