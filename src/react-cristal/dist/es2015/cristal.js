@@ -246,7 +246,7 @@ var Cristal = (function(_super) {
       var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250)
       _this.setState({mouseWheelTimeout:newTimeOut})
       if (e.ctrlKey) {
-        console.log("preventing default")
+  
         e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
