@@ -108,7 +108,15 @@ export default class ConsoleStamp extends Component {
       if (_.isEqual(lastLog.data, log.data)) {
         this.setState({ lastFreq: this.state.lastFreq + 1 });
       } else {
-        logs.push(log);
+     
+        if(this.state.lastFreq > 1){
+          logs.push({
+        method: "command",
+        data: ["(" + this.state.lastFreq.toString() + ")"]
+      })
+
+        }
+         logs.push(log);
         this.setState({ logs: logs, lastFreq: 1 });
         consoleContainer = document.getElementById("consoleContainer");
         consoleContainer.scrollTop = consoleContainer.scrollHeight;
@@ -157,6 +165,7 @@ this.checkLastLog({ method: method, data: [message] });
         data: ["(" + this.state.lastFreq.toString() + ")"]
       });
     }
+ 
 
 
         if(this.state.hidden){
@@ -190,10 +199,11 @@ this.checkLastLog({ method: method, data: [message] });
 
         >
           <Console 
-          styles={{LOG_COLOR:"rgb(102,102,102)", 
+          styles={{LOG_COLOR:"black", 
           LOG_ERROR_BACKGROUND:"rgba(255, 184, 0, .5)", LOG_ERROR_BORDER:"transparent",
           LOG_ERROR_COLOR:"rgba(102,102,102)", BASE_FONT_FAMILY:"menlo", BASE_FONT_SIZE:10,
-          LOG_COMMAND_COLOR:"rgba(150,150,150)",
+          LOG_COMMAND_COLOR:"rgba(150,150,150)",BASE_BACKGROUND_COLOR:"transparent",
+          LOG_BORDER:"rgb(225,225,225)", LOG_COMMAND_ICON:""
         }}
           logs={renderedLogs} variant="light" />
         </div>
