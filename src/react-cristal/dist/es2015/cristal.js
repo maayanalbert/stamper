@@ -25,6 +25,7 @@ import CloseImg from "./../../../close.png"; // @cameron update this to material
 import styled from "styled-components"; 
 import DeleteIcon from '@material-ui/icons/Delete';
 import CopyIcon from '@material-ui/icons/FileCopyOutlined';
+import ClearIcon from '@material-ui/icons/ClearAll';
 import  "./../../../App.scss"; 
 
 
@@ -82,7 +83,8 @@ var Cristal = (function(_super) {
       originalHeight:null,
       mouseWheelTimeout:null,
       mouseOnClose:false,
-      mouseOnCopy:false
+      mouseOnCopy:false,
+      mouseOnClear:false
     };
 
     _this.space = 32;
@@ -576,6 +578,7 @@ var Cristal = (function(_super) {
    
       var closeBtn = createIcon(this, DeleteIcon, closeHidden, "mouseOnClose", onClose)
       var copyBtn = createIcon(this, CopyIcon,copyHidden, "mouseOnCopy", onCopy)
+      var clearBtn = createIcon(this, ClearIcon,!_a.showClear, "mousOnClear", _a.onClear)
 
       var titleIcon = null
       if(this.props.icon){
@@ -590,6 +593,7 @@ var Cristal = (function(_super) {
         >
           {copyBtn}
           {closeBtn}
+          {clearBtn}
         </div>
       );
 

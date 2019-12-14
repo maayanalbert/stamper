@@ -7,6 +7,7 @@ import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
 import PrintIcon from '@material-ui/icons/Print';
+
 var _ = require("lodash");
 
 
@@ -58,7 +59,7 @@ export default class ConsoleStamp extends Component {
   }
 
   clearConsole() {
-    // this.setState({logs:[], lastFreq:0})
+    this.setState({logs:[], lastFreq:0})
   }
 
   getIcon(){
@@ -189,6 +190,8 @@ this.checkLastLog({ method: method, data: [message] });
           onMove={(s) => this.setState({x:s.x, y:s.y})}
           className="bg-lightGrey border border-borderGrey shadow-sm"
           icon={this.getIcon()}
+        showClear
+        onClear={this.clearConsole.bind(this)}
       >
         <div
           id="consoleContainer"
