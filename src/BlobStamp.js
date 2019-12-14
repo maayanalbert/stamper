@@ -5,7 +5,7 @@ import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
-import CodeIcon from '@material-ui/icons/Code';
+import CodeIcon from "@material-ui/icons/Code";
 
 // import "ace-builds/src-noconflict/mode-javascript";
 // import "ace-builds/src-noconflict/theme-tomorrow";
@@ -13,13 +13,12 @@ import CodeIcon from '@material-ui/icons/Code';
 // import "ace-builds/src-noconflict/snippets/javascript";
 
 var userAgent = navigator.userAgent.toLowerCase();
-if(userAgent.indexOf(' electron/') > -1){
+if (userAgent.indexOf(" electron/") > -1) {
   const electron = window.require("electron");
   var ipc = electron.ipcRenderer;
-}else{
-  var ipc = false
+} else {
+  var ipc = false;
 }
-
 
 export default class BlobStamp extends Component {
   constructor(props) {
@@ -29,16 +28,16 @@ export default class BlobStamp extends Component {
       editorScrolling: false,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
-      errorLines:this.props.errorLines,
-      exportableCode:"",
-      editsMade:"",
-      runningBorder:false,
-      x:this.props.initialPosition.x,
-      y:this.props.initialPosition.y,
-      originX:this.props.initialOriginX,
+      errorLines: this.props.errorLines,
+      exportableCode: "",
+      editsMade: "",
+      runningBorder: false,
+      x: this.props.initialPosition.x,
+      y: this.props.initialPosition.y,
+      originX: this.props.initialOriginX,
       originY: this.props.initialOriginY,
-      scale:this.props.initialScale,
-      hidden:this.props.initialHidden
+      scale: this.props.initialScale,
+      hidden: this.props.initialHidden
     };
 
     this.cristalRef = React.createRef();
@@ -46,7 +45,9 @@ export default class BlobStamp extends Component {
   }
 
   componentDidMount() {
-this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id))
+    this.setState({ exportableCode: "" }, () =>
+      this.props.requestCompile(this.props.id)
+    );
   }
   setEditorScrolling(isScrolling) {
     if (isScrolling && this.state.editorScrolling == false) {
@@ -58,35 +59,41 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     }
   }
 
-  mouseOutCallback(){
-    if(this.state.editsMade){
-              this.props.requestCompile(this.props.id)
-              this.setState({editsMade:false, runningBorder:true}, 
-                () => setTimeout(() => this.setState({runningBorder:false}), 100)
-              )
+  mouseOutCallback() {
+    if (this.state.editsMade) {
+      this.props.requestCompile(this.props.id);
+      this.setState({ editsMade: false, runningBorder: true }, () =>
+        setTimeout(() => this.setState({ runningBorder: false }), 100)
+      );
     }
-
   }
 
-  toggleHide(scale, originX, originY, callback){
-    
-    if(this.state.hidden){
-      var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
-      var distFromOriginY = (this.state.originY - this.state.y)/this.state.scale
-      var x = originX - distFromOriginX*scale
-      var y = originY - distFromOriginY*scale
-    this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
-    }else{
-      this.setState({hidden:true, originX:originX, originY:originY, scale:scale}, callback)
+  toggleHide(scale, originX, originY, callback) {
+    if (this.state.hidden) {
+      var distFromOriginX =
+        (this.state.originX - this.state.x) / this.state.scale;
+      var distFromOriginY =
+        (this.state.originY - this.state.y) / this.state.scale;
+      var x = originX - distFromOriginX * scale;
+      var y = originY - distFromOriginY * scale;
+      this.setState({ hidden: false, scale: scale, x: x, y: y }, callback);
+    } else {
+      this.setState(
+        { hidden: true, originX: originX, originY: originY, scale: scale },
+        callback
+      );
     }
-
   }
   renderEditor() {
-
-    var markers = []
-    for(var i in this.state.errorLines){
-      if(i != 0){
-        markers.push({startRow:i-1, endRow:i, type:"background", className:"bg-warningOrange marker"});
+    var markers = [];
+    for (var i in this.state.errorLines) {
+      if (i != 0) {
+        markers.push({
+          startRow: i - 1,
+          endRow: i,
+          type: "background",
+          className: "bg-warningOrange marker"
+        });
       }
     }
 
@@ -99,18 +106,17 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
         <AceEditor
           style={{
             width: this.state.editorWidth,
-            height: this.state.editorHeight,
-
+            height: this.state.editorHeight
           }}
           mode="javascript"
           theme="p5"
           onChange={value => {
-            this.setState({ code: value });ipc && ipc.send("edited")
-            this.setState({editsMade:true}) 
-          }
-          }
-                 markers={markers}
-        name= {"name" + this.props.id.toString()}
+            this.setState({ code: value });
+            ipc && ipc.send("edited");
+            this.setState({ editsMade: true });
+          }}
+          markers={markers}
+          name={"name" + this.props.id.toString()}
           fontSize={globals.globalVarCodeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -126,7 +132,7 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
             enableSnippets: false,
             showLineNumbers: true,
             tabSize: 2,
-            hasCssTransforms: true 
+            hasCssTransforms: true
           }}
         />
       </div>
@@ -144,23 +150,23 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     this.props.addStamp(data, updatePosition);
   }
 
-  addErrorLine(lineNum){
-    var errorLines = this.state.errorLines
-    errorLines[lineNum] = ""
-    this.setState({errorLines:errorLines})
+  addErrorLine(lineNum) {
+    var errorLines = this.state.errorLines;
+    errorLines[lineNum] = "";
+    this.setState({ errorLines: errorLines });
   }
 
-  clearErrorsAndUpdate(editsMade, newErrors=[]){
-    var newErrorLines = this.state.errorLines
-    if(editsMade){
-      var newErrorLines = {}
+  clearErrorsAndUpdate(editsMade, newErrors = []) {
+    var newErrorLines = this.state.errorLines;
+    if (editsMade) {
+      var newErrorLines = {};
     }
-    this.setState({errorLines:newErrorLines}, () => {
-      this.setState({exportableCode:this.props.getExportableCode()})
-      for(var i = 0; i < newErrors.length; i++){
-        this.addErrorLine(newErrors[i])
+    this.setState({ errorLines: newErrorLines }, () => {
+      this.setState({ exportableCode: this.props.getExportableCode() });
+      for (var i = 0; i < newErrors.length; i++) {
+        this.addErrorLine(newErrors[i]);
       }
-    })
+    });
   }
 
   getData() {
@@ -170,10 +176,10 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
       editorHeight: this.state.editorHeight,
       x: this.state.x,
       y: this.state.y,
-      originX:this.state.originX,
-      originY:this.state.originY,
-      scale:this.state.scale,
-      hidden:this.state.hidden
+      originX: this.state.originX,
+      originY: this.state.originY,
+      scale: this.state.scale,
+      hidden: this.state.hidden
     };
 
     return data;
@@ -189,23 +195,22 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     this.editorRef.current.editor.resize();
   }
 
-  getIcon(){
-    return CodeIcon
+  getIcon() {
+    return CodeIcon;
   }
 
   render() {
-
-          var border = "border border-borderGrey"
-    if(Object.keys(this.state.errorLines).length > 0){
-      border = "border border-warningOrange"
+    var border = "border border-borderGrey";
+    if (Object.keys(this.state.errorLines).length > 0) {
+      border = "border border-warningOrange";
     }
 
-        if(this.state.runningBorder){
-      border = "border border-borderDarkGrey"
+    if (this.state.runningBorder) {
+      border = "border border-borderDarkGrey";
     }
-    console.log(this.state.scale)
-        if(this.state.hidden){
-      return(<div></div>)
+    console.log(this.state.scale);
+    if (this.state.hidden) {
+      return <div></div>;
     }
     return (
       <div>
@@ -218,14 +223,18 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-          initialPosition={{x:this.state.x, y:this.state.y}}
-          onMove={(s) => this.setState({x:s.x, y:s.y})}
+          initialPosition={{ x: this.state.x, y: this.state.y }}
+          onMove={s => this.setState({ x: s.x, y: s.y })}
           initialScale={this.state.scale}
-          className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
+          className={
+            "shadow-sm bg-jsArea " + border + " vertex" + this.props.id
+          }
           title="Anything"
           icon={this.CodeIcon()}
         >
-          <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>{this.renderEditor()}</div>
+          <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>
+            {this.renderEditor()}
+          </div>
         </Cristal>
       </div>
     );

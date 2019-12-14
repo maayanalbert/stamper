@@ -11,7 +11,9 @@ import {
   LeftResizeHandle,
   ContentWrapper,
   padding,
-  Title,minWidth, minHeight
+  Title,
+  minWidth,
+  minHeight
 } from "./styled";
 import { isSmartPosition } from "./domain";
 import {
@@ -22,22 +24,20 @@ import {
 import { Stacker } from "./stacker";
 import CopyImg from "./../../../copy.png"; // @cameron update this to material icon
 import CloseImg from "./../../../close.png"; // @cameron update this to material icon
-import styled from "styled-components"; 
-import DeleteIcon from '@material-ui/icons/Delete';
-import CopyIcon from '@material-ui/icons/FileCopyOutlined';
-import ClearIcon from '@material-ui/icons/ClearAll';
-import  "./../../../App.scss"; 
-
-
+import styled from "styled-components";
+import DeleteIcon from "@material-ui/icons/Delete";
+import CopyIcon from "@material-ui/icons/FileCopyOutlined";
+import ClearIcon from "@material-ui/icons/ClearAll";
+import MinimzeIcon from "@material-ui/icons/Minimize";
+import "./../../../App.scss";
 
 var userAgent = navigator.userAgent.toLowerCase();
-if(userAgent.indexOf(' electron/') > -1){
+if (userAgent.indexOf(" electron/") > -1) {
   const electron = window.require("electron");
   var ipc = electron.ipcRenderer;
-}else{
-  var ipc = false
+} else {
+  var ipc = false;
 }
-
 
 var __extends =
   (this && this.__extends) ||
@@ -73,18 +73,18 @@ var Cristal = (function(_super) {
       isDragging: false,
       isResizingX: false,
       isResizingY: false,
-      isResizingXLeft:false,
+      isResizingXLeft: false,
       zIndex: Stacker.getNextIndex(),
       downKey: -1,
       isMoving: false,
       mouseIsDown: false,
       scale: 1,
-      panDisabled:false,
-      originalHeight:null,
-      mouseWheelTimeout:null,
-      mouseOnClose:false,
-      mouseOnCopy:false,
-      mouseOnClear:false
+      panDisabled: false,
+      originalHeight: null,
+      mouseWheelTimeout: null,
+      mouseOnClose: false,
+      mouseOnCopy: false,
+      mouseOnClear: false
     };
 
     _this.space = 32;
@@ -105,8 +105,6 @@ var Cristal = (function(_super) {
       });
     };
     _this.saveWrapperRef = function(el) {
-
-
       _this.childrenElement = el;
       if (!_this.childrenElement) return;
       var initialSize = _this.props.initialSize;
@@ -116,18 +114,16 @@ var Cristal = (function(_super) {
         height = initialSize.height;
       } else {
         var rect = _this.childrenElement.getBoundingClientRect();
-            
 
         width = rect.width;
 
         height = rect.height;
       }
       if (_this.props.initialScale) {
-
         _this.setState({ scale: _this.props.initialScale });
       }
-      _this.setState({ width: width, height: height,originalHeight:height });
-      _this.setInitialPosition({ width: width, height: height});
+      _this.setState({ width: width, height: height, originalHeight: height });
+      _this.setInitialPosition({ width: width, height: height });
     };
     _this.setInitialPosition = function(size) {
       var initialPosition = _this.props.initialPosition;
@@ -160,7 +156,6 @@ var Cristal = (function(_super) {
     };
 
     _this.onMouseDown = function() {
-
       var isDraggable = _this.props.isDraggable;
       if (!isDraggable) return;
 
@@ -169,17 +164,15 @@ var Cristal = (function(_super) {
       });
     };
 
-    _this.disablePan = function(status){
-        _this.setState({panDisabled:status})
-    }
+    _this.disablePan = function(status) {
+      _this.setState({ panDisabled: status });
+    };
 
     _this.pan = function(changeX, changeY) {
-
-
-      ipc && ipc.send("edited")
-    if(_this.state.panDisabled){
-        return
-    }
+      ipc && ipc.send("edited");
+      if (_this.state.panDisabled) {
+        return;
+      }
       var _a = _this.state,
         currentX = _a.x,
         currentY = _a.y;
@@ -188,15 +181,22 @@ var Cristal = (function(_super) {
       _this.setState({ x: newX, y: newY }, () => _this.onStartMove(true));
     };
 
-    _this.manualResize = function(widthDiff, heightDiff){
+    _this.manualResize = function(widthDiff, heightDiff) {
+      var width = _this.state.width,
+        height = _this.state.height,
+        originalHeight = _this.state.originalHeight;
 
-        var width = _this.state.width, height = _this.state.height, originalHeight = _this.state.originalHeight
+      _this.setState({ width: width + widthDiff });
+    };
 
-        _this.setState({width:width+widthDiff})
-    }
-
-    _this.zoom = function(newScale, mouseX, mouseY, manual = false, center = false) {
-      ipc && ipc.send("edited")
+    _this.zoom = function(
+      newScale,
+      mouseX,
+      mouseY,
+      manual = false,
+      center = false
+    ) {
+      ipc && ipc.send("edited");
 
       var scale = _this.state.scale,
         x = _this.state.x,
@@ -208,8 +208,6 @@ var Cristal = (function(_super) {
         return;
       }
 
-
-
       var curDistX = mouseX - x,
         curDistY = mouseY - y;
 
@@ -218,7 +216,6 @@ var Cristal = (function(_super) {
 
       var scaledDistX = unScaledDistX * newScale,
         scaledDistY = unScaledDistY * newScale;
-
 
       if (center) {
         var newOriginX = window.innerWidth / 2,
@@ -230,32 +227,29 @@ var Cristal = (function(_super) {
       var newX = newOriginX - scaledDistX,
         newY = newOriginY - scaledDistY;
 
-    if(manual){
-      _this.setState({ scale: newScale }, () =>
-        _this.setState({ x: newX, y: newY })
-      );        
-  }else{
-      _this.setState({ scale: newScale }, () =>
-        _this.setState({ x: newX, y: newY }, () => this.onStartMove(true))
-      );
-  }
-
+      if (manual) {
+        _this.setState({ scale: newScale }, () =>
+          _this.setState({ x: newX, y: newY })
+        );
+      } else {
+        _this.setState({ scale: newScale }, () =>
+          _this.setState({ x: newX, y: newY }, () => this.onStartMove(true))
+        );
+      }
     };
 
     _this.onWheel = function(e) {
-
-      if(_this.state.mouseWheelTimeout){
-        clearTimeout(_this.state.mouseWheelTimeout)
+      if (_this.state.mouseWheelTimeout) {
+        clearTimeout(_this.state.mouseWheelTimeout);
       }
-      var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250)
-      _this.setState({mouseWheelTimeout:newTimeOut})
+      var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250);
+      _this.setState({ mouseWheelTimeout: newTimeOut });
       if (e.ctrlKey) {
-
         e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
-        if(_this.props.panDisabled){
-          return
+        if (_this.props.panDisabled) {
+          return;
         }
         _this.pan(-e.deltaX, -e.deltaY);
       }
@@ -264,9 +258,7 @@ var Cristal = (function(_super) {
       _this.setState({ mouseIsDown: true });
     };
     _this.onMouseMove = function(e) {
-           
       var isResizing = _this.isResizing;
-
 
       var _a = _this.state,
         isDragging = _a.isDragging,
@@ -286,7 +278,7 @@ var Cristal = (function(_super) {
 
         return;
       } else if (isDragging) {
-        ipc && ipc.send("edited")
+        ipc && ipc.send("edited");
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
@@ -296,23 +288,23 @@ var Cristal = (function(_super) {
           y = _b.y;
         _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
-      } else if(isResizing) {
-        ipc && ipc.send("edited")
-          _this.resizeCristal(e);
+      } else if (isResizing) {
+        ipc && ipc.send("edited");
+        _this.resizeCristal(e);
       }
     };
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
-      var scale = _this.state.scale
+      var scale = _this.state.scale;
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
         currentY = _a.y,
         currentWidth = _a.width,
         currentHeight = _a.height;
-      var movementX = e.movementX/scale,
-        movementY = e.movementY/scale;
+      var movementX = e.movementX / scale,
+        movementY = e.movementY / scale;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
       var newX = currentX + movementX;
@@ -322,36 +314,26 @@ var Cristal = (function(_super) {
         isResizingY = _c.isResizingY,
         isResizingXLeft = _c.isResizingXLeft;
 
-      var height = currentHeight
-      var width = currentWidth
-      var x = currentX
-
+      var height = currentHeight;
+      var width = currentWidth;
+      var x = currentX;
 
       if (isResizingX) {
-   
         var newWidth = (currentWidth || 0) + movementX;
         var width = Math.max(newWidth, minWidth);
-
       }
-      if(isResizingXLeft) {
-      
+      if (isResizingXLeft) {
         var newWidth = (currentWidth || 0) - movementX;
         var width = Math.max(newWidth, minWidth);
-        var x = currentX + e.movementX
-    
+        var x = currentX + e.movementX;
       }
       if (isResizingY) {
         var newHeight = (currentHeight || 0) + movementY;
         var height = Math.max(newHeight, minHeight);
-      
       }
 
-
-      _this.notifyResize(width, height, x)
-
+      _this.notifyResize(width, height, x);
     };
-
-
 
     _this.onStoppedMove = function() {
       if (this.state.isMoving) {
@@ -362,10 +344,8 @@ var Cristal = (function(_super) {
     };
 
     _this.onStartMove = function(panning = false) {
-     
       _this.notifyMove();
       if (_this.state.isMoving === false) {
-
         _this.notifyStartMove();
         if (_this.state.downKey === _this.opt && panning === false) {
           _this.notifyOptMove();
@@ -378,19 +358,17 @@ var Cristal = (function(_super) {
       onMove && onMove(_this.state);
     };
     _this.notifyResize = function(newWidth, newHeight, newX) {
-
       var onResize = _this.props.onResize;
-      var heightDiff = newHeight - _this.state.height
-      var widthDiff = newWidth - _this.state.width
-      var resizeBlocked = false
+      var heightDiff = newHeight - _this.state.height;
+      var widthDiff = newWidth - _this.state.width;
+      var resizeBlocked = false;
       if (onResize) {
         var resizeBlocked = onResize(widthDiff, heightDiff);
       }
-      if(!resizeBlocked){
-        _this.setState({height:newHeight, width:newWidth, x:newX})
+      if (!resizeBlocked) {
+        _this.setState({ height: newHeight, width: newWidth, x: newX });
       }
     };
-    
 
     _this.notifyStartMove = function() {
       var onStartMove = _this.props.onStartMove;
@@ -405,7 +383,6 @@ var Cristal = (function(_super) {
       onOptMove && onOptMove(_this.state);
     };
     _this.notifyStartResize = function() {
-
       var onStartResize = _this.props.onStartResize;
       onStartResize && onStartResize(_this.state);
     };
@@ -416,71 +393,91 @@ var Cristal = (function(_super) {
 
     _this.onMouseUp = function() {
       _this.onStoppedMove();
-      if(_this.state.isResizingY || _this.state.isResizingX ||_this.state.isResizingXLeft){
+      if (
+        _this.state.isResizingY ||
+        _this.state.isResizingX ||
+        _this.state.isResizingXLeft
+      ) {
         _this.notifyStopResize();
       }
       _this.setState({
         isDragging: false,
         isResizingX: false,
-        isResizingXLeft:false,
+        isResizingXLeft: false,
         isResizingY: false,
         mouseIsDown: false
       });
     };
     _this.startFullResize = function() {
-      _this.notifyStartResize()
+      _this.notifyStartResize();
       _this.setState({
         isResizingX: true,
         isResizingY: true
       });
     };
     _this.startFullLeftResize = function() {
-      _this.notifyStartResize()
+      _this.notifyStartResize();
       _this.setState({
         isResizingXLeft: true,
         isResizingY: true
       });
     };
     _this.startXResize = function() {
-        _this.notifyStartResize()
+      _this.notifyStartResize();
       return _this.setState({ isResizingX: true });
     };
     _this.startXLeftResize = function() {
-        _this.notifyStartResize()
+      _this.notifyStartResize();
       return _this.setState({ isResizingXLeft: true });
     };
     _this.startYResize = function() {
-
-        _this.notifyStartResize()
+      _this.notifyStartResize();
       return _this.setState({ isResizingY: true });
     };
     _this.renderResizeHandles = function() {
       var isResizable = _this.props.isResizable;
       if (!isResizable) return;
 
-      var scale = _this.state.scale
-      var height = _this.state.height
-      var width = _this.state.width
+      var scale = _this.state.scale;
+      var height = _this.state.height;
+      var width = _this.state.width;
       return [
         React.createElement(RightResizeHandle, {
           key: "right-resize",
-          onMouseDown: _this.startXResize, style:{ width:20/scale, bottom:20/scale, height:height - 30- 20/scale}
+          onMouseDown: _this.startXResize,
+          style: {
+            width: 20 / scale,
+            bottom: 20 / scale,
+            height: height - 30 - 20 / scale
+          }
         }),
         React.createElement(LeftResizeHandle, {
           key: "left-resize",
-          onMouseDown: _this.startXLeftResize, style:{ width:20/scale, bottom:20/scale, height:height - 30- 20/scale},
+          onMouseDown: _this.startXLeftResize,
+          style: {
+            width: 20 / scale,
+            bottom: 20 / scale,
+            height: height - 30 - 20 / scale
+          }
         }),
         React.createElement(BottomRightResizeHandle, {
           key: "bottom-right-resize",
-          onMouseDown: _this.startFullResize, style:{ width:20/scale, height:20/scale}
+          onMouseDown: _this.startFullResize,
+          style: { width: 20 / scale, height: 20 / scale }
         }),
         React.createElement(BottomLeftResizeHandle, {
           key: "bottom-left-resize",
-          onMouseDown: _this.startFullLeftResize, style:{ width:20/scale, height:20/scale}
+          onMouseDown: _this.startFullLeftResize,
+          style: { width: 20 / scale, height: 20 / scale }
         }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
-          onMouseDown: _this.startYResize, style:{height:20/scale, left:20/scale, width:width - 2*20/scale}
+          onMouseDown: _this.startYResize,
+          style: {
+            height: 20 / scale,
+            left: 20 / scale,
+            width: width - (2 * 20) / scale
+          }
         })
       ];
     };
@@ -524,44 +521,48 @@ var Cristal = (function(_super) {
     configurable: true
   });
 
-  function createIcon(_this, iconType,  hiddenFlag = false, stateVal="",  callBack=null){
-    if(hiddenFlag){
-      return null
+  function createIcon(
+    _this,
+    iconType,
+    hiddenFlag = false,
+    stateVal = "",
+    callBack = null
+  ) {
+    if (hiddenFlag) {
+      return null;
     }
 
-      var opacity = .3
-      if(_this.state[stateVal]){
-        opacity = 1
-      }
+    var opacity = 0.5;
+    if (_this.state[stateVal]) {
+      opacity = 1;
+    }
 
-    var mouseOverCallback =  () => {
-          var stateEdit = {}
-          stateEdit[stateVal] = true
-          _this.setState(stateEdit)
-        }
+    var mouseOverCallback = () => {
+      var stateEdit = {};
+      stateEdit[stateVal] = true;
+      _this.setState(stateEdit);
+    };
 
     var mouseOutCallback = () => {
-        
-          var stateEdit = {}
-          stateEdit[stateVal] = false
-          _this.setState(stateEdit)
-     
-        }
-        var color = "greyText"
-    if(!callBack){
-  mouseOverCallback = () => {}
-      mouseOutCallback = () => {}
-      opacity = .8
-      color="greyText"
+      var stateEdit = {};
+      stateEdit[stateVal] = false;
+      _this.setState(stateEdit);
+    };
+    var color = "greyText";
+    if (!callBack) {
+      mouseOverCallback = () => {};
+      mouseOutCallback = () => {};
+      opacity = 0.5;
+      color = "greyText";
     }
 
     return React.createElement(iconType, {
-        onClick: callBack,
-        style:{opacity:opacity, height:18, width:18},
-        className:"m-1 text-" + color,
-        onMouseOver:mouseOverCallback,
-        onMouseOut:mouseOutCallback
-      });
+      onClick: callBack,
+      style: { opacity: opacity, height: 18, width: 18 },
+      className: "m-1 text-" + color,
+      onMouseOver: mouseOverCallback,
+      onMouseOut: mouseOutCallback
+    });
   }
 
   Object.defineProperty(Cristal.prototype, "header", {
@@ -574,17 +575,42 @@ var Cristal = (function(_super) {
         onCopy = _a.onCopy,
         copyHidden = _a.copyHidden;
 
+      var closeBtn = createIcon(
+        this,
+        DeleteIcon,
+        closeHidden,
+        "mouseOnClose",
+        onClose
+      );
+      var copyBtn = createIcon(
+        this,
+        CopyIcon,
+        copyHidden,
+        "mouseOnCopy",
+        onCopy
+      );
+      var clearBtn = createIcon(
+        this,
+        ClearIcon,
+        !_a.showClear,
+        "mousOnClear",
+        _a.onClear
+      );
 
-   
-      var closeBtn = createIcon(this, DeleteIcon, closeHidden, "mouseOnClose", onClose)
-      var copyBtn = createIcon(this, CopyIcon,copyHidden, "mouseOnCopy", onCopy)
-      var clearBtn = createIcon(this, ClearIcon,!_a.showClear, "mousOnClear", _a.onClear)
-
-      var titleIcon = null
-      if(this.props.icon){
-      var titleIcon = createIcon(this, this.props.icon)
+      if(_a.onMinimize){
+      var minimizeBtn = createIcon(
+        this,
+        MinimzeIcon,
+        _a.onMinimize === null,
+        "mouseOnMinimize",
+        _a.onMinimize
+      );        
       }
 
+      var titleIcon = null;
+      if (this.props.icon) {
+        var titleIcon = createIcon(this, this.props.icon);
+      }
 
       var sideButtons = (
         <div
@@ -594,6 +620,7 @@ var Cristal = (function(_super) {
           {copyBtn}
           {closeBtn}
           {clearBtn}
+          {minimizeBtn}
         </div>
       );
 
@@ -639,15 +666,15 @@ var Cristal = (function(_super) {
       height: height,
       zIndex: zIndex,
       transform: "scale(" + scale.toString() + ")",
-      transformOrigin:"top left",
+      transformOrigin: "top left",
       border: this.props.border,
       outline: this.props.outline
     };
 
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
-    if(this.props.headerHidden){
-      HeaderComponent = null
+    if (this.props.headerHidden) {
+      HeaderComponent = null;
     }
 
     return ReactDOM.createPortal(
@@ -658,7 +685,7 @@ var Cristal = (function(_super) {
           ref: this.saveWrapperRef,
           isActive: isActive,
           className: className + " rounded " + this.props.wrapperName,
-          onMouseDown: this.changeZIndex,
+          onMouseDown: this.changeZIndex
         },
         <div>{HeaderComponent}</div>,
         ContentComponent,

@@ -6,10 +6,10 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-import GradientIcon from '@material-ui/icons/Gradient';
-import ColorIcon from '@material-ui/icons/ColorLens';
-import WebIcon from '@material-ui/icons/Web';
-import CategoryIcon from '@material-ui/icons/Category';
+import GradientIcon from "@material-ui/icons/Gradient";
+import ColorIcon from "@material-ui/icons/ColorLens";
+import WebIcon from "@material-ui/icons/Web";
+import CategoryIcon from "@material-ui/icons/Category";
 
 import "./theme-p5.js";
 
@@ -21,16 +21,13 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import { Resizable, ResizableBox } from "react-resizable";
 
-
 var userAgent = navigator.userAgent.toLowerCase();
-if(userAgent.indexOf(' electron/') > -1){
+if (userAgent.indexOf(" electron/") > -1) {
   const electron = window.require("electron");
   var ipc = electron.ipcRenderer;
-}else{
-  var ipc = false
+} else {
+  var ipc = false;
 }
-
-
 
 export default class FunctionStamp extends Component {
   constructor(props) {
@@ -47,41 +44,46 @@ export default class FunctionStamp extends Component {
       editorHidden: false,
       isSpecialFn: false,
       editorScrolling: false,
-      errorLines:this.props.errorLines,
-      iframeCode:"",
-      editsMade:false,
-      runningBorder:false,
-      doubleClickActive:false,
-      resizingIframe:false,
-      x:this.props.initialPosition.x,
-      y:this.props.initialPosition.y,
-      originX:this.props.initialOriginX,
+      errorLines: this.props.errorLines,
+      iframeCode: "",
+      editsMade: false,
+      runningBorder: false,
+      doubleClickActive: false,
+      resizingIframe: false,
+      x: this.props.initialPosition.x,
+      y: this.props.initialPosition.y,
+      originX: this.props.initialOriginX,
       originY: this.props.initialOriginY,
-      scale:this.props.initialScale,
-      hidden:this.props.initialHidden
+      scale: this.props.initialScale,
+      hidden: this.props.initialHidden
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
 
-  toggleHide(scale, originX, originY, callback){
-    
-    if(this.state.hidden){
-      var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
-      var distFromOriginY = (this.state.originY - this.state.y)/this.state.scale
-      var x = originX - distFromOriginX*scale
-      var y = originY - distFromOriginY*scale
-    this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
-    }else{
-      this.setState({hidden:true, originX:originX, originY:originY, scale:scale}, callback)
+  toggleHide(scale, originX, originY, callback) {
+    if (this.state.hidden) {
+      var distFromOriginX =
+        (this.state.originX - this.state.x) / this.state.scale;
+      var distFromOriginY =
+        (this.state.originY - this.state.y) / this.state.scale;
+      var x = originX - distFromOriginX * scale;
+      var y = originY - distFromOriginY * scale;
+      this.setState({ hidden: false, scale: scale, x: x, y: y }, callback);
+    } else {
+      this.setState(
+        { hidden: true, originX: originX, originY: originY, scale: scale },
+        callback
+      );
     }
-
   }
 
   componentDidMount() {
-this.setState({iframeCode:""}, () => this.props.requestCompile(this.props.id))
-this.checkName()
+    this.setState({ iframeCode: "" }, () =>
+      this.props.requestCompile(this.props.id)
+    );
+    this.checkName();
   }
 
   checkName() {
@@ -89,25 +91,22 @@ this.checkName()
     this.setState({ isSpecialFn: isSpecialFn });
   }
 
-
-  addErrorLine(lineNum){
-    var errorLines = this.state.errorLines
-    errorLines[lineNum] = ""
-    this.setState({errorLines:errorLines})
-
+  addErrorLine(lineNum) {
+    var errorLines = this.state.errorLines;
+    errorLines[lineNum] = "";
+    this.setState({ errorLines: errorLines });
   }
 
-  clearErrorsAndUpdate(newErrors=[]){
+  clearErrorsAndUpdate(newErrors = []) {
+    var newErrorLines = this.state.errorLines;
+    var newErrorLines = {};
 
-    var newErrorLines = this.state.errorLines
-      var newErrorLines = {}
-
-    this.setState({errorLines:newErrorLines}, () => {
-      this.setState({iframeCode:this.props.getHTML(this.props.id)})
-      for(var i = 0; i < newErrors.length; i++){
-        this.addErrorLine(newErrors[i])
+    this.setState({ errorLines: newErrorLines }, () => {
+      this.setState({ iframeCode: this.props.getHTML(this.props.id) });
+      for (var i = 0; i < newErrors.length; i++) {
+        this.addErrorLine(newErrors[i]);
       }
-    })
+    });
   }
 
   loadp5Lib() {
@@ -125,18 +124,12 @@ this.checkName()
     });
   }
 
-  updateIframeDimensions(
-    movementX = 0,
-    movementY = 0
-  ) {
-
-
+  updateIframeDimensions(movementX = 0, movementY = 0) {
     ipc && ipc.send("edited");
-    var scale = this.props.getScale()
+    var scale = this.props.getScale();
 
-
-    var width = this.state.iframeWidth + movementX/scale;
-    var height = this.state.iframeHeight + movementY/scale;
+    var width = this.state.iframeWidth + movementX / scale;
+    var height = this.state.iframeHeight + movementY / scale;
     if (width < 30) {
       movementX = 0;
       width = 30;
@@ -146,9 +139,8 @@ this.checkName()
       height = 30;
     }
 
-
     this.setState({ iframeWidth: width, iframeHeight: height });
-    this.cristalRef.current.manualResize(movementX/scale, movementY/scale);
+    this.cristalRef.current.manualResize(movementX / scale, movementY / scale);
   }
 
   setEditorScrolling(isScrolling) {
@@ -162,51 +154,52 @@ this.checkName()
   }
 
   renderEditor() {
-    var markers = []
-    for(var i in this.state.errorLines){
-      if(i != 0){
-        markers.push({startRow:i-1, endRow:i, type:"background", className:"bg-warningOrange marker"});
+    var markers = [];
+    for (var i in this.state.errorLines) {
+      if (i != 0) {
+        markers.push({
+          startRow: i - 1,
+          endRow: i,
+          type: "background",
+          className: "bg-warningOrange marker"
+        });
       }
     }
-      
-    var theme = "p5"
-    var mode = "javascript"
-    if(this.props.isHtml || this.props.isCss){
-      theme = "solarized_light"
+
+    var theme = "p5";
+    var mode = "javascript";
+    if (this.props.isHtml || this.props.isCss) {
+      theme = "solarized_light";
     }
 
-    if(this.props.isCss){
-      mode = "css"
-    }else if(this.props.isHtml){
-      mode = "html"
+    if (this.props.isCss) {
+      mode = "css";
+    } else if (this.props.isHtml) {
+      mode = "html";
     }
-
-
 
     return (
       <div
         onMouseOut={() => {
-          this.setEditorScrolling(false)
-        }
-        }
+          this.setEditorScrolling(false);
+        }}
         hidden={this.state.editorHidden}
       >
         <br />
         <AceEditor
-        markers={markers}
+          markers={markers}
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
-            background:"transparent"
-
+            background: "transparent"
           }}
           mode={mode}
           theme={theme}
           onChange={value => {
-            this.setState({ code: value, editsMade:true });
+            this.setState({ code: value, editsMade: true });
             ipc && ipc.send("edited");
           }}
-          name= {"name" + this.props.id.toString()}
+          name={"name" + this.props.id.toString()}
           fontSize={globals.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -228,14 +221,13 @@ this.checkName()
     );
   }
 
-  mouseOutCallback(){
-    if(this.state.editsMade){
-              this.props.requestCompile(this.props.id)
-              this.setState({editsMade:false, runningBorder:true}, 
-                () => setTimeout(() => this.setState({runningBorder:false}), 100)
-              )
+  mouseOutCallback() {
+    if (this.state.editsMade) {
+      this.props.requestCompile(this.props.id);
+      this.setState({ editsMade: false, runningBorder: true }, () =>
+        setTimeout(() => this.setState({ runningBorder: false }), 100)
+      );
     }
-
   }
 
   renderFunctionName() {
@@ -247,12 +239,11 @@ this.checkName()
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
-    }else if(this.props.isHtml || this.props.isCss){
-      nameColor = "htmlCssName"
+    } else if (this.props.isHtml || this.props.isCss) {
+      nameColor = "htmlCssName";
     }
 
-    var argsColor = "greyText"
-   
+    var argsColor = "greyText";
 
     return (
       <div>
@@ -260,14 +251,13 @@ this.checkName()
           placeholder="function name..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
-            this.setState({ name: event.target.value, editsMade:true }, () => this.checkName());
+            this.setState({ name: event.target.value, editsMade: true }, () =>
+              this.checkName()
+            );
 
             ipc && ipc.send("edited");
           }}
-          style={{background:"transparent"}}
-        
-
-
+          style={{ background: "transparent" }}
           value={this.state.name}
           class={"text-" + nameColor + " name"}
         />
@@ -275,15 +265,14 @@ this.checkName()
         <br />
 
         <input
-        // @cameron styling for arguments field
+          // @cameron styling for arguments field
           placeholder="arguments..."
           disabled={this.props.isHtml || this.props.isCss}
           onChange={event => {
-            this.setState({ args: event.target.value, editsMade:true });
+            this.setState({ args: event.target.value, editsMade: true });
             ipc && ipc.send("edited");
           }}
-          style={{background:"transparent"}}
-       
+          style={{ background: "transparent" }}
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />
@@ -291,30 +280,37 @@ this.checkName()
     );
   }
 
-
   renderIframe() {
     return (
       <div hidden={this.props.isCss}>
-<div hidden={this.state.resizingIframe === false}
-style={{position:"absolute", fontSize:globals.codeSize, opacity:.5,
-top: 80, right:25}} 
-class="text-greyText">
-{Math.floor(this.state.iframeWidth) + "," + Math.floor(this.state.iframeHeight)}</div>
+        <div
+          hidden={this.state.resizingIframe === false}
+          style={{
+            position: "absolute",
+            fontSize: globals.codeSize,
+            opacity: 0.5,
+            top: 80,
+            right: 25
+          }}
+          class="text-greyText"
+        >
+         {"W:" + Math.floor(this.state.iframeWidth) +
+            " H:" +
+            Math.floor(this.state.iframeHeight)}
+        </div>
         <Resizable
-    
           className="ml-1 bg-white shadow"
           onResize={e => {
-            this.updateIframeDimensions(
-              e.movementX,
-              e.movementY
-            );
+            this.updateIframeDimensions(e.movementX, e.movementY);
           }}
           onResizeStart={() => {
-            this.props.onStartMove(); 
-            this.setState({resizingIframe:true})
-          }
-          }
-          onResizeStop={(e) =>  {this.props.onStopMove();this.setState({resizingIframe:false})} }
+            this.props.onStartMove();
+            this.setState({ resizingIframe: true });
+          }}
+          onResizeStop={e => {
+            this.props.onStopMove();
+            this.setState({ resizingIframe: false });
+          }}
           width={this.state.iframeHeight}
           height={this.state.iframeWidth}
           style={{
@@ -322,7 +318,6 @@ class="text-greyText">
             zIndex: 5
           }}
         >
-
           <div onMouseOver={this.mouseOutCallback.bind(this)}>
             <div
               style={{
@@ -336,15 +331,14 @@ class="text-greyText">
             >
               {" "}
             </div>
-            <iframe 
-
-            ref={(iframeElem) => {if(iframeElem){
-              this.props.addNewIframeConsole(iframeElem.contentWindow.console)
-
-            }}
-
-              
-            }
+            <iframe
+              ref={iframeElem => {
+                if (iframeElem) {
+                  this.props.addNewIframeConsole(
+                    iframeElem.contentWindow.console
+                  );
+                }
+              }}
               scrolling="no"
               style={{
                 border: "none",
@@ -360,7 +354,6 @@ class="text-greyText">
           </div>
         </Resizable>
       </div>
-
     );
   }
 
@@ -409,22 +402,21 @@ class="text-greyText">
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
       isCss: this.props.isCss,
-      originX:this.state.originX,
-      originY:this.state.originY,
-      scale:this.state.scale,
-      hidden:this.state.hidden
+      originX: this.state.originX,
+      originY: this.state.originY,
+      scale: this.state.scale,
+      hidden: this.state.hidden
     };
-
 
     return data;
   }
 
   resizeEditor(widthDiff, heightDiff) {
-    var height = this.state.editorHeight + heightDiff
-    var width = this.state.editorWidth + widthDiff
+    var height = this.state.editorHeight + heightDiff;
+    var width = this.state.editorWidth + widthDiff;
 
-    if(height < 0 || width < 0){
-      return true
+    if (height < 0 || width < 0) {
+      return true;
     }
 
     this.setState({
@@ -434,54 +426,49 @@ class="text-greyText">
     this.editorRef.current.editor.resize();
   }
 
-  getIcon(){
-    var icon = GradientIcon
-    if(this.props.isHtml){
-      icon = WebIcon
-    }else if(this.props.isCss){
-      icon = ColorIcon
-    }else if(this.state.isSpecialFn){
-      icon = CategoryIcon
+  getIcon() {
+    var icon = GradientIcon;
+    if (this.props.isHtml) {
+      icon = WebIcon;
+    } else if (this.props.isCss) {
+      icon = ColorIcon;
+    } else if (this.state.isSpecialFn) {
+      icon = CategoryIcon;
     }
 
-    return icon
-
+    return icon;
   }
 
   render() {
-
-    var headerColor = "bg-white"
-    if(0 in this.state.errorLines){
-      headerColor = "bg-warningOrange"
+    var headerColor = "bg-white";
+    if (0 in this.state.errorLines) {
+      headerColor = "bg-warningOrange";
     }
 
+    var border = "border border-borderGrey";
 
-    var border = "border border-borderGrey"
-
-    if(Object.keys(this.state.errorLines).length > 0){
-      border = "border border-warningOrange"
+    if (Object.keys(this.state.errorLines).length > 0) {
+      border = "border border-warningOrange";
     }
-      if(this.state.runningBorder){
-      border = "border border-borderDarkGrey"
+    if (this.state.runningBorder) {
+      border = "border border-borderDarkGrey";
     }
 
     // <!-- @cameron little white div thing --> scroll down to style
 
-    var bgColor = "bg-jsArea"
-    if(this.props.isHtml || this.props.isCss){
-      bgColor = "bg-htmlCssArea"
+    var bgColor = "bg-jsArea";
+    if (this.props.isHtml || this.props.isCss) {
+      bgColor = "bg-htmlCssArea";
     }
 
-
-    if(this.state.hidden){
-      return(<div></div>)
+    if (this.state.hidden) {
+      return <div></div>;
     }
 
     return (
       <div>
         <Cristal
           ref={this.cristalRef}
-
           isResizable={true}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
@@ -490,41 +477,41 @@ class="text-greyText">
           onOptMove={() => this.copyAndOpt(true)}
           closeHidden={this.props.isHtml || this.props.isCss}
           copyHidden={this.props.isHtml || this.props.isCss}
-          initialPosition={{x:this.state.x, y:this.state.y}}
+          initialPosition={{ x: this.state.x, y: this.state.y }}
           initialScale={this.state.scale}
-          className={"shadow-sm " + bgColor + " " + border + " vertex" + this.props.id}
+          className={
+            "shadow-sm " + bgColor + " " + border + " vertex" + this.props.id
+          }
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
-          onMove={(s) => this.setState({x:s.x, y:s.y})}
+          onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
         >
           <div onMouseLeave={this.mouseOutCallback.bind(this)}>
-          <div
-
-            class={headerColor}
-            style={{
-              position: "absolute",
-              top: globals.headerHeight,
-              left: 0,
-              width: "100%",
-              height: globals.fnTitleHeight,
-              color: "transparent"
-            }}
-          >
-            {" "}
-          </div>
-
-          <div class="p-2" >
-
-            {this.renderFunctionName()}
-
-            <div class="row m-0 ">
-              {this.renderEditor()}
-
-              {this.renderIframe()}
+            <div
+              class={headerColor}
+              style={{
+                position: "absolute",
+                top: globals.headerHeight,
+                left: 0,
+                width: "100%",
+                height: globals.fnTitleHeight,
+                color: "transparent"
+              }}
+            >
+              {" "}
             </div>
-          </div>
+
+            <div class="p-2">
+              {this.renderFunctionName()}
+
+              <div class="row m-0 ">
+                {this.renderEditor()}
+
+                {this.renderIframe()}
+              </div>
+            </div>
           </div>
         </Cristal>
       </div>

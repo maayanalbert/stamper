@@ -12,10 +12,13 @@ export const globals = {
   globalVarCodeSize:12,
   fnTitleHeight: 90,
   copyOffset: 17,
-  specialFns:{draw:"", setup:"", mousePressed:"event", keyPressed:""},
+  specialFns:{draw:"", setup:"", mousePressed:"", keyPressed:"", keyReleased:"", keyTyped:"", 
+  keyIsDown:"", mouseMoved:"", mouseDragged:"", mousePressed:"", mouseReleased:"", mouseClicked:"", 
+doubleClicked:"", mouseWheel:"", preload:"", windowResized:""},
   fnStampWidth:557,
   fnStampHeight:318
 };
+
 
 
 
