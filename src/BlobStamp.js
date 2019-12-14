@@ -173,7 +173,7 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     }
 
         if(this.state.runningBorder){
-      border = "border border-blue"
+      border = "border border-borderDarkGrey"
     }
     return (
       <div>

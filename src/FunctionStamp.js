@@ -462,7 +462,7 @@ class="text-greyText">
       border = "border border-warningOrange"
     }
       if(this.state.runningBorder){
-      border = "border border-blue"
+      border = "border border-borderDarkGrey"
     }
 
     // <!-- @cameron little white div thing --> scroll down to style
