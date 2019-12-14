@@ -14,6 +14,8 @@ import parser from "./parser.js"
 import anim from 'css-animation';
 import { Resizable, ResizableBox } from "react-resizable";
 import styled from 'styled-components';
+
+
 var _ = require("lodash");
 
 
@@ -1065,21 +1067,22 @@ toggleHide(stampRef){
   if(this.state.consoleStamp && this.state.consoleStamp.ref.current){
 
  var consoleRef = this.state.consoleStamp.ref.current
-    pickerData.push({name:"console", status:!consoleRef.state.hidden, callback:() => this.toggleHide(consoleRef)})
+    pickerData.push({name:"console", status:!consoleRef.state.hidden, icon:consoleRef.getIcon(),
+      callback:() => this.toggleHide(consoleRef)})
   }
 
-  if(this.state.htmlID >= 0 && this.state.cssID >= 0){
+  if(this.state.fnStamps[this.state.htmlID] && this.state.fnStamps[this.state.cssID]){
 
     var htmlRef = this.state.fnStamps[this.state.htmlID].ref.current
 
     if(htmlRef){
 
-      pickerData.push({name:htmlRef.state.name, 
+      pickerData.push({name:htmlRef.state.name, icon:htmlRef.getIcon(),
         status:!htmlRef.state.hidden, callback:() => this.toggleHide(htmlRef)})
     }
         var cssRef = this.state.fnStamps[this.state.cssID].ref.current
     if(cssRef){
-      pickerData.push({name:cssRef.state.name, 
+      pickerData.push({name:cssRef.state.name, icon:cssRef.getIcon(),
         status:!cssRef.state.hidden, callback:() => this.toggleHide(cssRef)})
     }
   }
@@ -1089,7 +1092,8 @@ toggleHide(stampRef){
       var stampRef = stamp.ref.current
       if(stampRef && stampRef.props.isHtml === false && stampRef.props.isCss === false){
 
-      pickerData.push({name:stampRef.state.name, status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
+      pickerData.push({name:stampRef.state.name, icon:stampRef.getIcon(),
+        status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
       }
 
     })
@@ -1099,7 +1103,8 @@ toggleHide(stampRef){
       var stampRef = stamp.ref.current
       if(stampRef){
 
-      pickerData.push({name:this.getFirstLine(stampRef.state.code), status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
+      pickerData.push({name:this.getFirstLine(stampRef.state.code), icon:stampRef.getIcon(),
+        status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
       }
 
     })
@@ -1108,6 +1113,13 @@ toggleHide(stampRef){
 
   }
 
+createIcon(iconType, size=18){
+  return   React.createElement(iconType, {
+        style:{opacity:"0.3", height:size, width:size},
+        className:"m-1 text-greyText"
+      });
+}
+
 renderLayerPicker(){
 
 
@@ -1115,10 +1127,14 @@ renderLayerPicker(){
     this.state.pickerData.map(item => {
       if(item.name){
       pickers.push(
-          <div class= "row m-2 d-flex justify-content-between">
-           
-    <a class="text-greyText" 
+
+
+    <div class= "d-flex justify-content-between">
+    <div>
+           {this.createIcon(item.icon, 15)}
+    <a class="text-greyText ml-1" 
     style={{fontSize:12}}>{item.name}</a>
+    </div>
        <input type="checkbox" checked={item.status} onClick={item.callback}/>
         </div>
 )

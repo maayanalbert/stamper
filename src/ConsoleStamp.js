@@ -6,6 +6,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
+import PrintIcon from '@material-ui/icons/Print';
 var _ = require("lodash");
 
 
@@ -60,8 +61,12 @@ export default class ConsoleStamp extends Component {
     // this.setState({logs:[], lastFreq:0})
   }
 
+  getIcon(){
+    return PrintIcon
+  }
+
   toggleHide(scale, originX, originY, callback){
-    console.log(scale, originX, originY, callback)
+
     
     if(this.state.hidden){
       var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
@@ -165,7 +170,7 @@ this.checkLastLog({ method: method, data: [message] });
         data: ["(" + this.state.lastFreq.toString() + ")"]
       });
     }
- 
+
 
 
         if(this.state.hidden){
@@ -183,6 +188,7 @@ this.checkLastLog({ method: method, data: [message] });
         initialPosition={{x:this.state.x, y:this.state.y}}
           onMove={(s) => this.setState({x:s.x, y:s.y})}
           className="bg-lightGrey border border-borderGrey shadow-sm"
+          icon={this.getIcon()}
       >
         <div
           id="consoleContainer"
@@ -198,6 +204,7 @@ this.checkLastLog({ method: method, data: [message] });
           }}
 
         >
+
           <Console 
           styles={{LOG_COLOR:"black", 
           LOG_ERROR_BACKGROUND:"rgba(255, 184, 0, .5)", LOG_ERROR_BORDER:"transparent",

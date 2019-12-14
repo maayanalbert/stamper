@@ -5,6 +5,7 @@ import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
+import CodeIcon from '@material-ui/icons/Code';
 
 // import "ace-builds/src-noconflict/mode-javascript";
 // import "ace-builds/src-noconflict/theme-tomorrow";
@@ -188,6 +189,9 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     this.editorRef.current.editor.resize();
   }
 
+  getIcon(){
+    return CodeIcon
+  }
 
   render() {
 
@@ -218,6 +222,8 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
           onMove={(s) => this.setState({x:s.x, y:s.y})}
           initialScale={this.state.scale}
           className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
+          title="Anything"
+          icon={this.CodeIcon()}
         >
           <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>{this.renderEditor()}</div>
         </Cristal>

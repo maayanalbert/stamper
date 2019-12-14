@@ -11,9 +11,7 @@ import {
   LeftResizeHandle,
   ContentWrapper,
   padding,
-  CloseIcon,
-  Title,
-  CopyIcon, minWidth, minHeight
+  Title,minWidth, minHeight
 } from "./styled";
 import { isSmartPosition } from "./domain";
 import {
@@ -25,6 +23,9 @@ import { Stacker } from "./stacker";
 import CopyImg from "./../../../copy.png"; // @cameron update this to material icon
 import CloseImg from "./../../../close.png"; // @cameron update this to material icon
 import styled from "styled-components"; 
+import DeleteIcon from '@material-ui/icons/Delete';
+import CopyIcon from '@material-ui/icons/FileCopyOutlined';
+import  "./../../../App.scss"; 
 
 
 
@@ -79,7 +80,9 @@ var Cristal = (function(_super) {
       scale: 1,
       panDisabled:false,
       originalHeight:null,
-      mouseWheelTimeout:null
+      mouseWheelTimeout:null,
+      mouseOnClose:false,
+      mouseOnCopy:false
     };
 
     _this.space = 32;
@@ -518,6 +521,46 @@ var Cristal = (function(_super) {
     enumerable: true,
     configurable: true
   });
+
+  function createIcon(_this, iconType,  hiddenFlag = false, stateVal="",  callBack=null){
+    if(hiddenFlag){
+      return null
+    }
+
+      var opacity = .3
+      if(_this.state[stateVal]){
+        opacity = 1
+      }
+
+    var mouseOverCallback =  () => {
+          var stateEdit = {}
+          stateEdit[stateVal] = true
+          _this.setState(stateEdit)
+        }
+
+    var mouseOutCallback = () => {
+        
+          var stateEdit = {}
+          stateEdit[stateVal] = false
+          _this.setState(stateEdit)
+     
+        }
+
+    if(!callBack){
+  mouseOverCallback = () => {}
+      mouseOutCallback = () => {}
+      opacity = .3
+    }
+
+    return React.createElement(iconType, {
+        onClick: callBack,
+        style:{opacity:opacity, height:18, width:18},
+        className:"m-1 text-greyText",
+        onMouseOver:mouseOverCallback,
+        onMouseOut:mouseOutCallback
+      });
+  }
+
   Object.defineProperty(Cristal.prototype, "header", {
     get: function() {
       var _a = this.props,
@@ -528,27 +571,21 @@ var Cristal = (function(_super) {
         onCopy = _a.onCopy,
         copyHidden = _a.copyHidden;
 
-      var closeBtn = React.createElement(CloseIcon, {
-        onClick: onClose,
-        src: CloseImg
-      });
-      if (closeHidden) {
-        closeBtn = null;
+
+   
+      var closeBtn = createIcon(this, DeleteIcon, closeHidden, "mouseOnClose", onClose)
+      var copyBtn = createIcon(this, CopyIcon,copyHidden, "mouseOnCopy", onCopy)
+
+      var titleIcon = null
+      if(this.props.icon){
+      var titleIcon = createIcon(this, this.props.icon)
       }
 
-      var copyBtn = React.createElement(CloseIcon, {
-        onClick: onCopy,
-        src: CopyImg
-      });
-
-      if (copyHidden) {
-        copyBtn = null;
-      }
 
       var sideButtons = (
         <div
           class="row"
-          style={{ position: "absolute", cursor: "auto", right: 22, top: 8 }}
+          style={{ position: "absolute", cursor: "auto", right: 18, top: 0 }}
         >
           {copyBtn}
           {closeBtn}
@@ -563,7 +600,7 @@ var Cristal = (function(_super) {
           ref: this.saveHeaderRef,
           onMouseDown: this.onMouseDown
         },
-        React.createElement(Title, null, title),
+        titleIcon,
         sideButtons
       );
     },

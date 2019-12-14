@@ -6,6 +6,11 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
+import GradientIcon from '@material-ui/icons/Gradient';
+import ColorIcon from '@material-ui/icons/ColorLens';
+import WebIcon from '@material-ui/icons/Web';
+import CategoryIcon from '@material-ui/icons/Category';
+
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";
@@ -76,6 +81,7 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
 this.setState({iframeCode:""}, () => this.props.requestCompile(this.props.id))
+this.checkName()
   }
 
   checkName() {
@@ -428,6 +434,20 @@ class="text-greyText">
     this.editorRef.current.editor.resize();
   }
 
+  getIcon(){
+    var icon = GradientIcon
+    if(this.props.isHtml){
+      icon = WebIcon
+    }else if(this.props.isCss){
+      icon = ColorIcon
+    }else if(this.state.isSpecialFn){
+      icon = CategoryIcon
+    }
+
+    return icon
+
+  }
+
   render() {
 
     var headerColor = "bg-white"
@@ -477,6 +497,7 @@ class="text-greyText">
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
           onMove={(s) => this.setState({x:s.x, y:s.y})}
+          icon={this.getIcon()}
         >
           <div onMouseLeave={this.mouseOutCallback.bind(this)}>
           <div
