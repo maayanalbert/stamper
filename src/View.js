@@ -96,7 +96,7 @@ export default class View extends Component {
 
   loadStamperFile(stamperFile){
 
-    console.log(stamperFile)
+ 
     this.setState({
       scale:stamperFile.scale, originX:stamperFile.originX, originY:stamperFile.originY}, ()=> {
     this.addConsoleStamp(stamperFile.console)
@@ -113,7 +113,6 @@ export default class View extends Component {
 
         this.setState({originCristal:originCristal})
 
-        console.log(this.state.originX)
   })
 
 
@@ -286,7 +285,10 @@ function logToConsole(message, lineno){
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(),
       consoleWidth: (globals.defaultEditorWidth * 2) / 3,
-      consoleHeight: globals.defaultVarEditorHeight
+      consoleHeight: globals.defaultVarEditorHeight,
+     hidden:false,
+      originX:0,
+      originY:0
     };
 
     Object.keys(defaults).map(setting => {
@@ -324,6 +326,9 @@ function logToConsole(message, lineno){
         starterConsoleWidth={consoleWidth}
         starterConsoleHeight={consoleHeight}
         addErrorLine={this.addErrorLine.bind(this)}
+        initialHidden={data.hidden}
+        initialOriginX={data.originX}
+        initialOriginY={data.originY}
       />
     );
 
@@ -399,7 +404,7 @@ function logToConsole(message, lineno){
       isCss = data.isCss,
       hidden = data.hidden;
 
-      console.log(data)
+ 
 
 
     const release = await this.counterMutex.acquire();
@@ -589,7 +594,7 @@ function logToConsole(message, lineno){
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
     // this.setState({traversalGraph:newTraversalGraph})
-    console.log("compiling")
+
     this.setLayerPicker()
 
 
@@ -688,7 +693,10 @@ function logToConsole(message, lineno){
       cristalRef.current && cristalRef.current.disablePan(status);
     });
 
-    this.state.consoleStamp.ref.current.cristalRef.current.disablePan(status)
+    
+    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef
+    consoleCristalRef.current && consoleCristalRef.current.disablePan(status)
+
   }
   checkAllNames() {
     var nameDict = {};
@@ -940,7 +948,7 @@ function logToConsole(message, lineno){
     Object.values(this.state.blobStamps).map(stamp =>
       data.blobs.push(stamp.ref.current.getData())
     );
-    console.log(data)
+
     return data;
   }
 
@@ -1011,6 +1019,15 @@ toggleHide(stampRef){
 
   setLayerPicker(){
   var pickerData = []
+
+ 
+  if(this.state.consoleStamp && this.state.consoleStamp.ref.current){
+
+ var consoleRef = this.state.consoleStamp.ref.current
+    pickerData.push({name:"console", status:!consoleRef.state.hidden, callback:() => this.toggleHide(consoleRef)})
+  }
+
+  pickerData.push({})
     Object.values(this.state.fnStamps).map((stamp) =>{
       var stampRef = stamp.ref.current
       if(stampRef){

@@ -25,7 +25,13 @@ export default class ConsoleStamp extends Component {
       logs: [],
       consoleHeight: this.props.starterConsoleHeight,
       consoleWidth: this.props.starterConsoleWidth,
-      lastFreq: 0
+      lastFreq: 0,
+      originX:this.props.initialOriginX,
+      originY: this.props.initialOriginY,
+      scale:this.props.initialScale,
+      hidden:this.props.initialHidden,
+      x:this.props.initialPosition.x,
+      y:this.props.initialPosition.y,
     };
 
     this.cristalRef = React.createRef();
@@ -52,6 +58,21 @@ export default class ConsoleStamp extends Component {
 
   clearConsole() {
     // this.setState({logs:[], lastFreq:0})
+  }
+
+  toggleHide(scale, originX, originY, callback){
+    console.log(scale, originX, originY, callback)
+    
+    if(this.state.hidden){
+      var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
+      var distFromOriginY = (this.state.originY - this.state.y)/this.state.scale
+      var x = originX - distFromOriginX*scale
+      var y = originY - distFromOriginY*scale
+    this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
+    }else{
+      this.setState({hidden:true, originX:originX, originY:originY, scale:scale}, callback)
+    }
+
   }
 
   setEditorScrolling(isScrolling) {
@@ -103,10 +124,14 @@ this.checkLastLog({ method: method, data: [message] });
     getData() {
     var data = {
 
-      x: this.cristalRef.current.state.x,
-      y: this.cristalRef.current.state.y,
+      x: this.state.x,
+      y: this.state.y,
       consoleWidth: this.state.consoleWidth,
       consoleHeight: this.state.consoleHeight,
+      originX:this.state.originX,
+      originY:this.state.originY,
+      scale:this.state.scale,
+      hidden:this.state.hidden
     };
 
 
@@ -133,15 +158,22 @@ this.checkLastLog({ method: method, data: [message] });
       });
     }
 
+    console.log("hello")
+
+        if(this.state.hidden){
+      return(<div></div>)
+    }
+
 
     return (
       <Cristal
         ref={this.cristalRef}
-        initialScale={this.props.initialScale}
+        initialScale={this.state.scale}
         closeHidden={true}
         copyHidden={true}
         onResize={this.resizeConsole.bind(this)}
-        initialPosition={this.props.initialPosition}
+        initialPosition={{x:this.state.x, y:this.state.y}}
+          onMove={(s) => this.setState({x:s.x, y:s.y})}
       >
         <div
           id="consoleContainer"
