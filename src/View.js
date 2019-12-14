@@ -1027,9 +1027,13 @@ renderLayerPicker(){
 
 
     return (
-      <div class="bg-white border border-borderGrey" 
+      <div class="bg-white border border-borderGrey"  
+          onMouseOver={() => this.disablePan(true)}
+          onMouseOut={() => this.disablePan(false)}
+      style={{position:"absolute", top:0, left:0, "overflow-y": "scroll", 
 
-      style={{position:"absolute", top:0, left:0, height:"100vh", zIndex: 1000000000000000000}}>
+      height:"100vh", zIndex: 1000000000000000000,
+    }}>
       <ResizableBox 
       width={200}  axis="x"
 
@@ -1038,7 +1042,7 @@ renderLayerPicker(){
        color:"transparent"}}>hi</div>}
 
       >
-      <div class="m-3" style={{overflow:"hidden" }}>
+      <div class="m-3" style={{overflow:"hidden"}}>
           {pickers}
           </div>
   </ResizableBox>
