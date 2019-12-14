@@ -238,7 +238,7 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
-
+  
       if(_this.state.mouseWheelTimeout){
         clearTimeout(_this.state.mouseWheelTimeout)
       }
@@ -602,6 +602,9 @@ var Cristal = (function(_super) {
 
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
+    if(this.props.headerHidden){
+      HeaderComponent = null
+    }
 
 
     return ReactDOM.createPortal(

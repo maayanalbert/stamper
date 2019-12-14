@@ -148,7 +148,8 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
       x: this.cristalRef.current.state.x,
       y: this.cristalRef.current.state.y,
       editorWidth: this.state.editorWidth,
-      editorHeight: this.state.editorHeight
+      editorHeight: this.state.editorHeight,
+      id:this.props.id
     };
 
     return data;

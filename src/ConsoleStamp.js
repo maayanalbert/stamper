@@ -107,6 +107,7 @@ this.checkLastLog({ method: method, data: [message] });
       y: this.cristalRef.current.state.y,
       consoleWidth: this.state.consoleWidth,
       consoleHeight: this.state.consoleHeight,
+      id:this.props.id
     };
 
 

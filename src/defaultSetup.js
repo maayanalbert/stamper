@@ -19,18 +19,25 @@ var htmlCode = `<html>
 
 var setup = {
     fns: [
+      { name: "style.css", args: " ", code: cssCode, isCss: true,id:2 },
+      { name: "index.html", args: " ", code: htmlCode, isHtml: true, id:1 },
       {
         name: "setup",
         args: "",
-        code: "createCanvas(400, 400)"
+        code: "createCanvas(400, 400)",
+        id:3
       },
-      { name: "draw", args: "", code: "background(220)" },
-      { name: "style.css", args: " ", code: cssCode, isCss: true },
-      { name: "index.html", args: " ", code: htmlCode, isHtml: true }
+      { name: "draw", args: "", code: "background(220)",
+      id:4 }
     ],
     blobs: [],
     scale: 1,
-    console:{}
+    console:{id:0},
+    counter:5,
+    hiddenFns:{},
+    hiddenBlobs:{},
+    originX:0,
+    originY:0
   }
 
 

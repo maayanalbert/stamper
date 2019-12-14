@@ -34,7 +34,7 @@ module.exports = class FileManager {
   }
 
   resetFiles() {
-    this.path = "";
+    this.path = undefined;
     this.name = "";
     this.html = "";
     this.css = "";
@@ -91,7 +91,7 @@ module.exports = class FileManager {
         isHtml: true
       });
       newStamper.console = {}
-      newStamper.scale = 1
+      newStamper. = 1
 
       return newStamper
   }

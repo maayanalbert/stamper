@@ -54,45 +54,6 @@ export default class FunctionStamp extends Component {
     this.editorRef = React.createRef();
   }
 
-  // updateFuns(fromComponentDidMount) {
-  //   var name = this.state.name;
-
-  //   var fullFun =
-  //     "function " +
-  //     name +
-  //     "(" +
-  //     this.state.args +
-  //     "){\n" +
-  //     this.state.code +
-  //     "\n}";
-
-  //   var drawableFun = name + "()";
-
-  //   var isSpecialFn = name in globals.specialFns;
-  //   if (this.props.isHtml || this.props.isCss) {
-  //     fullFun = "";
-  //     drawableFun = "";
-  //   }
-
-  //   var runnableInnerCode = this.state.code
-
-  //   var editsMade = true
-  //   if((fullFun === this.state.fullFun 
-  //     && drawableFun === this.state.drawableFun 
-  //     && runnableInnerCode === this.state.runnableInnerCode)){
-  //     editsMade = false
-  //   }
-
-  //   this.setState(
-  //     {
-  //       fullFun: fullFun,
-  //       drawableFun: drawableFun,
-  //       runnableInnerCode: runnableInnerCode
-  //     },
-  //     () => this.props.compileCode(editsMade)
-  //   );
-  // }
-
   checkName() {
     var isSpecialFn = this.state.name in globals.specialFns;
     this.setState({ isSpecialFn: isSpecialFn });
@@ -427,7 +388,8 @@ class="text-greyText">
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
-      isCss: this.props.isCss
+      isCss: this.props.isCss,
+      id:this.props.id
     };
 
     return data;

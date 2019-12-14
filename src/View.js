@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Cristal from "react-cristal";
+import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
@@ -44,35 +44,107 @@ export default class View extends Component {
       htmlAsksForJs:true,
       lines:[],
       lineData:[],
-      traversalGraph:{}
+      traversalGraph:{},
+      hiddenFns:{},
+      hiddenBlobs: {},
+      originX:0,
+      originY:0,
+      consoleId: -1
     };
     this.counterMutex = new Mutex();
 
     ipc && ipc.on("writeToView", (event, files) => {
-      this.setState(
-        {
-          fnStamps: {},
-          blobStamps: {},
-          counter: 0,
-          htmlID: -1,
-          cssID: -1,
-          scale: files.stamper.scale,
-          consoleStamp:null
-        },
-        () => {
 
-          this.addConsoleStamp(files.stamper.console)
-          files.stamper.fns.map(data => this.addFnStamp(data));
-          files.stamper.blobs.map(data => this.addBlobStamp(data));
+    this.setState({
+      fnStamps:{},
+      scale:1,
+      counter:0,
+      blobStamps:{},
+      htmlID:-1,
+      cssID:-1,
+      consoleStamp:null,
+      setupExists:true,
+      htmlAsksForCss:true,
+      htmlAsksForJs:true,
+      lines:[],
+      lineData:[],
+      traversalGraph:[],
+      hiddenFns:{},
+      hiddenBlobs:{},
+      consoleId:-1
+    }, () => {
+ this.loadStamperFile(files.stamper)
+    })
+
+         
+
           
-        }
-      );
+       
+
     });
 
     ipc && ipc.on("requestSave", (event, rawCode) => {
       this.sendSaveData();
     });
   
+
+  }
+
+    componentDidMount() {
+      this.loadStamperFile(defaultSetup.getSetup())
+      document.addEventListener("wheel", this.onWheel.bind(this), { passive: false });
+    }
+
+    componentWillUnmout(){
+      document.removeEventListener("wheel", this.onWheel.bind(this));
+    }
+
+    onWheel(e){
+      var originX = this.state.originX, originY = this.state.originY
+      if (e.ctrlKey) {
+
+        var newScale = this.state.scale - e.deltaY * 0.01, 
+        mouseX = e.clientX, mouseY = e.clientY, scale = this.state.scale
+
+      var curDistX = mouseX - originX,
+        curDistY = mouseY - originY;
+
+      var unScaledDistX = curDistX / scale,
+        unScaledDistY = curDistY / scale;
+
+      var scaledDistX = unScaledDistX * newScale,
+        scaledDistY = unScaledDistY * newScale;
+
+      var newX = mouseX - scaledDistX,
+        newY = mouseY - scaledDistY;
+
+      this.setState({originX:newX, originY:newY, scale:newScale})
+    }else{
+      this.setState({originX:originX - e.deltaX, originY:originY - e.deltaY})
+    }
+  }
+
+  loadStamperFile(stamperFile){
+
+    this.setState({hiddenFns:stamperFile.hiddenFns, counter:stamperFile.counter,
+      hiddenBlobs:stamperFile.hiddenBlobs,
+      scale:stamperFile.scale, originX:stamperFile.originX, originY:stamperFile.originY}, ()=> {
+    this.addConsoleStamp(stamperFile.console,
+      () => {
+
+        stamperFile.fns.map(data => this.addFnStamp(data));
+        stamperFile.blobs.map(data => this.addBlobStamp(data));
+
+      }
+
+      )
+
+
+
+      })
+
+
+
 
   }
 
@@ -202,22 +274,12 @@ function logToConsole(message, lineno){
    }
 
   
-   console.log(linesToJs)
+
    parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs) + "</script>")
    parser(jsSelector).replaceWith(jsBlock);
     return parser.html();
   }
-  componentDidMount() {
 
-
-
-    var initialSetup = defaultSetup.getSetup()
-    this.addConsoleStamp(initialSetup.console)
-    initialSetup.fns.map(data => this.addFnStamp(data));
-    initialSetup.blobs.map(data => this.addBlobStamp(data));
-
-
-  }
 
 
   addErrorLine(lineNum, id){
@@ -243,7 +305,7 @@ function logToConsole(message, lineno){
   //   this.setState({ scale: 1 });
   // }
 
-   addConsoleStamp(data) {
+    addConsoleStamp(data, callback ) {
 
     var defaults = {
       x: this.defaultStarterPos(),
@@ -260,17 +322,28 @@ function logToConsole(message, lineno){
     });
 
 
-    this.createConsoleStamp(data);
+    this.createConsoleStamp(data, callback);
   }
 
-  async createConsoleStamp(data) {
+  async getNewId(){
+    const release = await this.counterMutex.acquire();
+    var id = this.state.counter;
+    this.setState({ counter: id + 1 }, release());
+
+    return id
+  }
+
+  async createConsoleStamp(data, callback) {
     var x = data.x,
       y = data.y,
       consoleWidth = data.consoleWidth,
       consoleHeight = data.consoleHeight;
-    const release = await this.counterMutex.acquire();
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
+
+        if(data.id){
+        var id = data.id
+      }else{
+        var id = await this.getNewId()
+      }
 
     var ref = React.createRef();
 
@@ -279,7 +352,7 @@ function logToConsole(message, lineno){
       initialScale={this.state.scale}
         ref={ref}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={id}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         initialScale={this.state.scale}
@@ -291,19 +364,21 @@ function logToConsole(message, lineno){
     );
 
     var consoleStamp = { elem: elem, ref: ref };
-    this.setState({ consoleStamp: consoleStamp });
+      this.setState({ consoleStamp: consoleStamp, consoleId:id }, callback);
+
   }
 
   defaultStarterPos(offset = 0) {
     return Math.random() * globals.marginVariance + globals.margin * 2 + offset;
   }
 
-  addFnStamp(
+ addFnStamp(
     data,
     updateName = false,
     updatePosition = false,
     setIframeDisabled = false
   ) {
+
     var defaults = {
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
@@ -319,11 +394,14 @@ function logToConsole(message, lineno){
       isCss: false
     };
 
+
     Object.keys(defaults).map(setting => {
       if (!(setting in data)) {
         data[setting] = defaults[setting];
       }
     });
+
+
 
     if (updatePosition) {
       data.x += globals.copyOffset * 2;
@@ -358,14 +436,15 @@ function logToConsole(message, lineno){
       isHtml = data.isHtml,
       isCss = data.isCss;
 
-
-    const release = await this.counterMutex.acquire();
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
+      if(data.id){
+        var id = data.id
+      }else{
+        var id = await this.getNewId()
+      }
 
     var fnStamps = this.state.fnStamps;
     var ref = React.createRef();
-
+    console.log(data)
     var elem = (
       <FunctionStamp
         ref={ref}
@@ -378,7 +457,7 @@ function logToConsole(message, lineno){
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={id}
         deleteFrame={this.deleteFrame}
 
         onStartMove={this.onStartMove.bind(this)}
@@ -398,15 +477,15 @@ function logToConsole(message, lineno){
       />
     );
 
+    fnStamps[id] = { elem: elem, ref: ref };
 
-    fnStamps[counter] = { elem: elem, ref: ref };
 
-    this.setState({ fnStamps: fnStamps });
+    this.setState({ fnStamps: fnStamps }, () => {console.log(this.state.fnStamps); console.log(this.getAllData())});
 
     if (isHtml) {
-      this.setState({ htmlID: counter });
+      this.setState({ htmlID: id });
     } else if (isCss) {
-      this.setState({ cssID: counter });
+      this.setState({ cssID: id });
     }
 
 
@@ -419,7 +498,7 @@ function logToConsole(message, lineno){
 
   }
 
-  addBlobStamp(data, updatePosition = false) {
+ addBlobStamp(data, updatePosition = false) {
     var defaults = {
       code: "var z = 10",
       x: this.defaultStarterPos(),
@@ -448,9 +527,12 @@ function logToConsole(message, lineno){
       editorWidth = data.editorWidth,
       editorHeight = data.editorHeight,
       errorLines = data.errorLines;
-    const release = await this.counterMutex.acquire();
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
+
+            if(data.id){
+        var id = data.id
+      }else{
+        var id = await this.getNewId()
+      }
 
     var blobStamps = this.state.blobStamps;
     var ref = React.createRef();
@@ -461,7 +543,7 @@ function logToConsole(message, lineno){
         starterCode={code}
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={id}
         deleteFrame={this.deleteFrame}
  
         onStartMove={this.onStartMove.bind(this)}
@@ -477,7 +559,7 @@ function logToConsole(message, lineno){
       />
     );
 
-    blobStamps[counter] = { elem: elem, ref: ref };
+    blobStamps[id] = { elem: elem, ref: ref };
     this.setState({ blobStamps: blobStamps });
   }
 
@@ -709,6 +791,7 @@ function logToConsole(message, lineno){
 
 
 
+
     Object.keys(this.state.fnStamps).map(id => {
 
 
@@ -847,8 +930,14 @@ function logToConsole(message, lineno){
   }
 
   getAllData() {
-
-    var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
+    console.log(this.state.fnStamps)
+    var data = { fns: [], blobs: [], 
+      scale: this.state.scale, 
+      console:this.state.consoleStamp.ref.current.getData(),
+      counter:this.state.counter,
+      hiddenFns:this.state.hiddenFns,
+      hiddenBlobs:this.state.hiddenBlobs, originX:this.state.originX, 
+      originY:this.state.originY };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())
     );
@@ -903,9 +992,6 @@ function logToConsole(message, lineno){
   onStopMove(s) {
 
 
-    if(s){
-    this.setState({ scale: s.scale });
-    }
     var fnStamps = this.state.fnStamps;
     for (var i in fnStamps) {
       var fnStamp = fnStamps[i].ref.current;
@@ -922,6 +1008,150 @@ function logToConsole(message, lineno){
 
   //   this.setState({ iframeWidth: width, iframeHeight: height });
   // }
+
+  getFirstLine(text){
+    for(var i = 0; i < text.length; i++){
+      if(text[i] === "\n"){
+        return text.substr(0, i)
+      }
+    }
+    return text.substr(0, Math.max(text.length, 50))
+  }
+
+  hideFnStamp(id){
+
+    var stampRef = this.state.fnStamps[id].ref.current
+    var data = stampRef.getData()
+    data.originX = this.state.originX
+    data.originY = this.state.originY
+    var hiddenFns = this.state.hiddenFns
+    hiddenFns[id] = data
+
+    this.setState({hiddenFns:hiddenFns})
+    this.onDelete(id)
+  }
+
+  hideBlobStamp(id){
+
+    var stampRef = this.state.blobStamps[id].ref.current
+    var data = stampRef.getData()
+    data.originX = this.state.originX
+    data.originY = this.state.originY
+    var hiddenBlobs = this.state.hiddenBlobs
+
+    hiddenBlobs[id] = data 
+
+    this.setState({hiddenBlobs:hiddenBlobs})
+    this.onDelete(id)
+  }
+
+  unHideFnStamp(id){
+    var data = _.clone(this.state.hiddenFns[id])
+
+    var distFromOriginX = data.originX - data.x
+    var distFromOriginY = data.originY - data.y
+    data.x = this.state.originX - distFromOriginX
+    data.y = this.state.originY - distFromOriginY
+    console.log(data)
+
+    this.addFnStamp(data)
+    var hiddenFns = this.state.hiddenFns
+    delete hiddenFns[id]
+    this.setState({hiddenFns:hiddenFns}, () => console.log(this.getAllData()))
+  }
+
+  unHideBlobStamp(id){
+    var data = _.clone(this.state.hiddenBlobs[id])
+
+    var distFromOriginX = data.originX - data.x
+    var distFromOriginY = data.originY - data.y
+    data.x = this.state.originX - distFromOriginX
+    data.y = this.state.originY - distFromOriginY
+    this.addBlobStamp(data)
+    var hiddenBlobs = this.state.hiddenBlobs
+    delete hiddenBlobs[id]
+    this.setState({hiddenBlobs:hiddenBlobs})
+
+  }
+
+  renderLayerPicker(){
+ 
+    var pickerData = [{name:"Console", id: this.state.consoleId, status:true}]
+    var fnIds = Object.keys(this.state.fnStamps).concat(Object.keys(this.state.hiddenFns))
+    fnIds.sort().map((id) =>{
+      if(id in this.state.fnStamps){
+        var stampRef = this.state.fnStamps[id].ref.current
+        if(stampRef){
+          pickerData.push({name:this.state.fnStamps[id].ref.current.state.name , 
+            status: true, callback: this.hideFnStamp.bind(this, id)
+
+          })     
+        }
+      }else{
+        var stampData = this.state.hiddenFns[id]
+        pickerData.push({
+          name:stampData.name,
+          status:false,
+          callback:this.unHideFnStamp.bind(this, id)
+        })
+
+      }
+
+    })
+
+    pickerData.push({})
+
+    var blobIds = Object.keys(this.state.blobStamps).concat(Object.keys(this.state.hiddenBlobs))
+   
+    blobIds.sort().map((id) =>{
+      if(id in this.state.blobStamps){
+        var stampRef = this.state.blobStamps[id].ref.current
+        if(stampRef){
+          var firstLine = this.getFirstLine(this.state.blobStamps[id].ref.current.state.code )
+     
+          pickerData.push({name:firstLine , status:true, callback:this.hideBlobStamp.bind(this,id)})     
+        }
+      }else{
+        var stampData = this.state.hiddenBlobs[id]
+        var firstLine = this.getFirstLine(stampData.code)
+        pickerData.push({name:firstLine , status:false, callback:this.unHideBlobStamp.bind(this,id)})
+      }
+
+    })
+
+    var pickers = []
+    pickerData.map(item => {
+      if(item.name){
+      pickers.push(
+          <div class= "row m-2 d-flex justify-content-between">
+           
+    <a class="text-greyText" 
+    style={{fontSize:12 }}>{item.name}</a>
+       <input type="checkbox" checked={item.status} onClick={item.callback}/>
+        </div>
+)
+      }else{
+        pickers.push(<br/>)
+      }
+
+
+    })
+
+
+    return (
+      <div class="bg-white border border-borderGrey p-2" style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width:200,
+            height:"100vh",
+            zIndex: 1000000000000000000,
+          }}>
+          {pickers}
+  </div>
+
+    )
+  }
 
   render() {
     if(this.state.consoleStamp){
@@ -943,6 +1173,7 @@ function logToConsole(message, lineno){
           {elems}
           {consoleElem}
           {this.state.lines}
+
         </div>
         <div
           class="topButtons"
@@ -976,6 +1207,7 @@ function logToConsole(message, lineno){
           </button>
           <br />
         </div>
+        {this.renderLayerPicker()}
       </div>
     );
   }
