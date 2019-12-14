@@ -1068,10 +1068,26 @@ toggleHide(stampRef){
     pickerData.push({name:"console", status:!consoleRef.state.hidden, callback:() => this.toggleHide(consoleRef)})
   }
 
+  if(this.state.htmlID >= 0 && this.state.cssID >= 0){
+
+    var htmlRef = this.state.fnStamps[this.state.htmlID].ref.current
+
+    if(htmlRef){
+
+      pickerData.push({name:htmlRef.state.name, 
+        status:!htmlRef.state.hidden, callback:() => this.toggleHide(htmlRef)})
+    }
+        var cssRef = this.state.fnStamps[this.state.cssID].ref.current
+    if(cssRef){
+      pickerData.push({name:cssRef.state.name, 
+        status:!cssRef.state.hidden, callback:() => this.toggleHide(cssRef)})
+    }
+  }
+
   pickerData.push({})
     Object.values(this.state.fnStamps).map((stamp) =>{
       var stampRef = stamp.ref.current
-      if(stampRef){
+      if(stampRef && stampRef.props.isHtml === false && stampRef.props.isCss === false){
 
       pickerData.push({name:stampRef.state.name, status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
       }
