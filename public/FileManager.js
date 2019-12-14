@@ -217,7 +217,8 @@ this.path = path
     this.js = files.js;
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
-
+    console.log("js")
+    console.log(files.js)
     this.stamper.compressedJs = LZUTF8.compress(this.js, {
       outputEncoding: "StorageBinaryString"
     });

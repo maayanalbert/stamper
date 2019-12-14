@@ -158,7 +158,6 @@ this.checkLastLog({ method: method, data: [message] });
       });
     }
 
-    console.log("hello")
 
         if(this.state.hidden){
       return(<div></div>)

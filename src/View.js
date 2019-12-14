@@ -541,6 +541,7 @@ function logToConsole(message, lineno){
   sendSaveData() {
 
 
+    console.log(this.getExportableCode())
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -736,10 +737,28 @@ function logToConsole(message, lineno){
       }
     });
 
-    if (codeData === null) {
-      codeData = this.getRunnableCode(-1);
-    }
-    return codeData.runnableCode;
+    if(codeData){return codeData.runnableCode}
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      if (stamp.ref.current.state.name === "setup") {
+        codeData = this.getRunnableCode(stamp.ref.current.props.id);
+
+      }
+    });
+
+      if(codeData){return codeData.runnableCode}
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      if (stamp.ref.current.props.isHtml === false && stamp.ref.current.props.isCss === false) {
+        codeData = this.getRunnableCode(stamp.ref.current.props.id);
+    
+      }
+    });
+
+    if(codeData){return codeData.runnableCode}
+
+
+    return "";
   }
 
   getNumLines(code){
