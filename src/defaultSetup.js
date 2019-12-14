@@ -30,7 +30,9 @@ var setup = {
     ],
     blobs: [],
     scale: 1,
-    console:{}
+    console:{},
+    originX:0,
+    originY:0
   }
 
 

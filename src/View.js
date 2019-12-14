@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Cristal from "react-cristal";
+import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
@@ -44,7 +44,13 @@ export default class View extends Component {
       htmlAsksForJs:true,
       lines:[],
       lineData:[],
-      traversalGraph:{}
+      traversalGraph:{},
+      consoleId: -1,
+      numToggles:0,
+      originX:0,
+      originY:0,
+      scale:1,
+      originCristal:null
     };
     this.counterMutex = new Mutex();
 
@@ -56,14 +62,16 @@ export default class View extends Component {
           counter: 0,
           htmlID: -1,
           cssID: -1,
-          scale: files.stamper.scale,
-          consoleStamp:null
+          scale: 1,
+          consoleStamp:null,
+          consoleId:-1,
+          originX:0, 
+          originY:0,
+          originCristal:null
         },
         () => {
 
-          this.addConsoleStamp(files.stamper.console)
-          files.stamper.fns.map(data => this.addFnStamp(data));
-          files.stamper.blobs.map(data => this.addBlobStamp(data));
+          this.loadStamperFile(files.stamper)
           
         }
       );
@@ -75,6 +83,42 @@ export default class View extends Component {
   
 
   }
+
+    componentDidMount() {
+
+      this.loadStamperFile(defaultSetup.getSetup())
+    }
+
+
+
+  loadStamperFile(stamperFile){
+
+    console.log(stamperFile)
+    this.setState({
+      scale:stamperFile.scale, originX:stamperFile.originX, originY:stamperFile.originY}, ()=> {
+    this.addConsoleStamp(stamperFile.console)
+            stamperFile.fns.map(data => this.addFnStamp(data));
+        stamperFile.blobs.map(data => this.addBlobStamp(data));
+
+        var originCristal = 
+        (        <Cristal 
+        closeHidden headerHidden copyHidden isResizable={false}
+        initialPosition ={{x:this.state.originX, y:this.state.originY}}
+        initialScale={this.state.scale}
+
+        onStopMove={(s) => this.setState({originX:s.x, originY:s.y, scale:s.scale})}></Cristal>)
+
+        this.setState({originCristal:originCristal})
+
+        console.log(this.state.originX)
+  })
+
+
+
+  }
+
+
+
 
   getIframeErrorCallBack(ranges, offset =0){
     var strRanges = JSON.stringify(ranges)
@@ -202,22 +246,12 @@ function logToConsole(message, lineno){
    }
 
   
-   console.log(linesToJs)
+
    parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs) + "</script>")
    parser(jsSelector).replaceWith(jsBlock);
     return parser.html();
   }
-  componentDidMount() {
 
-
-
-    var initialSetup = defaultSetup.getSetup()
-    this.addConsoleStamp(initialSetup.console)
-    initialSetup.fns.map(data => this.addFnStamp(data));
-    initialSetup.blobs.map(data => this.addBlobStamp(data));
-
-
-  }
 
 
   addErrorLine(lineNum, id){
@@ -291,7 +325,7 @@ function logToConsole(message, lineno){
     );
 
     var consoleStamp = { elem: elem, ref: ref };
-    this.setState({ consoleStamp: consoleStamp });
+    this.setState({ consoleStamp: consoleStamp, consoleId:counter });
   }
 
   defaultStarterPos(offset = 0) {
@@ -316,7 +350,10 @@ function logToConsole(message, lineno){
       iframeWidth: globals.defaultIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
-      isCss: false
+      isCss: false,
+      hidden:false,
+      originX:0,
+      originY:0
     };
 
     Object.keys(defaults).map(setting => {
@@ -356,7 +393,10 @@ function logToConsole(message, lineno){
       iframeWidth = data.iframeWidth,
       iframeHeight = data.iframeHeight,
       isHtml = data.isHtml,
-      isCss = data.isCss;
+      isCss = data.isCss,
+      hidden = data.hidden;
+
+      console.log(data)
 
 
     const release = await this.counterMutex.acquire();
@@ -380,6 +420,9 @@ function logToConsole(message, lineno){
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
+        initialHidden={hidden}
+        initialOriginX={data.originX}
+        initialOriginY={data.originY}
 
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
@@ -598,12 +641,12 @@ function logToConsole(message, lineno){
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current.disablePan(status);
+      cristalRef.current && cristalRef.current.disablePan(status);
     });
 
     Object.values(this.state.blobStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current.disablePan(status);
+      cristalRef.current && cristalRef.current.disablePan(status);
     });
 
     this.state.consoleStamp.ref.current.cristalRef.current.disablePan(status)
@@ -848,7 +891,9 @@ function logToConsole(message, lineno){
 
   getAllData() {
 
-    var data = { fns: [], blobs: [], scale: this.state.scale, console:this.state.consoleStamp.ref.current.getData() };
+    var data = { fns: [], blobs: [], scale: this.state.scale, 
+      console:this.state.consoleStamp.ref.current.getData(), 
+      originX:this.state.originX, originY:this.state.originY };
     Object.values(this.state.fnStamps).map(stamp =>
       data.fns.push(stamp.ref.current.getData())
     );
@@ -856,7 +901,7 @@ function logToConsole(message, lineno){
     Object.values(this.state.blobStamps).map(stamp =>
       data.blobs.push(stamp.ref.current.getData())
     );
-
+    console.log(data)
     return data;
   }
 
@@ -901,11 +946,6 @@ function logToConsole(message, lineno){
   }
 
   onStopMove(s) {
-
-
-    if(s){
-    this.setState({ scale: s.scale });
-    }
     var fnStamps = this.state.fnStamps;
     for (var i in fnStamps) {
       var fnStamp = fnStamps[i].ref.current;
@@ -915,13 +955,59 @@ function logToConsole(message, lineno){
     this.setLines()
   }
 
-  // updateIframeDimensions(width, height) {
-  //   Object.values(this.state.fnStamps).map(stamp =>
-  //     stamp.ref.current.updateIframeDimensions(width, height)
-  //   );
+toggleHide(stampRef){
+  stampRef.toggleHide(this.state.scale, this.state.originX, this.state.originY, 
+    () => this.setState({numToggles:this.state.numToggles + 1}))
 
-  //   this.setState({ iframeWidth: width, iframeHeight: height });
-  // }
+}
+
+
+renderLayerPicker(){
+  var pickerData = []
+    Object.values(this.state.fnStamps).map((stamp) =>{
+      var stampRef = stamp.ref.current
+      if(stampRef){
+
+      pickerData.push({name:stampRef.state.name, status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
+      }
+
+    })
+
+
+    var pickers = [(<div style={{color:"transparent"}}>{this.state.numToggles}</div>)]
+    pickerData.map(item => {
+      if(item.name){
+      pickers.push(
+          <div class= "row m-2 d-flex justify-content-between">
+           
+    <a class="text-greyText" 
+    style={{fontSize:12 }}>{item.name}</a>
+       <input type="checkbox" checked={item.status} onClick={item.callback}/>
+        </div>
+)
+      }else{
+        pickers.push(<br/>)
+      }
+
+
+    })
+
+
+    return (
+      <div class="bg-white border border-borderGrey p-2" style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width:200,
+            height:"100vh",
+            zIndex: 1000000000000000000,
+          }}>
+          {pickers}
+  </div>
+
+    )
+
+  }
 
   render() {
     if(this.state.consoleStamp){
@@ -976,6 +1062,10 @@ function logToConsole(message, lineno){
           </button>
           <br />
         </div>
+        {this.state.originCristal}
+
+        {this.renderLayerPicker()}
+
       </div>
     );
   }

@@ -47,67 +47,39 @@ export default class FunctionStamp extends Component {
       editsMade:false,
       runningBorder:false,
       doubleClickActive:false,
-      resizingIframe:false
+      resizingIframe:false,
+      x:this.props.initialPosition.x,
+      y:this.props.initialPosition.y,
+      originX:this.props.initialOriginX,
+      originY: this.props.initialOriginY,
+      scale:this.props.initialScale,
+      hidden:this.props.initialHidden
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
   }
 
-  // updateFuns(fromComponentDidMount) {
-  //   var name = this.state.name;
+  toggleHide(scale, originX, originY, callback){
+    
+    if(this.state.hidden){
+      var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
+      var distFromOriginY = (this.state.originY - this.state.y)/this.state.scale
+      var x = originX - distFromOriginX*scale
+      var y = originY - distFromOriginY*scale
+    this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
+    }else{
+      this.setState({hidden:true, originX:originX, originY:originY}, callback)
+    }
 
-  //   var fullFun =
-  //     "function " +
-  //     name +
-  //     "(" +
-  //     this.state.args +
-  //     "){\n" +
-  //     this.state.code +
-  //     "\n}";
+  }
 
-  //   var drawableFun = name + "()";
-
-  //   var isSpecialFn = name in globals.specialFns;
-  //   if (this.props.isHtml || this.props.isCss) {
-  //     fullFun = "";
-  //     drawableFun = "";
-  //   }
-
-  //   var runnableInnerCode = this.state.code
-
-  //   var editsMade = true
-  //   if((fullFun === this.state.fullFun 
-  //     && drawableFun === this.state.drawableFun 
-  //     && runnableInnerCode === this.state.runnableInnerCode)){
-  //     editsMade = false
-  //   }
-
-  //   this.setState(
-  //     {
-  //       fullFun: fullFun,
-  //       drawableFun: drawableFun,
-  //       runnableInnerCode: runnableInnerCode
-  //     },
-  //     () => this.props.compileCode(editsMade)
-  //   );
-  // }
 
   checkName() {
     var isSpecialFn = this.state.name in globals.specialFns;
     this.setState({ isSpecialFn: isSpecialFn });
   }
 
-  componentDidUnmount(){
-
-  }
-
-  componentDidMount() {
-
-    this.setState({errorLines:{}}, () => this.props.requestCompile(this.props.id))
-    this.checkName();
-    this.loadp5Lib();
-  }
 
   addErrorLine(lineNum){
     var errorLines = this.state.errorLines
@@ -420,15 +392,20 @@ class="text-greyText">
       name: this.state.name,
       code: this.state.code,
       args: this.state.args,
-      x: this.cristalRef.current.state.x,
-      y: this.cristalRef.current.state.y,
+      x: this.state.x,
+      y: this.state.y,
       editorWidth: this.state.editorWidth,
       editorHeight: this.state.editorHeight,
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
-      isCss: this.props.isCss
+      isCss: this.props.isCss,
+      originX:this.state.originX,
+      originY:this.state.originY,
+      scale:this.state.scale,
+      hidden:this.state.hidden
     };
+
 
     return data;
   }
@@ -471,6 +448,9 @@ class="text-greyText">
     if(this.props.isHtml || this.props.isCss){
       bgColor = "bg-htmlCssArea"
     }
+    if(this.state.hidden){
+      return(<div></div>)
+    }
 
     return (
       <div>
@@ -485,12 +465,13 @@ class="text-greyText">
           onOptMove={() => this.copyAndOpt(true)}
           closeHidden={this.props.isHtml || this.props.isCss}
           copyHidden={this.props.isHtml || this.props.isCss}
-          initialPosition={this.props.initialPosition}
-          initialScale={this.props.initialScale}
+          initialPosition={{x:this.state.x, y:this.state.y}}
+          initialScale={this.state.scale}
           className={"shadow-sm " + bgColor + " " + border + " vertex" + this.props.id}
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
+          onMove={(s) => this.setState({x:s.x, y:s.y})}
         >
           <div onMouseLeave={this.mouseOutCallback.bind(this)}>
           <div
