@@ -448,6 +448,8 @@ class="text-greyText">
     if(this.props.isHtml || this.props.isCss){
       bgColor = "bg-htmlCssArea"
     }
+
+
     if(this.state.hidden){
       return(<div></div>)
     }

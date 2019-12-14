@@ -12,6 +12,8 @@ import cheerio from "cheerio";
 import { SteppedLineTo } from 'react-lineto';
 import parser from "./parser.js"
 import anim from 'css-animation';
+import { Resizable, ResizableBox } from "react-resizable";
+import styled from 'styled-components';
 var _ = require("lodash");
 
 
@@ -50,7 +52,8 @@ export default class View extends Component {
       originX:0,
       originY:0,
       scale:1,
-      originCristal:null
+      originCristal:null,
+      pickerData:[]
     };
     this.counterMutex = new Mutex();
 
@@ -444,7 +447,7 @@ function logToConsole(message, lineno){
 
     fnStamps[counter] = { elem: elem, ref: ref };
 
-    this.setState({ fnStamps: fnStamps });
+    this.setState({ fnStamps: fnStamps }, () => this.setLayerPicker());
 
     if (isHtml) {
       this.setState({ htmlID: counter });
@@ -468,7 +471,10 @@ function logToConsole(message, lineno){
       x: this.defaultStarterPos(),
       y: this.defaultStarterPos(400),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
-      editorHeight: globals.defaultVarEditorHeight
+      editorHeight: globals.defaultVarEditorHeight,
+      hidden:false,
+      originX:0,
+      originY:0
     };
 
     Object.keys(defaults).map(setting => {
@@ -490,7 +496,8 @@ function logToConsole(message, lineno){
       code = data.code,
       editorWidth = data.editorWidth,
       editorHeight = data.editorHeight,
-      errorLines = data.errorLines;
+      errorLines = data.errorLines,
+      hidden = data.hidden;
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, release());
@@ -506,7 +513,9 @@ function logToConsole(message, lineno){
         initialPosition={{ x: x, y: y }}
         id={counter}
         deleteFrame={this.deleteFrame}
- 
+        initialHidden={hidden}
+        initialOriginX={data.originX}
+        initialOriginY={data.originY} 
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addBlobStamp.bind(this)}
@@ -521,7 +530,7 @@ function logToConsole(message, lineno){
     );
 
     blobStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ blobStamps: blobStamps });
+    this.setState({ blobStamps: blobStamps }, () => this.setLayerPicker());
   }
 
   sendSaveData() {
@@ -957,12 +966,20 @@ function logToConsole(message, lineno){
 
 toggleHide(stampRef){
   stampRef.toggleHide(this.state.scale, this.state.originX, this.state.originY, 
-    () => this.setState({numToggles:this.state.numToggles + 1}))
+ () => this.setLayerPicker())
 
 }
 
+  getFirstLine(text){
+    for(var i = 0; i < text.length; i++){
+      if(text[i] === "\n"){
+        return text.substr(0, i)
+      }
+    }
+    return text.substr(0, Math.max(text.length, 50))
+  }
 
-renderLayerPicker(){
+  setLayerPicker(){
   var pickerData = []
     Object.values(this.state.fnStamps).map((stamp) =>{
       var stampRef = stamp.ref.current
@@ -973,15 +990,31 @@ renderLayerPicker(){
 
     })
 
+    pickerData.push({})
+    Object.values(this.state.blobStamps).map((stamp) =>{
+      var stampRef = stamp.ref.current
+      if(stampRef){
 
-    var pickers = [(<div style={{color:"transparent"}}>{this.state.numToggles}</div>)]
-    pickerData.map(item => {
+      pickerData.push({name:this.getFirstLine(stampRef.state.code), status:!stampRef.state.hidden, callback: () => this.toggleHide(stampRef) })
+      }
+
+    })
+
+    this.setState({pickerData:pickerData})
+
+  }
+
+renderLayerPicker(){
+
+
+    var pickers = []
+    this.state.pickerData.map(item => {
       if(item.name){
       pickers.push(
           <div class= "row m-2 d-flex justify-content-between">
            
     <a class="text-greyText" 
-    style={{fontSize:12 }}>{item.name}</a>
+    style={{fontSize:12}}>{item.name}</a>
        <input type="checkbox" checked={item.status} onClick={item.callback}/>
         </div>
 )
@@ -994,15 +1027,21 @@ renderLayerPicker(){
 
 
     return (
-      <div class="bg-white border border-borderGrey p-2" style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width:200,
-            height:"100vh",
-            zIndex: 1000000000000000000,
-          }}>
+      <div class="bg-white border border-borderGrey" 
+
+      style={{position:"absolute", top:0, left:0, height:"100vh", zIndex: 1000000000000000000}}>
+      <ResizableBox 
+      width={200}  axis="x"
+
+      handle={<div style={{width:20,cursor: "ew-resize",
+       height:"100vh", right:0, top:0, position:"absolute", background:"transparent", 
+       color:"transparent"}}>hi</div>}
+
+      >
+      <div class="m-3" style={{overflow:"hidden" }}>
           {pickers}
+          </div>
+  </ResizableBox>
   </div>
 
     )

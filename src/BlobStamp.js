@@ -32,6 +32,12 @@ export default class BlobStamp extends Component {
       exportableCode:"",
       editsMade:"",
       runningBorder:false,
+      x:this.props.initialPosition.x,
+      y:this.props.initialPosition.y,
+      originX:this.props.initialOriginX,
+      originY: this.props.initialOriginY,
+      scale:this.props.initialScale,
+      hidden:this.props.initialHidden
     };
 
     this.cristalRef = React.createRef();
@@ -57,6 +63,20 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
               this.setState({editsMade:false, runningBorder:true}, 
                 () => setTimeout(() => this.setState({runningBorder:false}), 100)
               )
+    }
+
+  }
+
+  toggleHide(scale, originX, originY, callback){
+    
+    if(this.state.hidden){
+      var distFromOriginX = (this.state.originX - this.state.x)/this.state.scale
+      var distFromOriginY = (this.state.originY - this.state.y)/this.state.scale
+      var x = originX - distFromOriginX*scale
+      var y = originY - distFromOriginY*scale
+    this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
+    }else{
+      this.setState({hidden:true, originX:originX, originY:originY}, callback)
     }
 
   }
@@ -145,10 +165,14 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
   getData() {
     var data = {
       code: this.state.code,
-      x: this.cristalRef.current.state.x,
-      y: this.cristalRef.current.state.y,
       editorWidth: this.state.editorWidth,
-      editorHeight: this.state.editorHeight
+      editorHeight: this.state.editorHeight,
+      x: this.state.x,
+      y: this.state.y,
+      originX:this.state.originX,
+      originY:this.state.originY,
+      scale:this.state.scale,
+      hidden:this.state.hidden
     };
 
     return data;
@@ -175,6 +199,10 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
         if(this.state.runningBorder){
       border = "border border-borderDarkGrey"
     }
+    console.log(this.state.scale)
+        if(this.state.hidden){
+      return(<div></div>)
+    }
     return (
       <div>
         <Cristal
@@ -186,8 +214,9 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-          initialPosition={this.props.initialPosition}
-          initialScale={this.props.initialScale}
+          initialPosition={{x:this.state.x, y:this.state.y}}
+          onMove={(s) => this.setState({x:s.x, y:s.y})}
+          initialScale={this.state.scale}
           className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
         >
           <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>{this.renderEditor()}</div>
