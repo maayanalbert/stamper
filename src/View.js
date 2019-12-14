@@ -1006,7 +1006,7 @@ toggleHide(stampRef){
         return text.substr(0, i)
       }
     }
-    return text.substr(0, Math.max(text.length, 50))
+    return text.substr(0, Math.min(text.length, 15))
   }
 
   setLayerPicker(){
