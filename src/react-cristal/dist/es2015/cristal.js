@@ -249,7 +249,9 @@ var Cristal = (function(_super) {
         e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
-
+        if(_this.props.panDisabled){
+          return
+        }
         _this.pan(-e.deltaX, -e.deltaY);
       }
     };

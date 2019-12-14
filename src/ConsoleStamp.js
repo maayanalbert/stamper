@@ -153,7 +153,7 @@ this.checkLastLog({ method: method, data: [message] });
     var renderedLogs = _.cloneDeep(this.state.logs);
     if (this.state.lastFreq > 1) {
       renderedLogs.push({
-        method: "log",
+        method: "command",
         data: ["(" + this.state.lastFreq.toString() + ")"]
       });
     }
@@ -173,6 +173,7 @@ this.checkLastLog({ method: method, data: [message] });
         onResize={this.resizeConsole.bind(this)}
         initialPosition={{x:this.state.x, y:this.state.y}}
           onMove={(s) => this.setState({x:s.x, y:s.y})}
+          className="bg-lightGrey border border-borderGrey shadow-sm"
       >
         <div
           id="consoleContainer"
@@ -184,10 +185,17 @@ this.checkLastLog({ method: method, data: [message] });
             overflow: "hidden",
             "overflow-y": "scroll",
             "white-space": "nowrap",
-            backgroundColor: "#242424"
+        
           }}
+
         >
-          <Console logs={renderedLogs} variant="dark" />
+          <Console 
+          styles={{LOG_COLOR:"rgb(102,102,102)", 
+          LOG_ERROR_BACKGROUND:"rgba(255, 184, 0, .5)", LOG_ERROR_BORDER:"transparent",
+          LOG_ERROR_COLOR:"rgba(102,102,102)", BASE_FONT_FAMILY:"menlo", BASE_FONT_SIZE:10,
+          LOG_COMMAND_COLOR:"rgba(150,150,150)",
+        }}
+          logs={renderedLogs} variant="light" />
         </div>
       </Cristal>
     );

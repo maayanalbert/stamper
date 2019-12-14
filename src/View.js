@@ -53,9 +53,11 @@ export default class View extends Component {
       originY:0,
       scale:1,
       originCristal:null,
-      pickerData:[]
+      pickerData:[],
+
     };
     this.counterMutex = new Mutex();
+
 
     ipc && ipc.on("writeToView", (event, files) => {
       this.setState(
@@ -70,7 +72,8 @@ export default class View extends Component {
           consoleId:-1,
           originX:0, 
           originY:0,
-          originCristal:null
+          originCristal:null,
+
         },
         () => {
 
@@ -540,8 +543,6 @@ function logToConsole(message, lineno){
 
   sendSaveData() {
 
-
-    console.log(this.getExportableCode())
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -683,6 +684,27 @@ function logToConsole(message, lineno){
   }
 
   disablePan(status) {
+
+    if(status){
+              var originCristal = 
+        (        <Cristal panDisabled
+        closeHidden headerHidden copyHidden isResizable={false}
+        initialPosition ={{x:this.state.originX, y:this.state.originY}}
+        initialScale={this.state.scale}
+
+        onStopMove={(s) => this.setState({originX:s.x, originY:s.y, scale:s.scale})}></Cristal>)
+        this.setState({originCristal:originCristal})
+
+    }else{
+              var originCristal = 
+        (        <Cristal 
+        closeHidden headerHidden copyHidden isResizable={false}
+        initialPosition ={{x:this.state.originX, y:this.state.originY}}
+        initialScale={this.state.scale}
+
+        onStopMove={(s) => this.setState({originX:s.x, originY:s.y, scale:s.scale})}></Cristal>)
+        this.setState({originCristal:originCristal})
+    }
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
