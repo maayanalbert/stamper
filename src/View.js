@@ -14,7 +14,8 @@ import parser from "./parser.js"
 import anim from 'css-animation';
 import { Resizable, ResizableBox } from "react-resizable";
 import styled from 'styled-components';
-
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 var _ = require("lodash");
 
@@ -1113,10 +1114,11 @@ toggleHide(stampRef){
 
   }
 
-createIcon(iconType, size=18){
+createIcon(iconType, size=15, callback=null, opacity=.3){
   return   React.createElement(iconType, {
-        style:{opacity:"0.3", height:size, width:size},
-        className:"m-1 text-greyText"
+        style:{opacity:opacity, height:size, width:size},
+        className:"m-1 text-greyText",
+        onClick:callback
       });
 }
 
@@ -1125,17 +1127,31 @@ renderLayerPicker(){
 
     var pickers = []
     this.state.pickerData.map(item => {
+
+      if(item.status){
+        var iconType = VisibilityIcon
+      }else{
+        var iconType = VisibilityOffIcon
+      }
+
+      var overalOpacity = 1
+      if(item.status === false){
+        overalOpacity = .5
+      }
       if(item.name){
       pickers.push(
 
 
-    <div class= "d-flex justify-content-between">
+    <div class= "d-flex justify-content-between" style={{opacity:overalOpacity}}
+    onClick={item.callback}
+
+    >
     <div>
-           {this.createIcon(item.icon, 15)}
+           {this.createIcon(item.icon, 15, null, .8)}
     <a class="text-greyText ml-1" 
     style={{fontSize:12}}>{item.name}</a>
     </div>
-       <input type="checkbox" checked={item.status} onClick={item.callback}/>
+       {this.createIcon(iconType, 20, null, 1)}
         </div>
 )
       }else{

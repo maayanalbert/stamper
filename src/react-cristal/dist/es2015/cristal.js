@@ -545,17 +545,18 @@ var Cristal = (function(_super) {
           _this.setState(stateEdit)
      
         }
-
+        var color = "greyText"
     if(!callBack){
   mouseOverCallback = () => {}
       mouseOutCallback = () => {}
-      opacity = .3
+      opacity = .8
+      color="greyText"
     }
 
     return React.createElement(iconType, {
         onClick: callBack,
         style:{opacity:opacity, height:18, width:18},
-        className:"m-1 text-greyText",
+        className:"m-1 text-" + color,
         onMouseOver:mouseOverCallback,
         onMouseOut:mouseOutCallback
       });
