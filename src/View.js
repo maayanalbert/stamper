@@ -196,14 +196,14 @@ function logToConsole(message, lineno){
     if(htmlStr[i] === "\n" ){
       linesToJs += 1
     }
-    if(htmlStr.substr(i, jsSelector.length) === jsSelector){
+    if(htmlStr.substr(i, "sketch.js".length) === "sketch.js"){
       break
     }
    }
 
   
-
-   parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs-3) + "</script>")
+   console.log(linesToJs)
+   parser(".errorListener").replaceWith("<script class='errorListener' >" + this.getIframeErrorCallBack(ranges, linesToJs) + "</script>")
    parser(jsSelector).replaceWith(jsBlock);
     return parser.html();
   }
@@ -556,8 +556,6 @@ function logToConsole(message, lineno){
 
   }
   compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
-
-   
     
     if(id in seen){
       return
