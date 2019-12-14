@@ -19,14 +19,14 @@ var htmlCode = `<html>
 
 var setup = {
     fns: [
+      { name: "style.css", args: " ", code: cssCode, isCss: true },
+      { name: "index.html", args: " ", code: htmlCode, isHtml: true },
       {
         name: "setup",
         args: "",
         code: "createCanvas(400, 400)"
       },
-      { name: "draw", args: "", code: "background(220)" },
-      { name: "style.css", args: " ", code: cssCode, isCss: true },
-      { name: "index.html", args: " ", code: htmlCode, isHtml: true }
+      { name: "draw", args: "", code: "background(220)" }
     ],
     blobs: [],
     scale: 1,
