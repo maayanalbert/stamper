@@ -447,7 +447,7 @@ function logToConsole(message, lineno){
 
     fnStamps[counter] = { elem: elem, ref: ref };
 
-    this.setState({ fnStamps: fnStamps }, () => this.setLayerPicker());
+    this.setState({ fnStamps: fnStamps });
 
     if (isHtml) {
       this.setState({ htmlID: counter });
@@ -530,7 +530,7 @@ function logToConsole(message, lineno){
     );
 
     blobStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ blobStamps: blobStamps }, () => this.setLayerPicker());
+    this.setState({ blobStamps: blobStamps });
   }
 
   sendSaveData() {
@@ -586,9 +586,11 @@ function logToConsole(message, lineno){
 
     
 
-    var newTraversalGraph = this.setLineData()
-    var oldTravarsalGraph = this.state.traversalGraph
-    this.setState({traversalGraph:newTraversalGraph})
+    // var newTraversalGraph = this.setLineData()
+    // var oldTravarsalGraph = this.state.traversalGraph
+    // this.setState({traversalGraph:newTraversalGraph})
+    console.log("compiling")
+    this.setLayerPicker()
 
 
     var duplicateNamedStamps = this.checkAllNames()

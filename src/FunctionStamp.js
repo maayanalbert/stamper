@@ -74,6 +74,9 @@ export default class FunctionStamp extends Component {
 
   }
 
+  componentDidMount() {
+this.setState({iframeCode:""}, () => this.props.requestCompile(this.props.id))
+  }
 
   checkName() {
     var isSpecialFn = this.state.name in globals.specialFns;
