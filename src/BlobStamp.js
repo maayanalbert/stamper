@@ -76,7 +76,7 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
       var y = originY - distFromOriginY*scale
     this.setState({hidden:false, scale:scale, x:x, y:y}, callback)
     }else{
-      this.setState({hidden:true, originX:originX, originY:originY}, callback)
+      this.setState({hidden:true, originX:originX, originY:originY, scale:scale}, callback)
     }
 
   }
