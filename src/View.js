@@ -601,9 +601,37 @@ function logToConsole(message, lineno){
 
 
  
-    this.compileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
+    // this.compileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
      
-    this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
+    // this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      var stampRef = stamp.ref.current
+          if(stampRef){
+        var newErrors = []
+
+        if(stampRef.props.id in duplicateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
+          newErrors.push(0)
+        }
+         
+        stampRef.clearErrorsAndUpdate(newErrors);
+      }
+
+    })
+
+        Object.values(this.state.blobStamps).map(stamp => {
+      var stampRef = stamp.ref.current
+          if(stampRef){
+        var newErrors = []
+
+        if(stampRef.props.id in duplicateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
+          newErrors.push(0)
+        }
+         
+        stampRef.clearErrorsAndUpdate(newErrors);
+      }
+
+    })
    
 
   }
