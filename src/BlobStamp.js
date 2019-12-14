@@ -30,7 +30,8 @@ export default class BlobStamp extends Component {
       editorWidth: this.props.starterEditorWidth,
       errorLines:this.props.errorLines,
       exportableCode:"",
-      editsMade:""
+      editsMade:"",
+      runningBorder:false,
     };
 
     this.cristalRef = React.createRef();
@@ -50,10 +51,12 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     }
   }
 
-    mouseOutCallback(){
+  mouseOutCallback(){
     if(this.state.editsMade){
               this.props.requestCompile(this.props.id)
-              this.setState({editsMade:false})
+              this.setState({editsMade:false, runningBorder:true}, 
+                () => setTimeout(() => this.setState({runningBorder:false}), 100)
+              )
     }
 
   }
@@ -69,7 +72,6 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     return (
       <div
         onMouseOut={() => {
-          this.mouseOutCallback();
           this.setEditorScrolling(false);
         }}
       >
@@ -87,7 +89,7 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
           }
           }
                  markers={markers}
-        name= {"id" + this.props.id.toString()}
+        name= {"name" + this.props.id.toString()}
           fontSize={globals.globalVarCodeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -169,6 +171,10 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
     if(Object.keys(this.state.errorLines).length > 0){
       border = "border border-warningOrange"
     }
+
+        if(this.state.runningBorder){
+      border = "border border-blue"
+    }
     return (
       <div>
         <Cristal
@@ -184,7 +190,7 @@ this.setState({exportableCode:""}, () => this.props.requestCompile(this.props.id
           initialScale={this.props.initialScale}
           className={"shadow-sm bg-jsArea " + border + " vertex" + this.props.id}
         >
-          <div class="row m-0">{this.renderEditor()}</div>
+          <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>{this.renderEditor()}</div>
         </Cristal>
       </div>
     );

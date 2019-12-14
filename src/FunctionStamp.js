@@ -44,7 +44,10 @@ export default class FunctionStamp extends Component {
       editorScrolling: false,
       errorLines:this.props.errorLines,
       iframeCode:"",
-      editsMade:true
+      editsMade:false,
+      runningBorder:false,
+      doubleClickActive:false,
+      resizingIframe:false
     };
 
     this.cristalRef = React.createRef();
@@ -100,7 +103,7 @@ export default class FunctionStamp extends Component {
   }
 
   componentDidMount() {
-    console.log("mounting")
+
     this.setState({errorLines:{}}, () => this.props.requestCompile(this.props.id))
     this.checkName();
     this.loadp5Lib();
@@ -197,10 +200,11 @@ export default class FunctionStamp extends Component {
       mode = "html"
     }
 
+
+
     return (
       <div
         onMouseOut={() => {
-          this.mouseOutCallback()
           this.setEditorScrolling(false)
         }
         }
@@ -221,7 +225,7 @@ export default class FunctionStamp extends Component {
             this.setState({ code: value, editsMade:true });
             ipc && ipc.send("edited");
           }}
-          name= {"id" + this.props.id.toString()}
+          name= {"name" + this.props.id.toString()}
           fontSize={globals.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -246,7 +250,9 @@ export default class FunctionStamp extends Component {
   mouseOutCallback(){
     if(this.state.editsMade){
               this.props.requestCompile(this.props.id)
-              this.setState({editsMade:false})
+              this.setState({editsMade:false, runningBorder:true}, 
+                () => setTimeout(() => this.setState({runningBorder:false}), 100)
+              )
     }
 
   }
@@ -278,7 +284,8 @@ export default class FunctionStamp extends Component {
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.mouseOutCallback()}
+        
+
 
           value={this.state.name}
           class={"text-" + nameColor + " name"}
@@ -295,7 +302,7 @@ export default class FunctionStamp extends Component {
             ipc && ipc.send("edited");
           }}
           style={{background:"transparent"}}
-          onMouseOut={() => this.mouseOutCallback()}
+       
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />
@@ -303,10 +310,17 @@ export default class FunctionStamp extends Component {
     );
   }
 
+
   renderIframe() {
     return (
       <div hidden={this.props.isCss}>
+<div hidden={this.state.resizingIframe === false}
+style={{position:"absolute", fontSize:globals.codeSize, opacity:.5,
+top: 80, right:25}} 
+class="text-greyText">
+{Math.floor(this.state.iframeWidth) + "," + Math.floor(this.state.iframeHeight)}</div>
         <Resizable
+    
           className="ml-1 bg-white shadow"
           onResize={e => {
             this.updateIframeDimensions(
@@ -314,8 +328,12 @@ export default class FunctionStamp extends Component {
               e.movementY
             );
           }}
-          onResizeStart={this.props.onStartMove}
-          onResizeStop={(e) =>  this.props.onStopMove() }
+          onResizeStart={() => {
+            this.props.onStartMove(); 
+            this.setState({resizingIframe:true})
+          }
+          }
+          onResizeStop={(e) =>  {this.props.onStopMove();this.setState({resizingIframe:false})} }
           width={this.state.iframeHeight}
           height={this.state.iframeWidth}
           style={{
@@ -323,7 +341,8 @@ export default class FunctionStamp extends Component {
             zIndex: 5
           }}
         >
-          <div>
+
+          <div onMouseOver={this.mouseOutCallback.bind(this)}>
             <div
               style={{
                 position: "absolute",
@@ -336,7 +355,9 @@ export default class FunctionStamp extends Component {
             >
               {" "}
             </div>
-            <iframe ref={(iframeElem) => {if(iframeElem){
+            <iframe 
+
+            ref={(iframeElem) => {if(iframeElem){
               this.props.addNewIframeConsole(iframeElem.contentWindow.console)
 
             }}
@@ -358,6 +379,7 @@ export default class FunctionStamp extends Component {
           </div>
         </Resizable>
       </div>
+
     );
   }
 
@@ -435,10 +457,13 @@ export default class FunctionStamp extends Component {
 
 
     var border = "border border-borderGrey"
+
     if(Object.keys(this.state.errorLines).length > 0){
       border = "border border-warningOrange"
     }
-
+      if(this.state.runningBorder){
+      border = "border border-blue"
+    }
 
     // <!-- @cameron little white div thing --> scroll down to style
 
@@ -467,7 +492,7 @@ export default class FunctionStamp extends Component {
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
         >
-
+          <div onMouseLeave={this.mouseOutCallback.bind(this)}>
           <div
 
             class={headerColor}
@@ -483,7 +508,8 @@ export default class FunctionStamp extends Component {
             {" "}
           </div>
 
-          <div class="p-2">
+          <div class="p-2" >
+
             {this.renderFunctionName()}
 
             <div class="row m-0 ">
@@ -491,6 +517,7 @@ export default class FunctionStamp extends Component {
 
               {this.renderIframe()}
             </div>
+          </div>
           </div>
         </Cristal>
       </div>

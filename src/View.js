@@ -11,6 +11,7 @@ import { Line } from "react-lineto";
 import cheerio from "cheerio";
 import { SteppedLineTo } from 'react-lineto';
 import parser from "./parser.js"
+import anim from 'css-animation';
 var _ = require("lodash");
 
 
@@ -525,14 +526,13 @@ function logToConsole(message, lineno){
     }
 
     this.setState({setupExists:newSetupExists})
-  
 
     return newSetupExists
   }
 
   requestCompile(id){
 
-
+    
 
     var newTraversalGraph = this.setLineData()
     var oldTravarsalGraph = this.state.traversalGraph
@@ -548,9 +548,7 @@ function logToConsole(message, lineno){
     this.sendSaveData();
 
 
-
  
-
     this.compileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
      
     this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
@@ -559,8 +557,7 @@ function logToConsole(message, lineno){
   }
   compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
 
-
-
+   
     
     if(id in seen){
       return
@@ -585,7 +582,7 @@ function logToConsole(message, lineno){
         var newErrors = []
 
         if(stampRef.props.id in duplicateNamedStamps && stampRef.props.isCss === false && stampRef.props.isHtml === false){
-          newErrors.append(0)
+          newErrors.push(0)
         }
          
         stampRef.clearErrorsAndUpdate(newErrors);
@@ -717,9 +714,6 @@ function logToConsole(message, lineno){
     Object.keys(this.state.fnStamps).map(id => {
 
 
-        
-      
-
       var stampRef = this.state.fnStamps[id].ref.current
 
 
@@ -739,10 +733,6 @@ function logToConsole(message, lineno){
   
     });
 
-
-
-    var style = {borderColor:"rgb(230, 230, 230)", borderWidth:10*this.state.scale}
-
     undeclaredArr.map(undeclaredItem => {
       var identifier = undeclaredItem[0]
       var usingFn = undeclaredItem[1]
@@ -761,7 +751,7 @@ function logToConsole(message, lineno){
        
 
     Object.keys(this.state.fnStamps).map(id =>{
-      if(id != this.state.htmlID && id != this.state.cssID){
+      if(id != this.state.htmlID && id != this.state.cssID && id != setupID){
         lineData.push([id, setupID])
             if(setupID in traversalGraph === false){
           traversalGraph[setupID] = []
@@ -770,9 +760,18 @@ function logToConsole(message, lineno){
       }
     })
 
-    this.setState({lineData:lineData}, () => this.setLines())
+    this.setState({lineData:lineData}, () => this.setLines())  
 
+    Object.keys(this.state.fnStamps).map(id =>{
+      if(id != this.state.htmlID && id != this.state.cssID){
+        if(this.state.htmlID in traversalGraph === false){
+          traversalGraph[this.state.htmlID] = []
+        }
+        traversalGraph[this.state.htmlID].push(id)
+      }
+    })
 
+    traversalGraph[this.state.cssID] = [this.state.htmlID]
 
     return traversalGraph
   }
@@ -971,11 +970,9 @@ function logToConsole(message, lineno){
             add global blobs
           </button>
           <button
-            class="btn btn btn-lightGrey shadow m-1 text-white"
-            onClick={() =>
-                 console.log(parser.getIdentifiers("function setup(x, y){var z = k + 1}; "))
-              
-            }
+            class={"btn btn shadow m-1 text-white btn-grey"}
+           
+            
           >
             clear
           </button>
