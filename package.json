@@ -13,6 +13,7 @@
     "console-feed": "^2.8.10",
     "cross-env": "^6.0.2",
     "css-animation": "^2.0.4",
+    "electron-default-menu": "^1.0.1",
     "electron-is-dev": "1.1.0",
     "electron-log": "^3.0.9",
     "electron-updater": "^4.2.0",

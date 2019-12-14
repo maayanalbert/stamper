@@ -1,5 +1,6 @@
 const {
   app,
+  shell,
   BrowserWindow,
   Menu,
   protocol,
@@ -14,7 +15,7 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 
 const FileManager = require("./FileManager.js");
-
+const defaultMenu = require('electron-default-menu');
 
 let mainWindow;
 let fileManager;
@@ -22,23 +23,25 @@ let fileManager;
 
 function createWindow() {
   autoUpdater.checkForUpdates();
+
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 680,
-    webPreferences: { nodeIntegration: true }
+    webPreferences: { nodeIntegration: true },
+    show:false
   });
+  mainWindow.maximize()
+  mainWindow.show()
   mainWindow.loadURL(
     isDev
       ? "http://localhost:3000"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
-  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
     ipcMain: null;
     Menu.setApplicationMenu(null) 
+
   });
 
   setMenu();
@@ -66,11 +69,10 @@ app.on("activate", () => {
 });
 
 function setMenu() {
-  var menu = Menu.buildFromTemplate([
-    {
-      label: "Idk",
-      submenu: [{ label: "Idk" }]
-    },
+
+  var menu = defaultMenu(app, shell)
+
+  menu.splice(1, 0, 
     {
       label: "File",
       submenu: [
@@ -89,6 +91,7 @@ function setMenu() {
           },
           accelerator: "Cmd+O"
         },
+        { type: 'separator' },
 
         {
           label: "Save",
@@ -105,25 +108,38 @@ function setMenu() {
           accelerator: "Shift+Cmd+S"
         }
       ]
+    })
+
+  menu.splice(5, 0, 
+    {
+      label: "Sketch",
+      submenu: [
+       
+      ]
+    })
+    
+    log.info(menu[6].submenu[0].click)
+
+    menu[6].submenu = [
+    {
+      label:"p5.js Reference",
+      click(){shell.openExternal('https://p5js.org/reference/') }
     },
     {
-      label: "Edit",
-      submenu: [
-        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-        { type: "separator" },
-        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        {
-          label: "Select All",
-          accelerator: "CmdOrCtrl+A",
-          selector: "selectAll:"
-        }
-      ]
+      label:"p5.js Libraries",
+      click(){shell.openExternal('https://p5js.org/libraries/') }
+    },
+    {
+      label:"p5.js Learn",
+      click(){shell.openExternal('https://p5js.org/learn/') }
+    },
+    {
+      label:"p5.js Examples",
+      click(){shell.openExternal('https://p5js.org/examples/') }
     }
-  ]);
-  Menu.setApplicationMenu(menu);
+    ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 
 //////////
