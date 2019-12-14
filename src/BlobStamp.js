@@ -230,7 +230,7 @@ export default class BlobStamp extends Component {
             "shadow-sm bg-jsArea " + border + " vertex" + this.props.id
           }
           title="Anything"
-          icon={this.CodeIcon()}
+          icon={this.getIcon()}
         >
           <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>
             {this.renderEditor()}
