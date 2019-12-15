@@ -9,7 +9,7 @@ export const globals = {
   margin: 25,
   marginVariance: 100,
   codeSize: 12,
-  globalVarCodeSize:12,
+  bigCodeSize:24,
   fnTitleHeight: 90,
   copyOffset: 17,
   specialFns:{draw:"", setup:"", mousePressed:"", keyPressed:"", keyReleased:"", keyTyped:"", 

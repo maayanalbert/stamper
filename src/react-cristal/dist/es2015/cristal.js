@@ -648,11 +648,17 @@ var Cristal = (function(_super) {
         var titleIcon = createIcon(this, this.props.icon);
       }
 
+      var makeBigIcon = createIcon(this, 
+        _a.makeBigIcon, 
+        !_a.showMakeBig, "mouseOnBig",
+         _a.onMakeBig )
+
       var sideButtons = (
         <div
           class="row"
           style={{ position: "absolute", cursor: "auto", right: 18, top: 0 }}
         >
+          {makeBigIcon}
           {copyBtn}
           {closeBtn}
           {clearBtn}

@@ -6,6 +6,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import CodeIcon from "@material-ui/icons/Code";
+import TextIcon from "@material-ui/icons/TextFields";
 
 // import "ace-builds/src-noconflict/mode-javascript";
 // import "ace-builds/src-noconflict/theme-tomorrow";
@@ -37,7 +38,8 @@ export default class BlobStamp extends Component {
       originX: this.props.initialOriginX,
       originY: this.props.initialOriginY,
       scale: this.props.initialScale,
-      hidden: this.props.initialHidden
+      hidden: this.props.initialHidden,
+      codeSize:globals.codeSize
     };
 
     this.cristalRef = React.createRef();
@@ -117,7 +119,7 @@ export default class BlobStamp extends Component {
           }}
           markers={markers}
           name={"name" + this.props.id.toString()}
-          fontSize={globals.globalVarCodeSize}
+          fontSize={this.state.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
           showGutter={false}
@@ -231,6 +233,16 @@ export default class BlobStamp extends Component {
           }
           title="Anything"
           icon={this.getIcon()}
+          makeBigIcon ={TextIcon}
+          showMakeBig
+          onMakeBig ={() => {
+            if(this.state.codeSize === globals.codeSize){
+              this.setState({codeSize:globals.bigCodeSize})
+            }else{
+              this.setState({codeSize:globals.codeSize})
+            }
+          }}
+
         >
           <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>
             {this.renderEditor()}
