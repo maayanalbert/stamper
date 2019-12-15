@@ -155,14 +155,16 @@ var Cristal = (function(_super) {
       }
 
       if(_this.state.downKey === _this.cmd){
-        e.preventDefault()
         if(ipc){
 
         }else if(e.keyCode === _this.zero){
+           e.preventDefault()
           _this.zoom(1, window.innerWidth/2, window.innerHeight/2, true)
         }else if(e.keyCode === _this.plus){
+           e.preventDefault()
           _this.zoom(_this.state.scale * 2, window.innerWidth/2, window.innerWidth/2, true)
         }else if(e.keyCode === _this.minus){
+           e.preventDefault()
           _this.zoom(_this.state.scale * .5, window.innerWidth/2, window.innerWidth/2, true)
         }
       }else{
