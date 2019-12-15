@@ -121,9 +121,7 @@ function setMenu() {
 
       ]
     })
-
-    log.info(menu[6].submenu[0].click)
-
+    
     menu[6].submenu = [
     {
       label:"p5.js Reference",
@@ -168,7 +166,7 @@ function setMenu() {
           accelerator: "Cmd+0"
         })
 
-    log.info(menu[2])
+
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 

@@ -10,6 +10,7 @@ import GradientIcon from "@material-ui/icons/Gradient";
 import ColorIcon from "@material-ui/icons/ColorLens";
 import WebIcon from "@material-ui/icons/Web";
 import CategoryIcon from "@material-ui/icons/Category";
+import HearingIcon from "@material-ui/icons/Hearing";
 
 import "./theme-p5.js";
 
@@ -19,6 +20,7 @@ import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
+
 import { Resizable, ResizableBox } from "react-resizable";
 
 var userAgent = navigator.userAgent.toLowerCase();
@@ -63,6 +65,7 @@ export default class FunctionStamp extends Component {
   }
 
   toggleHide(scale, originX, originY, callback) {
+    console.log(scale, originX, originY, callback)
     if (this.state.hidden) {
       var distFromOriginX =
         (this.state.originX - this.state.x) / this.state.scale;
@@ -80,6 +83,7 @@ export default class FunctionStamp extends Component {
   }
 
   componentDidMount() {
+    this.loadp5Lib()
     this.setState({ iframeCode: "" }, () =>
       this.props.requestCompile(this.props.id)
     );
@@ -110,6 +114,7 @@ export default class FunctionStamp extends Component {
   }
 
   loadp5Lib() {
+    this.editorRef.current &&
     this.editorRef.current.editor.completers.push({
       getCompletions: function(editor, session, pos, prefix, callback) {
         var completions = [];
@@ -433,7 +438,12 @@ export default class FunctionStamp extends Component {
     } else if (this.props.isCss) {
       icon = ColorIcon;
     } else if (this.state.isSpecialFn) {
+      if(globals.specialFns[this.state.name]){
       icon = CategoryIcon;
+      }else{
+        icon = HearingIcon
+      }
+
     }
 
     return icon;
