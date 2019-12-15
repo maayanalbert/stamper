@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
+import SideBar from "./SideBar.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
@@ -16,6 +17,13 @@ import { Resizable, ResizableBox } from "react-resizable";
 import styled from "styled-components";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-css";
+import "ace-builds/src-noconflict/mode-html";
+import "ace-builds/src-noconflict/theme-solarized_light";
+import "ace-builds/src-min-noconflict/ext-language_tools";
+import "ace-builds/src-noconflict/snippets/javascript";
 
 var _ = require("lodash");
 
@@ -54,9 +62,14 @@ export default class View extends Component {
       originY: 0,
       scale: 1,
       originCristal: null,
-      pickerData: []
+      pickerData: [],
+      sideBarWidth:200,
+      pickerHeight:400,
+      jsImportCode:""
+
     };
     this.counterMutex = new Mutex();
+    this.aceRef = React.createRef()
 
     ipc &&
       ipc.on("writeToView", (event, files) => {
@@ -269,8 +282,8 @@ function logToConsole(message, lineno){
       varStamp.ref.current.cristalRef.current.zoom(newScale, mouseX, mouseY)
     );
 
-    this.state.console.ref.current.zoom(newScale, mouseX, mouseY)
-    this.cristalRef.current.zoom(newScale, mouseX, mouseY)
+    this.state.console.ref.current.zoom(newScale, mouseX, mouseY);
+    this.cristalRef.current.zoom(newScale, mouseX, mouseY);
     this.setState({ scale: newScale });
   }
 
@@ -558,7 +571,7 @@ function logToConsole(message, lineno){
 
     if (this.state.setupExists && newSetupExists === false) {
       this.state.consoleStamp.ref.current.logToConsole(
-        `Stamper Error: You don't have a setup. This will constrain your canvas to a default width and hight.`
+        `Stamper Error: You don't have a setup. This will constrain your canvas to a default width and height.`
       );
     }
 
@@ -1144,91 +1157,7 @@ function logToConsole(message, lineno){
     this.setState({ pickerData: pickerData });
   }
 
-  createIcon(iconType, size = 15, callback = null, opacity = 0.3) {
-    return React.createElement(iconType, {
-      style: { opacity: opacity, height: size, width: size },
-      className: "m-1 text-greyText",
-      onClick: callback
-    });
-  }
-
-  renderLayerPicker() {
-    var pickers = [];
-    this.state.pickerData.map(item => {
-      if (item.status) {
-        var iconType = VisibilityIcon;
-      } else {
-        var iconType = VisibilityOffIcon;
-      }
-
-      var overalOpacity = 1;
-      if (item.status === false) {
-        overalOpacity = 0.5;
-      }
-      if (item.name) {
-        pickers.push(
-          <div
-            class="d-flex justify-content-between"
-            style={{ opacity: overalOpacity }}
-            onClick={item.callback}
-          >
-            <div style={{overflow:"hidden"}}>
-              {this.createIcon(item.icon, 15, null, 0.5)}
-              <a class="text-greyText ml-1" style={{ fontSize: 12 }}>
-                {item.name}
-              </a>
-            </div>
-            {this.createIcon(iconType, 20, null, .8)}
-          </div>
-        );
-      } else {
-        pickers.push(<br />);
-      }
-    });
-
-    return (
-      <div
-        class="bg-white border border-borderGrey"
-        onMouseOver={() => this.disablePan(true)}
-        onMouseOut={() => this.disablePan(false)}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          "overflow-y": "scroll",
-
-          height: "100vh",
-          zIndex: 1000000000000000000
-        }}
-      >
-        <ResizableBox
-          width={200}
-          axis="x"
-          handle={
-            <div
-              style={{
-                width: 20,
-                cursor: "ew-resize",
-                height: "100vh",
-                right: 0,
-                top: 0,
-                position: "absolute",
-                background: "transparent",
-                color: "transparent"
-              }}
-            >
-              hi
-            </div>
-          }
-        >
-          <div class="m-3" style={{ overflow: "hidden" }}>
-            {pickers}
-          </div>
-        </ResizableBox>
-      </div>
-    );
-  }
-
+  
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1278,7 +1207,10 @@ function logToConsole(message, lineno){
         </div>
         {this.state.originCristal}
 
-        {this.renderLayerPicker()}
+        <SideBar pickerData={this.state.pickerData} 
+        addBlobStamp={this.addBlobStamp.bind(this)}
+        addFnStamp={this.addFnStamp.bind(this)}
+        disablePan={this.disablePan.bind(this)}/>
       </div>
     );
   }

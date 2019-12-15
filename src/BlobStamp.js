@@ -47,6 +47,7 @@ export default class BlobStamp extends Component {
   }
 
   componentDidMount() {
+    this.loadp5Lib()
     this.setState({ exportableCode: "" }, () =>
       this.props.requestCompile(this.props.id)
     );
@@ -199,6 +200,22 @@ export default class BlobStamp extends Component {
 
   getIcon() {
     return CodeIcon;
+  }
+
+    loadp5Lib() {
+        this.editorRef.current &&
+    this.editorRef.current.editor.completers.push({
+      getCompletions: function(editor, session, pos, prefix, callback) {
+        var completions = [];
+        p5Lib.forEach(function(w) {
+          completions.push({
+            value: w,
+            meta: "p5.js"
+          });
+        });
+        callback(null, completions);
+      }
+    });
   }
 
   render() {

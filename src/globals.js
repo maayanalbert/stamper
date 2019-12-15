@@ -12,9 +12,10 @@ export const globals = {
   bigCodeSize:24,
   fnTitleHeight: 90,
   copyOffset: 17,
-  specialFns:{draw:"", setup:"", mousePressed:"", keyPressed:"", keyReleased:"", keyTyped:"", 
-  keyIsDown:"", mouseMoved:"", mouseDragged:"", mousePressed:"", mouseReleased:"", mouseClicked:"", 
-doubleClicked:"", mouseWheel:"", preload:"", windowResized:""},
+  specialFns:{draw:true, setup:true, mousePressed:false, keyPressed:false, keyReleased:false, keyTyped:false, 
+  keyIsDown:false, mouseMoved:false, mouseDragged:false, mousePressed:false, 
+  mouseReleased:false, mouseClicked:false, 
+doubleClicked:false, mouseWheel:false, preload:true, windowResized:false},
   fnStampWidth:557,
   fnStampHeight:318
 };

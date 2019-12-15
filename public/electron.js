@@ -119,7 +119,7 @@ function setMenu() {
       ]
     })
     
-    log.info(menu[6].submenu[0].click)
+
 
     menu[6].submenu = [
     {
@@ -165,7 +165,7 @@ function setMenu() {
           accelerator: "Cmd+0"
         })
 
-    log.info(menu[2])
+
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 
