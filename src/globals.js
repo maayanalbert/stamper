@@ -12,12 +12,30 @@ export const globals = {
   bigCodeSize:24,
   fnTitleHeight: 90,
   copyOffset: 17,
-  specialFns:{draw:true, setup:true, mousePressed:false, keyPressed:false, keyReleased:false, keyTyped:false, 
-  keyIsDown:false, mouseMoved:false, mouseDragged:false, mousePressed:false,
-  mouseReleased:false, mouseClicked:false,
-doubleClicked:false, mouseWheel:false, preload:true, windowResized:false},
-  fnStampWidth:557,
-  fnStampHeight:318
+  
+  specialFns: {
+    draw:           true,
+    preload:        true,
+    setup:          true,
+
+    mousePressed:   false,
+    keyPressed:     false,
+    keyReleased:    false,
+    keyTyped:       false,
+    keyIsDown:      false,
+    mouseMoved:     false,
+    mouseDragged:   false,
+    mousePressed:   false,
+    mouseReleased:  false,
+    mouseClicked:   false,
+    doubleClicked:  false,
+    mouseWheel:     false,
+    windowResized:  false
+  },
+
+  fnStampWidth:     557,
+  fnStampHeight:    318
+
 };
 
 export const p5Lib = [
