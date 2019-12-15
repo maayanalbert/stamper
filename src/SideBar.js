@@ -31,18 +31,38 @@ var esprima = require("esprima");
 
 const defaultSetup = require("./defaultSetup.js");
 
-export default class View extends Component {
+export default class SideBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      width:250,
-      pickerHeight:400,
-      code:"// paste javascript code here to import it into stamper!", 
+      width:200,
+      pickerHeight:window.innerHeight-150,
+      code:
+
+`// import unstructred Javascript code or individual functions
+
+// like the below: 
+function noiseWave() {
+  let noiseScale=0.02;
+  background(0);
+  for (let x=0; x < width; x++) {
+    let noiseVal = noise((mouseX+x)*noiseScale, mouseY*noiseScale);
+    stroke(noiseVal*255);
+    line(x, mouseY+noiseVal*80, x, height);
+  }
+}`
+
+
+
+
+      , 
       codeHasError:false
 
 
     };
   this.editorRef = React.createRef()
+
+
   }
 
   parseCode(){
@@ -65,7 +85,8 @@ export default class View extends Component {
           style={{
             width: this.state.width-30,
             height: window.innerHeight- this.state.pickerHeight,
-            background: "transparent"
+            background: "transparent",
+    
           }}
           mode="javascript"
           theme="p5"
@@ -79,10 +100,6 @@ export default class View extends Component {
           value={this.state.code}
           ref={this.editorRef}
           setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: false,
-            showLineNumbers: true,
             tabSize: 2,
             hasCssTransforms: true
           }}
@@ -141,9 +158,10 @@ export default class View extends Component {
             style={{ opacity: overalOpacity }}
             onClick={item.callback}
           >
-            <div style={{ overflow: "hidden" }}>
+            <div clas="row" style={{ overflow: "hidden" }}>
+
               {this.createIcon(item.icon, 15, null, 0.5)}
-              <a class="text-greyText ml-1" style={{ fontSize: 12 }}>
+              <a class="text-greyText picker ml-1">
                 {item.name}
               </a>
             </div>
@@ -192,10 +210,10 @@ export default class View extends Component {
 
     if(this.state.codeHasError){
       return(
-            <button class="btn shadow-sm m-1 bg-warningOrangeDark"
+            <button class="btn btn-block shadow-sm m-1 bg-warningOrangeDark"
             disabled
             style={{position:"absolute",  color:"rgb(0, 0, 0)",
-            bottom:10, left:this.state.width-130,
+            bottom:0,
             fontSize:globals.codeSize}}
 
             >
@@ -206,9 +224,9 @@ export default class View extends Component {
     }
     return(
 
-            <button class={"btn  shadow-sm m-1 bg-grey border-borderGrey text-greyText"}
+            <button class={"btn btn-block shadow-sm m-1 bg-grey border-borderGrey text-greyText"}
             style={{position:"absolute", 
-            bottom:10, left:this.state.width-170,
+            bottom:30, left:-4,
             fontSize:globals.codeSize}}
             onClick={this.parseCode.bind(this)}
 
@@ -222,14 +240,14 @@ export default class View extends Component {
   render() {
     return (
       <div
-        class="bg-white border border-borderGrey shadow"
+        class="bg-white border border-borderGrey shadow-sm"
         onMouseOver={() => this.props.disablePan(true)}
         onMouseOut={() => this.props.disablePan(false)}
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          height:"100vh",
+          height:"100%",
 
 
           zIndex: 1000000000000000000
@@ -249,7 +267,7 @@ export default class View extends Component {
               style={{
                 width: 20,
                 cursor: "ew-resize",
-                height: "100vh",
+                height: "100%",
                 right: 0,
                 top: 0,
                 position: "absolute",
@@ -261,7 +279,7 @@ export default class View extends Component {
             </div>
           }
         >
-          <div style={{height:"100vh" }}>
+          <div style={{height:"100%" }}>
             {this.renderLayerPicker()}
 
 

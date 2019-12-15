@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Cristal from "./react-cristal/dist/es2015/index.js";
-import Copy from "./copy.png";
 import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
@@ -192,7 +191,7 @@ export default class ConsoleStamp extends Component {
               LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
               LOG_ERROR_BORDER: "transparent",
               LOG_ERROR_COLOR: "rgba(102,102,102)",
-              BASE_FONT_FAMILY: "menlo",
+              BASE_FONT_FAMILY: "Roboto Mono",
               BASE_FONT_SIZE: 10,
               LOG_COMMAND_COLOR: "rgba(150,150,150)",
               BASE_BACKGROUND_COLOR: "transparent",

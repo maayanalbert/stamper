@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
+import TopBar from "./TopBar.js"
 import SideBar from "./SideBar.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
@@ -1172,45 +1173,21 @@ function logToConsole(message, lineno){
 
     return (
       <div>
+     <TopBar/> 
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
           {consoleElem}
           {this.state.lines}
         </div>
-        <div
-          class="topButtons"
-          style={{
-            position: "absolute",
-            top: globals.margin,
-            right: globals.margin,
-            zIndex: 1000000000000000000
-          }}
-        >
-          <button
-            class="btn btn btn-pink shadow m-1"
-            onClick={() => this.addFnStamp({}, true)}
-          >
-            {" "}
-            add sketch
-          </button>
-          <button
-            class="btn btn btn-blue shadow m-1"
-            onClick={() => this.addBlobStamp({})}
-          >
-            {" "}
-            add global blobs
-          </button>
-          <button class={"btn btn shadow m-1 text-white btn-grey"}>
-            clear
-          </button>
-          <br />
-        </div>
+            
         {this.state.originCristal}
-
+  
         <SideBar pickerData={this.state.pickerData} 
         addBlobStamp={this.addBlobStamp.bind(this)}
         addFnStamp={this.addFnStamp.bind(this)}
         disablePan={this.disablePan.bind(this)}/>
+
+     
       </div>
     );
   }

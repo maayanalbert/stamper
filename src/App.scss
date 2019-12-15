@@ -86,7 +86,8 @@
 
 
 
-
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap');
 
 
 
@@ -94,7 +95,7 @@ $size: 225;
 $placeholder: rgb(200, 200, 200);
 
 * {
-    font-family: menlo;
+font-family: 'Roboto Mono', monospace;
   }
 
 $theme-colors: (
@@ -140,19 +141,32 @@ html, body {
 }
 
 .name{
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
   border:none;
   outline:none;
   font-weight: bold;
   position: relative;
   width: 100%;
-  font-size: 18px;
+  font-size: 20px;
+}
+
+.btn{
+font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+
+.picker{
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
 }
 
 .args{
   border:none;
   outline:none;
   position: relative;
-  font-size: 12px;
+  font-size: 14px;
   width: 100%;
 }
 

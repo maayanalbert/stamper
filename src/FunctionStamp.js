@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Cristal from "./react-cristal/dist/es2015/index.js";
-import Copy from "./copy.png";
 import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";

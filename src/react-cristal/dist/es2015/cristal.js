@@ -22,8 +22,6 @@ import {
   isInView
 } from "./utils";
 import { Stacker } from "./stacker";
-import CopyImg from "./../../../copy.png"; // @cameron update this to material icon
-import CloseImg from "./../../../close.png"; // @cameron update this to material icon
 import styled from "styled-components";
 import DeleteIcon from "@material-ui/icons/Delete";
 import CopyIcon from "@material-ui/icons/FileCopyOutlined";

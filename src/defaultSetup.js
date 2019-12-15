@@ -19,8 +19,8 @@ var htmlCode = `<html>
 
 var setup = {
     fns: [
-      { name: "style.css", args: " ", code: cssCode, isCss: true, x:800, y:140},
-      { name: "index.html", args: " ", code: htmlCode, isHtml: true , x:220, y:140},
+      { name: "style.css", args: " ", code: cssCode, isCss: true, x:800, y:140, hidden:true},
+      { name: "index.html", args: " ", code: htmlCode, isHtml: true , x:220, y:140, hidden:true},
       {
         name: "setup",
         args: "",
@@ -30,7 +30,7 @@ var setup = {
     ],
     blobs: [],
     scale: 1,
-    console:{x:220, y:15},
+    console:{x:220, y:15, hidden:true},
     originX:0,
     originY:0
   }
