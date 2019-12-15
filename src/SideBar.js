@@ -35,7 +35,7 @@ export default class View extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      width:200,
+      width:250,
       pickerHeight:400,
       code:"// paste javascript code here to import it into stamper!", 
       codeHasError:false
@@ -59,12 +59,11 @@ export default class View extends Component {
 
   renderJsImporter(){
 
-
     return(
 <div class="bg-jsArea p-3" style={{overflow:"hidden", width:this.state.width}}>
         <AceEditor
           style={{
-            width: this.state.width-20,
+            width: this.state.width-30,
             height: window.innerHeight- this.state.pickerHeight,
             background: "transparent"
           }}
@@ -189,11 +188,41 @@ export default class View extends Component {
   }
 
 
+  renderButton(){
+
+    if(this.state.codeHasError){
+      return(
+            <button class="btn shadow-sm m-1 bg-warningOrangeDark"
+            disabled
+            style={{position:"absolute",  color:"rgb(0, 0, 0)",
+            bottom:10, left:this.state.width-130,
+            fontSize:globals.codeSize}}
+
+            >
+            Syntax Error
+          </button>
+
+        )
+    }
+    return(
+
+            <button class={"btn  shadow-sm m-1 bg-grey border-borderGrey text-greyText"}
+            style={{position:"absolute", 
+            bottom:10, left:this.state.width-170,
+            fontSize:globals.codeSize}}
+            onClick={this.parseCode.bind(this)}
+
+            >
+            Import Javascript
+          </button>
+
+      )
+  }
 
   render() {
     return (
       <div
-        class="bg-white border border-borderGrey"
+        class="bg-white border border-borderGrey shadow"
         onMouseOver={() => this.props.disablePan(true)}
         onMouseOut={() => this.props.disablePan(false)}
         style={{
@@ -235,16 +264,10 @@ export default class View extends Component {
           <div style={{height:"100vh" }}>
             {this.renderLayerPicker()}
 
+
          
             {this.renderJsImporter()}
-
-            <button class={"btn btn-sm  shadow-sm m-1 bg-white border-borderGrey"}
-            style={{position:"absolute", bottom:20, left:this.state.width-130}}
-            onClick={this.parseCode.bind(this)}
-
-            >
-            Import Javascript
-          </button>
+            {this.renderButton()}
           </div>
         </ResizableBox>
       </div>
