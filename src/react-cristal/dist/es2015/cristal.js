@@ -89,6 +89,10 @@ var Cristal = (function(_super) {
 
     _this.space = 32;
     _this.opt = 18;
+    _this.cmd = 91
+    _this.plus = 187
+    _this.minus = 189
+    _this.zero = 48
     _this.onWindowResize = function() {
       var _a = _this.state,
         x = _a.x,
@@ -145,11 +149,25 @@ var Cristal = (function(_super) {
     };
 
     _this.onKeyDown = function(e) {
-      _this.setState({ downKey: e.keyCode });
+
       if (e.keyCode === _this.space) {
         document.body.style.cursor = "grab";
       }
+
+      if(_this.state.downKey === _this.cmd){
+        if(e.keyCode === _this.zero){
+          _this.zoom(1, window.innerWidth/2, window.innerHeight/2, true)
+        }else if(e.keyCode === _this.plus){
+          _this.zoom(_this.state.scale * 1.1, window.innerWidth/2, window.innerWidth/2, true)
+        }else if(e.keyCode === _this.minus){
+          _this.zoom(_this.state.scale * .9, window.innerWidth/2, window.innerWidth/2, true)
+        }
+      }else{
+        _this.setState({ downKey: e.keyCode });
+      }
+ 
     };
+
     _this.onKeyUp = function(e) {
       _this.setState({ downKey: -1 });
       document.body.style.cursor = "auto";
@@ -229,11 +247,11 @@ var Cristal = (function(_super) {
 
       if (manual) {
         _this.setState({ scale: newScale }, () =>
-          _this.setState({ x: newX, y: newY })
+          _this.setState({ x: newX, y: newY }, () => _this.notifyStopMove())
         );
       } else {
         _this.setState({ scale: newScale }, () =>
-          _this.setState({ x: newX, y: newY }, () => this.onStartMove(true))
+          _this.setState({ x: newX, y: newY }, () => _this.onStartMove(true))
         );
       }
     };
@@ -497,6 +515,24 @@ var Cristal = (function(_super) {
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
+
+    ipc &&
+      ipc.on("zoomIn", () => {
+        this.zoom(this.state.scale * 1.1, window.innerWidth/2, window.innerHeight/2,
+          true)
+      })
+
+    ipc &&
+      ipc.on("zoomOut", () => {
+        this.zoom(this.state.scale * .9, window.innerWidth/2, window.innerHeight/2,
+          true)
+      })
+
+      ipc &&
+      ipc.on("zoomActual", () => {
+        this.zoom(1, window.innerWidth/2, window.innerHeight/2,
+          true)
+      })
 
     // window.addEventListener('resize', this.onWindowResize);
   };

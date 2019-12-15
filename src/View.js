@@ -88,6 +88,7 @@ export default class View extends Component {
 
   componentDidMount() {
     this.loadStamperFile(defaultSetup.getSetup());
+    document.addEventListener("mousedown", this.onGlobalMouseDown);
   }
 
   loadStamperFile(stamperFile) {
@@ -110,7 +111,7 @@ export default class View extends Component {
             isResizable={false}
             initialPosition={{ x: this.state.originX, y: this.state.originY }}
             initialScale={this.state.scale}
-            className="bg-grey"
+            className="bg-white"
             onStopMove={s =>
               this.setState({ originX: s.x, originY: s.y, scale: s.scale })
             }
@@ -256,20 +257,22 @@ function logToConsole(message, lineno){
     }
   }
 
-  // resetScale(mouseX, mouseY) {
-  //   if (this.state.scale === 1) {
-  //     return;
-  //   }
+  manualZoom(newScale, mouseX, mouseY) {
+    if (this.state.scale === 1) {
+      return;
+    }
 
-  //   Object.values(this.state.fnStamps).map(fnStamp =>
-  //     fnStamp.ref.current.cristalRef.current.zoom(1, mouseX, mouseY, true)
-  //   );
-  //   Object.values(this.state.blobStamps).map(varStamp =>
-  //     varStamp.ref.current.cristalRef.current.zoom(1, mouseX, mouseY, true)
-  //   );
+    Object.values(this.state.fnStamps).map(fnStamp =>
+      fnStamp.ref.current.cristalRef.current.zoom(newScale, mouseX, mouseY)
+    );
+    Object.values(this.state.blobStamps).map(varStamp =>
+      varStamp.ref.current.cristalRef.current.zoom(newScale, mouseX, mouseY)
+    );
 
-  //   this.setState({ scale: 1 });
-  // }
+    this.state.console.ref.current.zoom(newScale, mouseX, mouseY)
+    this.cristalRef.current.zoom(newScale, mouseX, mouseY)
+    this.setState({ scale: newScale });
+  }
 
   addConsoleStamp(data) {
     var defaults = {
@@ -658,7 +661,7 @@ function logToConsole(message, lineno){
       var originCristal = (
         <Cristal
           panDisabled
-          className="bg-grey"
+          className="bg-white"
           closeHidden
           headerHidden
           copyHidden
@@ -674,7 +677,7 @@ function logToConsole(message, lineno){
     } else {
       var originCristal = (
         <Cristal
-          className="bg-grey"
+          className="bg-white"
           closeHidden
           headerHidden
           copyHidden

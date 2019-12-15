@@ -36,11 +36,12 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.on("closed", () => {
+    Menu.setApplicationMenu(Menu.buildFromTemplate([])) 
     mainWindow = null;
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
     ipcMain: null;
-    Menu.setApplicationMenu(null) 
+
 
   });
 
@@ -139,6 +140,32 @@ function setMenu() {
     }
     ]
 
+    menu[3].submenu.push({ type: 'separator' })
+    menu[3].submenu.push(        {
+          label: "Zoom In",
+          click(e) {
+            mainWindow.webContents.send("zoomIn");
+          },
+          accelerator: "Cmd+Plus"
+        })
+
+    menu[3].submenu.push(        {
+          label: "Zoom Out",
+          click(e) {
+            mainWindow.webContents.send("zoomOut");
+          },
+          accelerator: "Cmd+numsub"
+        })
+
+    menu[3].submenu.push(        {
+          label: "Actual Size",
+          click(e) {
+            mainWindow.webContents.send("zoomActual");
+          },
+          accelerator: "Cmd+0"
+        })
+
+    log.info(menu[2])
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 
