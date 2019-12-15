@@ -146,7 +146,7 @@ function setMenu() {
           click(e) {
             mainWindow.webContents.send("zoomIn");
           },
-          accelerator: "Cmd+Plus"
+          accelerator: "Cmd+plus"
         })
 
     menu[3].submenu.push(        {

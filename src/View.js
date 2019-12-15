@@ -364,7 +364,7 @@ function logToConsole(message, lineno){
 
     if (updatePosition) {
       data.x += globals.copyOffset * 2;
-      data.y += globals.copyOffset;
+      data.y += globals.copyOffset * 2;
     }
 
     var newName = data.name + (this.state.counter + 1).toString();
@@ -476,7 +476,8 @@ function logToConsole(message, lineno){
     });
 
     if (updatePosition) {
-      data.x += data.editorWidth + 50;
+      data.x += globals.copyOffset * 2;
+      data.y += globals.copyOffset * 2;
     }
 
     this.createBlobStamp(data);
