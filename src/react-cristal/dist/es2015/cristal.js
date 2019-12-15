@@ -155,9 +155,7 @@ var Cristal = (function(_super) {
       }
 
       if(_this.state.downKey === _this.cmd){
-        if(ipc){
-
-        }else if(e.keyCode === _this.zero){
+        if(e.keyCode === _this.zero){
            e.preventDefault()
           _this.zoom(1, window.innerWidth/2, window.innerHeight/2, true)
         }else if(e.keyCode === _this.plus){
