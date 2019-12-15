@@ -25,7 +25,10 @@ function createWindow() {
   autoUpdater.checkForUpdates();
 
   mainWindow = new BrowserWindow({
-    webPreferences: { nodeIntegration: true },
+    webPreferences: {
+      "nodeIntegration": true,
+      "web-security": false
+    },
     show:false
   });
   mainWindow.maximize()
@@ -36,7 +39,7 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.on("closed", () => {
-    Menu.setApplicationMenu(Menu.buildFromTemplate([])) 
+    Menu.setApplicationMenu(Menu.buildFromTemplate([]))
     mainWindow = null;
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
@@ -73,7 +76,7 @@ function setMenu() {
 
   var menu = defaultMenu(app, shell)
 
-  menu.splice(1, 0, 
+  menu.splice(1, 0,
     {
       label: "File",
       submenu: [
@@ -111,16 +114,14 @@ function setMenu() {
       ]
     })
 
-  menu.splice(5, 0, 
+  menu.splice(5, 0,
     {
       label: "Sketch",
       submenu: [
-       
+
       ]
     })
     
-
-
     menu[6].submenu = [
     {
       label:"p5.js Reference",

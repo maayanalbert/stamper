@@ -603,7 +603,7 @@ function logToConsole(message, lineno){
       var stampRef = stamp.ref.current;
       if (stampRef) {
         var newErrors = [];
-
+        console.log(stamp)
         if (
           stampRef.props.id in duplicateNamedStamps &&
           stampRef.props.isCss === false &&
