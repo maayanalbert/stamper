@@ -381,11 +381,17 @@ export default class FunctionStamp extends Component {
       updatePosition = true;
     }
 
+    var callback = () => null
+    if(isOpt){
+      callback = () => this.cristalRef.current.changeZIndex()
+    }
+
     var newName = this.props.addStamp(
       data,
       updateName,
       updatePosition,
-      setIframeDisabled
+      setIframeDisabled,
+      callback
     );
     if (isOpt) {
       this.setState({ name: newName }, () => this.checkName());

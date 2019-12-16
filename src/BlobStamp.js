@@ -149,7 +149,12 @@ export default class BlobStamp extends Component {
       updatePosition = true;
     }
 
-    this.props.addStamp(data, updatePosition);
+    var callback = () => null
+    if(isOpt){
+      callback = () => this.cristalRef.current.changeZIndex()
+    }
+
+    this.props.addStamp(data, updatePosition, callback);
   }
 
   addErrorLine(lineNum) {

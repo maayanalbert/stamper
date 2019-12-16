@@ -330,7 +330,8 @@ function logToConsole(message, lineno){
     data,
     updateName = false,
     updatePosition = false,
-    setIframeDisabled = false
+    setIframeDisabled = false,
+    callback = () => null
   ) {
     var defaults = {
       name: "sketch",
@@ -369,12 +370,12 @@ function logToConsole(message, lineno){
 
     data.iframeDisabled = setIframeDisabled;
 
-    this.createFnStamp(data);
+    this.createFnStamp(data, callback);
     this.refreshBlobStamps(this.state.blobStamps);
     return newName;
   }
 
-  async createFnStamp(data) {
+  async createFnStamp(data, callback) {
     var name = data.name,
       code = data.code,
       args = data.args,
@@ -435,7 +436,8 @@ function logToConsole(message, lineno){
 
     fnStamps[counter] = { elem: elem, ref: ref };
 
-    this.setState({ fnStamps: fnStamps });
+
+    this.setState({ fnStamps: fnStamps }, callback);
 
     if (isHtml) {
       this.setState({ htmlID: counter });
@@ -451,7 +453,8 @@ function logToConsole(message, lineno){
     this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole);
   }
 
-  addBlobStamp(data, updatePosition = false) {
+  addBlobStamp(data, updatePosition = false,
+    callback = () => null) {
     var defaults = {
       code: "var z = 10",
       x: 0,
@@ -474,10 +477,10 @@ function logToConsole(message, lineno){
       data.y += globals.copyOffset * 2;
     }
 
-    this.createBlobStamp(data);
+    this.createBlobStamp(data, callback);
   }
 
-  async createBlobStamp(data) {
+  async createBlobStamp(data, callback) {
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -517,7 +520,7 @@ function logToConsole(message, lineno){
     );
 
     blobStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ blobStamps: blobStamps });
+    this.setState({ blobStamps: blobStamps }, callback);
   }
 
   sendSaveData() {
@@ -1050,22 +1053,16 @@ function logToConsole(message, lineno){
     if(stampRef){
       var cristalRef = stampRef.cristalRef.current
       if(cristalRef){
+
         var x = cristalRef.state.x, y=cristalRef.state.y, width = cristalRef.state.width,
         height = cristalRef.state.height
 
-        var curCenterX = x + width/2
-        var curCenterY = y + height/2
 
-        var newCenterX = (window.innerWidth-xOff)/2 + xOff
-        var newCenterY = (window.innerHeight-yOff)/2 + yOff
+        var newX = (window.innerWidth-xOff)/2 + xOff - width/2*this.state.scale
+        var newY = (window.innerHeight-yOff)/2 + yOff - height/2*this.state.scale
 
-        var distX = curCenterX - newCenterX
-        var distY = curCenterY - newCenterY
-
-        cristalRef.setState({x:newCenterX - width/2*this.state.scale, 
-          y:newCenterY - height/2*this.state.scale})
-
-        // this.manualPan(-distX, -distY)
+        this.manualPan(newX - x, newY - y) 
+        cristalRef.changeZIndex()
 
       }
     }
@@ -1073,7 +1070,8 @@ function logToConsole(message, lineno){
 
 
   manualPan(xDiff, yDiff){
-    this.setState({originX:this.state.originX + xDiff, originY:this.state.originY + yDiff},
+    this.setState({originX:this.state.originX + xDiff, 
+      originY:this.state.originY + yDiff, originCristal:null},
       () => this.setOriginCristal())
 
     Object.values(this.state.fnStamps).map(stamp => {
