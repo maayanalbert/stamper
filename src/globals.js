@@ -17,8 +17,8 @@ export const globals = {
     draw:           true,
     preload:        true,
     setup:          true,
-    
-    windowResized:  false
+
+    windowResized:  false,
     deviceMoved:  false,
     deviceTurned: false,
     deviceShaken: false,
