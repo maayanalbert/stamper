@@ -151,7 +151,6 @@ function noiseWave() {
       if (item.status === false) {
         overalOpacity = 0.5;
       }
-      if (item.name) {
         pickers.push(
           <div
             class="d-flex justify-content-between"
@@ -168,9 +167,6 @@ function noiseWave() {
             {this.createIcon(iconType, 20, null, 0.8)}
           </div>
         );
-      } else {
-        pickers.push(<br />);
-      }
     });
 
     return (

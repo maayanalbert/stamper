@@ -569,7 +569,7 @@ var Cristal = (function(_super) {
       return null;
     }
 
-    var opacity = 0.5;
+    var opacity = 0.3;
     if (_this.state[stateVal]) {
       opacity = 1;
     }
@@ -589,7 +589,6 @@ var Cristal = (function(_super) {
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
-      opacity = 0.5;
       color = "greyText";
     }
 
