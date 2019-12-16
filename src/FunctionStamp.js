@@ -64,7 +64,6 @@ export default class FunctionStamp extends Component {
   }
 
   toggleHide(scale, originX, originY, callback) {
-    console.log(scale, originX, originY, callback)
     if (this.state.hidden) {
       var distFromOriginX =
         (this.state.originX - this.state.x) / this.state.scale;

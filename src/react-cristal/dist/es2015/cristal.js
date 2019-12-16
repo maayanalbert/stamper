@@ -187,6 +187,10 @@ var Cristal = (function(_super) {
       _this.setState({ panDisabled: status });
     };
 
+    _this.setPos = function(xDiff, yDiff){
+      _this.setState({ x: this.state.x + xDiff, y:this.state.y + yDiff});
+    }
+
     _this.pan = function(changeX, changeY) {
       ipc && ipc.send("edited");
       if (_this.state.panDisabled) {

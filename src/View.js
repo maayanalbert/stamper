@@ -116,22 +116,7 @@ export default class View extends Component {
         stamperFile.fns.map(data => this.addFnStamp(data));
         stamperFile.blobs.map(data => this.addBlobStamp(data));
 
-        var originCristal = (
-          <Cristal
-            closeHidden
-            headerHidden
-            copyHidden
-            isResizable={false}
-            initialPosition={{ x: this.state.originX, y: this.state.originY }}
-            initialScale={this.state.scale}
-            className="bg-white"
-            onStopMove={s =>
-              this.setState({ originX: s.x, originY: s.y, scale: s.scale })
-            }
-          ></Cristal>
-        );
-
-        this.setState({ originCristal: originCristal });
+        this.setOriginCristal()
       }
     );
   }
@@ -665,41 +650,28 @@ function logToConsole(message, lineno){
     }
   }
 
+  setOriginCristal(panDisabled = false){
+      var originCristal = (
+        <Cristal
+          panDisabled = {panDisabled}
+          className="bg-white"
+          closeHidden
+          headerHidden
+          copyHidden
+          isResizable={false}
+          initialPosition={{ x: this.state.originX, y: this.state.originY }}
+          initialScale={this.state.scale}
+          onStopMove={s =>
+            this.setState({ originX: s.x, originY: s.y, scale: s.scale })
+          }
+        ></Cristal>
+      );
+      this.setState({ originCristal: originCristal });
+
+  }
+
   disablePan(status) {
-    if (status) {
-      var originCristal = (
-        <Cristal
-          panDisabled
-          className="bg-white"
-          closeHidden
-          headerHidden
-          copyHidden
-          isResizable={false}
-          initialPosition={{ x: this.state.originX, y: this.state.originY }}
-          initialScale={this.state.scale}
-          onStopMove={s =>
-            this.setState({ originX: s.x, originY: s.y, scale: s.scale })
-          }
-        ></Cristal>
-      );
-      this.setState({ originCristal: originCristal });
-    } else {
-      var originCristal = (
-        <Cristal
-          className="bg-white"
-          closeHidden
-          headerHidden
-          copyHidden
-          isResizable={false}
-          initialPosition={{ x: this.state.originX, y: this.state.originY }}
-          initialScale={this.state.scale}
-          onStopMove={s =>
-            this.setState({ originX: s.x, originY: s.y, scale: s.scale })
-          }
-        ></Cristal>
-      );
-      this.setState({ originCristal: originCristal });
-    }
+    this.setOriginCristal(status)
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
@@ -1063,6 +1035,63 @@ function logToConsole(message, lineno){
     this.setLines();
   }
 
+  centerOnStamp(id, xOff, yOff){
+
+    var stampRef 
+
+    if(id in this.state.fnStamps){
+      stampRef = this.state.fnStamps[id].ref.current
+    }else if(id in this.state.blobStamps){
+      stampRef = this.state.blobStamps[id].ref.current
+    }else if(id === -1){
+      stampRef = this.state.consoleStamp.ref.current
+    }
+
+    if(stampRef){
+      var cristalRef = stampRef.cristalRef.current
+      if(cristalRef){
+        var x = cristalRef.state.x, y=cristalRef.state.y, width = cristalRef.state.width,
+        height = cristalRef.state.height
+
+        var curCenterX = x + width/2
+        var curCenterY = y + height/2
+
+        var newCenterX = (window.innerWidth-xOff)/2 + xOff
+        var newCenterY = (window.innerHeight-yOff)/2 + yOff
+
+        var distX = curCenterX - newCenterX
+        var distY = curCenterY - newCenterY
+
+        cristalRef.setState({x:newCenterX - width/2*this.state.scale, 
+          y:newCenterY - height/2*this.state.scale})
+
+        // this.manualPan(-distX, -distY)
+
+      }
+    }
+  }
+
+
+  manualPan(xDiff, yDiff){
+    this.setState({originX:this.state.originX + xDiff, originY:this.state.originY + yDiff},
+      () => this.setOriginCristal())
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      var cristalRef = stamp.ref.current.cristalRef;
+      cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
+    });
+
+    Object.values(this.state.blobStamps).map(stamp => {
+      var cristalRef = stamp.ref.current.cristalRef;
+      cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
+    });
+
+    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
+    consoleCristalRef.current && consoleCristalRef.current.setPos(xDiff, yDiff);
+
+
+  }
+
   toggleHide(stampRef) {
     stampRef.toggleHide(
       this.state.scale,
@@ -1093,7 +1122,8 @@ function logToConsole(message, lineno){
         name: "console",
         status: !consoleRef.state.hidden,
         icon: consoleRef.getIcon(),
-        callback: () => this.toggleHide(consoleRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(-1, xOff, yOff),
+        hideCallback: () => this.toggleHide(consoleRef)
       });
     }
 
@@ -1108,16 +1138,19 @@ function logToConsole(message, lineno){
           name: htmlRef.state.name,
           icon: htmlRef.getIcon(),
           status: !htmlRef.state.hidden,
-          callback: () => this.toggleHide(htmlRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.htmlID, xOff, yOff),
+          hideCallback: () => this.toggleHide(htmlRef)
         });
       }
       var cssRef = this.state.fnStamps[this.state.cssID].ref.current;
       if (cssRef) {
         pickerData.push({
+
           name: cssRef.state.name,
           icon: cssRef.getIcon(),
           status: !cssRef.state.hidden,
-          callback: () => this.toggleHide(cssRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.cssID, xOff, yOff),
+          hideCallback: () => this.toggleHide(cssRef)
         });
       }
     }
@@ -1134,7 +1167,8 @@ function logToConsole(message, lineno){
           name: stampRef.state.name,
           icon: stampRef.getIcon(),
           status: !stampRef.state.hidden,
-          callback: () => this.toggleHide(stampRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
+          hideCallback: () => this.toggleHide(stampRef)
         });
       }
     });
@@ -1147,7 +1181,8 @@ function logToConsole(message, lineno){
           name: this.getFirstLine(stampRef.state.code),
           icon: stampRef.getIcon(),
           status: !stampRef.state.hidden,
-          callback: () => this.toggleHide(stampRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
+          hideCallback: () => this.toggleHide(stampRef)
         });
       }
     });

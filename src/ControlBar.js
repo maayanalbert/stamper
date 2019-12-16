@@ -44,7 +44,7 @@ export default class ControlBar extends Component {
       this.newStampMargin = 20
       this.newStampMarginVariance = 100
     this.state = {
-      width: 200,
+      sideBarWidth: 200,
       pickerHeight: window.innerHeight - (this.topBarHeight + 
         this.importButtonHeight + 110),
       pickerScrollEnabled:true,
@@ -86,13 +86,13 @@ function noiseWave() {
 
       >
         <Resizable
-        width={this.state.width}
+        width={this.state.sideBarWidth}
         onResize={e => {
-          var newWidth = this.state.width + e.movementX
+          var newWidth = this.state.sideBarWidth + e.movementX
           if(newWidth > this.minWidth&& 
             newWidth < this.maxWidth ){
           this.setState(
-            { width: newWidth },
+            { sideBarWidth: newWidth },
             ()=>   this.editorRef.current.editor.resize()
           );
           }
@@ -115,7 +115,7 @@ function noiseWave() {
   }
 
   setInitialPosition(data){
-    data.x = this.state.width + this.newStampMargin + Math.random() * this.newStampMarginVariance
+    data.x = this.state.sideBarWidth + this.newStampMargin + Math.random() * this.newStampMarginVariance
     data.y = this.topBarHeight + this.newStampMargin + Math.random() * this.newStampMarginVariance
     return data
   }
@@ -135,11 +135,11 @@ function noiseWave() {
 
     return(
 
-<div class="bg-jsArea" style={{ width:this.state.width,
+<div class="bg-jsArea" style={{ width:this.state.sideBarWidth,
 height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
         <AceEditor
           style={{
-            width: this.state.width,
+            width: this.state.sideBarWidth,
             height: window.innerHeight- (this.state.pickerHeight + this.topBarHeight
               + this.importButtonHeight),
             background: "transparent",
@@ -204,9 +204,11 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
       }
 
       var overalOpacity = 1;
+      var centerCallback = item.centerCallback
 
       if (item.status === false) {
         overalOpacity = 0.5;
+        centerCallback = () => null
 
       }
       if (item.name) {
@@ -223,11 +225,12 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
               {this.createIcon(item.icon, 18, null, 0.3)}
               <a class="text-greyText picker ml-1"
               style={{opacity:.8}}
+              onClick={() => centerCallback(this.state.sideBarWidth, this.topBarHeight)}
 
               >{item.name}</a>
             </div>
 
-            {this.createIcon(iconType, 18, item.callback, .7)}
+            {this.createIcon(iconType, 18, item.hideCallback, .7)}
           </div>
 
           </div>
@@ -244,7 +247,7 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
   }
     return (
         <Resizable
-        width={this.state.width}
+        width={this.state.sideBarWidth}
         onResize={e => {
           var newHeight = this.state.pickerHeight + e.movementY
           if(newHeight > this.minPickerHeight&& 
@@ -271,7 +274,7 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
           style={{
             overflow: "hidden",
             "overflow-y":overflowY,
-            width: this.state.width,
+            width: this.state.sideBarWidth,
             height: this.state.pickerHeight
           }}
         >
@@ -282,11 +285,11 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
     );
   }
 
-  createIcon(iconType, size = 15, callback = null, opacity = 0.3) {
+  createIcon(iconType, size = 15, hideCallback = null, opacity = 0.3) {
     return React.createElement(iconType, {
       style: { opacity: opacity, height: size, width: size },
       className: "m-1 text-greyText",
-      onClick: callback
+      onClick: hideCallback
     });
   }
 
