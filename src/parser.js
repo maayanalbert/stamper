@@ -125,7 +125,7 @@ function addFn(fnStamps, item, rawCode) {
   var name = item.id.name;
 
   var args = "";
-  if (item.params.length > 1) {
+  if (item.params.length >= 1) {
     var argStart = item.params[0].range[0];
     var argEnd = item.params[item.params.length - 1].range[1];
     var args = rawCode.substr(argStart, argEnd - argStart);
