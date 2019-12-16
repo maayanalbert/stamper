@@ -5,8 +5,7 @@ import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
-import TopBar from "./TopBar.js"
-import SideBar from "./SideBar.js";
+import ControlBar from "./ControlBar.js";
 import BlobStamp from "./BlobStamp.js";
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
@@ -290,8 +289,8 @@ function logToConsole(message, lineno){
 
   addConsoleStamp(data) {
     var defaults = {
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(),
+      x: 0,
+      y: 0,
       consoleWidth: (globals.defaultEditorWidth * 2) / 3,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
@@ -342,10 +341,6 @@ function logToConsole(message, lineno){
     this.setState({ consoleStamp: consoleStamp, consoleId: counter });
   }
 
-  defaultStarterPos(offset = 0) {
-    return Math.random() * globals.marginVariance + globals.margin * 2 + offset;
-  }
-
   addFnStamp(
     data,
     updateName = false,
@@ -356,8 +351,8 @@ function logToConsole(message, lineno){
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
       args: "x=mouseX, y=mouseY",
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(),
+      x: 0,
+      y: 0,
       iframeDisabled: false,
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
@@ -474,8 +469,8 @@ function logToConsole(message, lineno){
   addBlobStamp(data, updatePosition = false) {
     var defaults = {
       code: "var z = 10",
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(400),
+      x: 0,
+      y: 0,
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
@@ -604,7 +599,6 @@ function logToConsole(message, lineno){
       var stampRef = stamp.ref.current;
       if (stampRef) {
         var newErrors = [];
-        console.log(stamp)
         if (
           stampRef.props.id in duplicateNamedStamps &&
           stampRef.props.isCss === false &&
@@ -1081,6 +1075,9 @@ function logToConsole(message, lineno){
   getFirstLine(text) {
     for (var i = 0; i < text.length; i++) {
       if (text[i] === "\n") {
+        if(i === 0){
+          return " "
+        }
         return text.substr(0, i);
       }
     }
@@ -1125,7 +1122,7 @@ function logToConsole(message, lineno){
       }
     }
 
-    pickerData.push({});
+    // pickerData.push({});
     Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
       if (
@@ -1142,7 +1139,7 @@ function logToConsole(message, lineno){
       }
     });
 
-    pickerData.push({});
+    // pickerData.push({});
     Object.values(this.state.blobStamps).map(stamp => {
       var stampRef = stamp.ref.current;
       if (stampRef) {
@@ -1173,7 +1170,6 @@ function logToConsole(message, lineno){
 
     return (
       <div>
-     <TopBar/> 
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
           {consoleElem}
@@ -1182,7 +1178,7 @@ function logToConsole(message, lineno){
             
         {this.state.originCristal}
   
-        <SideBar pickerData={this.state.pickerData} 
+        <ControlBar pickerData={this.state.pickerData} 
         addBlobStamp={this.addBlobStamp.bind(this)}
         addFnStamp={this.addFnStamp.bind(this)}
         disablePan={this.disablePan.bind(this)}/>

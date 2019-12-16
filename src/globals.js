@@ -6,8 +6,6 @@ export const globals = {
   iframeMargin: 8,
   headerHeight: 30,
   brHeight: 25,
-  margin: 25,
-  marginVariance: 100,
   codeSize: 12,
   bigCodeSize:24,
   fnTitleHeight: 90,
@@ -17,7 +15,7 @@ export const globals = {
     draw:           true,
     preload:        true,
     setup:          true,
-
+    
     windowResized:  false,
     deviceMoved:  false,
     deviceTurned: false,
