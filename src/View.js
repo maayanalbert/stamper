@@ -289,8 +289,8 @@ function logToConsole(message, lineno){
 
   addConsoleStamp(data) {
     var defaults = {
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(),
+      x: 0,
+      y: 0,
       consoleWidth: (globals.defaultEditorWidth * 2) / 3,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
@@ -341,10 +341,6 @@ function logToConsole(message, lineno){
     this.setState({ consoleStamp: consoleStamp, consoleId: counter });
   }
 
-  defaultStarterPos(offset = 0) {
-    return Math.random() * globals.marginVariance + globals.margin * 2 + offset;
-  }
-
   addFnStamp(
     data,
     updateName = false,
@@ -355,8 +351,8 @@ function logToConsole(message, lineno){
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
       args: "x=mouseX, y=mouseY",
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(),
+      x: 0,
+      y: 0,
       iframeDisabled: false,
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
@@ -473,8 +469,8 @@ function logToConsole(message, lineno){
   addBlobStamp(data, updatePosition = false) {
     var defaults = {
       code: "var z = 10",
-      x: this.defaultStarterPos(),
-      y: this.defaultStarterPos(400),
+      x: 0,
+      y: 0,
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,

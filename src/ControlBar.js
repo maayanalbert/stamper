@@ -33,16 +33,27 @@ const defaultSetup = require("./defaultSetup.js");
 export default class ControlBar extends Component {
   constructor(props) {
     super(props);
+    this.editorRef = React.createRef();
+    this.minPickerHeight=30
+    this.minJsImporterHeight=30
+    this.topBarHeight = 100
+    this.minWidth = 150
+    this.maxWidth = window.innerWidth - 30
+      this.editorRef = React.createRef()
+      this.importButtonHeight = 50
+      this.newStampMargin = 20
+      this.newStampMarginVariance = 100
     this.state = {
       width: 200,
-      pickerHeight: 500,
+      pickerHeight: window.innerHeight - (this.topBarHeight + 
+        this.importButtonHeight + 110),
       pickerScrollEnabled:true,
       codeHasError:false,
-       code:
+      code:
 
-`// import unstructured Javascript code or individual functions
+`\n// import unstructured Javascript code or individual functions
 
-// like the below: 
+// like the below, feel free to delete: 
 function noiseWave() {
   let noiseScale=0.02;
   background(0);
@@ -53,14 +64,7 @@ function noiseWave() {
   }
 }`
     };
-    this.editorRef = React.createRef();
-    this.minPickerHeight=30
-    this.minJsImporterHeight=30
-    this.topBarHeight = 100
-    this.minWidth = 150
-    this.maxWidth = window.innerWidth - 30
-      this.editorRef = React.createRef()
-      this.importButtonHeight = 50
+
 
   }
 
@@ -110,13 +114,17 @@ function noiseWave() {
       )
   }
 
-
+  setInitialPosition(data){
+    data.x = this.state.width + this.newStampMargin + Math.random() * this.newStampMarginVariance
+    data.y = this.topBarHeight + this.newStampMargin + Math.random() * this.newStampMarginVariance
+    return data
+  }
 
   parseCode(){
     try{
       var stamps = parser.jsToStamps(this.state.code)
-              stamps.fns.map(data => this.props.addFnStamp(data));
-        stamps.blobs.map(data => this.props.addBlobStamp(data));
+      stamps.fns.map(data =>{this.props.addFnStamp(this.setInitialPosition(data))});
+      stamps.blobs.map(data =>{this.props.addBlobStamp(this.setInitialPosition(data))});
 
         this.setState({code:""})
     }catch(e){
@@ -305,11 +313,11 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
   renderPickerResizeHandle() {
     return (
       <div
-        className="border-bottom border-borderGrey"
+        className="border-bottom border-borderGrey border-top bg-grey"
         style={{
           width: "100%",
           cursor: "ns-resize",
-          height: 20,
+          height: 15,
           right: 0,
           bottom: 0,
           position: "absolute",
