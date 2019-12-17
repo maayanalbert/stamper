@@ -358,8 +358,8 @@ function logToConsole(message, lineno){
     });
 
     if (updatePosition) {
-      data.x += globals.copyOffset * 2;
-      data.y += globals.copyOffset * 2;
+      data.x += globals.copyOffset * 2 * this.state.scale;
+      data.y += globals.copyOffset * 2 * this.state.scale;
     }
 
     var newName = data.name + (this.state.counter + 1).toString();
@@ -463,7 +463,8 @@ function logToConsole(message, lineno){
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
       originX: 0,
-      originY: 0
+      originY: 0,
+      codeSize:globals.codeSize
     };
 
     Object.keys(defaults).map(setting => {
@@ -473,8 +474,8 @@ function logToConsole(message, lineno){
     });
 
     if (updatePosition) {
-      data.x += globals.copyOffset * 2;
-      data.y += globals.copyOffset * 2;
+      data.x += globals.copyOffset * 2 * this.state.scale;
+      data.y += globals.copyOffset * 2 * this.state.scale;
     }
 
     this.createBlobStamp(data, callback);
@@ -502,6 +503,7 @@ function logToConsole(message, lineno){
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
         id={counter}
+        starterCodeSize ={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
         initialOriginX={data.originX}

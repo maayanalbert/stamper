@@ -506,7 +506,6 @@ var Cristal = (function(_super) {
     };
 
     _this.changeZIndex = function() {
-      console.log("changing z index")
       var zIndex = _this.state.zIndex;
       _this.setState({
         zIndex: Stacker.getNextIndex(zIndex)

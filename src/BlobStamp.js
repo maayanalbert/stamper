@@ -38,7 +38,7 @@ export default class BlobStamp extends Component {
       originY: this.props.initialOriginY,
       scale: this.props.initialScale,
       hidden: this.props.initialHidden,
-      codeSize:globals.codeSize
+      codeSize:this.props.starterCodeSize
     };
 
     this.cristalRef = React.createRef();
@@ -186,7 +186,8 @@ export default class BlobStamp extends Component {
       originX: this.state.originX,
       originY: this.state.originY,
       scale: this.state.scale,
-      hidden: this.state.hidden
+      hidden: this.state.hidden,
+      codeSize:this.state.codeSize
     };
 
     return data;
@@ -231,7 +232,7 @@ export default class BlobStamp extends Component {
     if (this.state.runningBorder) {
       border = "border border-borderDarkGrey";
     }
-    console.log(this.state.scale);
+
     if (this.state.hidden) {
       return <div></div>;
     }
