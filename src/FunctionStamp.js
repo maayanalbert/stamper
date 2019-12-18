@@ -225,11 +225,17 @@ export default class FunctionStamp extends Component {
     );
   }
 
-  mouseOutCallback() {
+  compileCallback() {
     if (this.state.editsMade) {
       this.props.requestCompile(this.props.id);
+      $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
       this.setState({ editsMade: false, runningBorder: true }, () =>
-        setTimeout(() => this.setState({ runningBorder: false }), 100)
+        setTimeout(() => {
+          this.setState({ runningBorder: false }, () => {
+            setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
+          })
+        }
+      , 300)
       );
     }
   }
@@ -322,7 +328,7 @@ export default class FunctionStamp extends Component {
             zIndex: 5
           }}
         >
-          <div onMouseOver={this.mouseOutCallback.bind(this)}>
+          <div onMouseOver={this.compileCallback.bind(this)}>
             <div
               style={{
                 position: "absolute",
@@ -466,7 +472,7 @@ export default class FunctionStamp extends Component {
       border = "border border-warningOrange";
     }
     if (this.state.runningBorder) {
-      border = "border border-borderDarkGrey";
+      border = "border border-blue";
     }
 
     // <!-- @cameron little white div thing --> scroll down to style
@@ -495,7 +501,7 @@ export default class FunctionStamp extends Component {
           initialPosition={{ x: this.state.x, y: this.state.y }}
           initialScale={this.state.scale}
           className={
-            "shadow-sm " + bgColor + " " + border + " vertex" + this.props.id
+            "shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 
           }
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
@@ -503,7 +509,7 @@ export default class FunctionStamp extends Component {
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
         >
-          <div onMouseLeave={this.mouseOutCallback.bind(this)}>
+          <div onMouseLeave={this.compileCallback.bind(this)}>
             <div
               class={headerColor}
               style={{

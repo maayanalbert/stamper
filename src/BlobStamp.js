@@ -223,6 +223,21 @@ export default class BlobStamp extends Component {
     });
   }
 
+    compileCallback() {
+    if (this.state.editsMade) {
+      this.props.requestCompile(this.props.id);
+      $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
+      this.setState({ editsMade: false, runningBorder: true }, () =>
+        setTimeout(() => {
+          this.setState({ runningBorder: false }, () => {
+            setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
+          })
+        }
+      , 300)
+      );
+    }
+  }
+
   render() {
     var border = "border border-borderGrey";
     if (Object.keys(this.state.errorLines).length > 0) {
@@ -230,7 +245,7 @@ export default class BlobStamp extends Component {
     }
 
     if (this.state.runningBorder) {
-      border = "border border-borderDarkGrey";
+      border = "border border-blue";
     }
 
     if (this.state.hidden) {
@@ -266,7 +281,7 @@ export default class BlobStamp extends Component {
           }}
 
         >
-          <div class="row m-0" onMouseLeave={this.mouseOutCallback.bind(this)}>
+          <div class="row m-0" onMouseLeave={this.compileCallback.bind(this)}>
             {this.renderEditor()}
           </div>
         </Cristal>
