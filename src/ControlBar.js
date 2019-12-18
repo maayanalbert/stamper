@@ -223,11 +223,11 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
 
             <div clas="row border-bottom" style={{ overflow: "hidden" }}>
               {this.createIcon(item.icon, 18, null, 0.3)}
-              <a class="text-greyText picker ml-1"
-              style={{opacity:.8}}
+              <b class="text-greyText picker ml-1"
+              style={{opacity:.8, cursor:"default"}}
               onClick={() => centerCallback(this.state.sideBarWidth, this.topBarHeight)}
 
-              >{item.name}</a>
+              >{item.name}</b>
             </div>
 
             {this.createIcon(iconType, 18, item.hideCallback, .7)}
