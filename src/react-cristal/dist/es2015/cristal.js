@@ -82,7 +82,8 @@ var Cristal = (function(_super) {
       mouseWheelTimeout: null,
       mouseOnClose: false,
       mouseOnCopy: false,
-      mouseOnClear: false
+      mouseOnClear: false,
+      zoomDisabled: false
     };
 
     _this.space = 32;
@@ -187,15 +188,20 @@ var Cristal = (function(_super) {
       _this.setState({ panDisabled: status });
     };
 
+    _this.disableZoom = function(status) {
+      _this.setState({ zoomDisabled: status });
+    };
+
     _this.setPos = function(xDiff, yDiff){
       _this.setState({ x: this.state.x + xDiff, y:this.state.y + yDiff});
     }
 
     _this.pan = function(changeX, changeY) {
-      ipc && ipc.send("edited");
+
       if (_this.state.panDisabled) {
         return;
       }
+            ipc && ipc.send("edited");
       var _a = _this.state,
         currentX = _a.x,
         currentY = _a.y;
@@ -219,6 +225,10 @@ var Cristal = (function(_super) {
       manual = false,
       center = false
     ) {
+      if(_this.state.zoomDisabled){
+        return
+      }
+
       ipc && ipc.send("edited");
 
       var scale = _this.state.scale,

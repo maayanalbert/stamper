@@ -691,6 +691,24 @@ function logToConsole(message, lineno){
     var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
     consoleCristalRef.current && consoleCristalRef.current.disablePan(status);
   }
+
+  disableZoom(status) {
+    this.setOriginCristal(status)
+
+    Object.values(this.state.fnStamps).map(stamp => {
+      var cristalRef = stamp.ref.current.cristalRef;
+      cristalRef.current && cristalRef.current.disableZoom(status);
+    });
+
+    Object.values(this.state.blobStamps).map(stamp => {
+      var cristalRef = stamp.ref.current.cristalRef;
+      cristalRef.current && cristalRef.current.disableZoom(status);
+    });
+
+    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
+    consoleCristalRef.current && consoleCristalRef.current.disableZoom(status);
+  }
+
   checkAllNames() {
     var nameDict = {};
     Object.values(this.state.fnStamps).map(stamp => {
@@ -1070,21 +1088,6 @@ function logToConsole(message, lineno){
     }
   }
 
-  //   compileCallback() {
-  //   if (this.state.editsMade) {
-  //     this.props.requestCompile(this.props.id);
-  //     $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
-  //     this.setState({ editsMade: false, runningBorder: true }, () =>
-  //       setTimeout(() => {
-  //         this.setState({ runningBorder: false }, () => {
-  //           setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
-  //         })
-  //       }
-  //     , 300)
-  //     );
-  //   }
-  // }
-
 
   manualPan(xDiff, yDiff){
 
@@ -1235,7 +1238,8 @@ function logToConsole(message, lineno){
         <ControlBar pickerData={this.state.pickerData} 
         addBlobStamp={this.addBlobStamp.bind(this)}
         addFnStamp={this.addFnStamp.bind(this)}
-        disablePan={this.disablePan.bind(this)}/>
+        disablePan={this.disablePan.bind(this)}
+        disableZoom={this.disableZoom.bind(this)}/>
 
      
       </div>

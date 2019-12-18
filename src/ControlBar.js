@@ -72,8 +72,8 @@ function noiseWave() {
     return (
       <div
         class="bg-white border border-borderGrey shadow-sm"
-        onMouseOver={() => this.props.disablePan(true)}
-        onMouseOut={() => this.props.disablePan(false)}
+        onMouseOver={() => {this.props.disablePan(true); this.props.disableZoom(true)}}
+        onMouseOut={() => {this.props.disablePan(false); this.props.disableZoom(false)}}
 
         style={{
           position: "absolute",
