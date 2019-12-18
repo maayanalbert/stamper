@@ -659,7 +659,7 @@ function logToConsole(message, lineno){
       var originCristal = (
         <Cristal
           panDisabled = {panDisabled}
-          className="bg-white"
+          className=" bg-white"
           closeHidden
           headerHidden
           copyHidden
@@ -1070,8 +1070,27 @@ function logToConsole(message, lineno){
     }
   }
 
+  //   compileCallback() {
+  //   if (this.state.editsMade) {
+  //     this.props.requestCompile(this.props.id);
+  //     $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
+  //     this.setState({ editsMade: false, runningBorder: true }, () =>
+  //       setTimeout(() => {
+  //         this.setState({ runningBorder: false }, () => {
+  //           setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
+  //         })
+  //       }
+  //     , 300)
+  //     );
+  //   }
+  // }
+
 
   manualPan(xDiff, yDiff){
+
+    $(".stamp").css({transition: "all .5s ease"})
+    setTimeout(() => $(".stamp").css({transition: "none"}), 500)
+
     this.setState({originX:this.state.originX + xDiff, 
       originY:this.state.originY + yDiff, originCristal:null},
       () => this.setOriginCristal())

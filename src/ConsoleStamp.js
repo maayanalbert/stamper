@@ -168,7 +168,7 @@ export default class ConsoleStamp extends Component {
         onResize={this.resizeConsole.bind(this)}
         initialPosition={{ x: this.state.x, y: this.state.y }}
         onMove={s => this.setState({ x: s.x, y: s.y })}
-        className="bg-lightGrey border border-borderGrey shadow-sm"
+        className="stamp bg-lightGrey border border-borderGrey shadow-sm"
         icon={this.getIcon()}
         showClear
         onClear={this.clearConsole.bind(this)}

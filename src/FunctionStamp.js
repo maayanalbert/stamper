@@ -501,7 +501,7 @@ export default class FunctionStamp extends Component {
           initialPosition={{ x: this.state.x, y: this.state.y }}
           initialScale={this.state.scale}
           className={
-            "shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 
+            "stamp shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 
           }
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}

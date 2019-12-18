@@ -266,7 +266,7 @@ export default class BlobStamp extends Component {
           onMove={s => this.setState({ x: s.x, y: s.y })}
           initialScale={this.state.scale}
           className={
-            "shadow-sm bg-jsArea " + border + " vertex" + this.props.id
+            "stamp shadow-sm bg-jsArea " + border + " vertex" + this.props.id
           }
           title="Anything"
           icon={this.getIcon()}
