@@ -161,6 +161,7 @@ export default class ConsoleStamp extends Component {
 
     return (
       <Cristal
+       parentID = {this.props.id}
         ref={this.cristalRef}
         initialScale={this.state.scale}
         closeHidden={true}

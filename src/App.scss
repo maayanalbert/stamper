@@ -172,6 +172,9 @@ font-family: 'Roboto', sans-serif;
 }
 
 
+.stamp{
+  transition: border .3s ease-out;
+}
 
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */

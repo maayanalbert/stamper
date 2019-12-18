@@ -658,6 +658,7 @@ function logToConsole(message, lineno){
   setOriginCristal(panDisabled = false){
       var originCristal = (
         <Cristal
+         parentID = {-1}
           panDisabled = {panDisabled}
           className=" bg-white"
           closeHidden
@@ -1066,7 +1067,7 @@ function logToConsole(message, lineno){
       stampRef = this.state.fnStamps[id].ref.current
     }else if(id in this.state.blobStamps){
       stampRef = this.state.blobStamps[id].ref.current
-    }else if(id === -1){
+    }else if(this.state.consoleStamp.ref.current && id === this.state.consoleStamp.ref.current.props.id){
       stampRef = this.state.consoleStamp.ref.current
     }
 
@@ -1092,7 +1093,7 @@ function logToConsole(message, lineno){
   manualPan(xDiff, yDiff){
 
     $(".stamp").css({transition: "all .5s ease"})
-    setTimeout(() => $(".stamp").css({transition: "none"}), 500)
+    setTimeout(() => $(".stamp").css({transition: "border .3s ease-out"}), 500)
 
     this.setState({originX:this.state.originX + xDiff, 
       originY:this.state.originY + yDiff, originCristal:null},
@@ -1144,8 +1145,9 @@ function logToConsole(message, lineno){
         name: "console",
         status: !consoleRef.state.hidden,
         icon: consoleRef.getIcon(),
-        centerCallback:(xOff, yOff) => this.centerOnStamp(-1, xOff, yOff),
-        hideCallback: () => this.toggleHide(consoleRef)
+        centerCallback:(xOff, yOff) => this.centerOnStamp(consoleRef.props.id, xOff, yOff),
+        hideCallback: () => this.toggleHide(consoleRef),
+        id:consoleRef.props.id
       });
     }
 
@@ -1161,7 +1163,8 @@ function logToConsole(message, lineno){
           icon: htmlRef.getIcon(),
           status: !htmlRef.state.hidden,
         centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.htmlID, xOff, yOff),
-          hideCallback: () => this.toggleHide(htmlRef)
+          hideCallback: () => this.toggleHide(htmlRef),
+        id:htmlRef.props.id
         });
       }
       var cssRef = this.state.fnStamps[this.state.cssID].ref.current;
@@ -1172,7 +1175,8 @@ function logToConsole(message, lineno){
           icon: cssRef.getIcon(),
           status: !cssRef.state.hidden,
         centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.cssID, xOff, yOff),
-          hideCallback: () => this.toggleHide(cssRef)
+          hideCallback: () => this.toggleHide(cssRef),
+        id:cssRef.props.id
         });
       }
     }
@@ -1190,7 +1194,8 @@ function logToConsole(message, lineno){
           icon: stampRef.getIcon(),
           status: !stampRef.state.hidden,
         centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
-          hideCallback: () => this.toggleHide(stampRef)
+          hideCallback: () => this.toggleHide(stampRef),
+        id:stampRef.props.id
         });
       }
     });
@@ -1204,7 +1209,8 @@ function logToConsole(message, lineno){
           icon: stampRef.getIcon(),
           status: !stampRef.state.hidden,
         centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
-          hideCallback: () => this.toggleHide(stampRef)
+          hideCallback: () => this.toggleHide(stampRef),
+        id:stampRef.props.id
         });
       }
     });

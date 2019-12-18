@@ -28,6 +28,8 @@ import CopyIcon from "@material-ui/icons/FileCopyOutlined";
 import ClearIcon from "@material-ui/icons/ClearAll";
 import MinimzeIcon from "@material-ui/icons/Minimize";
 import "./../../../App.scss";
+import $ from "jquery";
+import pf, { globals, p5Lib } from "./../../../globals.js";
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -80,9 +82,6 @@ var Cristal = (function(_super) {
       panDisabled: false,
       originalHeight: null,
       mouseWheelTimeout: null,
-      mouseOnClose: false,
-      mouseOnCopy: false,
-      mouseOnClear: false,
       zoomDisabled: false
     };
 
@@ -576,40 +575,31 @@ var Cristal = (function(_super) {
     _this,
     iconType,
     hiddenFlag = false,
-    stateVal = "",
+    classVal = "",
     callBack = null
   ) {
     if (hiddenFlag) {
       return null;
     }
 
-    var opacity = 0.3;
-    if (_this.state[stateVal]) {
-      opacity = 1;
-    }
-
+    var uniqueClass = classVal +  _this.props.parentID.toString()
     var mouseOverCallback = () => {
-      var stateEdit = {};
-      stateEdit[stateVal] = true;
-      _this.setState(stateEdit);
+      $("." + uniqueClass).css({opacity: "1"})
     };
 
     var mouseOutCallback = () => {
-      var stateEdit = {};
-      stateEdit[stateVal] = false;
-      _this.setState(stateEdit);
+      $("." + uniqueClass).css({opacity: ".3"})
     };
-    var color = "greyText";
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
-      color = "greyText";
     }
+
 
     return React.createElement(iconType, {
       onClick: callBack,
-      style: { opacity: opacity, height: 18, width: 18 },
-      className: "m-1 text-" + color,
+      style: { opacity: .3, height: 18, width: 18 },
+      className: "dynamicIcon text-greyText m-1 " + uniqueClass ,
       onMouseOver: mouseOverCallback,
       onMouseOut: mouseOutCallback
     });

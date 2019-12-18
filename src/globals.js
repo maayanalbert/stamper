@@ -10,6 +10,8 @@ export const globals = {
   bigCodeSize:24,
   fnTitleHeight: 90,
   copyOffset: 17,
+  iconTransition: "all .3s ease",
+  borderTransition: "border .3s ease-out",
 
   specialFns: {
     draw:           true,

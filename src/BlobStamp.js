@@ -226,12 +226,9 @@ export default class BlobStamp extends Component {
     compileCallback() {
     if (this.state.editsMade) {
       this.props.requestCompile(this.props.id);
-      $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
       this.setState({ editsMade: false, runningBorder: true }, () =>
         setTimeout(() => {
-          this.setState({ runningBorder: false }, () => {
-            setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
-          })
+          this.setState({ runningBorder: false })
         }
       , 300)
       );
@@ -254,6 +251,7 @@ export default class BlobStamp extends Component {
     return (
       <div>
         <Cristal
+         parentID = {this.props.id}
           ref={this.cristalRef}
           onResize={this.resizeEditor.bind(this)}
           isResizable={true}

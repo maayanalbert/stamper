@@ -228,12 +228,9 @@ export default class FunctionStamp extends Component {
   compileCallback() {
     if (this.state.editsMade) {
       this.props.requestCompile(this.props.id);
-      $(".vertex" + this.props.id).css({transition: "all .3s ease-out"})
       this.setState({ editsMade: false, runningBorder: true }, () =>
         setTimeout(() => {
-          this.setState({ runningBorder: false }, () => {
-            setTimeout(() => $(".vertex" + this.props.id).css({transition: "none"}), 300)
-          })
+          this.setState({ runningBorder: false }, )
         }
       , 300)
       );
@@ -508,6 +505,7 @@ export default class FunctionStamp extends Component {
           onStopResize={this.props.onStopMove}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
+          parentID = {this.props.id}
         >
           <div onMouseLeave={this.compileCallback.bind(this)}>
             <div

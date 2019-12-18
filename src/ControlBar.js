@@ -222,7 +222,7 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
 
 
             <div clas="row border-bottom" style={{ overflow: "hidden" }}>
-              {this.createIcon(item.icon, 18, null, 0.3)}
+              {this.createIcon(item.id, item.icon, 18, null, 0.3, "type")}
               <b class="text-greyText picker ml-1"
               style={{opacity:.8, cursor:"default"}}
               onClick={() => centerCallback(this.state.sideBarWidth, this.topBarHeight)}
@@ -230,7 +230,7 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
               >{item.name}</b>
             </div>
 
-            {this.createIcon(iconType, 18, item.hideCallback, .7)}
+            {this.createIcon(item.id, iconType, 18, item.hideCallback, .6, "hide")}
           </div>
 
           </div>
@@ -285,13 +285,30 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
     );
   }
 
-  createIcon(iconType, size = 15, hideCallback = null, opacity = 0.3) {
+  createIcon(id, iconType, size = 15, hideCallback = null, opacity = 0.3, classVal) {
+
+    var uniqueClass = classVal +  id.toString()
+    var mouseOverCallback = () => {
+      $("." + uniqueClass).css({opacity: "1"})
+    };
+
+    var mouseOutCallback = () => {
+      $("." + uniqueClass).css({opacity: opacity})
+    };
+    if (!hideCallback) {
+      mouseOverCallback = () => {};
+      mouseOutCallback = () => {};
+    }
+
     return React.createElement(iconType, {
       style: { opacity: opacity, height: size, width: size },
-      className: "m-1 text-greyText",
-      onClick: hideCallback
+      className: " m-1 text-greyText " + uniqueClass,
+      onClick: hideCallback,
+        onMouseOver: mouseOverCallback,
+      onMouseOut: mouseOutCallback
     });
   }
+
 
   renderSideBarResizeHandle(){
       return (
@@ -312,6 +329,8 @@ height:window.innerHeight- (this.state.pickerHeight + this.topBarHeight)}}>
       </div>
     );  
   }
+
+
 
   renderPickerResizeHandle() {
     return (
