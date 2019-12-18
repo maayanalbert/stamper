@@ -1092,8 +1092,9 @@ function logToConsole(message, lineno){
 
   manualPan(xDiff, yDiff){
 
+    var oldTransition = $(".stamp").css("transition")
     $(".stamp").css({transition: "all .5s ease"})
-    setTimeout(() => $(".stamp").css({transition: "border .3s ease-out"}), 500)
+    setTimeout(() => $(".stamp").css({transition: oldTransition}), 500)
 
     this.setState({originX:this.state.originX + xDiff, 
       originY:this.state.originY + yDiff, originCristal:null},
