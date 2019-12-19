@@ -106,6 +106,8 @@ export default class View extends Component {
             originCristal: null
           },
           () => {
+
+            console.log(stamperFile)
     this.setState(
       {
         scale: stamperFile.scale,
@@ -584,6 +586,7 @@ function logToConsole(message, lineno){
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
     // this.setState({traversalGraph:newTraversalGraph})
+    this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
 
     this.setLayerPicker();
 
@@ -591,7 +594,7 @@ function logToConsole(message, lineno){
 
     this.checkForSetup();
 
-    this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
+
 
     this.sendSaveData();
 
@@ -632,6 +635,7 @@ function logToConsole(message, lineno){
       }
     });
   }
+
   compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
     if (id in seen) {
       return;
@@ -1183,7 +1187,7 @@ function logToConsole(message, lineno){
       }
 
           pickerData.push({
-          name: name + id,
+          name: name,
           icon: stampRef.getIcon(),
           status: !stampRef.state.hidden,
         centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
