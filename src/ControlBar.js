@@ -22,9 +22,8 @@ import CategoryIcon from "@material-ui/icons/CategoryRounded";
 import HearingIcon from "@material-ui/icons/HearingRounded";
 import CodeIcon from "@material-ui/icons/CodeRounded";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMoreRounded";
-import GetAppIcon from '@material-ui/icons/GetAppRounded';
-import LayersIcon from '@material-ui/icons/LayersRounded';
-
+import GetAppIcon from "@material-ui/icons/GetAppRounded";
+import LayersIcon from "@material-ui/icons/LayersRounded";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -42,7 +41,8 @@ import pf1, {
   commentBlob,
   varBlob,
   listenerFns,
-  builtInFns, worlds
+  builtInFns,
+  worlds
 } from "./starterStamps.js";
 
 var _ = require("lodash");
@@ -418,9 +418,9 @@ function noiseWave() {
         <TopButton
           iconType={GetAppIcon}
           uniqueClass="download"
-          iconCallback={() =>{
-            var js = this.props.getFileData().js
-            var blob = new Blob([js], {type: "text/plain;charset=utf-8"});
+          iconCallback={() => {
+            var js = this.props.getFileData().js;
+            var blob = new Blob([js], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "sketch.js");
           }}
           tooltipText="download javascript"
@@ -433,7 +433,7 @@ function noiseWave() {
             iconCallback={() =>
               this.props.addFnStamp(this.setInitialPosition(normalFn))
             }
-            tooltipText ="new function stamp"
+            tooltipText="new function stamp"
           />
 
           <TopButton
@@ -445,7 +445,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(this.setInitialPosition(data))
             }))}
-            tooltipText ="new built in stamp"
+            tooltipText="new built in stamp"
           />
 
           <TopButton
@@ -457,39 +457,42 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(this.setInitialPosition(data))
             }))}
-            tooltipText ="new listener"
+            tooltipText="new listener"
           />
 
           <TopButton
             iconType={CodeIcon}
             uniqueClass="anything"
             iconCallback={() =>
-                this.props.addBlobStamp(this.setInitialPosition(varBlob))}
+              this.props.addBlobStamp(this.setInitialPosition(varBlob))
+            }
             dropDownData={[
-              {name: "variable",
-              callback: () =>
-                this.props.addBlobStamp(this.setInitialPosition(varBlob))},
-            {name: "comment",
-              callback: () =>
-                this.props.addBlobStamp(this.setInitialPosition(commentBlob))}
-              ]}
-              tooltipText ="new anything stamp"
+              {
+                name: "variable",
+                callback: () =>
+                  this.props.addBlobStamp(this.setInitialPosition(varBlob))
+              },
+              {
+                name: "comment",
+                callback: () =>
+                  this.props.addBlobStamp(this.setInitialPosition(commentBlob))
+              }
+            ]}
+            tooltipText="new anything stamp"
           />
-
         </div>
 
-          <TopButton
-            iconType={LayersIcon}
-            uniqueClass="worlds"
-            iconCallback={null}
-            dropDownData={worlds.map(world => ({
-              name: world.name,
-              callback: () =>
-                this.props.loadStamperFile(world.data)
-            }))}
-            tooltipText ="add new world"
-            alignLeft
-          />
+        <TopButton
+          iconType={LayersIcon}
+          uniqueClass="worlds"
+          iconCallback={null}
+          dropDownData={worlds.map(world => ({
+            name: world.name,
+            callback: () => this.props.loadStamperFile(world.data)
+          }))}
+          tooltipText="add new world"
+          alignLeft
+        />
       </div>
     );
   }
@@ -523,40 +526,36 @@ class TopButton extends Component {
   }
 
   createIcon(iconType, callback, givenUniqueClass, size) {
-
-    var uniqueClass = givenUniqueClass
+    var uniqueClass = givenUniqueClass;
     var mouseOverCallback = () => {
-
-      if(!callback){
-        this.setState({mouseOverDropDown:true}, () =>      $("." + uniqueClass).css({ opacity: "1" }));
-      }  else{
-           $("." + uniqueClass).css({ opacity: "1" })
-      }   
-
-
+      if (!callback) {
+        this.setState({ mouseOverDropDown: true }, () =>
+          $("." + uniqueClass).css({ opacity: "1" })
+        );
+      } else {
+        $("." + uniqueClass).css({ opacity: "1" });
+      }
     };
 
     var mouseOutCallback = () => {
-    if(!callback){
-this.setState({mouseOverDropDown:false}, 
+      if (!callback) {
+        this.setState(
+          { mouseOverDropDown: false },
 
-  () =>{
-
-    if(this.state.down === false){
-$("." + uniqueClass).css({ opacity: ".6" })
-    }
-  } )    }else{
-  $("." + uniqueClass).css({ opacity: ".6" })
-}  
-
-
-
-
-    }
+          () => {
+            if (this.state.down === false) {
+              $("." + uniqueClass).css({ opacity: ".6" });
+            }
+          }
+        );
+      } else {
+        $("." + uniqueClass).css({ opacity: ".6" });
+      }
+    };
 
     if (!callback) {
       callback = () => this.setState({ down: !this.state.down });
-      uniqueClass += "expand"
+      uniqueClass += "expand";
     }
 
     return React.createElement(iconType, {
@@ -575,7 +574,11 @@ $("." + uniqueClass).css({ opacity: ".6" })
 
     var dropDowns = this.props.dropDownData.map(data => (
       <div
-        class={this.props.uniqueClass + data.name + " picker text-greyText p-2 pl-3 pr-3"}
+        class={
+          this.props.uniqueClass +
+          data.name +
+          " picker text-greyText p-2 pl-3 pr-3"
+        }
         onMouseOver={() => {
           this.setState({ mouseOverDropDown: true });
           $("." + this.props.uniqueClass + data.name).css({
@@ -597,14 +600,14 @@ $("." + uniqueClass).css({ opacity: ".6" })
       </div>
     ));
 
-    var right = "default"
-    if(this.props.alignLeft){
-      right = 0
+    var right = "default";
+    if (this.props.alignLeft) {
+      right = 0;
     }
     return (
       <div
         class="bg-white border border-borderGrey rounded mt-2"
-        style={{ position: "absolute", right:right}}
+        style={{ position: "absolute", right: right }}
       >
         {dropDowns}
       </div>
@@ -612,16 +615,15 @@ $("." + uniqueClass).css({ opacity: ".6" })
   }
 
   render() {
-    if(this.state.down){
-               $("." + this.props.uniqueClass + "expand").css({
-            opacity: "1"
-          });
-             }else{
-               $("." + this.props.uniqueClass + "expand").css({
-            opacity: ".6"
-          });              
-             }
-
+    if (this.state.down) {
+      $("." + this.props.uniqueClass + "expand").css({
+        opacity: "1"
+      });
+    } else {
+      $("." + this.props.uniqueClass + "expand").css({
+        opacity: ".6"
+      });
+    }
 
     var expandButton = null;
     if (this.props.dropDownData) {
@@ -639,24 +641,25 @@ $("." + uniqueClass).css({ opacity: ".6" })
           trigger="hover"
           placement="bottom"
           overlay={
-            <Tooltip id="alert" style={{zIndex:1000000000000000002}}  hidden={true}>
+            <Tooltip
+              id="alert"
+              style={{ zIndex: 1000000000000000002 }}
+              hidden={true}
+            >
               {this.props.tooltipText}
             </Tooltip>
           }
         >
-  <div>
+          <div>
+            {this.createIcon(
+              this.props.iconType,
+              this.props.iconCallback,
+              this.props.uniqueClass,
+              22
+            )}
 
-
-        {this.createIcon(
-          this.props.iconType,
-          this.props.iconCallback,
-          this.props.uniqueClass,
-          22
-        )}
- 
-          {expandButton}
-        </div>
-
+            {expandButton}
+          </div>
         </OverlayTrigger>
 
         {this.renderDropDowns()}

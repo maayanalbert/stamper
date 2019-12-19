@@ -34,6 +34,7 @@ export default class ConsoleStamp extends Component {
     };
 
     this.cristalRef = React.createRef();
+    this.limit = 100
   }
 
   componentDidMount() {
@@ -88,37 +89,49 @@ export default class ConsoleStamp extends Component {
   }
 
   checkLastLog(log) {
-    var consoleContainer = document.getElementById("consoleContainer");
-    if (consoleContainer === null) {
-      return;
-    }
+ 
+
 
     var logs = this.state.logs;
     if (logs.length < 1) {
       this.setState({ logs: [log], lastFreq: 0 });
-      consoleContainer = document.getElementById("consoleContainer");
-      consoleContainer.scrollTop = consoleContainer.scrollHeight;
+      var consoleContainer = document.getElementById("consoleContainer");
+      if(consoleContainer){
+        consoleContainer.scrollTop = consoleContainer.scrollHeight;
+      }
+  
     } else {
       var lastLog = logs[logs.length - 1];
 
       if (_.isEqual(lastLog.data, log.data)) {
+        if(this.state.lastFreq >= this.limit){
+          return
+        }
         this.setState({ lastFreq: this.state.lastFreq + 1 });
       } else {
         if (this.state.lastFreq > 1) {
+                var freqString = this.state.lastFreq.toString() 
+      if(this.state.lastFreq >= this.limit){
+        freqString += "+"
+      }
           logs.push({
             method: "command",
-            data: ["(" + this.state.lastFreq.toString() + ")"]
+            data: ["(" + freqString + ")"]
           });
         }
         logs.push(log);
         this.setState({ logs: logs, lastFreq: 1 });
-        consoleContainer = document.getElementById("consoleContainer");
-        consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        var consoleContainer = document.getElementById("consoleContainer");
+        if(consoleContainer){
+          consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }
+
       }
     }
   }
 
   logToConsole(message, method = "error") {
+
     this.checkLastLog({ method: method, data: [message] });
   }
 
@@ -149,10 +162,20 @@ export default class ConsoleStamp extends Component {
   render() {
     var renderedLogs = _.cloneDeep(this.state.logs);
     if (this.state.lastFreq > 1) {
+      var freqString = this.state.lastFreq.toString() 
+      if(this.state.lastFreq >= this.limit){
+        freqString += "+"
+      }
+
       renderedLogs.push({
         method: "command",
-        data: ["(" + this.state.lastFreq.toString() + ")"]
+        data: ["(" + freqString + ")"]
       });
+
+        var consoleContainer = document.getElementById("consoleContainer");
+        if(consoleContainer){
+          consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }      
     }
 
     if (this.state.hidden) {
