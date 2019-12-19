@@ -541,7 +541,7 @@ class TopButton extends Component {
           { mouseOverDropDown: false },
 
           () => {
-            if (this.state.down === false || iconType != ExpandMoreIcon) {
+            if (this.state.down === false || (iconType != ExpandMoreIcon && this.props.iconCallback) ) {
               $("." + uniqueClass).css({ opacity: ".5" });
             }
           }
