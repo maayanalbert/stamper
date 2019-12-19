@@ -63,20 +63,16 @@ export default class View extends Component {
       scale: 1,
       originCristal: null,
       pickerData: [],
-      sideBarWidth:200,
-      pickerHeight:400,
-      jsImportCode:""
-
+      sideBarWidth: 200,
+      pickerHeight: 400,
+      jsImportCode: ""
     };
     this.counterMutex = new Mutex();
-    this.aceRef = React.createRef()
+    this.aceRef = React.createRef();
 
     ipc &&
-      ipc.on("writeToView", (event, files) => 
-
-            this.loadStamperFile(files.stamper)
-
-
+      ipc.on("writeToView", (event, files) =>
+        this.loadStamperFile(files.stamper)
       );
 
     ipc &&
@@ -91,39 +87,37 @@ export default class View extends Component {
   }
 
   loadStamperFile(stamperFile) {
-        this.setState(
-          {
-            fnStamps: {},
-            blobStamps: {},
-            counter: 0,
-            htmlID: -1,
-            cssID: -1,
-            scale: 1,
-            consoleStamp: null,
-            consoleId: -1,
-            originX: 0,
-            originY: 0,
-            originCristal: null
-          },
-          () => {
     this.setState(
       {
-        scale: stamperFile.scale,
-        originX: stamperFile.originX,
-        originY: stamperFile.originY
+        fnStamps: {},
+        blobStamps: {},
+        counter: 0,
+        htmlID: -1,
+        cssID: -1,
+        scale: 1,
+        consoleStamp: null,
+        consoleId: -1,
+        originX: 0,
+        originY: 0,
+        originCristal: null
       },
       () => {
-        this.addConsoleStamp(stamperFile.console);
-        stamperFile.fns.map(data => this.addFnStamp(data));
-        stamperFile.blobs.map(data => this.addBlobStamp(data));
+        this.setState(
+          {
+            scale: stamperFile.scale,
+            originX: stamperFile.originX,
+            originY: stamperFile.originY
+          },
+          () => {
+            this.addConsoleStamp(stamperFile.console);
+            stamperFile.fns.map(data => this.addFnStamp(data));
+            stamperFile.blobs.map(data => this.addBlobStamp(data));
 
-        this.setOriginCristal()
-      }
-    )
-
+            this.setOriginCristal();
           }
-)
-
+        );
+      }
+    );
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -441,7 +435,6 @@ function logToConsole(message, lineno){
 
     fnStamps[counter] = { elem: elem, ref: ref };
 
-
     this.setState({ fnStamps: fnStamps }, callback);
 
     if (isHtml) {
@@ -458,8 +451,7 @@ function logToConsole(message, lineno){
     this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole);
   }
 
-  addBlobStamp(data, updatePosition = false,
-    callback = () => null) {
+  addBlobStamp(data, updatePosition = false, callback = () => null) {
     var defaults = {
       code: "var z = 10",
       x: 0,
@@ -469,7 +461,7 @@ function logToConsole(message, lineno){
       hidden: false,
       originX: 0,
       originY: 0,
-      codeSize:globals.codeSize
+      codeSize: globals.codeSize
     };
 
     Object.keys(defaults).map(setting => {
@@ -508,7 +500,7 @@ function logToConsole(message, lineno){
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
         id={counter}
-        starterCodeSize ={data.codeSize}
+        starterCodeSize={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
         initialOriginX={data.originX}
@@ -530,7 +522,7 @@ function logToConsole(message, lineno){
     this.setState({ blobStamps: blobStamps }, callback);
   }
 
-  getFileData(){
+  getFileData() {
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -547,15 +539,14 @@ function logToConsole(message, lineno){
       js: this.getExportableCode()
     };
 
-    return fileData    
+    return fileData;
   }
 
   sendSaveData() {
-    var fileData = this.getFileData()
-    if(fileData){
-    ipc && ipc.send("save", fileData);
+    var fileData = this.getFileData();
+    if (fileData) {
+      ipc && ipc.send("save", fileData);
     }
-
   }
 
   checkForSetup() {
@@ -669,29 +660,28 @@ function logToConsole(message, lineno){
     }
   }
 
-  setOriginCristal(panDisabled = false){
-      var originCristal = (
-        <Cristal
-         parentID = {-1}
-          panDisabled = {panDisabled}
-          className=" bg-grey"
-          closeHidden
-          headerHidden
-          copyHidden
-          isResizable={false}
-          initialPosition={{ x: this.state.originX, y: this.state.originY }}
-          initialScale={this.state.scale}
-          onStopMove={s =>
-            this.setState({ originX: s.x, originY: s.y, scale: s.scale })
-          }
-        ></Cristal>
-      );
-      this.setState({ originCristal: originCristal });
-
+  setOriginCristal(panDisabled = false) {
+    var originCristal = (
+      <Cristal
+        parentID={-1}
+        panDisabled={panDisabled}
+        className=" bg-grey"
+        closeHidden
+        headerHidden
+        copyHidden
+        isResizable={false}
+        initialPosition={{ x: this.state.originX, y: this.state.originY }}
+        initialScale={this.state.scale}
+        onStopMove={s =>
+          this.setState({ originX: s.x, originY: s.y, scale: s.scale })
+        }
+      ></Cristal>
+    );
+    this.setState({ originCristal: originCristal });
   }
 
   disablePan(status) {
-    this.setOriginCristal(status)
+    this.setOriginCristal(status);
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
@@ -708,7 +698,7 @@ function logToConsole(message, lineno){
   }
 
   disableZoom(status) {
-    this.setOriginCristal(status)
+    this.setOriginCristal(status);
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
@@ -1073,46 +1063,56 @@ function logToConsole(message, lineno){
     this.setLines();
   }
 
-  centerOnStamp(id, xOff, yOff){
+  centerOnStamp(id, xOff, yOff) {
+    var stampRef;
 
-    var stampRef 
-
-    if(id in this.state.fnStamps){
-      stampRef = this.state.fnStamps[id].ref.current
-    }else if(id in this.state.blobStamps){
-      stampRef = this.state.blobStamps[id].ref.current
-    }else if(this.state.consoleStamp.ref.current && id === this.state.consoleStamp.ref.current.props.id){
-      stampRef = this.state.consoleStamp.ref.current
+    if (id in this.state.fnStamps) {
+      stampRef = this.state.fnStamps[id].ref.current;
+    } else if (id in this.state.blobStamps) {
+      stampRef = this.state.blobStamps[id].ref.current;
+    } else if (
+      this.state.consoleStamp.ref.current &&
+      id === this.state.consoleStamp.ref.current.props.id
+    ) {
+      stampRef = this.state.consoleStamp.ref.current;
     }
 
-    if(stampRef){
-      var cristalRef = stampRef.cristalRef.current
-      if(cristalRef){
+    if (stampRef) {
+      var cristalRef = stampRef.cristalRef.current;
+      if (cristalRef) {
+        var x = cristalRef.state.x,
+          y = cristalRef.state.y,
+          width = cristalRef.state.width,
+          height = cristalRef.state.height;
 
-        var x = cristalRef.state.x, y=cristalRef.state.y, width = cristalRef.state.width,
-        height = cristalRef.state.height
+        var newX =
+          (window.innerWidth - xOff) / 2 +
+          xOff -
+          (width / 2) * this.state.scale;
+        var newY =
+          (window.innerHeight - yOff) / 2 +
+          yOff -
+          (height / 2) * this.state.scale;
 
-
-        var newX = (window.innerWidth-xOff)/2 + xOff - width/2*this.state.scale
-        var newY = (window.innerHeight-yOff)/2 + yOff - height/2*this.state.scale
-
-        this.manualPan(newX - x, newY - y) 
-        cristalRef.changeZIndex()
-
+        this.manualPan(newX - x, newY - y);
+        cristalRef.changeZIndex();
       }
     }
   }
 
+  manualPan(xDiff, yDiff) {
+    var oldTransition = $(".stamp").css("transition");
+    $(".stamp").css({ transition: "all .5s ease" });
+    setTimeout(() => $(".stamp").css({ transition: oldTransition }), 500);
 
-  manualPan(xDiff, yDiff){
-
-    var oldTransition = $(".stamp").css("transition")
-    $(".stamp").css({transition: "all .5s ease"})
-    setTimeout(() => $(".stamp").css({transition: oldTransition}), 500)
-
-    this.setState({originX:this.state.originX + xDiff, 
-      originY:this.state.originY + yDiff, originCristal:null},
-      () => this.setOriginCristal())
+    this.setState(
+      {
+        originX: this.state.originX + xDiff,
+        originY: this.state.originY + yDiff,
+        originCristal: null
+      },
+      () => this.setOriginCristal()
+    );
 
     Object.values(this.state.fnStamps).map(stamp => {
       var cristalRef = stamp.ref.current.cristalRef;
@@ -1126,8 +1126,6 @@ function logToConsole(message, lineno){
 
     var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
     consoleCristalRef.current && consoleCristalRef.current.setPos(xDiff, yDiff);
-
-
   }
 
   toggleHide(stampRef) {
@@ -1142,8 +1140,8 @@ function logToConsole(message, lineno){
   getFirstLine(text) {
     for (var i = 0; i < text.length; i++) {
       if (text[i] === "\n") {
-        if(i === 0){
-          return " "
+        if (i === 0) {
+          return " ";
         }
         return text.substr(0, i);
       }
@@ -1160,80 +1158,109 @@ function logToConsole(message, lineno){
         name: "console",
         status: !consoleRef.state.hidden,
         icon: consoleRef.getIcon(),
-        centerCallback:(xOff, yOff) => this.centerOnStamp(consoleRef.props.id, xOff, yOff),
+        centerCallback: (xOff, yOff) =>
+          this.centerOnStamp(consoleRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(consoleRef),
-        id:consoleRef.props.id
+        id: consoleRef.props.id
       });
     }
 
-    if (
-      this.state.fnStamps[this.state.htmlID] &&
-      this.state.fnStamps[this.state.cssID]
-    ) {
-      var htmlRef = this.state.fnStamps[this.state.htmlID].ref.current;
-
-      if (htmlRef) {
-        pickerData.push({
-          name: htmlRef.state.name,
-          icon: htmlRef.getIcon(),
-          status: !htmlRef.state.hidden,
-        centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.htmlID, xOff, yOff),
-          hideCallback: () => this.toggleHide(htmlRef),
-        id:htmlRef.props.id
-        });
+    var fnIds = Object.keys(this.state.fnStamps);
+    var blobIds = Object.keys(this.state.blobStamps);
+    var allIds = fnIds.concat(blobIds);
+    allIds.map(id => {
+      if (id in this.state.fnStamps) {
+        var stampRef = this.state.fnStamps[id].ref.current;
+        if (!stampRef) {
+          return;
+        }
+        var name = stampRef.state.name;
+      } else if (id in this.state.blobStamps) {
+        var stampRef = this.state.blobStamps[id].ref.current;
+        if (!stampRef) {
+          return;
+        }
+        var name = this.getFirstLine(stampRef.state.code);
       }
-      var cssRef = this.state.fnStamps[this.state.cssID].ref.current;
-      if (cssRef) {
-        pickerData.push({
 
-          name: cssRef.state.name,
-          icon: cssRef.getIcon(),
-          status: !cssRef.state.hidden,
-        centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.cssID, xOff, yOff),
-          hideCallback: () => this.toggleHide(cssRef),
-        id:cssRef.props.id
-        });
-      }
-    }
-
-    // pickerData.push({});
-    Object.values(this.state.fnStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
-      if (
-        stampRef &&
-        stampRef.props.isHtml === false &&
-        stampRef.props.isCss === false
-      ) {
-        pickerData.push({
-          name: stampRef.state.name,
-          icon: stampRef.getIcon(),
-          status: !stampRef.state.hidden,
-        centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
-          hideCallback: () => this.toggleHide(stampRef),
-        id:stampRef.props.id
-        });
-      }
+      pickerData.push({
+        name: name + id,
+        icon: stampRef.getIcon(),
+        status: !stampRef.state.hidden,
+        centerCallback: (xOff, yOff) =>
+          this.centerOnStamp(stampRef.props.id, xOff, yOff),
+        hideCallback: () => this.toggleHide(stampRef),
+        id: stampRef.props.id
+      });
     });
 
-    // pickerData.push({});
-    Object.values(this.state.blobStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
-      if (stampRef) {
-        pickerData.push({
-          name: this.getFirstLine(stampRef.state.code),
-          icon: stampRef.getIcon(),
-          status: !stampRef.state.hidden,
-        centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
-          hideCallback: () => this.toggleHide(stampRef),
-        id:stampRef.props.id
-        });
-      }
-    });
+    // if (
+    //   this.state.fnStamps[this.state.htmlID] &&
+    //   this.state.fnStamps[this.state.cssID]
+    // ) {
+    //   var htmlRef = this.state.fnStamps[this.state.htmlID].ref.current;
+
+    //   if (htmlRef) {
+    //     pickerData.push({
+    //       name: htmlRef.state.name,
+    //       icon: htmlRef.getIcon(),
+    //       status: !htmlRef.state.hidden,
+    //     centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.htmlID, xOff, yOff),
+    //       hideCallback: () => this.toggleHide(htmlRef),
+    //     id:htmlRef.props.id
+    //     });
+    //   }
+    //   var cssRef = this.state.fnStamps[this.state.cssID].ref.current;
+    //   if (cssRef) {
+    //     pickerData.push({
+
+    //       name: cssRef.state.name,
+    //       icon: cssRef.getIcon(),
+    //       status: !cssRef.state.hidden,
+    //     centerCallback:(xOff, yOff) => this.centerOnStamp(this.state.cssID, xOff, yOff),
+    //       hideCallback: () => this.toggleHide(cssRef),
+    //     id:cssRef.props.id
+    //     });
+    //   }
+    // }
+
+    // // pickerData.push({});
+    // Object.values(this.state.fnStamps).map(stamp => {
+    //   var stampRef = stamp.ref.current;
+    //   if (
+    //     stampRef &&
+    //     stampRef.props.isHtml === false &&
+    //     stampRef.props.isCss === false
+    //   ) {
+    //     pickerData.push({
+    //       name: stampRef.state.name,
+    //       icon: stampRef.getIcon(),
+    //       status: !stampRef.state.hidden,
+    //     centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
+    //       hideCallback: () => this.toggleHide(stampRef),
+    //     id:stampRef.props.id
+    //     });
+    //   }
+    // });
+
+    // // pickerData.push({});
+    // Object.values(this.state.blobStamps).map(stamp => {
+    //   var stampRef = stamp.ref.current;
+    //   if (stampRef) {
+    //     pickerData.push({
+    //       name: this.getFirstLine(stampRef.state.code),
+    //       icon: stampRef.getIcon(),
+    //       status: !stampRef.state.hidden,
+    //     centerCallback:(xOff, yOff) => this.centerOnStamp(stampRef.props.id, xOff, yOff),
+    //       hideCallback: () => this.toggleHide(stampRef),
+    //     id:stampRef.props.id
+    //     });
+    //   }
+    // });
 
     this.setState({ pickerData: pickerData });
   }
 
-  
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1253,18 +1280,18 @@ function logToConsole(message, lineno){
           {consoleElem}
           {this.state.lines}
         </div>
-            
-        {this.state.originCristal}
-  
-        <ControlBar pickerData={this.state.pickerData} 
-        addBlobStamp={this.addBlobStamp.bind(this)}
-        addFnStamp={this.addFnStamp.bind(this)}
-        disablePan={this.disablePan.bind(this)}
-        disableZoom={this.disableZoom.bind(this)}
-        loadStamperFile={this.loadStamperFile.bind(this)}
-        getFileData = {this.getFileData.bind(this)}/>
 
-     
+        {this.state.originCristal}
+
+        <ControlBar
+          pickerData={this.state.pickerData}
+          addBlobStamp={this.addBlobStamp.bind(this)}
+          addFnStamp={this.addFnStamp.bind(this)}
+          disablePan={this.disablePan.bind(this)}
+          disableZoom={this.disableZoom.bind(this)}
+          loadStamperFile={this.loadStamperFile.bind(this)}
+          getFileData={this.getFileData.bind(this)}
+        />
       </div>
     );
   }
