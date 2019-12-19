@@ -4,8 +4,8 @@ import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
-import CodeIcon from "@material-ui/icons/Code";
-import TextIcon from "@material-ui/icons/TextFields";
+import CodeIcon from "@material-ui/icons/CodeRounded";
+import TextIcon from "@material-ui/icons/TextFieldsRounded";
 
 // import "ace-builds/src-noconflict/mode-javascript";
 // import "ace-builds/src-noconflict/theme-tomorrow";

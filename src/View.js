@@ -72,7 +72,25 @@ export default class View extends Component {
     this.aceRef = React.createRef()
 
     ipc &&
-      ipc.on("writeToView", (event, files) => {
+      ipc.on("writeToView", (event, files) => 
+
+            this.loadStamperFile(files.stamper)
+
+
+      );
+
+    ipc &&
+      ipc.on("requestSave", (event, rawCode) => {
+        this.sendSaveData();
+      });
+  }
+
+  componentDidMount() {
+    this.loadStamperFile(defaultSetup.getSetup());
+    document.addEventListener("mousedown", this.onGlobalMouseDown);
+  }
+
+  loadStamperFile(stamperFile) {
         this.setState(
           {
             fnStamps: {},
@@ -88,23 +106,6 @@ export default class View extends Component {
             originCristal: null
           },
           () => {
-            this.loadStamperFile(files.stamper);
-          }
-        );
-      });
-
-    ipc &&
-      ipc.on("requestSave", (event, rawCode) => {
-        this.sendSaveData();
-      });
-  }
-
-  componentDidMount() {
-    this.loadStamperFile(defaultSetup.getSetup());
-    document.addEventListener("mousedown", this.onGlobalMouseDown);
-  }
-
-  loadStamperFile(stamperFile) {
     this.setState(
       {
         scale: stamperFile.scale,
@@ -118,7 +119,11 @@ export default class View extends Component {
 
         this.setOriginCristal()
       }
-    );
+    )
+
+          }
+)
+
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -525,7 +530,7 @@ function logToConsole(message, lineno){
     this.setState({ blobStamps: blobStamps }, callback);
   }
 
-  sendSaveData() {
+  getFileData(){
     if (
       this.state.htmlID in this.state.fnStamps === false ||
       this.state.cssID in this.state.fnStamps === false
@@ -535,13 +540,22 @@ function logToConsole(message, lineno){
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
     var cssStamp = this.state.fnStamps[this.state.cssID];
 
-    var message = {
+    var fileData = {
       html: htmlStamp.ref.current.state.code,
       stamper: this.getAllData(),
       css: cssStamp.ref.current.state.code,
       js: this.getExportableCode()
     };
-    ipc && ipc.send("save", message);
+
+    return fileData    
+  }
+
+  sendSaveData() {
+    var fileData = this.getFileData()
+    if(fileData){
+    ipc && ipc.send("save", fileData);
+    }
+
   }
 
   checkForSetup() {
@@ -1246,7 +1260,9 @@ function logToConsole(message, lineno){
         addBlobStamp={this.addBlobStamp.bind(this)}
         addFnStamp={this.addFnStamp.bind(this)}
         disablePan={this.disablePan.bind(this)}
-        disableZoom={this.disableZoom.bind(this)}/>
+        disableZoom={this.disableZoom.bind(this)}
+        loadStamperFile={this.loadStamperFile.bind(this)}
+        getFileData = {this.getFileData.bind(this)}/>
 
      
       </div>

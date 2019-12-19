@@ -17,15 +17,18 @@ import styled from "styled-components";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
-import GradientIcon from "@material-ui/icons/Gradient";
-import CategoryIcon from "@material-ui/icons/Category";
-import HearingIcon from "@material-ui/icons/Hearing";
-import CodeIcon from "@material-ui/icons/Code";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import GradientIcon from "@material-ui/icons/GradientRounded";
+import CategoryIcon from "@material-ui/icons/CategoryRounded";
+import HearingIcon from "@material-ui/icons/HearingRounded";
+import CodeIcon from "@material-ui/icons/CodeRounded";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMoreRounded";
+import GetAppIcon from '@material-ui/icons/GetAppRounded';
+import LayersIcon from '@material-ui/icons/LayersRounded';
 
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import Dropdown from "react-bootstrap/Dropdown";
+
+import Overlay from "react-bootstrap/Overlay";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-css";
@@ -39,7 +42,7 @@ import pf1, {
   commentBlob,
   varBlob,
   listenerFns,
-  builtInFns
+  builtInFns, worlds
 } from "./starterStamps.js";
 
 var _ = require("lodash");
@@ -413,11 +416,14 @@ function noiseWave() {
         }}
       >
         <TopButton
-          iconType={GradientIcon}
-          uniqueClass="basic"
-          iconCallback={() =>
-            this.props.addFnStamp(this.setInitialPosition(normalFn))
-          }
+          iconType={GetAppIcon}
+          uniqueClass="download"
+          iconCallback={() =>{
+            var js = this.props.getFileData().js
+            var blob = new Blob([js], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, "sketch.js");
+          }}
+          tooltipText="download javascript"
         />
 
         <div class="row">
@@ -427,6 +433,7 @@ function noiseWave() {
             iconCallback={() =>
               this.props.addFnStamp(this.setInitialPosition(normalFn))
             }
+            tooltipText ="new function stamp"
           />
 
           <TopButton
@@ -438,6 +445,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(this.setInitialPosition(data))
             }))}
+            tooltipText ="new built in stamp"
           />
 
           <TopButton
@@ -449,6 +457,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(this.setInitialPosition(data))
             }))}
+            tooltipText ="new listener"
           />
 
           <TopButton
@@ -464,17 +473,23 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(this.setInitialPosition(commentBlob))}
               ]}
+              tooltipText ="new anything stamp"
           />
 
         </div>
 
-        <TopButton
-          iconType={GradientIcon}
-          uniqueClass="basic"
-          iconCallback={() =>
-            this.props.addFnStamp(this.setInitialPosition(normalFn))
-          }
-        />
+          <TopButton
+            iconType={LayersIcon}
+            uniqueClass="worlds"
+            iconCallback={null}
+            dropDownData={worlds.map(world => ({
+              name: world.name,
+              callback: () =>
+                this.props.loadStamperFile(world.data)
+            }))}
+            tooltipText ="add new world"
+            alignLeft
+          />
       </div>
     );
   }
@@ -496,7 +511,7 @@ class TopButton extends Component {
   }
 
   onMouseDown() {
-    if (this.state.mouseOverDropDown == false) {
+    if (this.state.mouseOverDropDown === false) {
       this.setState({ down: false });
     }
   }
@@ -508,14 +523,30 @@ class TopButton extends Component {
   }
 
   createIcon(iconType, callback, givenUniqueClass, size) {
+
     var uniqueClass = givenUniqueClass
     var mouseOverCallback = () => {
-      $("." + uniqueClass).css({ opacity: "1" });
+
+         
+
+        this.setState({mouseOverDropDown:true}, () =>      $("." + uniqueClass).css({ opacity: "1" }));
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({ opacity: ".6" });
-    };
+      
+this.setState({mouseOverDropDown:false}, 
+
+  () =>{
+
+    if(this.state.down === false){
+$("." + uniqueClass).css({ opacity: ".6" })
+    }
+  } )
+
+
+
+    }
+
     if (!callback) {
       callback = () => this.setState({ down: !this.state.down });
       uniqueClass += "expand"
@@ -537,7 +568,7 @@ class TopButton extends Component {
 
     var dropDowns = this.props.dropDownData.map(data => (
       <div
-        class={this.props.uniqueClass + data.name + " picker text-greyText p-2"}
+        class={this.props.uniqueClass + data.name + " picker text-greyText p-2 pl-3 pr-3"}
         onMouseOver={() => {
           this.setState({ mouseOverDropDown: true });
           $("." + this.props.uniqueClass + data.name).css({
@@ -558,10 +589,15 @@ class TopButton extends Component {
         {data.name}
       </div>
     ));
+
+    var right = "default"
+    if(this.props.alignLeft){
+      right = 0
+    }
     return (
       <div
-        class="bg-white border border-borderGrey rounded"
-        style={{ position: "absolute" }}
+        class="bg-white border border-borderGrey rounded mt-2"
+        style={{ position: "absolute", right:right}}
       >
         {dropDowns}
       </div>
@@ -569,6 +605,17 @@ class TopButton extends Component {
   }
 
   render() {
+    if(this.state.down){
+               $("." + this.props.uniqueClass + "expand").css({
+            opacity: "1"
+          });
+             }else{
+               $("." + this.props.uniqueClass + "expand").css({
+            opacity: ".6"
+          });              
+             }
+
+
     var expandButton = null;
     if (this.props.dropDownData) {
       expandButton = this.createIcon(
@@ -581,18 +628,30 @@ class TopButton extends Component {
 
     return (
       <div class="p-3">
+        <OverlayTrigger
+          trigger="hover"
+          placement="bottom"
+          overlay={
+            <Tooltip id="alert" style={{zIndex:1000000000000000002}}  hidden={true}>
+              {this.props.tooltipText}
+            </Tooltip>
+          }
+        >
+  <div>
+
+
         {this.createIcon(
           this.props.iconType,
           this.props.iconCallback,
           this.props.uniqueClass,
-          25
+          22
         )}
-        <a
-          onMouseOver={() => this.setState({ mouseOverDropDown: true })}
-          onMouseOut={() => this.setState({ mouseOverDropDown: false })}
-        >
+ 
           {expandButton}
-        </a>
+        </div>
+
+        </OverlayTrigger>
+
         {this.renderDropDowns()}
       </div>
     );

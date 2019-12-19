@@ -23,10 +23,10 @@ import {
 } from "./utils";
 import { Stacker } from "./stacker";
 import styled from "styled-components";
-import DeleteIcon from "@material-ui/icons/Delete";
+import DeleteIcon from "@material-ui/icons/DeleteRounded";
 import CopyIcon from "@material-ui/icons/FileCopyOutlined";
-import ClearIcon from "@material-ui/icons/ClearAll";
-import MinimzeIcon from "@material-ui/icons/Minimize";
+import ClearIcon from "@material-ui/icons/ClearAllRounded";
+import MinimzeIcon from "@material-ui/icons/MinimizeRounded";
 import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
