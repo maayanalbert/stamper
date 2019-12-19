@@ -618,7 +618,8 @@ class TopButton extends Component {
     }
     return(
       <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"0",position:"absolute", top:5, transition:"all .2s ease-out",
+      style={{opacity:"0",position:"absolute", top:5,
+      transition:"all .2s ease-out",
       right:right}}
      
 
