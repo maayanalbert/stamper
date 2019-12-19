@@ -527,13 +527,17 @@ class TopButton extends Component {
     var uniqueClass = givenUniqueClass
     var mouseOverCallback = () => {
 
-         
-
+      if(!callback){
         this.setState({mouseOverDropDown:true}, () =>      $("." + uniqueClass).css({ opacity: "1" }));
+      }  else{
+           $("." + uniqueClass).css({ opacity: "1" })
+      }   
+
+
     };
 
     var mouseOutCallback = () => {
-      
+    if(!callback){
 this.setState({mouseOverDropDown:false}, 
 
   () =>{
@@ -541,7 +545,10 @@ this.setState({mouseOverDropDown:false},
     if(this.state.down === false){
 $("." + uniqueClass).css({ opacity: ".6" })
     }
-  } )
+  } )    }else{
+  $("." + uniqueClass).css({ opacity: ".6" })
+}  
+
 
 
 
