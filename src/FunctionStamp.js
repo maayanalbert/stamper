@@ -299,7 +299,7 @@ export default class FunctionStamp extends Component {
             top: 80,
             right: 25
           }}
-          class="text-greyText"
+          class="text-greyText "
         >
          {"W:" + Math.floor(this.state.iframeWidth) +
             " H:" +

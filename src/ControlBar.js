@@ -464,14 +464,14 @@ function noiseWave() {
             iconType={CodeIcon}
             uniqueClass="anything"
             iconCallback={() =>
-                this.props.addFnStamp(this.setInitialPosition(varBlob))}
+                this.props.addBlobStamp(this.setInitialPosition(varBlob))}
             dropDownData={[
               {name: "variable",
               callback: () =>
-                this.props.addFnStamp(this.setInitialPosition(varBlob))},
+                this.props.addBlobStamp(this.setInitialPosition(varBlob))},
             {name: "comment",
               callback: () =>
-                this.props.addFnStamp(this.setInitialPosition(commentBlob))}
+                this.props.addBlobStamp(this.setInitialPosition(commentBlob))}
               ]}
               tooltipText ="new anything stamp"
           />
