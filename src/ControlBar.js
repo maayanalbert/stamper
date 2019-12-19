@@ -279,7 +279,7 @@ function noiseWave() {
                 iconType,
                 18,
                 item.hideCallback,
-                0.6
+                0.5
               )}
             </div>
           </div>
@@ -542,7 +542,7 @@ class TopButton extends Component {
 
           () => {
             if (this.state.down === false || iconType != ExpandMoreIcon) {
-              $("." + uniqueClass).css({ opacity: ".6" });
+              $("." + uniqueClass).css({ opacity: ".5" });
             }
           }
         );
@@ -555,7 +555,7 @@ class TopButton extends Component {
     }
 
     return React.createElement(iconType, {
-      style: { opacity: ".6", height: size, width: size },
+      style: { opacity: ".5", height: size, width: size },
       className: " text-greyText " + uniqueClass,
       onClick: callback,
       onMouseOver: mouseOverCallback,
@@ -617,7 +617,7 @@ class TopButton extends Component {
       });
     } else {
       $("." + this.props.uniqueClass + "expand").css({
-        opacity: ".6"
+        opacity: ".5"
       });
     }
 

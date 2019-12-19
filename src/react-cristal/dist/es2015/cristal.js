@@ -588,9 +588,9 @@ var Cristal = (function(_super) {
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({opacity: ".6"})
+      $("." + uniqueClass).css({opacity: ".5"})
     };
-    var opacity = ".6"
+    var opacity = ".5"
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
