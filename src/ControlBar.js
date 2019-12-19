@@ -653,12 +653,14 @@ class TopButton extends Component {
     return (
       <div class="m-3 mt-4"
 
-      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: ".5"})}
-      onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
       >
 
             {this.renderTooltip()}
-                  <div>
+              <div
+
+      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: ".5"})}
+      onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
+              >
 
             {this.createIcon(
               this.props.iconType,

@@ -674,7 +674,7 @@ function logToConsole(message, lineno){
         <Cristal
          parentID = {-1}
           panDisabled = {panDisabled}
-          className=" bg-white"
+          className=" bg-grey"
           closeHidden
           headerHidden
           copyHidden
