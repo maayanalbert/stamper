@@ -62,8 +62,6 @@ export default class ControlBar extends Component {
     this.maxWidth = window.innerWidth - 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
-    this.newStampMargin = 20;
-    this.newStampMarginVariance = 100;
     this.state = {
       sideBarWidth: 200,
       pickerHeight:
@@ -86,7 +84,9 @@ function noiseWave() {
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.props.updateControlBarDimensions(this.state.sideBarWidth, this.topBarHeight)
+  }
 
   renderSideBar() {
     return (
@@ -119,6 +119,7 @@ function noiseWave() {
               );
             }
           }}
+          onResizeStop={e => this.props.updateControlBarDimensions(this.state.sideBarWidth, this.topBarHeight)}
           height={window.innerHeight - this.topBarHeight}
           axis="x"
           handle={this.renderSideBarResizeHandle()}
@@ -133,26 +134,14 @@ function noiseWave() {
     );
   }
 
-  setInitialPosition(data) {
-    data.x =
-      this.state.sideBarWidth +
-      this.newStampMargin +
-      Math.random() * this.newStampMarginVariance;
-    data.y =
-      this.topBarHeight +
-      this.newStampMargin +
-      Math.random() * this.newStampMarginVariance;
-    return data;
-  }
-
   parseCode() {
     try {
       var stamps = parser.jsToStamps(this.state.code);
       stamps.fns.map(data => {
-        this.props.addFnStamp(this.setInitialPosition(data));
+        this.props.addFnStamp(data);
       });
       stamps.blobs.map(data => {
-        this.props.addBlobStamp(this.setInitialPosition(data));
+        this.props.addBlobStamp(data);
       });
 
       this.setState({ code: "" });
@@ -431,7 +420,7 @@ function noiseWave() {
             iconType={GradientIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addFnStamp(this.setInitialPosition(normalFn))
+              this.props.addFnStamp(normalFn)
             }
             tooltipText="new function stamp"
           />
@@ -443,7 +432,7 @@ function noiseWave() {
             dropDownData={builtInFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(this.setInitialPosition(data))
+                this.props.addFnStamp(data)
             }))}
             tooltipText="new built in stamp"
           />
@@ -455,7 +444,7 @@ function noiseWave() {
             dropDownData={listenerFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(this.setInitialPosition(data))
+                this.props.addFnStamp(data)
             }))}
             tooltipText="new listener"
           />
@@ -464,18 +453,18 @@ function noiseWave() {
             iconType={CodeIcon}
             uniqueClass="anything"
             iconCallback={() =>
-              this.props.addBlobStamp(this.setInitialPosition(varBlob))
+              this.props.addBlobStamp(varBlob)
             }
             dropDownData={[
               {
                 name: "variable",
                 callback: () =>
-                  this.props.addBlobStamp(this.setInitialPosition(varBlob))
+                  this.props.addBlobStamp(varBlob)
               },
               {
                 name: "comment",
                 callback: () =>
-                  this.props.addBlobStamp(this.setInitialPosition(commentBlob))
+                  this.props.addBlobStamp(commentBlob)
               }
             ]}
             tooltipText="new anything stamp"

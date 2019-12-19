@@ -63,13 +63,14 @@ export default class View extends Component {
       scale: 1,
       originCristal: null,
       pickerData: [],
-      sideBarWidth:200,
-      pickerHeight:400,
-      jsImportCode:""
+      sideBarWidth:0,
+      topBarHeight:0
 
     };
     this.counterMutex = new Mutex();
     this.aceRef = React.createRef()
+    this.newStampMarginVariance = 100;
+        this.newStampMargin = 20;
 
     ipc &&
       ipc.on("writeToView", (event, files) => 
@@ -88,6 +89,11 @@ export default class View extends Component {
   componentDidMount() {
     this.loadStamperFile(defaultSetup.getSetup());
     document.addEventListener("mousedown", this.onGlobalMouseDown);
+  }
+
+  updateControlBarDimensions(sideBarWidth, topBarHeight){
+    console.log(sideBarWidth, topBarHeight)
+    this.setState({sideBarWidth:sideBarWidth, topBarHeight:topBarHeight})
   }
 
   loadStamperFile(stamperFile) {
@@ -279,10 +285,22 @@ function logToConsole(message, lineno){
     this.setState({ scale: newScale });
   }
 
+  setInitialPosition(dimension) {
+    if(dimension === "x"){
+      return this.state.sideBarWidth +
+      this.newStampMargin +
+      Math.random() * this.newStampMarginVariance;
+    }else if(dimension === "y"){
+      return this.state.topBarHeight +
+      this.newStampMargin +
+      Math.random() * this.newStampMarginVariance;
+    }
+  }
+
   addConsoleStamp(data) {
     var defaults = {
-      x: 0,
-      y: 0,
+      x: this.setInitialPosition("x"),
+      y: this.setInitialPosition("y"),
       consoleWidth: (globals.defaultEditorWidth * 2) / 3,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
@@ -291,10 +309,11 @@ function logToConsole(message, lineno){
     };
 
     Object.keys(defaults).map(setting => {
-      if (!(setting in data)) {
-        data[setting] = defaults[setting];
+      if ((setting in data)) {
+        defaults[setting] = data[setting];
       }
     });
+    data = defaults
 
     this.createConsoleStamp(data);
   }
@@ -344,8 +363,8 @@ function logToConsole(message, lineno){
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
       args: "x=mouseX, y=mouseY",
-      x: 0,
-      y: 0,
+      x: this.setInitialPosition("x"),
+      y: this.setInitialPosition("y"),
       iframeDisabled: false,
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
@@ -359,10 +378,11 @@ function logToConsole(message, lineno){
     };
 
     Object.keys(defaults).map(setting => {
-      if (!(setting in data)) {
-        data[setting] = defaults[setting];
+      if ((setting in data)) {
+        defaults[setting] = data[setting];
       }
     });
+    data = defaults
 
     if (updatePosition) {
       data.x += globals.copyOffset * 2 * this.state.scale;
@@ -464,8 +484,8 @@ function logToConsole(message, lineno){
     callback = () => null) {
     var defaults = {
       code: "var z = 10",
-      x: 0,
-      y: 0,
+      x: this.setInitialPosition("x"),
+      y: this.setInitialPosition("y"),
       editorWidth: (globals.defaultEditorWidth * 2) / 3,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
@@ -475,11 +495,12 @@ function logToConsole(message, lineno){
     };
 
     Object.keys(defaults).map(setting => {
-      if (!(setting in data)) {
-        data[setting] = defaults[setting];
+      if ((setting in data)) {
+        defaults[setting] = data[setting];
       }
     });
-
+    data = defaults
+    
     if (updatePosition) {
       data.x += globals.copyOffset * 2 * this.state.scale;
       data.y += globals.copyOffset * 2 * this.state.scale;
@@ -1228,7 +1249,8 @@ function logToConsole(message, lineno){
         disablePan={this.disablePan.bind(this)}
         disableZoom={this.disableZoom.bind(this)}
         loadStamperFile={this.loadStamperFile.bind(this)}
-        getFileData = {this.getFileData.bind(this)}/>
+        getFileData = {this.getFileData.bind(this)}
+        updateControlBarDimensions ={this.updateControlBarDimensions.bind(this)}/>
 
      
       </div>
