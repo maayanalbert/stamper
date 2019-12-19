@@ -610,6 +610,25 @@ class TopButton extends Component {
     );
   }
 
+
+  renderTooltip(){
+    var right = "default"
+    if(this.props.alignLeft){
+      right = 15
+    }
+    return(
+      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
+      style={{opacity:"0",position:"absolute", top:5, transition:"all .2s ease-out",
+      right:right}}
+     
+
+      >
+      {this.props.tooltipText}</div>
+     
+  
+    )
+
+  }
   render() {
     if (this.state.down) {
       $("." + this.props.uniqueClass + "expand").css({
@@ -632,21 +651,15 @@ class TopButton extends Component {
     }
 
     return (
-      <div class="p-3">
-        <OverlayTrigger
-          trigger="hover"
-          placement="bottom"
-          overlay={
-            <Tooltip
-              id="alert"
-              style={{ zIndex: 1000000000000000002 }}
-              hidden={true}
-            >
-              {this.props.tooltipText}
-            </Tooltip>
-          }
-        >
-          <div>
+      <div class="m-3 mt-4"
+
+      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: ".5"})}
+      onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
+      >
+
+            {this.renderTooltip()}
+                  <div>
+
             {this.createIcon(
               this.props.iconType,
               this.props.iconCallback,
@@ -656,7 +669,7 @@ class TopButton extends Component {
 
             {expandButton}
           </div>
-        </OverlayTrigger>
+     
 
         {this.renderDropDowns()}
       </div>
