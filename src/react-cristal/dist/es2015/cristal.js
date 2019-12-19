@@ -588,18 +588,20 @@ var Cristal = (function(_super) {
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({opacity: ".3"})
+      $("." + uniqueClass).css({opacity: ".6"})
     };
+    var opacity = ".6"
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
+      opacity = ".3"
     }
 
 
     return React.createElement(iconType, {
       onClick: callBack,
-      style: { opacity: .3, height: 18, width: 18 },
-      className: "dynamicIcon text-greyText m-1 " + uniqueClass ,
+      style: { opacity: opacity, height: 18, width: 18 },
+      className: "text-greyText m-1 " + uniqueClass ,
       onMouseOver: mouseOverCallback,
       onMouseOut: mouseOutCallback
     });

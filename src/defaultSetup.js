@@ -28,7 +28,7 @@ var setup = {
       },
       { name: "draw", args: "", code: "background(220)", x:800, y:480 }
     ],
-    blobs: [{}],
+    blobs: [],
     scale: 1,
     console:{x:220, y:15, hidden:true},
     originX:0,
