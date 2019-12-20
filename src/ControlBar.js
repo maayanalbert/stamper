@@ -59,10 +59,11 @@ export default class ControlBar extends Component {
     this.minJsImporterHeight = 30;
     this.topBarHeight = 60;
     this.minWidth = 150;
-    this.maxWidth = window.innerWidth - 30;
+    this.minNonSideBarWidth = 30
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
     this.state = {
+      jsImporterHeight:110,
       sideBarWidth: 200,
       pickerHeight:
         window.innerHeight -
@@ -86,6 +87,17 @@ function noiseWave() {
 
   componentDidMount() {
     this.props.updateControlBarDimensions(this.state.sideBarWidth, this.topBarHeight)
+    window.addEventListener('resize', this.onWindowResize.bind(this));
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.onWindowResize)
+  }
+
+  onWindowResize(e){
+    this.setState({pickerHeight: window.innerHeight - (this.topBarHeight + this.importButtonHeight + this.state.jsImporterHeight)})
+    if(this.state.sideBarWidth > window.innerWidth - this.minNonSideBarWidth){
+      this.setState({sideBarWidth: window.innerWidth - this.minNonSideBarWidth})
+    }
   }
 
   renderSideBar() {
@@ -113,7 +125,7 @@ function noiseWave() {
           width={this.state.sideBarWidth}
           onResize={e => {
             var newWidth = this.state.sideBarWidth + e.movementX;
-            if (newWidth > this.minWidth && newWidth < this.maxWidth) {
+            if (newWidth > this.minWidth && newWidth <= window.innerWidth - this.minNonSideBarWidth) {
               this.setState({ sideBarWidth: newWidth }, () =>
                 this.editorRef.current.editor.resize()
               );
@@ -296,7 +308,7 @@ function noiseWave() {
                   +this.importButtonHeight)
           ) {
             this.setState(
-              { pickerHeight: this.state.pickerHeight + e.movementY },
+              { pickerHeight: this.state.pickerHeight + e.movementY, jsImporterHeight:this.state.jsImporterHeight - e.movementY },
               () => this.editorRef.current.editor.resize()
             );
           }

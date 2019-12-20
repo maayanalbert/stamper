@@ -29,7 +29,8 @@ function createWindow() {
       "nodeIntegration": true,
       "web-security": false
     },
-    show:false
+    show:false,  minHeight: 300,
+  minWidth: 450
   });
   mainWindow.maximize()
   mainWindow.show()
