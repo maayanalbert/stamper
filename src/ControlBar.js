@@ -413,6 +413,7 @@ function noiseWave() {
             saveAs(blob, "sketch.js");
           }}
           tooltipText="download javascript"
+          alignLeft
         />
 
         <div class="row">
@@ -434,7 +435,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(data)
             }))}
-            tooltipText="new built in stamp"
+            tooltipText="new built in function"
           />
 
           <TopButton
@@ -480,7 +481,7 @@ function noiseWave() {
             callback: () => this.props.loadStamperFile(world.data)
           }))}
           tooltipText="add new world"
-          alignLeft
+          alignRight
         />
       </div>
     );
@@ -586,7 +587,7 @@ class TopButton extends Component {
     ));
 
     var right = "default";
-    if (this.props.alignLeft) {
+    if (this.props.alignRight) {
       right = 0;
     }
     return (
@@ -601,19 +602,44 @@ class TopButton extends Component {
 
 
   renderTooltip(){
-    var right = "default"
-    if(this.props.alignLeft){
-      right = 15
-    }
-    return(
-      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"0",position:"absolute", top:5,
-      transition:"all .2s ease-out",
-      right:right}}
-     
+    if(this.props.alignRight){
+      return(
 
+      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
+      style={{opacity:"0", position:"absolute", right:15, top:5,
+      transition:"all .2s ease-out"}}
       >
       {this.props.tooltipText}</div>
+
+        )
+    }
+
+    if(this.props.alignLeft){
+      return(
+
+      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
+      style={{opacity:"0", position:"absolute", left:15, top:5,
+      transition:"all .2s ease-out"}}
+      >
+      {this.props.tooltipText}</div>
+
+        )
+    }
+
+    var offset = "-135px"
+    if(this.props.dropDownData){
+      var offset = "-130px"
+    }
+    return(
+      <div style = {{position:"absolute", top:5}}>
+      <div style={{position:"absolute", width:300, left:offset}} >
+      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
+      style={{opacity:"0", textAlign:"center",
+      transition:"all .2s ease-out"}}
+      >
+      {this.props.tooltipText}</div>
+      </div>
+      </div>
      
   
     )
