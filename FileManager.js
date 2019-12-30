@@ -74,10 +74,12 @@ module.exports = class FileManager {
       return stamper
     }
 
+      try{
+        var newStamper = parser.jsToStamps(js);
+      }catch(e){
+        throw "Syntax error in Javascript"
+      }
 
-      var newStamper = parser.jsToStamps(js);
-
-      if(newStamper === null){return null}
       newStamper.fns.push({
         name: "style.css",
         args: " ",
@@ -105,15 +107,17 @@ module.exports = class FileManager {
       return;
     }
 
+    try{
       var newStamper = this.updateStamperJs(js, stamper)
-      if(newStamper === null){
-      dialog.showMessageBox(this.mainWindow, {
+    }catch(e){
+       dialog.showMessageBox(this.mainWindow, {
         message:
-          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into stamper land :(.`,
+          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into stamper land :(`,
         buttons: ["Ok"]
       });
-        return
-      }
+        return     
+    }
+
       this.stamper = newStamper
 
       this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
@@ -217,7 +221,8 @@ this.path = path
     this.js = files.js;
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
-
+    console.log("js")
+    console.log(files.js)
     this.stamper.compressedJs = LZUTF8.compress(this.js, {
       outputEncoding: "StorageBinaryString"
     });
