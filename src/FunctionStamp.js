@@ -40,7 +40,7 @@ export default class FunctionStamp extends Component {
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
-      editorHeight: globals.defaultEditorHeight,
+      editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
       editorHidden: false,
       isSpecialFn: false,
@@ -82,7 +82,7 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
     this.loadp5Lib()
-    this.setState({ editorHeight:this.props.starterEditorHeight, 
+    this.setState({ 
       iframeHeight: this.props.starterIframeHeight }, () =>
       this.props.requestCompile(this.props.id)
     );
