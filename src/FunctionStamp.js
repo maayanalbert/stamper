@@ -39,7 +39,7 @@ export default class FunctionStamp extends Component {
       args: this.props.starterArgs,
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
-      iframeHeight: globals.defaultEditorHeight,
+      iframeHeight: 0,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
       editorHidden: false,
@@ -71,10 +71,15 @@ export default class FunctionStamp extends Component {
         (this.state.originY - this.state.y) / this.state.scale;
       var x = originX - distFromOriginX * scale;
       var y = originY - distFromOriginY * scale;
-      this.setState({ hidden: false, scale: scale, x: x, y: y }, callback);
+      var iframeHeight = this.state.iframeHeight
+      this.setState({ hidden: false, scale: scale, x: x, y: y, savedIframeHeight:iframeHeight, iframeHeight:0 }, 
+        () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
+
+      )
+
     } else {
       this.setState(
-        { hidden: true, originX: originX, originY: originY, scale: scale },
+        { hidden: true, originX: originX, originY: originY, scale: scale},
         callback
       );
     }
