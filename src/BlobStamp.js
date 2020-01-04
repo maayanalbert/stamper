@@ -108,7 +108,8 @@ export default class BlobStamp extends Component {
         <AceEditor
           style={{
             width: this.state.editorWidth,
-            height: this.state.editorHeight
+            height: this.state.editorHeight,
+            fontFamily: 'Inconsolata',
           }}
           mode="javascript"
           theme="p5"

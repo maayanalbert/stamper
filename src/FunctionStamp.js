@@ -200,7 +200,8 @@ export default class FunctionStamp extends Component {
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
-            background: "transparent"
+            background: "transparent",
+            fontFamily: 'Inconsolata',
           }}
           mode={mode}
           theme={theme}

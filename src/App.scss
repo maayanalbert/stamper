@@ -1,18 +1,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 .react-resizable {
   position: relative;
 }
@@ -86,16 +74,14 @@
 
 
 
-@import url('https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap');
-@import url('https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap');
-
+@import url('https://fonts.googleapis.com/css?family=Inconsolata|Montserrat:300,400&display=swap');
 
 
 $size: 225;
 $placeholder: rgb(200, 200, 200);
 
 * {
-font-family: 'Roboto Mono', monospace;
+font-family: 'Inconsolata', monospace;
   }
 
 $theme-colors: (
@@ -110,7 +96,8 @@ warningOrangeDark: rgba(255, 184, 0, 1),
   blue:           rgb(70,160,206),
   borderGrey:     rgb(215,215,215),
   jsArea:         rgb(245, 248, 252),
-  greyText:       rgb(102, 102, 102),
+  greyText:       rgb(168, 168, 168),
+  greyIcon:       rgb(115, 115, 115),
   lightGreyText:  rgb(125, 125, 125),
   htmlCssArea:    rgb(252,249,245),
   htmlCssName:   rgb(86,162, 155),
@@ -142,8 +129,8 @@ html, body {
 }
 
 .name{
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
+  font-family: 'Montserrat', sans-serif;
+/*  font-weight: 500;*/
   border:none;
   outline:none;
   font-weight: bold;
@@ -153,16 +140,15 @@ html, body {
 }
 
 .btn{
-font-family: 'Roboto', sans-serif;
-  font-weight: 400;
+font-family: 'Montserrat', sans-serif;
+/*  font-weight: 400;*/
 }
 
 .picker{
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 400;
-  font-size: 13px;
+  font-size: 12px;
   cursor: default;
-  opacity: .8;
 }
 
 
@@ -170,7 +156,7 @@ font-family: 'Roboto', sans-serif;
   border:none;
   outline:none;
   position: relative;
-  font-size: 14px;
+  font-size: 16px;
   width: 100%;
 }
 

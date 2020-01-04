@@ -6,10 +6,12 @@ export const globals = {
   iframeMargin: 8,
   headerHeight: 30,
   brHeight: 25,
-  codeSize: 12,
+  codeSize: 14,
+  buttonTextSize: 12,
   bigCodeSize:24,
   fnTitleHeight: 90,
   copyOffset: 17,
+  iconOpacity:.5,
   iconTransition: "all .3s ease",
   borderTransition: "border .3s ease-out",
 

@@ -179,7 +179,8 @@ function noiseWave() {
               (this.state.pickerHeight +
                 this.topBarHeight +
                 this.importButtonHeight),
-            background: "transparent"
+            background: "transparent",
+            fontFamily: 'Inconsolata',
           }}
           mode="javascript"
           theme="p5"
@@ -223,7 +224,7 @@ function noiseWave() {
             "btn btn-block shadow-sm m-1 bg-" + color + " border-borderGrey"
           }
           style={{
-            fontSize: globals.codeSize
+            fontSize: globals.buttonTextSize
           }}
           onClick={this.parseCode.bind(this)}
           disabled={this.state.codeHasError}
@@ -262,8 +263,7 @@ function noiseWave() {
                   "type" + item.id.toString(),
                   item.icon,
                   18,
-                  null,
-                  0.3
+                  null
                 )}
                 <b
                   class="text-greyText picker ml-1"
@@ -279,8 +279,7 @@ function noiseWave() {
                 "hide" + item.id.toString(),
                 iconType,
                 18,
-                item.hideCallback,
-                0.5
+                item.hideCallback
               )}
             </div>
           </div>
@@ -339,16 +338,14 @@ function noiseWave() {
   createIcon(
     uniqueClass,
     iconType,
-    size = 15,
     hideCallback = null,
-    opacity = 0.3
   ) {
     var mouseOverCallback = () => {
       $("." + uniqueClass).css({ opacity: "1" });
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({ opacity: opacity });
+      $("." + uniqueClass).css({ opacity:globals.iconOpacity });
     };
     if (!hideCallback) {
       mouseOverCallback = () => {};
@@ -356,8 +353,8 @@ function noiseWave() {
     }
 
     return React.createElement(iconType, {
-      style: { opacity: opacity, height: size, width: size },
-      className: " m-1 text-greyText " + uniqueClass,
+      style: { height: 18, opacity:globals.iconOpacity, width: 18 },
+      className: " m-1 text-greyIcon " + uniqueClass,
       onClick: hideCallback,
       onMouseOver: mouseOverCallback,
       onMouseOut: mouseOutCallback
@@ -544,7 +541,7 @@ class TopButton extends Component {
 
           () => {
             if (this.state.down === false || (iconType != ExpandMoreIcon && this.props.iconCallback) ) {
-              $("." + uniqueClass).css({ opacity: ".5" });
+              $("." + uniqueClass).css({ opacity: globals.iconOpacity });
             }
           }
         );
@@ -558,7 +555,7 @@ class TopButton extends Component {
 
     return React.createElement(iconType, {
       style: { opacity: ".5", height: size, width: size },
-      className: " text-greyText " + uniqueClass,
+      className: " text-greyIcon " + uniqueClass,
       onClick: callback,
       onMouseOver: mouseOverCallback,
       onMouseOut: mouseOutCallback
@@ -674,7 +671,7 @@ class TopButton extends Component {
         ExpandMoreIcon,
         () => this.setState({ down: !this.state.down }),
         this.props.uniqueClass + "expand",
-        20
+        18
       );
     }
 
@@ -686,7 +683,7 @@ class TopButton extends Component {
             {this.renderTooltip()}
               <div
 
-      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: ".5"})}
+      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "1"})}
       onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
               >
 
@@ -694,7 +691,7 @@ class TopButton extends Component {
               this.props.iconType,
               this.props.iconCallback,
               this.props.uniqueClass,
-              22
+              20
             )}
 
             {expandButton}
