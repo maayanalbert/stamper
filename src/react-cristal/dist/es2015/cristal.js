@@ -23,9 +23,9 @@ import {
 } from "./utils";
 import { Stacker } from "./stacker";
 import styled from "styled-components";
-import DeleteIcon from "./../../../icons/trash.svg";
+import DeleteStampIcon from "./../../../icons/trash.svg";
 import CopyIcon from "./../../../icons/copy.svg";
-import ClearIcon from "./../../../icons/delete.svg";
+import ClearConsoleIcon from "./../../../icons/delete.svg";
 import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 import "./../../../App.scss";
 import $ from "jquery";
@@ -620,7 +620,7 @@ var Cristal = (function(_super) {
 
       var closeBtn = createIcon(
         this,
-        DeleteIcon,
+        DeleteStampIcon,
         closeHidden,
         "mouseOnClose",
         onClose
@@ -634,7 +634,7 @@ var Cristal = (function(_super) {
       );
       var clearBtn = createIcon(
         this,
-        ClearIcon,
+        ClearConsoleIcon,
         !_a.showClear,
         "mousOnClear",
         _a.onClear

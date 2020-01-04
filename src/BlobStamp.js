@@ -4,8 +4,8 @@ import $ from "jquery";
 import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
-import CodeIcon from "./icons/code.svg";
-import TextIcon from "./icons/type.svg";
+import BlobStampIcon from "./icons/code.svg";
+import CodeSizeIcon from "./icons/type.svg";
 
 // import "ace-builds/src-noconflict/mode-javascript";
 // import "ace-builds/src-noconflict/theme-tomorrow";
@@ -205,7 +205,7 @@ export default class BlobStamp extends Component {
   }
 
   getIcon() {
-    return CodeIcon;
+    return BlobStampIcon;
   }
 
     loadp5Lib() {
@@ -269,7 +269,7 @@ export default class BlobStamp extends Component {
           }
           title="Anything"
           icon={this.getIcon()}
-          makeBigIcon ={TextIcon}
+          makeBigIcon ={CodeSizeIcon}
           showMakeBig
           onMakeBig ={() => {
             if(this.state.codeSize === globals.codeSize){

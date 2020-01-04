@@ -20,7 +20,7 @@ import VisibilityOffIcon from "./icons/eye-off.svg";
 import GradientIcon from "./icons/box.svg";
 import CategoryIcon from "./icons/star.svg";
 import HearingIcon from "./icons/loader.svg";
-import CodeIcon from "./icons/code.svg";
+import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
 import GetAppIcon from "./icons/download.svg";
 import LayersIcon from "./icons/archive.svg";
@@ -460,7 +460,7 @@ function noiseWave() {
           />
 
           <TopButton
-            iconType={CodeIcon}
+            iconType={BlobStampIcon}
             uniqueClass="anything"
             iconCallback={() =>
               this.props.addBlobStamp(varBlob)
