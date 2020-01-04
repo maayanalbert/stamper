@@ -12,6 +12,7 @@ export const globals = {
   fnTitleHeight: 90,
   copyOffset: 17,
   iconOpacity:.5,
+  iconSize:15,
   iconTransition: "all .3s ease",
   borderTransition: "border .3s ease-out",
 

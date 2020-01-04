@@ -5,7 +5,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
-import PrintIcon from "@material-ui/icons/PrintRounded";
+import PrintIcon from "./icons/printer.svg";
 
 var _ = require("lodash");
 

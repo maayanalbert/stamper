@@ -23,10 +23,10 @@ import {
 } from "./utils";
 import { Stacker } from "./stacker";
 import styled from "styled-components";
-import DeleteIcon from "@material-ui/icons/DeleteRounded";
-import CopyIcon from "@material-ui/icons/FileCopyOutlined";
-import ClearIcon from "@material-ui/icons/ClearAllRounded";
-import MinimzeIcon from "@material-ui/icons/MinimizeRounded";
+import DeleteIcon from "./../../../icons/trash.svg";
+import CopyIcon from "./../../../icons/copy.svg";
+import ClearIcon from "./../../../icons/delete.svg";
+import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
@@ -598,12 +598,13 @@ var Cristal = (function(_super) {
     }
 
 
-    return React.createElement(iconType, {
+    return React.createElement("img", {
       onClick: callBack,
-      style: { opacity: opacity, height: 18, width: 18 },
+      style: { opacity: opacity, height: globals.iconSize, width: globals.iconSize },
       className: "text-greyIcon m-1 " + uniqueClass ,
       onMouseOver: mouseOverCallback,
-      onMouseOut: mouseOutCallback
+      onMouseOut: mouseOutCallback, 
+      src:iconType
     });
   }
 
@@ -661,7 +662,7 @@ var Cristal = (function(_super) {
 
       var sideButtons = (
         <div
-          class="row"
+          class="row mt-1"
           style={{ position: "absolute", cursor: "auto", right: 18, top: 0 }}
         >
           {makeBigIcon}

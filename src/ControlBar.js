@@ -14,16 +14,16 @@ import parser from "./parser.js";
 import anim from "css-animation";
 import { Resizable, ResizableBox } from "react-resizable";
 import styled from "styled-components";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import VisibilityIcon from "./icons/eye.svg";
+import VisibilityOffIcon from "./icons/eye-off.svg";
 
-import GradientIcon from "@material-ui/icons/GradientRounded";
-import CategoryIcon from "@material-ui/icons/CategoryRounded";
-import HearingIcon from "@material-ui/icons/HearingRounded";
-import CodeIcon from "@material-ui/icons/CodeRounded";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMoreRounded";
-import GetAppIcon from "@material-ui/icons/GetAppRounded";
-import LayersIcon from "@material-ui/icons/LayersRounded";
+import GradientIcon from "./icons/box.svg";
+import CategoryIcon from "./icons/star.svg";
+import HearingIcon from "./icons/loader.svg";
+import CodeIcon from "./icons/code.svg";
+import ExpandMoreIcon from "./icons/chevron-down.svg";
+import GetAppIcon from "./icons/download.svg";
+import LayersIcon from "./icons/archive.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -262,7 +262,6 @@ function noiseWave() {
                 {this.createIcon(
                   "type" + item.id.toString(),
                   item.icon,
-                  18,
                   null
                 )}
                 <b
@@ -278,7 +277,6 @@ function noiseWave() {
               {this.createIcon(
                 "hide" + item.id.toString(),
                 iconType,
-                18,
                 item.hideCallback
               )}
             </div>
@@ -340,6 +338,7 @@ function noiseWave() {
     iconType,
     hideCallback = null,
   ) {
+
     var mouseOverCallback = () => {
       $("." + uniqueClass).css({ opacity: "1" });
     };
@@ -352,12 +351,13 @@ function noiseWave() {
       mouseOutCallback = () => {};
     }
 
-    return React.createElement(iconType, {
-      style: { height: 18, opacity:globals.iconOpacity, width: 18 },
+    return React.createElement("img", {
+      style: { height: globals.iconSize, opacity:globals.iconOpacity, width: globals.iconSize },
       className: " m-1 text-greyIcon " + uniqueClass,
       onClick: hideCallback,
       onMouseOver: mouseOverCallback,
-      onMouseOut: mouseOutCallback
+      onMouseOut: mouseOutCallback,
+      src: iconType
     });
   }
 
@@ -553,12 +553,13 @@ class TopButton extends Component {
       uniqueClass += "expand";
     }
 
-    return React.createElement(iconType, {
-      style: { opacity: ".5", height: size, width: size },
+    return React.createElement("img", {
+      style: { opacity: globals.iconOpacity, height: size, width: size },
       className: " text-greyIcon " + uniqueClass,
       onClick: callback,
       onMouseOver: mouseOverCallback,
-      onMouseOut: mouseOutCallback
+      onMouseOut: mouseOutCallback,
+      src: iconType
     });
   }
 
@@ -671,7 +672,7 @@ class TopButton extends Component {
         ExpandMoreIcon,
         () => this.setState({ down: !this.state.down }),
         this.props.uniqueClass + "expand",
-        18
+        16
       );
     }
 

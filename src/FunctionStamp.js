@@ -5,11 +5,11 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-import GradientIcon from "@material-ui/icons/GradientRounded";
-import ColorIcon from "@material-ui/icons/ColorLensRounded";
-import WebIcon from "@material-ui/icons/WebRounded";
-import CategoryIcon from "@material-ui/icons/CategoryRounded";
-import HearingIcon from "@material-ui/icons/HearingRounded";
+import GradientIcon from "./icons/box.svg";
+import ColorIcon from "./icons/pen-tool.svg";
+import WebIcon from "./icons/layout.svg";
+import CategoryIcon from "./icons/star.svg";
+import HearingIcon from "./icons/loader.svg";
 
 import "./theme-p5.js";
 
