@@ -5,11 +5,11 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-import GradientIcon from "./icons/box.svg";
-import ColorIcon from "./icons/pen-tool.svg";
-import WebIcon from "./icons/layout.svg";
-import CategoryIcon from "./icons/star.svg";
-import HearingIcon from "./icons/loader.svg";
+import FunctionStampIcon from "./icons/box.svg";
+import CssStampIcon from "./icons/pen-tool.svg";
+import HtmlStampIcon from "./icons/layout.svg";
+import BuiltInStampIcon from "./icons/star.svg";
+import ListenerStampIcon from "./icons/loader.svg";
 
 import "./theme-p5.js";
 
@@ -446,16 +446,16 @@ export default class FunctionStamp extends Component {
   }
 
   getIcon() {
-    var icon = GradientIcon;
+    var icon = FunctionStampIcon;
     if (this.props.isHtml) {
-      icon = WebIcon;
+      icon = HtmlStampIcon;
     } else if (this.props.isCss) {
-      icon = ColorIcon;
+      icon = CssStampIcon;
     } else if (this.state.isSpecialFn) {
       if(globals.specialFns[this.state.name]){
-      icon = CategoryIcon;
+      icon = BuiltInStampIcon;
       }else{
-        icon = HearingIcon
+        icon = ListenerStampIcon
       }
 
     }

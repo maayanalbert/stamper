@@ -17,13 +17,13 @@ import styled from "styled-components";
 import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
 
-import GradientIcon from "./icons/box.svg";
-import CategoryIcon from "./icons/star.svg";
-import HearingIcon from "./icons/loader.svg";
+import FunctionStampIcon from "./icons/box.svg";
+import BuiltInStampIcon from "./icons/star.svg";
+import ListenerStampIcon from "./icons/loader.svg";
 import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
-import GetAppIcon from "./icons/download.svg";
-import LayersIcon from "./icons/archive.svg";
+import DownloadIcon from "./icons/download.svg";
+import WorldsIcon from "./icons/archive.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -414,7 +414,7 @@ function noiseWave() {
         }}
       >
         <TopButton
-          iconType={GetAppIcon}
+          iconType={DownloadIcon}
           uniqueClass="download"
           iconCallback={() => {
             var js = this.props.getFileData().js;
@@ -427,7 +427,7 @@ function noiseWave() {
 
         <div class="row">
           <TopButton
-            iconType={GradientIcon}
+            iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
               this.props.addFnStamp(normalFn)
@@ -436,7 +436,7 @@ function noiseWave() {
           />
 
           <TopButton
-            iconType={CategoryIcon}
+            iconType={BuiltInStampIcon}
             uniqueClass="builtIn"
             iconCallback={null}
             dropDownData={builtInFns.map(data => ({
@@ -448,7 +448,7 @@ function noiseWave() {
           />
 
           <TopButton
-            iconType={HearingIcon}
+            iconType={ListenerStampIcon}
             uniqueClass="listenerFns"
             iconCallback={null}
             dropDownData={listenerFns.map(data => ({
@@ -482,7 +482,7 @@ function noiseWave() {
         </div>
 
         <TopButton
-          iconType={LayersIcon}
+          iconType={WorldsIcon}
           uniqueClass="worlds"
           iconCallback={null}
           dropDownData={worlds.map(world => ({
