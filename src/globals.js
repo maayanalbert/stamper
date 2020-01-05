@@ -25,16 +25,19 @@ export const globals = {
     deviceMoved:  false,
     deviceTurned: false,
     deviceShaken: false,
+
     keyPressed: false,
     keyReleased:  false,
     keyTyped: false,
-    keyIsDown:  false,
+
     mouseMoved: false,
     mouseDragged: false,
+
     mousePressed: false,
     mouseReleased:  false,
     mouseClicked: false,
     doubleClicked:  false,
+    
     mouseWheel: false,
   },
 
