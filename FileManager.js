@@ -10,8 +10,7 @@ const {
   electron,
   dialog
 } = require("electron");
-const defaultSetup = require("./../src/defaultSetup.js");
-var parser = require("./../src/parser.js");
+var parser = require("./parser.js");
 var LZUTF8 = require("lzutf8");
 
 module.exports = class FileManager {
@@ -34,7 +33,7 @@ module.exports = class FileManager {
   }
 
   resetFiles() {
-    this.path = "";
+    this.path = undefined;
     this.name = "";
     this.html = "";
     this.css = "";
@@ -45,12 +44,14 @@ module.exports = class FileManager {
   onNewProject() {
     this.resetFiles();
 
-    var setup = defaultSetup.getSetup();
+ 
     this.name = 'Untitled';
-    this.stamper = setup;
+       this.mainWindow.setTitle(this.name);
 
     this.mainWindow.setTitle(this.name);
-    this.writeToView();
+    this.mainWindow.webContents.send("resetView")
+
+
   }
 
   onSaveCommand() {
