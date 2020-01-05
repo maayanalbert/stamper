@@ -25,7 +25,7 @@ import { Stacker } from "./stacker";
 import styled from "styled-components";
 import DeleteStampIcon from "./../../../icons/trash.svg";
 import CopyIcon from "./../../../icons/copy.svg";
-import ClearConsoleIcon from "./../../../icons/delete.svg";
+import ClearConsoleIcon from "./../../../icons/slash.svg";
 import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 import "./../../../App.scss";
 import $ from "jquery";

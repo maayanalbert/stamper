@@ -18,8 +18,8 @@ import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
 
 import FunctionStampIcon from "./icons/box.svg";
-import BuiltInStampIcon from "./icons/star.svg";
-import ListenerStampIcon from "./icons/loader.svg";
+import BuiltInStampIcon from "./icons/tag.svg";
+import ListenerStampIcon from "./icons/bell.svg";
 import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
 import DownloadIcon from "./icons/download.svg";
@@ -207,10 +207,10 @@ function noiseWave() {
   }
 
   renderImportButton() {
-    var text = "Import Javascript";
+    var text = "import javascript";
     var color = "grey";
-    if (this.state.codeHasError) {
-      text = "Syntax Error";
+    if (this.state.coeeHasError) {
+      text = "syntax Error";
       color = "warningOrangeDark";
     }
 
