@@ -784,41 +784,42 @@ function logToConsole(message, lineno){
   }
 
   getExportableCode() {
-    var codeData = null;
-    Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current.state.name === "draw") {
-        codeData = this.getRunnableCode(stamp.ref.current.props.id);
-      }
+    var runnableCode = [];
+    var ranges = [];
+    var curLine = 1;
+    var code;
+
+    Object.values(this.state.blobStamps).map(blobStamp => {
+      code = blobStamp.ref.current.state.code;
+      curLine = this.addCodeBlock(
+        code,
+        blobStamp.ref.current.props.id,
+        runnableCode,
+        ranges,
+        curLine,
+        false
+      );
     });
-
-    if (codeData) {
-      return codeData.runnableCode;
-    }
-
-    Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current.state.name === "setup") {
-        codeData = this.getRunnableCode(stamp.ref.current.props.id);
-      }
-    });
-
-    if (codeData) {
-      return codeData.runnableCode;
-    }
 
     Object.values(this.state.fnStamps).map(stamp => {
       if (
-        stamp.ref.current.props.isHtml === false &&
-        stamp.ref.current.props.isCss === false
+        stamp.ref.current.props.isCss === false &&
+        stamp.ref.current.props.isHtml === false 
       ) {
-        codeData = this.getRunnableCode(stamp.ref.current.props.id);
+        var state = stamp.ref.current.state;
+        code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        curLine = this.addCodeBlock(
+          code,
+          stamp.ref.current.props.id,
+          runnableCode,
+          ranges,
+          curLine,
+          true
+          )
       }
     });
 
-    if (codeData) {
-      return codeData.runnableCode;
-    }
-
-    return "";
+    return runnableCode.join("");
   }
 
   getNumLines(code) {
@@ -961,7 +962,8 @@ function logToConsole(message, lineno){
       if (
         stamp.ref.current.state.name != "draw" &&
         stamp.ref.current.props.isCss === false &&
-        stamp.ref.current.props.isHtml === false  && this.isListener(stamp.ref.current.state.name) === false 
+        stamp.ref.current.props.isHtml === false  && 
+        (this.isListener(stamp.ref.current.state.name) === false || this.isListener(this.state.fnStamps[id].ref.current.state.name)  === false)
 
       ) {
         var state = stamp.ref.current.state;

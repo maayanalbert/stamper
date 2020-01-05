@@ -4,7 +4,8 @@ export const builtInFns = [
   {
     name: "draw",
     args: "",
-    code: `background(102, 0.1);
+    code: `colorMode(RGB, 255, 255, 255, 1);
+background(0, 0, 0, .01);
 stroke(255);
 strokeWeight(1)
 
