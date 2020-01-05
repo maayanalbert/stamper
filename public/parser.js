@@ -2,6 +2,23 @@ var esprima = require("esprima");
 var _ = require("lodash");
 const log = require("electron-log");
 
+
+
+
+// function printQ(q){
+//   var str = ""
+//   q.map(data => {
+//     if(data[0] === null){
+//       str +=  "null" + ","
+//     }else{
+//       str +=  data[0].toString() + ","
+//     }
+
+//   })
+// }
+
+//////////////////////////////////// jsToStamps
+
 function jsToStamps(rawCode) {
   try{
     var program = esprima.parseScript(rawCode, {
@@ -26,7 +43,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
   var lastBlobLine = 0;
   var tempBlobStamps = [];
   for (var i = 0; i < body.length; i++) {
-    item = body[i];
+    var item = body[i];
     if (item.type === "FunctionDeclaration") {
       addFn(fnStamps, item, rawCode);
     } else if (item.type === "Block" || item.type === "Line") {
@@ -43,7 +60,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
   }
 
   for (var i = 0; i < tempBlobStamps.length; i++) {
-    blobStamp = tempBlobStamps[i];
+    var blobStamp = tempBlobStamps[i];
     if (blobStamp.code != "") {
       blobStamps.push(blobStamp);
     }
@@ -52,7 +69,7 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
 
 function insertComments(body, comments) {
   for (var i = 0; i < comments.length; i++) {
-    comment = comments[i];
+    var comment = comments[i];
     var pos = getPos(body, comment);
 
     if (pos >= 0) {
@@ -89,7 +106,7 @@ function addBlob(blobStamps, item, rawCode, lastBlobLine, isComment) {
     blobStamps.push({ code: "" });
   }
 
-  lastStamp = blobStamps[blobStamps.length - 1];
+  var lastStamp = blobStamps[blobStamps.length - 1];
 
   var lineDiff = item.loc.start.line - lastBlobLine;
   if (lineDiff == 0) {
@@ -108,7 +125,7 @@ function addFn(fnStamps, item, rawCode) {
   var name = item.id.name;
 
   var args = "";
-  if (item.params.length > 1) {
+  if (item.params.length >= 1) {
     var argStart = item.params[0].range[0];
     var argEnd = item.params[item.params.length - 1].range[1];
     var args = rawCode.substr(argStart, argEnd - argStart);
@@ -121,3 +138,97 @@ function addFn(fnStamps, item, rawCode) {
 }
 
 exports.jsToStamps = jsToStamps;
+
+//////////////////////////////////// getIdentifiers
+
+function isDeclaration(typeName){
+  return typeName.includes("Declaration") || typeName.includes("Declarator")
+}
+
+function getIdentifiers(rawCode) {
+
+
+  try {
+    var fullDict = esprima.parseScript(rawCode);
+  } catch (error) {
+    // throw error i guess
+  }
+
+
+  var declared = {};
+  var undeclared = {};
+
+  var q = [[null, fullDict, 0, null]];
+
+  while (q.length > 0) {
+
+    var cur = q.shift();
+  
+  
+    var key = cur[0];
+    var val = cur[1];
+    var pVal = cur[3];
+    var lvl = cur[2];
+
+
+
+
+    if (val === null) {
+      continue;
+    }
+
+    if (key && val && pVal) {
+
+      if (
+        key === "id" &&
+        val.type === "Identifier" &&
+        isDeclaration(pVal.type) &&
+        val.name in declared === false
+      ) {
+  
+        declared[val.name] = [pVal.type, lvl];
+      }
+    }
+   
+    if (key && key === "name") {
+      if (val in declared === false) {
+        undeclared[val] = lvl;
+      }
+    }
+
+
+    if (val instanceof Array) {
+
+      val.map(newVal => q.push([null, newVal, lvl + 1, val]));
+    } else if (val instanceof Object) {
+  
+      Object.keys(val).map(newKey => {
+        q.push([newKey, val[newKey], lvl + 1, val]);
+      });
+
+    } else {
+      // let it die
+    }
+    
+  }
+
+
+  var result = {declared:[], undeclared:[]}
+  Object.keys(declared).map(name => {
+    if (declared[name][1] === 3 && declared[name][0].includes("Declaration") ) {
+      result.declared.push(name)
+    }else if(declared[name][1] === 5 && declared[name][0].includes("Declarator")){
+    result.declared.push(name)
+    }
+  });
+
+  var relevantUndeclared = {}
+  Object.keys(undeclared).map(name => {
+    result.undeclared.push(name)
+  })
+
+  return result
+}
+
+
+exports.getIdentifiers = getIdentifiers;

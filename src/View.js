@@ -76,8 +76,12 @@ export default class View extends Component {
       ipc.on("writeToView", (event, files) => 
 
             this.loadStamperFile(files.stamper)
+      );
 
+    ipc &&
+      ipc.on("resetView", (event) => 
 
+           this.loadStamperFile(defaultSetup.getSetup())
       );
 
     ipc &&
