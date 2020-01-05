@@ -1006,7 +1006,6 @@ function logToConsole(message, lineno){
         false
       );
     }
-    console.log(runnableCode.join(""))
     return { ranges: ranges, runnableCode: runnableCode.join("") };
   }
 

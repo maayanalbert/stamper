@@ -1,23 +1,36 @@
+import pf, { globals, p5Lib } from "./globals.js";
+
 export const builtInFns =[
 { name: "draw", args: "", code: "background(220)"},
-{ name: "setup", args: "", code: "createCanvas(300,300)"},
+{ name: "setup", args: "", code: `createCanvas(${globals.defaultIframeWidth},${globals.defaultEditorHeight})`},
 { name: "preload", args: "", code: ""}
 ]
 
 export const listenerFns =[
 { name: "keyPressed", args: "", code: 
 `background(200);
-textSize(32);
+textSize(50);
 fill(245, 123, 158);
 text(keyCode, width/2 - textWidth(keyCode)/2, height/2);
 // Display last key pressed.`},
-{name: "mousePressed", args:"", code:'background(random(0, 255), random(0,255), random(0, 255))'}
+{name: "mousePressed", args:"", code:'background(random(0, 255), random(0,255), random(0, 255))'},
+{name:"mouseMoved", args:"", code:
+`background(0, 10)
+strokeWeight(0)
+fill(255)
+size = 2*random(0, width)/3
+ellipse(width/2,height/2,size, size)`},
+{name: "mouseWheel", args:"", code:
+`strokeWeight(1)
+stroke(75, 150, 250)
+var y = random(0, height)
+line(0, y, width, y)`}
 ]
 
-export const normalFn = { name: "redEllipse", args: "posX=mouseX, posY=mouseY", code: `fill('red')\nellipse(posX, posY, 30, 30)`}
+export const normalFn = { name: "blueCircle", args: "posX=mouseX, posY=mouseY", code: `fill('blue')\nellipse(posX, posY, 30, 30)`}
 
 
-export const commentBlob = {code: "// add a comment here", codeSize:28}
+export const commentBlob = {code: "// add a comment here", codeSize:globals.bigCodeSize}
 
 export const varBlob = {code: "var k = 1"}
 
