@@ -271,15 +271,19 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
+
       if (_this.state.mouseWheelTimeout) {
         clearTimeout(_this.state.mouseWheelTimeout);
       }
       var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250);
       _this.setState({ mouseWheelTimeout: newTimeOut });
       if (e.ctrlKey) {
-        e.preventDefault();
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
+        // if(Math.abs(e.deltaY) < 10){
+        //   e.preventDefault()
+        //   console.log(e.deltaY)
+        // }
         if (_this.props.panDisabled) {
           return;
         }

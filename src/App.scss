@@ -116,8 +116,13 @@ warningOrangeDark: rgba(255, 184, 0, 1),
   htmlArea:rgb(145, 155, 158)*/
 );
 
-html, body {
-  overflow: hidden;
+html {
+
+}
+
+body {
+    overflow: hidden;
+  overscroll-behavior-x: none;
 }
 
 .marker{
