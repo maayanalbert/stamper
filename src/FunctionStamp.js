@@ -357,6 +357,7 @@ export default class FunctionStamp extends Component {
                 border: "none",
                 height: this.state.iframeHeight,
                 width: this.state.iframeWidth,
+                margin: "-" + globals.iframeMargin.toString() + "px"
                 // pointerEvents:"none"
               }}
               srcdoc={this.state.iframeCode}

@@ -418,9 +418,14 @@ function noiseWave() {
           iconType={DownloadIcon}
           uniqueClass="download"
           iconCallback={() => {
+
             var js = this.props.getFileData().js;
-            var blob =  Blob([js], { type: "text/plain;charset=utf-8" });
+            var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "sketch.js");
+
+            var js = this.props.getFileData().stamper;
+            var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "meta.stamper");
           }}
           tooltipText="download javascript"
           alignLeft
