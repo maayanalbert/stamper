@@ -18,7 +18,7 @@ import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
 
 import FunctionStampIcon from "./icons/box.svg";
-import BuiltInStampIcon from "./icons/tag.svg";
+import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
@@ -433,7 +433,7 @@ function noiseWave() {
             iconCallback={() =>
               this.props.addFnStamp(normalFn)
             }
-            tooltipText="new function stamp"
+            tooltipText="new stamp"
           />
 
           <TopButton
@@ -445,7 +445,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(data)
             }))}
-            tooltipText="new built in function"
+            tooltipText="new scaffold"
           />
 
           <TopButton
@@ -490,7 +490,7 @@ function noiseWave() {
             name: world.name,
             callback: () => this.props.loadStamperFile(world.data)
           }))}
-          tooltipText="add new world"
+          tooltipText="load from example project"
           alignRight
         />
       </div>

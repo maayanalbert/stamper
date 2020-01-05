@@ -8,7 +8,7 @@ import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStampIcon from "./icons/box.svg";
 import CssStampIcon from "./icons/pen-tool.svg";
 import HtmlStampIcon from "./icons/layout.svg";
-import BuiltInStampIcon from "./icons/tag.svg";
+import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 
 import "./theme-p5.js";
