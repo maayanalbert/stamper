@@ -30,9 +30,9 @@ line(0, y, width, y)`}
 export const normalFn = { name: "blueCircle", args: "posX=mouseX, posY=mouseY", code: `fill('blue')\nellipse(posX, posY, 30, 30)`}
 
 
-export const commentBlob = {code: "// comment here", codeSize:globals.bigCodeSize}
+export const commentBlob = {code: `/*\n  comment here\n*/`, codeSize:globals.bigCodeSize}
 
-export const varBlob = {code: "var k = 1"}
+export const varBlob = {code: "var global1 = 1"}
 
 export default function DefaultExportPlaceholder() {
   return null;

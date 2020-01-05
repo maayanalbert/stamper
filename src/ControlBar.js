@@ -419,7 +419,7 @@ function noiseWave() {
           uniqueClass="download"
           iconCallback={() => {
             var js = this.props.getFileData().js;
-            var blob = new Blob([js], { type: "text/plain;charset=utf-8" });
+            var blob =  Blob([js], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "sketch.js");
           }}
           tooltipText="download javascript"
@@ -433,20 +433,14 @@ function noiseWave() {
             iconCallback={() =>
               this.props.addFnStamp(normalFn)
             }
-            tooltipText="new stamp"
-          />
-
-          <TopButton
-            iconType={BuiltInStampIcon}
-            uniqueClass="builtIn"
-            iconCallback={null}
             dropDownData={builtInFns.map(data => ({
               name: data.name,
               callback: () =>
                 this.props.addFnStamp(data)
             }))}
-            tooltipText="new scaffold"
+            tooltipText="stamp"
           />
+
 
           <TopButton
             iconType={ListenerStampIcon}
@@ -457,29 +451,28 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(data)
             }))}
-            tooltipText="new listener"
+            tooltipText="listener"
           />
 
           <TopButton
             iconType={BlobStampIcon}
-            uniqueClass="anything"
+            uniqueClass="varStamp"
             iconCallback={() =>
               this.props.addBlobStamp(varBlob)
             }
-            dropDownData={[
-              {
-                name: "variable",
-                callback: () =>
-                  this.props.addBlobStamp(varBlob)
-              },
-              {
-                name: "comment",
-                callback: () =>
-                  this.props.addBlobStamp(commentBlob)
-              }
-            ]}
-            tooltipText="new anything stamp"
+            tooltipText="global variable"
           />
+
+          <TopButton
+            iconType={BlobStampIcon}
+            uniqueClass="commentStamp"
+            iconCallback={() =>
+              this.props.addBlobStamp(commentBlob)
+            }
+            tooltipText="comment"
+          />
+
+
         </div>
 
         <TopButton
@@ -490,9 +483,12 @@ function noiseWave() {
             name: world.name,
             callback: () => this.props.loadStamperFile(world.data)
           }))}
-          tooltipText="load from example project"
+          tooltipText="overwrite with example"
           alignRight
         />
+
+
+
       </div>
     );
   }
