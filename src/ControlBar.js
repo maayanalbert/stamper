@@ -258,7 +258,10 @@ function noiseWave() {
               style={{ opacity: overalOpacity }}
               class="d-flex justify-content-between p-1 pl-2 pr-3"
             >
-              <div clas="row border-bottom" style={{ overflow: "hidden" }}>
+              <div clas="row border-bottom" style={{ overflow: "hidden" }}
+                                onClick={() =>
+                    centerCallback(this.state.sideBarWidth, this.topBarHeight)
+                  }>
                 {this.createIcon(
                   "type" + item.id.toString(),
                   item.icon,
@@ -266,9 +269,7 @@ function noiseWave() {
                 )}
                 <b
                   class="text-greyText picker ml-1"
-                  onClick={() =>
-                    centerCallback(this.state.sideBarWidth, this.topBarHeight)
-                  }
+
                 >
                   {item.name}
                 </b>
