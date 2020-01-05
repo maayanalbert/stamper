@@ -29,8 +29,7 @@ textSize(50);
 text(key + ' ' + keyCode, 20, 70);`
 
 var mousePressCode =
-`background('yellow')
-fill('black')
+`fill('black')
 
 // display last clicked location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
@@ -47,33 +46,35 @@ export const listenerFns = [
    {
     name: "keyReleased",
     args: "",
-    code: `background('black')\n`  + keyPressCode
+    code: `background('springgreen')\n`  + keyPressCode
   },
    {
     name: "keyTyped",
     args: "",
-    code: `background('black')\n`  + keyPressCode
+    code: `background('cyan')\n`  + keyPressCode
   },
+  {},
   {
     name: "mousePressed",
     args: "",
-    code: mousePressCode
+    code: `background('yellow')\n` +mousePressCode
   },
   {
     name: "mouseReleased",
     args: "",
-    code: mousePressCode
+    code: `background('springgreen')\n`  + mousePressCode
   },
   {
-    name: "moueClicked",
+    name: "mouseClicked",
     args: "",
-    code: mousePressCode
+    code: `background('cyan')\n`  + mousePressCode
   },
-  {
-    name: "mouseDoubleClicked",
+    {
+    name: "doubleClicked",
     args: "",
-    code: mousePressCode
+    code: `background('cyan')\n`  + mousePressCode
   },
+    {},
   {
     name: "mouseMoved",
     args: "",
@@ -83,11 +84,23 @@ fill(255)
 size = 2*random(0, width)/3
 ellipse(width/2,height/2,size, size)`
   },
+
+   {
+    name: "mouseDragged",
+    args: "",
+    code: `background(0, 10)
+strokeWeight(0)
+fill(255)
+size = 2*random(0, width)/3
+ellipse(width/2,height/2,size, size)`
+  },
+  {},
   {
     name: "mouseWheel",
     args: "",
-    code: `strokeWeight(1)
-stroke(75, 150, 250)
+    code: `background('yellow')
+strokeWeight(1)
+stroke("black")
 var y = random(0, height)
 line(0, y, width, y)`
   }

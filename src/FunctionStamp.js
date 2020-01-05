@@ -355,9 +355,8 @@ export default class FunctionStamp extends Component {
               scrolling="no"
               style={{
                 border: "none",
-                height: this.state.iframeHeight + globals.iframeMargin,
-                width: this.state.iframeWidth + globals.iframeMargin,
-                margin: "-" + globals.iframeMargin.toString() + "px"
+                height: this.state.iframeHeight,
+                width: this.state.iframeWidth,
                 // pointerEvents:"none"
               }}
               srcdoc={this.state.iframeCode}

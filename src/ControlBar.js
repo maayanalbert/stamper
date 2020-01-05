@@ -569,25 +569,26 @@ class TopButton extends Component {
     }
 
     var dropDowns = this.props.dropDownData.map(data => (
+
       <div
         class={
           this.props.uniqueClass +
           data.name +
           " picker text-greyText p-2 pl-3 pr-3"
         }
-        onMouseOver={() => {
+        onMouseOver={() => { if(!data.name){return}
           this.setState({ mouseOverDropDown: true });
           $("." + this.props.uniqueClass + data.name).css({
             background: "rgb(240, 240, 240)"
           });
         }}
-        onMouseOut={() => {
+        onMouseOut={() => {if(!data.name){return}
           this.setState({ mouseOverDropDown: false });
           $("." + this.props.uniqueClass + data.name).css({
             background: "transparent"
           });
         }}
-        onClick={() => {
+        onClick={() => {if(!data.name){return}
           data.callback();
           this.setState({ down: false });
         }}
