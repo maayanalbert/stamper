@@ -211,8 +211,8 @@ function noiseWave() {
   renderImportButton() {
     var text = "import javascript";
     var color = "grey";
-    if (this.state.coeeHasError) {
-      text = "syntax Error";
+    if (this.state.codeHasError) {
+      text = "syntax error";
       color = "warningOrangeDark";
     }
 
