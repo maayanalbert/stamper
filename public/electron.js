@@ -27,7 +27,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {
       "nodeIntegration": true,
-      "web-security": false
+      "web-security": false,
+      icon: __dirname + "./icons/map/icon.icns"
     },
     show:false,  minHeight: 300,
   minWidth: 450

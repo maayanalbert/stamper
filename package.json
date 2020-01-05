@@ -3,7 +3,7 @@
   "repository": "https://github.com/maayanalbert/stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.7.2",
@@ -14,6 +14,7 @@
     "cross-env": "^6.0.2",
     "css-animation": "^2.0.4",
     "electron-default-menu": "^1.0.1",
+    "electron-icon-maker": "0.0.4",
     "electron-is-dev": "1.1.0",
     "electron-log": "^3.0.9",
     "electron-updater": "^4.2.0",
