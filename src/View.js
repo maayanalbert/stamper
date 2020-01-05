@@ -957,7 +957,8 @@ function logToConsole(message, lineno){
       if (
         stamp.ref.current.state.name != "draw" &&
         stamp.ref.current.props.isCss === false &&
-        stamp.ref.current.props.isHtml === false
+        stamp.ref.current.props.isHtml === false  && this.isListener(stamp.ref.current.state.name) === false 
+
       ) {
         var state = stamp.ref.current.state;
         code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
@@ -981,7 +982,8 @@ function logToConsole(message, lineno){
 
     var fnStampRef = this.state.fnStamps[id].ref.current;
     var state = fnStampRef.state;
-    if (state.name === "draw") {
+    if (state.name === "draw" || this.isListener(state.name)) {
+
       var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
       curLine = this.addCodeBlock(
         fullFun,
@@ -993,7 +995,7 @@ function logToConsole(message, lineno){
       );
     } else if (state.name === "setup") {
       // do nothing
-    } else {
+    }else {
       code = `function draw(){\n${state.name}()\n}`;
       curLine = this.addCodeBlock(
         code,
@@ -1004,7 +1006,12 @@ function logToConsole(message, lineno){
         false
       );
     }
+    console.log(runnableCode.join(""))
     return { ranges: ranges, runnableCode: runnableCode.join("") };
+  }
+
+  isListener(name){
+    return name in globals.specialFns && globals.specialFns[name] === false
   }
 
   onDelete(id) {

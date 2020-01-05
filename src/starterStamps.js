@@ -5,8 +5,13 @@ export const builtInFns =[
 ]
 
 export const listenerFns =[
-{ name: "mousePressed", args: "", code: "background(220)"},
-{ name: "keyPressed", args: "", code: "background(220)"},
+{ name: "keyPressed", args: "", code: 
+`background(200);
+textSize(32);
+fill(245, 123, 158);
+text(keyCode, width/2 - textWidth(keyCode)/2, height/2);
+// Display last key pressed.`},
+{name: "mousePressed", args:"", code:'background(random(0, 255), random(0,255), random(0, 255))'}
 ]
 
 export const normalFn = { name: "redEllipse", args: "posX=mouseX, posY=mouseY", code: `fill('red')\nellipse(posX, posY, 30, 30)`}
