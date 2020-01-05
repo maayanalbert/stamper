@@ -109,7 +109,11 @@ line(0, y, width, y)`
 export const normalFn = {
   name: "blueCircle",
   args: "posX=mouseX, posY=mouseY",
-  code: `fill('blue')\nellipse(posX, posY, 30, 30)`
+  code: 
+ `strokeWeight(1)
+stroke("black")
+fill('lightblue')
+ellipse(posX, posY, 30, 30)`
 };
 
 export const commentBlob = {
