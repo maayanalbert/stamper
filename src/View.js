@@ -486,7 +486,7 @@ function logToConsole(message, lineno){
       code: "var z = 10",
       x: this.setInitialPosition("x"),
       y: this.setInitialPosition("y"),
-      editorWidth: (globals.defaultEditorWidth * 2) / 3,
+      editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
       originX: 0,

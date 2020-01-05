@@ -440,6 +440,7 @@ function noiseWave() {
             }))}
             tooltipText="stamp"
           />
+          <span style={{width:50}}/>
 
 
           <TopButton
@@ -454,6 +455,8 @@ function noiseWave() {
             tooltipText="listener"
           />
 
+                  <span style={{width:50}}/>
+
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
@@ -462,7 +465,7 @@ function noiseWave() {
             }
             tooltipText="global variable"
           />
-
+        <span style={{width:50}}/>
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="commentStamp"
@@ -613,7 +616,7 @@ class TopButton extends Component {
       return(
 
       <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"0", position:"absolute", right:15, top:5,
+      style={{opacity:"1", position:"absolute", right:15, top:5,
       transition:"all .2s ease-out"}}
       >
       {this.props.tooltipText}</div>
@@ -625,7 +628,7 @@ class TopButton extends Component {
       return(
 
       <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"0", position:"absolute", left:15, top:5,
+      style={{opacity:"1", position:"absolute", left:15, top:5,
       transition:"all .2s ease-out"}}
       >
       {this.props.tooltipText}</div>
@@ -633,15 +636,15 @@ class TopButton extends Component {
         )
     }
 
-    var offset = "-135px"
+    var offset = "-138px"
     if(this.props.dropDownData){
-      var offset = "-130px"
+      var offset = "-133px"
     }
     return(
       <div style = {{position:"absolute", top:5}}>
       <div style={{position:"absolute", width:300, left:offset}} >
       <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"0", textAlign:"center",
+      style={{opacity:"1", textAlign:"center",
       transition:"all .2s ease-out"}}
       >
       {this.props.tooltipText}</div>
@@ -673,6 +676,9 @@ class TopButton extends Component {
       );
     }
 
+          // onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "1"})}
+      // onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
+
     return (
       <div class="m-3 mt-4"
 
@@ -681,8 +687,7 @@ class TopButton extends Component {
             {this.renderTooltip()}
               <div
 
-      onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "1"})}
-      onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
+
               >
 
             {this.createIcon(
