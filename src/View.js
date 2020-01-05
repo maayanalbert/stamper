@@ -301,7 +301,7 @@ function logToConsole(message, lineno){
     var defaults = {
       x: this.setInitialPosition("x"),
       y: this.setInitialPosition("y"),
-      consoleWidth: (globals.defaultEditorWidth * 2) / 3,
+      consoleWidth: globals.defaultEditorWidth,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
       originX: 0,
@@ -1241,13 +1241,13 @@ function logToConsole(message, lineno){
 
     return (
       <div>
+              {this.state.originCristal}
         <div class="row bg-grey" style={{ height: "100vh" }}>
           {elems}
           {consoleElem}
           {this.state.lines}
         </div>
             
-        {this.state.originCristal}
   
         <ControlBar pickerData={this.state.pickerData} 
         addBlobStamp={this.addBlobStamp.bind(this)}
