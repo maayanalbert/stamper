@@ -24,6 +24,8 @@ import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
 import DownloadIcon from "./icons/download.svg";
 import WorldsIcon from "./icons/archive.svg";
+import GlobalVarIcon from "./icons/globe.svg";
+import CommentIcon from "./icons/message-square.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -443,7 +445,7 @@ function noiseWave() {
               callback: () =>
                 this.props.addFnStamp(data)
             }))}
-            tooltipText="stamp"
+            tooltipText="function"
           />
           <span style={{width:50}}/>
 
@@ -463,7 +465,7 @@ function noiseWave() {
                   <span style={{width:50}}/>
 
           <TopButton
-            iconType={BlobStampIcon}
+            iconType={ BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
               this.props.addBlobStamp(varBlob)
