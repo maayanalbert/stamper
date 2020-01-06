@@ -70,7 +70,8 @@
     }
   },
   "main": "public/electron.js",
-  "homepage": "./",
+  // "homepage": "./",
+    "homepage": "https://p5stamper.com",
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",
