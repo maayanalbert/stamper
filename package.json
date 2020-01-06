@@ -71,7 +71,7 @@
   },
   "main": "public/electron.js",
 
-    "homepage": "https://p5stamper.com",
+    "homepage": "./",
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",
@@ -81,7 +81,7 @@
     "deploy": "yarn react-build && electron-builder --publish=always",
     "build": "yarn react-build && yarn electron-build",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
-    "prewebdeploy": "yarn run build",
+    "prewebdeploy": "yarn run build && cp CNAME build/CNAME",
     "webdeploy": "gh-pages -d build",
     "webstart": "yarn react-start"
   },
