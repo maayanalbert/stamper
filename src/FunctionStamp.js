@@ -56,11 +56,14 @@ export default class FunctionStamp extends Component {
       originX: this.props.initialOriginX,
       originY: this.props.initialOriginY,
       scale: this.props.initialScale,
-      hidden: this.props.initialHidden
+      hidden: this.props.initialHidden,
+      looping:false
     };
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
+
+  this.updateLooping = this.updateLooping.bind(this)
   }
 
   toggleHide(scale, originX, originY, callback) {
@@ -85,6 +88,20 @@ export default class FunctionStamp extends Component {
     }
   }
 
+  updateLooping(e){
+
+      if(e.data.type != "loop" || e.data.id != this.props.id){
+        return
+      }
+      if(e.data.message === "start"){
+  
+        this.setState({looping : true})
+      }else if (e.data.message === "stop"){
+
+        this.setState({looping : false})
+      }
+  }
+
   componentDidMount() {
     // this.loadp5Lib()
     this.setState({ 
@@ -92,12 +109,13 @@ export default class FunctionStamp extends Component {
       this.props.requestCompile(this.props.id)
     );
     this.checkName();
+    window.addEventListener("message", this.updateLooping);
 
-    var iframeElem = document.getElementById("iframe" + this.props.id)
+  }
 
-    if(iframeElem){
-        document.addEventListener("click", () => { console.log("hi");var event = new KeyboardEvent('keydown', {key:'a'}); iframeElem.dispatchEvent(event)})
-    }
+  componentWillUnmount(){
+
+    window.removeEventListener("message", this.updateLooping);
   }
 
   checkName() {
@@ -116,7 +134,7 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      this.setState({ iframeCode: this.props.getHTML(this.props.id) });
+      this.setState({ iframeCode: this.props.getHTML(this.props.id), looping:true });
       for (var i = 0; i < newErrors.length; i++) {
         this.addErrorLine(newErrors[i]);
       }
@@ -300,6 +318,10 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
+    var iframeShadow = "shadow"
+    if(this.state.looping){
+      iframeShadow = "shadow-lg"
+    }
     return (
       <div hidden={this.props.isCss}>
         <div
@@ -318,7 +340,7 @@ export default class FunctionStamp extends Component {
             Math.floor(this.state.iframeHeight)}
         </div>
         <Resizable
-          className="ml-1 bg-white shadow"
+          className={"ml-1 bg-white " + iframeShadow} 
           onResize={e => {
             this.updateIframeDimensions(e.movementX, e.movementY);
           }}

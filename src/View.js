@@ -1012,7 +1012,30 @@ function logToConsole(message, lineno){
         false
       );
     }
-    return { ranges: ranges, runnableCode: runnableCode.join("") };
+    return { ranges: ranges, runnableCode: runnableCode.join("") + this.getLoopingControl(id) };
+  }
+
+  getLoopingControl(id){
+
+return `\n
+var entered = false
+setTimeout(() => {
+if(entered === false){
+ noLoop() 
+window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
+}
+}, 500)
+
+document.addEventListener('mouseenter', () => {
+  entered = true
+    loop()
+window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
+});
+document.addEventListener('mouseleave', () => {
+    noLoop()
+window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
+});
+`
   }
 
   isListener(name){

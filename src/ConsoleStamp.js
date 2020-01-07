@@ -39,6 +39,9 @@ export default class ConsoleStamp extends Component {
 
   componentDidMount() {
     window.addEventListener("message", e => {
+      if(e.data.type != "error"){
+        return
+      }
       this.logToConsole(e.data.message);
 
       var lineNum = e.data.lineno;
