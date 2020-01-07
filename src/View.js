@@ -1018,9 +1018,9 @@ function logToConsole(message, lineno){
   getLoopingControl(id){
 
 return `\n
+window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
 var stopLooping = setTimeout(() => {
  noLoop() 
-window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
 }, 1000)
 
 document.addEventListener('mouseenter', () => {
@@ -1029,9 +1029,9 @@ loop()
 window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
 });
 document.addEventListener('mouseleave', () => {
+  window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
 stopLooping =setTimeout(() => {
  noLoop() 
-window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
 }, 1000)
 });
 `

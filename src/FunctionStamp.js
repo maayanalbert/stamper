@@ -57,7 +57,8 @@ export default class FunctionStamp extends Component {
       originY: this.props.initialOriginY,
       scale: this.props.initialScale,
       hidden: this.props.initialHidden,
-      looping:false
+      looping:false,
+      loopingTransition:""
     };
 
     this.cristalRef = React.createRef();
@@ -94,11 +95,12 @@ export default class FunctionStamp extends Component {
         return
       }
       if(e.data.message === "start"){
+
   
-        this.setState({looping : true})
+        this.setState({looping : true, loopingTransition : ""})
       }else if (e.data.message === "stop"){
 
-        this.setState({looping : false})
+        this.setState({looping : false, loopingTransition:"all 1s ease-in"})
       }
   }
 
@@ -134,7 +136,7 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      this.setState({ iframeCode: this.props.getHTML(this.props.id), looping:true });
+      this.setState({ iframeCode: this.props.getHTML(this.props.id), looping:true, loopingTransition:"" });
       for (var i = 0; i < newErrors.length; i++) {
         this.addErrorLine(newErrors[i]);
       }
@@ -319,6 +321,11 @@ export default class FunctionStamp extends Component {
 
   renderIframe() {
 
+    var loopingOpacity = .0
+    if(this.state.looping){
+      loopingOpacity = .5
+    }
+
     return (
       <div hidden={this.props.isCss}>
 
@@ -338,11 +345,12 @@ export default class FunctionStamp extends Component {
             Math.floor(this.state.iframeHeight)}
         </div>
 <div
-    hidden = {!this.state.looping}
+
           style={{
+            transition:this.state.loopingTransition,
             position: "absolute",
             fontSize: globals.codeSize,
-            opacity: .5,
+            opacity: loopingOpacity,
             top: 80,
             left: 25 + this.state.editorWidth
           }}
