@@ -46,7 +46,7 @@ export default class BlobStamp extends Component {
   }
 
   componentDidMount() {
-    this.loadp5Lib()
+    // this.loadp5Lib()
     this.setState({ exportableCode: "" }, () =>
       this.props.requestCompile(this.props.id)
     );
@@ -130,10 +130,10 @@ export default class BlobStamp extends Component {
           ref={this.editorRef}
           className="bg-jsArea"
           setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
+            enableBasicAutocompletion: false,
+            enableLiveAutocompletion: false,
             enableSnippets: false,
-            showLineNumbers: true,
+            showLineNumbers: false,
             tabSize: 2,
             hasCssTransforms: true
           }}

@@ -86,12 +86,18 @@ export default class FunctionStamp extends Component {
   }
 
   componentDidMount() {
-    this.loadp5Lib()
+    // this.loadp5Lib()
     this.setState({ 
       iframeHeight: this.props.starterIframeHeight }, () =>
       this.props.requestCompile(this.props.id)
     );
     this.checkName();
+
+    var iframeElem = document.getElementById("iframe" + this.props.id)
+
+    if(iframeElem){
+        document.addEventListener("click", () => { console.log("hi");var event = new KeyboardEvent('keydown', {key:'a'}); iframeElem.dispatchEvent(event)})
+    }
   }
 
   checkName() {
@@ -219,10 +225,10 @@ export default class FunctionStamp extends Component {
           ref={this.editorRef}
           onScroll={() => this.setEditorScrolling(true)}
           setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
+            enableBasicAutocompletion: false,
+            enableLiveAutocompletion: false,
             enableSnippets: false,
-            showLineNumbers: true,
+            showLineNumbers: false,
             tabSize: 2,
             hasCssTransforms: true
           }}
@@ -294,6 +300,29 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
+
+    var iframeElem = (<iframe
+              ref={iframeElem => {
+                if (iframeElem) {
+                  this.props.addNewIframeConsole(
+                    iframeElem.contentWindow.console
+                  );
+                }
+              }}
+              scrolling="no"
+              style={{
+                border: "none",
+                height: this.state.iframeHeight + globals.iframeMargin,
+                width: this.state.iframeWidth + 2*globals.iframeMargin,
+                margin: "-" + globals.iframeMargin.toString() + "px"
+                // pointerEvents:"none"
+              }}
+              srcdoc={this.state.iframeCode}
+              sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
+              allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
+            />)
+
+
     return (
       <div hidden={this.props.isCss}>
         <div
@@ -352,6 +381,7 @@ export default class FunctionStamp extends Component {
                   );
                 }
               }}
+              id={"iframe" + this.props.id}
               scrolling="no"
               style={{
                 border: "none",
@@ -488,6 +518,7 @@ export default class FunctionStamp extends Component {
     if (this.state.hidden) {
       return <div></div>;
     }
+
 
     return (
       <div>
