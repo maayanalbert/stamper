@@ -1018,22 +1018,21 @@ function logToConsole(message, lineno){
   getLoopingControl(id){
 
 return `\n
-var entered = false
-setTimeout(() => {
-if(entered === false){
+var stopLooping = setTimeout(() => {
  noLoop() 
 window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
-}
-}, 500)
+}, 1000)
 
 document.addEventListener('mouseenter', () => {
-  entered = true
-    loop()
+clearTimeout(stopLooping)
+loop()
 window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
 });
 document.addEventListener('mouseleave', () => {
-    noLoop()
+stopLooping =setTimeout(() => {
+ noLoop() 
 window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
+}, 1000)
 });
 `
   }

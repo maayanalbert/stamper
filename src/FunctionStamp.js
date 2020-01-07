@@ -318,14 +318,12 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
-    var iframeShadow = "shadow"
-    if(this.state.looping){
-      iframeShadow = "shadow-lg"
-    }
+
     return (
       <div hidden={this.props.isCss}>
+
         <div
-          hidden={this.state.resizingIframe === false}
+          hidden={!this.state.resizingIframe}
           style={{
             position: "absolute",
             fontSize: globals.codeSize,
@@ -339,8 +337,21 @@ export default class FunctionStamp extends Component {
             " H:" +
             Math.floor(this.state.iframeHeight)}
         </div>
+<div
+    hidden = {!this.state.looping}
+          style={{
+            position: "absolute",
+            fontSize: globals.codeSize,
+            opacity: .5,
+            top: 80,
+            left: 25 + this.state.editorWidth
+          }}
+          class="text-greyText "
+        >
+         {"active"}
+        </div>
         <Resizable
-          className={"ml-1 bg-white " + iframeShadow} 
+          className="ml-1 bg-white shadow" 
           onResize={e => {
             this.updateIframeDimensions(e.movementX, e.movementY);
           }}
@@ -395,6 +406,7 @@ export default class FunctionStamp extends Component {
             />
           </div>
         </Resizable>
+ 
       </div>
     );
   }
