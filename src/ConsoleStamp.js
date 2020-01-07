@@ -65,7 +65,15 @@ export default class ConsoleStamp extends Component {
         (this.state.originY - this.state.y) / this.state.scale;
       var x = originX - distFromOriginX * scale;
       var y = originY - distFromOriginY * scale;
-      this.setState({ hidden: false, scale: scale, x: x, y: y }, callback);
+      this.setState({ hidden: false, scale: scale, x: x, y: y }, 
+        () => {
+          callback()
+      var consoleContainer = document.getElementById("consoleContainer");
+      if(consoleContainer){
+        consoleContainer.scrollTop = consoleContainer.scrollHeight;
+      }
+
+        });
     } else {
       this.setState(
         { hidden: true, originX: originX, originY: originY, scale: scale },
@@ -157,6 +165,10 @@ export default class ConsoleStamp extends Component {
       consoleHeight: height + heightDiff,
       consoleWidth: width + widthDiff
     });
+      var consoleContainer = document.getElementById("consoleContainer");
+      if(consoleContainer){
+        consoleContainer.scrollTop = consoleContainer.scrollHeight;
+      }
   }
 
   render() {

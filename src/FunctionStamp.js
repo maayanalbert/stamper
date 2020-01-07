@@ -300,29 +300,6 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
-
-    var iframeElem = (<iframe
-              ref={iframeElem => {
-                if (iframeElem) {
-                  this.props.addNewIframeConsole(
-                    iframeElem.contentWindow.console
-                  );
-                }
-              }}
-              scrolling="no"
-              style={{
-                border: "none",
-                height: this.state.iframeHeight + globals.iframeMargin,
-                width: this.state.iframeWidth + 2*globals.iframeMargin,
-                margin: "-" + globals.iframeMargin.toString() + "px"
-                // pointerEvents:"none"
-              }}
-              srcdoc={this.state.iframeCode}
-              sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
-              allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
-            />)
-
-
     return (
       <div hidden={this.props.isCss}>
         <div
