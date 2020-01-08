@@ -42,7 +42,7 @@ export default class App extends Component {
             <Modal.Title className="name">Use Chrome please!</Modal.Title>
           </Modal.Header>
           <Modal.Body className="picker">
-            Right now, Stamper is only supported in Google Chrome.{" "}
+            Right now, the web version of Stamper is only supported in Google Chrome.{" "}
           </Modal.Body>
         </Modal>
         <View />
