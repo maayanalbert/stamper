@@ -1,6 +1,6 @@
 import './App.scss';
 
-import React, {Component} from "react";
+import React, {Component, useState} from "react";
 
 import View from "./View.js"
 import Modal from 'react-bootstrap/Modal'
@@ -17,11 +17,11 @@ if (userAgent.indexOf(" electron/") > -1) {
 
 function App() {
 const [show, setShow] = useState(!ipc);
-const handleClose = () => setShow(false);
+const handleClose = () => {setShow(false); console.log(show)};
 const browserModal = {
   chrome: () => null,
   default: () => 
-      <Modal show={true} style={{zIndex:2000000000000000001}} centered onclose={handleClose}>
+      <Modal show={show} style={{zIndex:2000000000000000001}} centered onHide={handleClose}>
         <Modal.Header closeButton>
      <Modal.Title  className="name">Woohoo, you're reading this text in a modal!</Modal.Title>
         </Modal.Header>
