@@ -13,6 +13,7 @@
     "console-feed": "^2.8.10",
     "cross-env": "^6.0.2",
     "css-animation": "^2.0.4",
+    "detect-browser": "^4.8.0",
     "electron-default-menu": "^1.0.1",
     "electron-icon-maker": "0.0.4",
     "electron-is-dev": "1.1.0",
