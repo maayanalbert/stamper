@@ -257,19 +257,13 @@ function logToConsole(message, lineno){
       }
     }
 
+
     parser(".errorListener").replaceWith(
       "<script class='errorListener' >" +
         this.getIframeErrorCallBack(ranges, linesToJs) +
-                `\ndocument.addEventListener("wheel", (e) => {
-                  try{
-                    e.preventDefault()
-                    //console.log("prevent default successful")
-                  }catch(error){
-                    console.log(error)
-                  }; 
-                  console.log(e)
-                }) 
-                e.stopPropagation();` +
+        `\ndocument.addEventListener("wheel", (e) => {
+
+        })` +
         "</script>"
     );
     parser(jsSelector).replaceWith(jsBlock);

@@ -91,6 +91,7 @@ export default class FunctionStamp extends Component {
 
   updateLooping(e){
 
+
       if(e.data.type != "loop" || e.data.id != this.props.id){
         return
       }
@@ -102,6 +103,7 @@ export default class FunctionStamp extends Component {
 
         this.setState({looping : false, loopingTransition:"all 1s ease-in"})
       }
+
   }
 
   componentDidMount() {

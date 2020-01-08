@@ -90,9 +90,12 @@ export default class ConsoleStamp extends Component {
   }
 
   addNewIframeConsole(newConsole) {
+    var p5LogError = `Did you just try to use p5.js's loop() function? If so, you may want to move it into your sketch's setup() function.
+
+For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#why-cant-i-assign-variables-using-p5-functions-and-variables-before-setup`
     Hook(newConsole, newLogs => {
       newLogs.map(log => {
-        if (log.method === "log") {
+        if (log.method === "log" && log.data[0] != p5LogError) {
           this.checkLastLog(log);
         }
       });

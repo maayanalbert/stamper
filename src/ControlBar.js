@@ -37,6 +37,7 @@ import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
+import Modal from 'react-bootstrap/Modal'
 
 import pf1, {
   normalFn,
@@ -239,12 +240,18 @@ function noiseWave() {
 
   renderLayerPicker() {
     var pickers = [];
+
     this.props.pickerData.map(item => {
       if (item.status) {
         var iconType = VisibilityIcon;
+        var iconNameCallback =                   () =>
+                    centerCallback(this.state.sideBarWidth, this.topBarHeight)
+             
       } else {
         var iconType = VisibilityOffIcon;
+        var iconNameCallback = null
       }
+
 
       var overalOpacity = 1;
       var centerCallback = item.centerCallback;
@@ -267,20 +274,16 @@ function noiseWave() {
                 {this.createIcon(
                   "type" + item.id.toString(),
                   item.icon,
-                  null
+                  iconNameCallback,
+                         item.name
                 )}
-                <b
-                  class="text-greyText picker ml-1"
 
-                >
-                  {item.name}
-                </b>
               </div>
 
               {this.createIcon(
                 "hide" + item.id.toString(),
                 iconType,
-                item.hideCallback
+                item.hideCallback,
               )}
             </div>
           </div>
@@ -340,23 +343,40 @@ function noiseWave() {
     uniqueClass,
     iconType,
     hideCallback = null,
+    text
   ) {
-
+   
     var mouseOverCallback = () => {
-      $("." + uniqueClass).css({ opacity: "1" });
+      $("." + uniqueClass + "Icon").css({ opacity: "1" });
+      $("." + uniqueClass + "Text").removeClass("text-greyText").addClass("text-greyIcon");
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({ opacity:globals.iconOpacity });
+      $("." + uniqueClass + "Icon").css({ opacity:globals.iconOpacity });
+      $("." + uniqueClass + "Text").addClass("text-greyText").removeClass("text-greyIcon");
     };
     if (!hideCallback) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
     }
+    if(text){
+return (
+<div onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}>
+      {React.createElement("img", {
+      style: { height: globals.iconSize, opacity:globals.iconOpacity, width: globals.iconSize },
+      className: " m-1 text-greyIcon " + uniqueClass + "Icon",
+      onClick: hideCallback,
+      src: iconType
+    })}
+        <b class={"text-greyText picker ml-1 " + uniqueClass + "Text"}>
+          {text}
+        </b>
+      </div>)
+    }
 
     return React.createElement("img", {
       style: { height: globals.iconSize, opacity:globals.iconOpacity, width: globals.iconSize },
-      className: " m-1 text-greyIcon " + uniqueClass,
+      className: " m-1 text-greyIcon " + uniqueClass + "Icon",
       onClick: hideCallback,
       onMouseOver: mouseOverCallback,
       onMouseOut: mouseOutCallback,
@@ -710,6 +730,7 @@ class TopButton extends Component {
      
 
         {this.renderDropDowns()}
+
       </div>
     );
   }

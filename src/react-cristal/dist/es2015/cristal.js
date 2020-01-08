@@ -26,10 +26,12 @@ import styled from "styled-components";
 import DeleteStampIcon from "./../../../icons/trash.svg";
 import CopyIcon from "./../../../icons/copy.svg";
 import ClearConsoleIcon from "./../../../icons/slash.svg";
+import CodeSizeIcon from "./../../../icons/type.svg";
 import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
+
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -88,6 +90,7 @@ var Cristal = (function(_super) {
     _this.space = 32;
     _this.opt = 18;
     _this.cmd = 91
+    _this.ctrl = 17
     _this.plus = 187
     _this.minus = 189
     _this.zero = 48
@@ -158,8 +161,8 @@ var Cristal = (function(_super) {
       if (e.keyCode === _this.space) {
         document.body.style.cursor = "grab";
       }
-
-      if(_this.state.downKey === _this.cmd){
+      if(_this.state.downKey === _this.cmd || _this.state.downKey === _this.ctrl){
+  
         if(e.keyCode === _this.zero){
            e.preventDefault()
           _this.zoom(1, window.innerWidth/2, window.innerHeight/2, true)
@@ -171,13 +174,20 @@ var Cristal = (function(_super) {
           _this.zoom(_this.state.scale * .5, window.innerWidth/2, window.innerWidth/2, true)
         }
       }else{
+               console.log(_this.state.downKey)
         _this.setState({ downKey: e.keyCode });
+
+        console.log("updating")
       }
+            console.log(_this.state.downKey)
  
     };
 
     _this.onKeyUp = function(e) {
+      console.log(e.downKey)
+      if(e.keyCode === _this.state.downKey){
       _this.setState({ downKey: -1 });
+      }
       document.body.style.cursor = "auto";
     };
 
@@ -278,6 +288,7 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
+      // e.preventDefault()
 
       if (_this.state.mouseWheelTimeout) {
         clearTimeout(_this.state.mouseWheelTimeout);
@@ -286,7 +297,7 @@ var Cristal = (function(_super) {
       _this.setState({ mouseWheelTimeout: newTimeOut });
       if (e.ctrlKey) {
         e.preventDefault()
-        console.log(e)
+
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
         if (_this.props.panDisabled) {
@@ -607,7 +618,7 @@ var Cristal = (function(_super) {
     }
 
 
-    return React.createElement("img", {
+    var icon = React.createElement("img", {
       onClick: callBack,
       style: { opacity: opacity, height: globals.iconSize, width: globals.iconSize },
       className: "text-greyIcon m-1 " + uniqueClass ,
@@ -615,6 +626,10 @@ var Cristal = (function(_super) {
       onMouseOut: mouseOutCallback, 
       src:iconType
     });
+
+    return icon
+
+
   }
 
   Object.defineProperty(Cristal.prototype, "header", {
@@ -665,7 +680,7 @@ var Cristal = (function(_super) {
       }
 
       var makeBigIcon = createIcon(this, 
-        _a.makeBigIcon, 
+        CodeSizeIcon, 
         !_a.showMakeBig, "mouseOnBig",
          _a.onMakeBig )
 

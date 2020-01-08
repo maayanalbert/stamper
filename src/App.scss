@@ -117,13 +117,14 @@ warningOrangeDark: rgba(255, 184, 0, 1),
 );
 
 html {
-
+overflow: hidden;
+overscroll-behavior: none;
 }
 
 body {
-    overflow: hidden;
-  overscroll-behavior-x: none;
-  overscroll-behavior-y: none;
+overflow: hidden;
+overscroll-behavior: none;
+
 }
 
 .marker{
@@ -136,7 +137,7 @@ body {
 
 .name{
   font-family: 'Montserrat', sans-serif;
-/*  font-weight: 500;*/
+  font-weight: 400;
   border:none;
   outline:none;
   font-weight: bold;
@@ -151,6 +152,20 @@ font-family: 'Montserrat', sans-serif;
 }
 
 .picker{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  cursor: default;
+}
+
+.modal{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  cursor: default;
+}
+
+.modalBold{
   font-family: 'Montserrat', sans-serif;
   font-weight: 300;
   font-size: 12px;
