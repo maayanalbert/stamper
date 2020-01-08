@@ -286,12 +286,9 @@ var Cristal = (function(_super) {
       _this.setState({ mouseWheelTimeout: newTimeOut });
       if (e.ctrlKey) {
         e.preventDefault()
+        console.log(e)
         _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
       } else {
-        // if(Math.abs(e.deltaY) < 10){
-        //   e.preventDefault()
-        //   console.log(e.deltaY)
-        // }
         if (_this.props.panDisabled) {
           return;
         }

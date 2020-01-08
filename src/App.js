@@ -7,9 +7,10 @@ import View from "./View.js"
 
 
 function App() {
-      document.title = "Stamper"
+  document.title = "Stamper"
   return (
     <div>
+
     	<View/>
     </div>
   );

@@ -173,8 +173,9 @@ function logToConsole(message, lineno){
           }
         }
       })
-
+      if(stampId > 0){
       window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
+      }
 
     }`;
   }
@@ -241,6 +242,7 @@ function logToConsole(message, lineno){
     parser("head").prepend(
       "<script class='errorListener' >" +
         this.getIframeErrorCallBack(ranges) +
+        '\ndocument.addEventListener("wheel", (e) => {e.preventDefault();e.stopPropogation(); return false})' +
         "</script>"
     );
 
@@ -258,6 +260,16 @@ function logToConsole(message, lineno){
     parser(".errorListener").replaceWith(
       "<script class='errorListener' >" +
         this.getIframeErrorCallBack(ranges, linesToJs) +
+                `\ndocument.addEventListener("wheel", (e) => {
+                  try{
+                    e.preventDefault()
+                    //console.log("prevent default successful")
+                  }catch(error){
+                    console.log(error)
+                  }; 
+                  console.log(e)
+                }) 
+                e.stopPropagation();` +
         "</script>"
     );
     parser(jsSelector).replaceWith(jsBlock);
@@ -1012,10 +1024,16 @@ function logToConsole(message, lineno){
         false
       );
     }
-    return { ranges: ranges, runnableCode: this.setLoopingControl(id, runnableCode.join("")) };
+
+
+      runnableCode = this.setLoopingControl(id, runnableCode.join(""), state.name)
+
+    return { ranges: ranges, runnableCode: runnableCode };
   }
 
   setLoopingControl(id, runnableCode){
+
+
 
 var loopingVar = "_isLooping"
 
@@ -1029,23 +1047,26 @@ var _stopLooping = setTimeout(() => {
 
 document.addEventListener('mouseenter', () => {
 clearTimeout(_stopLooping)
+window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
 if(_isLooping){
+
 loop()
 }
 
-window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
 });
+
 document.addEventListener('mouseleave', () => {
   window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
 stopLooping =setTimeout(() => {
  noLoop() 
 }, 1000)
 });
+
 `
 
-runnableCode = runnableCode.replace("noLoop()", `noLoop()\n_isLooping = false`)
-runnableCode = runnableCode.replace("loop()", `loop()\n_isLooping = true`)
-runnableCode += loopingCallbacks
+runnableCode = runnableCode.replace("noLoop()", `noLoop(); _isLooping = false`)
+runnableCode = runnableCode.replace("loop()", `loop(); _isLooping = true`)
+runnableCode =  runnableCode + loopingCallbacks
 
 return runnableCode
 
