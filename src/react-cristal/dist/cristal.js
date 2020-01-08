@@ -89,6 +89,7 @@ var Cristal = (function(_super) {
       if (!_this.childrenElement) return;
       var initialSize = _this.props.initialSize;
       var width, height;
+      console.log(initialSize)
       if (initialSize) {
         width = initialSize.width;
         height = initialSize.height;
@@ -96,6 +97,7 @@ var Cristal = (function(_super) {
         var rect = _this.childrenElement.getBoundingClientRect();
         width = rect.width;
         height = rect.height;
+
       }
       if (_this.props.initialScale) {
 

@@ -112,13 +112,20 @@ var Cristal = (function(_super) {
       var initialSize = _this.props.initialSize;
       var width, height;
       if (initialSize) {
-        width = initialSize.width;
-        height = initialSize.height;
+        var rect = _this.childrenElement.getBoundingClientRect();
+        if(initialSize.width){
+          width = initialSize.width
+        }else{
+          width = rect.width;
+        }
+        if(initialSize.height){
+          height = initialSize.height
+        }else{
+          height = rect.height;
+        }
       } else {
         var rect = _this.childrenElement.getBoundingClientRect();
-
         width = rect.width;
-
         height = rect.height;
       }
       if (_this.props.initialScale) {

@@ -361,6 +361,7 @@ export default class FunctionStamp extends Component {
         <Resizable
           className="ml-1 bg-white shadow" 
           onResize={e => {
+
             this.updateIframeDimensions(e.movementX, e.movementY);
           }}
           onResizeStart={() => {
@@ -542,6 +543,7 @@ export default class FunctionStamp extends Component {
     return (
       <div>
         <Cristal
+          initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 50}}
           ref={this.cristalRef}
           isResizable={true}
           onStartMove={this.props.onStartMove}

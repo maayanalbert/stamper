@@ -117,7 +117,7 @@ export default class View extends Component {
           },
           () => {
 
-            console.log(stamperFile)
+
     this.setState(
       {
         scale: stamperFile.scale,
