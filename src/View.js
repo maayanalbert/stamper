@@ -1012,20 +1012,27 @@ function logToConsole(message, lineno){
         false
       );
     }
-    return { ranges: ranges, runnableCode: runnableCode.join("") + this.getLoopingControl(id) };
+    return { ranges: ranges, runnableCode: this.setLoopingControl(id, runnableCode.join("")) };
   }
 
-  getLoopingControl(id){
+  setLoopingControl(id, runnableCode){
 
-return `\n
+var loopingVar = "_isLooping"
+
+var loopingCallbacks = `\n
+var _isLooping = true\n
 window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
-var stopLooping = setTimeout(() => {
+var _userSetLoop = true
+var _stopLooping = setTimeout(() => {
  noLoop() 
 }, 1000)
 
 document.addEventListener('mouseenter', () => {
-clearTimeout(stopLooping)
+clearTimeout(_stopLooping)
+if(_isLooping){
 loop()
+}
+
 window.parent.postMessage({type:"loop", message:"start", id:${id}}, '*')
 });
 document.addEventListener('mouseleave', () => {
@@ -1035,6 +1042,13 @@ stopLooping =setTimeout(() => {
 }, 1000)
 });
 `
+
+runnableCode = runnableCode.replace("noLoop()", `noLoop()\n_isLooping = false`)
+runnableCode = runnableCode.replace("loop()", `loop()\n_isLooping = true`)
+runnableCode += loopingCallbacks
+
+return runnableCode
+
   }
 
   isListener(name){
