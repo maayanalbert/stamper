@@ -32,6 +32,9 @@ import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
 
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -289,7 +292,6 @@ var Cristal = (function(_super) {
 
     _this.onWheel = function(e) {
       // e.preventDefault()
-
       if (_this.state.mouseWheelTimeout) {
         clearTimeout(_this.state.mouseWheelTimeout);
       }
@@ -596,7 +598,8 @@ var Cristal = (function(_super) {
     iconType,
     hiddenFlag = false,
     classVal = "",
-    callBack = null
+    callBack = null,
+    tooltipText
   ) {
     if (hiddenFlag) {
       return null;
@@ -627,7 +630,26 @@ var Cristal = (function(_super) {
       src:iconType
     });
 
-    return icon
+    if(!tooltipText){
+      return icon
+    }
+        return (
+        <div     onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}     >
+        <OverlayTrigger 
+          trigger="hover"
+          placement="top"
+
+          overlay={
+            <Tooltip id="alert" className="picker" style={{fontSize:12 *_this.state.scale}}
+                     >
+              {tooltipText}
+            </Tooltip>
+            
+          }
+        >
+          {icon}
+        </OverlayTrigger></div>)
+   
 
 
   }
@@ -647,21 +669,24 @@ var Cristal = (function(_super) {
         DeleteStampIcon,
         closeHidden,
         "mouseOnClose",
-        onClose
+        onClose,
+        "delete stamp"
       );
       var copyBtn = createIcon(
         this,
         CopyIcon,
         copyHidden,
         "mouseOnCopy",
-        onCopy
+        onCopy,
+        "copy stamp"
       );
       var clearBtn = createIcon(
         this,
         ClearConsoleIcon,
         !_a.showClear,
         "mousOnClear",
-        _a.onClear
+        _a.onClear,
+        "clear console"
       );
 
       if(_a.onMinimize){
@@ -682,7 +707,8 @@ var Cristal = (function(_super) {
       var makeBigIcon = createIcon(this, 
         CodeSizeIcon, 
         !_a.showMakeBig, "mouseOnBig",
-         _a.onMakeBig )
+         _a.onMakeBig,
+         "toggle text size" )
 
       var sideButtons = (
         <div
