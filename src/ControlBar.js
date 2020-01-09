@@ -457,7 +457,7 @@ return (
 
 
 
-                  <span style={{width:50}}/>
+        
 
         <div class="row">
           <TopButton
