@@ -4,6 +4,7 @@ import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
+import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
 import BlobStamp from "./BlobStamp.js";
@@ -1311,7 +1312,7 @@ return runnableCode
         getFileData = {this.getFileData.bind(this)}
         updateControlBarDimensions ={this.updateControlBarDimensions.bind(this)}/>
 
-     
+     <ModalManager loadStamperFile={this.loadStamperFile.bind(this)}/>
       </div>
     );
   }

@@ -70,6 +70,7 @@ export default class BlobStamp extends Component {
   }
 
   toggleHide(scale, originX, originY, callback) {
+    ipc && ipc.send("edited");
     if (this.state.hidden) {
       var distFromOriginX =
         (this.state.originX - this.state.x) / this.state.scale;

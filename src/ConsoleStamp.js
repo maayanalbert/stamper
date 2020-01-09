@@ -61,6 +61,8 @@ export default class ConsoleStamp extends Component {
   }
 
   toggleHide(scale, originX, originY, callback) {
+    console.log("hiding console")
+    ipc && ipc.send("edited");
     if (this.state.hidden) {
       var distFromOriginX =
         (this.state.originX - this.state.x) / this.state.scale;

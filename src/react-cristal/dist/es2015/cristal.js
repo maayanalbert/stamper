@@ -177,12 +177,9 @@ var Cristal = (function(_super) {
           _this.zoom(_this.state.scale * .5, window.innerWidth/2, window.innerWidth/2, true)
         }
       }else{
-               console.log(_this.state.downKey)
         _this.setState({ downKey: e.keyCode });
 
-        console.log("updating")
       }
-            console.log(_this.state.downKey)
  
     };
 
@@ -212,6 +209,7 @@ var Cristal = (function(_super) {
     };
 
     _this.setPos = function(xDiff, yDiff){
+      ipc && ipc.send("edited");
       _this.setState({ x: this.state.x + xDiff, y:this.state.y + yDiff});
     }
 

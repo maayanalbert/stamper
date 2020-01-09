@@ -437,7 +437,7 @@ return (
         }}
       >
 
-   
+         <a class="row m-1" >
         <TopButton
           iconType={DownloadIcon}
           uniqueClass="download"
@@ -451,14 +451,30 @@ return (
             var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "meta.stamper");
           }}
-          tooltipText="download current project"
+          tooltipText="upload project"
           alignLeft
         />
+ <span style={{width:100}}/>
 
+        <TopButton
+          iconType={DownloadIcon}
+          uniqueClass="download"
+          iconCallback={() => {
 
+            var js = this.props.getFileData().js;
+            var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "sketch.js");
 
-        
+            var js = this.props.getFileData().stamper;
+            var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "meta.stamper");
+          }}
+          tooltipText="download project"
+          
+        />
+        </a>
 
+                 
         <div class="row">
           <TopButton
             iconType={FunctionStampIcon}
