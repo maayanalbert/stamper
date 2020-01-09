@@ -440,16 +440,9 @@ return (
          <a class="row m-1" >
         <TopButton
           iconType={DownloadIcon}
-          uniqueClass="download"
+          uniqueClass="upload"
           iconCallback={() => {
-
-            var js = this.props.getFileData().js;
-            var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, "sketch.js");
-
-            var js = this.props.getFileData().stamper;
-            var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, "meta.stamper");
+            this.props.modalManagerRef.current.uploadProject()
           }}
           tooltipText="upload project"
           alignLeft

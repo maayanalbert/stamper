@@ -16,7 +16,7 @@ var LZUTF8 = require("lzutf8");
 module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
-    this.path = undefined
+    this.path = undefined;
     this.name = "";
     this.html = "";
     this.css = "";
@@ -28,9 +28,9 @@ module.exports = class FileManager {
     });
 
     ipcMain.on("updatePath", (event, data) => {
-      this.path = data.path
-    this.name = this.path.replace(/^.*[\\\/]/, "");
-this.mainWindow.setTitle(this.name);
+      this.path = data.path;
+      this.name = this.path.replace(/^.*[\\\/]/, "");
+      this.mainWindow.setTitle(this.name);
     });
 
     ipcMain.on("edited", event => {
@@ -50,13 +50,10 @@ this.mainWindow.setTitle(this.name);
   onNewProject() {
     this.resetFiles();
 
- 
-    this.name = 'Untitled';
-       this.mainWindow.setTitle(this.name);
+    this.name = "Untitled";
+    this.mainWindow.setTitle(this.name);
 
-    this.mainWindow.webContents.send("resetView")
-
-
+    this.mainWindow.webContents.send("resetView");
   }
 
   onSaveCommand() {
@@ -121,15 +118,13 @@ this.mainWindow.setTitle(this.name);
   //         `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into Stamper land :(`,
   //       buttons: ["Ok"]
   //     });
-  //       return     
+  //       return
   //   }
 
   //     this.stamper = newStamper
 
   //     this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
   //     this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})
-    
-
 
   //   this.html = html;
   //   this.js = js;
@@ -140,22 +135,26 @@ this.mainWindow.setTitle(this.name);
   //   this.mainWindow.setTitle(this.name);
   // }
 
-  readOpenedProject(path){
+  readOpenedProject(path) {
     // this.path = path
-          jetpack.readAsync(path + "/index.html").then(html => {
-            jetpack.readAsync(path + "/sketch.js").then(js => {
-              jetpack.readAsync(path + "/style.css").then(css => {
-                jetpack
-                  .readAsync(path + "/pls_dont_touch.stamper", "json")
-                  .then(stamper => {
-                    // this.openFiles(html, js, css, stamper);
-    this.mainWindow.webContents.send("openFiles", {
-      html: html, js:js, css:css, stamper:stamper, path:path
-    });
-                  });
+    jetpack.readAsync(path + "/index.html").then(html => {
+      jetpack.readAsync(path + "/sketch.js").then(js => {
+        jetpack.readAsync(path + "/style.css").then(css => {
+          jetpack
+            .readAsync(path + "/pls_dont_touch.stamper", "json")
+            .then(stamper => {
+              // this.openFiles(html, js, css, stamper);
+              this.mainWindow.webContents.send("openFiles", {
+                html: html,
+                js: js,
+                css: css,
+                stamper: stamper,
+                path: path
               });
             });
-          });
+        });
+      });
+    });
   }
 
   onOpenCommand() {
@@ -167,11 +166,9 @@ this.mainWindow.setTitle(this.name);
             return;
           }
 
-          this.readOpenedProject(result.filePaths[0])
+          this.readOpenedProject(result.filePaths[0]);
         }
-        
       });
-
   }
 
   onSaveAsCommand() {
