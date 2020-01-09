@@ -26,6 +26,8 @@ export default class ModalManager extends Component {
       modalContent:
         "Right now, the web version of Stamper is only supported in Google Chrome."
     };
+    this.inputElem = null
+    this.uploadProject = this.uploadProject.bind(this)
   }
 
   componentDidMount() {
@@ -59,24 +61,73 @@ export default class ModalManager extends Component {
       directoryAttr.value = "true"; 
       inputElem.setAttributeNode(directoryAttr)
 
+      var styleAttr = document.createAttribute("hidden");
+      styleAttr.value = "true"; 
+      inputElem.setAttributeNode(styleAttr)
+
+      inputElem.addEventListener("change", this.uploadProject)
       document.getElementById("root").appendChild(inputElem)
+            this.inputElem = inputElem
 
   }
 
-  uploadProject() {
-    console.log("uploading project");
+  componentWillUnmout(){
+    this.inputElem.removeEventListener("change", this.uploadProject)
+  }
+
+  requestUpload() {
     document.getElementById("projectInput").click()
+  }
+
+  attemptToReadFile(files, name, key, readDict, callback){
+
+    for(var i = 0; i < files.length; i++){
+      if(files[i].name === name){
+        var reader = new FileReader()
+        reader.onload = function(e){
+          readDict[key] = e.target.result
+          callback()
+        }
+        try{
+        reader.readAsText(files[i])
+        return 
+        }catch{
+          this.setState({modalVisible:true, modalHeader:"Oh no! It looks like we had trouble reading one of your files.",
+            modalContent:"Check that your index.html, sketch.js, and style.css are properly configured."})
+        }  
+      }
+    }
 
   }
+
+  uploadProject(e){
+    var files = e.target.files
+    var readDict = {}
+    this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
+      this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
+        this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
+          this.attemptToReadFile(files, "pls_dont_touch.stamper", "stamper", readDict, () =>{
+            this.openFiles(readDict.html, readDict.js, readDict.css, JSON.parse(readDict.stamper))
+          })
+        })
+      })
+    })
+  }
+
 
   updateStamperJs(js, stamper) {
+      console.log("updating stamper")
     if (stamper === undefined) {
       var oldJs = "";
+          console.log("??")
     } else {
+            console.log(stamper.compressedJs)
+
       var oldJs = LZUTF8.decompress(stamper.compressedJs, {
         inputEncoding: "StorageBinaryString"
       });
     }
+
 
     if (oldJs === js) {
       return stamper;

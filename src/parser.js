@@ -28,6 +28,7 @@ function jsToStamps(rawCode) {
       loc: true
     });
   }catch(error){
+    console.log(error)
     return null
   }
 

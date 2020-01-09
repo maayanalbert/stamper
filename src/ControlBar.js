@@ -442,7 +442,7 @@ return (
           iconType={DownloadIcon}
           uniqueClass="upload"
           iconCallback={() => {
-            this.props.modalManagerRef.current.uploadProject()
+            this.props.modalManagerRef.current.requestUpload()
           }}
           tooltipText="upload project"
           alignLeft
