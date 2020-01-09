@@ -242,7 +242,6 @@ function logToConsole(message, lineno){
     parser("head").prepend(
       "<script class='errorListener' >" +
         this.getIframeErrorCallBack(ranges) +
-        '\ndocument.addEventListener("wheel", (e) => {e.preventDefault();e.stopPropogation(); return false})' +
         "</script>"
     );
 
@@ -261,9 +260,6 @@ function logToConsole(message, lineno){
     parser(".errorListener").replaceWith(
       "<script class='errorListener' >" +
         this.getIframeErrorCallBack(ranges, linesToJs) +
-        `\ndocument.addEventListener("wheel", (e) => {
-
-        })` +
         "</script>"
     );
     parser(jsSelector).replaceWith(jsBlock);

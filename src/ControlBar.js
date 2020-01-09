@@ -436,6 +436,8 @@ return (
           zIndex: 1000000000000000001
         }}
       >
+
+   
         <TopButton
           iconType={DownloadIcon}
           uniqueClass="download"
@@ -449,9 +451,13 @@ return (
             var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "meta.stamper");
           }}
-          tooltipText="download javascript"
+          tooltipText="download current project"
           alignLeft
         />
+
+
+
+                  <span style={{width:50}}/>
 
         <div class="row">
           <TopButton

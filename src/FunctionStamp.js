@@ -476,7 +476,8 @@ export default class FunctionStamp extends Component {
       originX: this.state.originX,
       originY: this.state.originY,
       scale: this.state.scale,
-      hidden: this.state.hidden
+      hidden: this.state.hidden,
+      exported:true
     };
 
     return data;
