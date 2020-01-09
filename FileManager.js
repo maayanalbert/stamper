@@ -1,5 +1,6 @@
 const log = require("electron-log");
 const jetpack = require("fs-jetpack");
+
 var _ = require("lodash");
 const {
   app,
@@ -16,7 +17,7 @@ var LZUTF8 = require("lzutf8");
 module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
-    this.path = undefined
+    this.path = undefined;
     this.name = "";
     this.html = "";
     this.css = "";
@@ -25,6 +26,12 @@ module.exports = class FileManager {
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
+    });
+
+    ipcMain.on("updatePath", (event, data) => {
+      this.path = data.path;
+      this.name = this.path.replace(/^.*[\\\/]/, "");
+      this.mainWindow.setTitle(this.name);
     });
 
     ipcMain.on("edited", event => {
@@ -44,14 +51,10 @@ module.exports = class FileManager {
   onNewProject() {
     this.resetFiles();
 
- 
-    this.name = 'Untitled';
-       this.mainWindow.setTitle(this.name);
-
+    this.name = "Untitled";
     this.mainWindow.setTitle(this.name);
-    this.mainWindow.webContents.send("resetView")
 
-
+    this.mainWindow.webContents.send("resetView");
   }
 
   onSaveCommand() {
@@ -62,92 +65,97 @@ module.exports = class FileManager {
     }
   }
 
-  updateStamperJs(js, stamper) {
-    if(stamper === undefined){
-      var oldJs = ""
-    }else{
-          var oldJs = LZUTF8.decompress(stamper.compressedJs, {
-       inputEncoding: "StorageBinaryString"
-     })
-    }
+  // updateStamperJs(js, stamper) {
+  //   if(stamper === undefined){
+  //     var oldJs = ""
+  //   }else{
+  //         var oldJs = LZUTF8.decompress(stamper.compressedJs, {
+  //      inputEncoding: "StorageBinaryString"
+  //    })
+  //   }
 
-    if(oldJs === js){
-      return stamper
-    }
+  //   if(oldJs === js){
+  //     return stamper
+  //   }
 
-      try{
-        var newStamper = parser.jsToStamps(js);
-      }catch(e){
-        throw "Syntax error in Javascript"
-      }
+  //     try{
+  //       var newStamper = parser.jsToStamps(js);
+  //     }catch(e){
+  //       throw "Syntax error in Javascript"
+  //     }
 
-      newStamper.fns.push({
-        name: "style.css",
-        args: " ",
-        code: "",
-        isCss: true
-      });
-      newStamper.fns.push({
-        name: "index.html",
-        args: " ",
-        code: "",
-        isHtml: true
-      });
-      newStamper.console = {}
-      newStamper.scale = 1
+  //     newStamper.fns.push({
+  //       name: "style.css",
+  //       args: " ",
+  //       code: "",
+  //       isCss: true
+  //     });
+  //     newStamper.fns.push({
+  //       name: "index.html",
+  //       args: " ",
+  //       code: "",
+  //       isHtml: true
+  //     });
+  //     newStamper.console = {}
+  //     newStamper.scale = 1
 
-      return newStamper
-  }
-  openFiles(html, js, css = "", stamper) {
-    if (html === undefined || js === undefined) {
-      dialog.showMessageBox(this.mainWindow, {
-        message:
-          "Oh no! It looks like you're missing some files. Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
-        buttons: ["Ok"]
-      });
-      return;
-    }
+  //     return newStamper
+  // }
+  // openFiles(html, js, css = "", stamper) {
+  //   if (html === undefined || js === undefined) {
+  //     dialog.showMessageBox(this.mainWindow, {
+  //       message:
+  //         "Oh no! It looks like you're missing some files. Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
+  //       buttons: ["Ok"]
+  //     });
+  //     return;
+  //   }
 
-    try{
-      var newStamper = this.updateStamperJs(js, stamper)
-    }catch(e){
-       dialog.showMessageBox(this.mainWindow, {
-        message:
-          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into Stamper land :(`,
-        buttons: ["Ok"]
-      });
-        return     
-    }
+  //   try{
+  //     var newStamper = this.updateStamperJs(js, stamper)
+  //   }catch(e){
+  //      dialog.showMessageBox(this.mainWindow, {
+  //       message:
+  //         `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into Stamper land :(`,
+  //       buttons: ["Ok"]
+  //     });
+  //       return
+  //   }
 
-      this.stamper = newStamper
+  //     this.stamper = newStamper
 
-      this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
-      this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})
-    
+  //     this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
+  //     this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})
 
+  //   this.html = html;
+  //   this.js = js;
+  //   this.css = css
+  //   this.name = this.path.replace(/^.*[\\\/]/, "");
 
-    this.html = html;
-    this.js = js;
-    this.css = css
-    this.name = this.path.replace(/^.*[\\\/]/, "");
+  //   this.writeToView();
+  //   this.mainWindow.setTitle(this.name);
+  // }
 
-    this.writeToView();
-    this.mainWindow.setTitle(this.name);
-  }
-
-  readOpenedProject(path){
-    this.path = path
-          jetpack.readAsync(this.path + "/index.html").then(html => {
-            jetpack.readAsync(this.path + "/sketch.js").then(js => {
-              jetpack.readAsync(this.path + "/style.css").then(css => {
-                jetpack
-                  .readAsync(this.path + "/pls_dont_touch.stamper", "json")
-                  .then(stamper => {
-                    this.openFiles(html, js, css, stamper);
-                  });
+  readOpenedProject(path) {
+    // this.path = path
+    jetpack.readAsync(path + "/index.html").then(html => {
+      jetpack.readAsync(path + "/sketch.js").then(js => {
+        jetpack.readAsync(path + "/style.css").then(css => {
+          jetpack
+            .readAsync(path + "/pls_dont_touch.stamper", "json")
+            .then(stamper => {
+              // this.openFiles(html, js, css, stamper);
+              this.mainWindow.webContents.send("openFiles", {
+                html: html,
+                js: js,
+                css: css,
+                stamper: stamper,
+                path: path
               });
             });
-          });
+        });
+      });
+    });
   }
 
   onOpenCommand() {
@@ -159,11 +167,9 @@ module.exports = class FileManager {
             return;
           }
 
-          this.readOpenedProject(result.filePaths[0])
+          this.readOpenedProject(result.filePaths[0]);
         }
-        
       });
-
   }
 
   onSaveAsCommand() {
@@ -222,11 +228,6 @@ module.exports = class FileManager {
     this.js = files.js;
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
-    console.log("js")
-    console.log(files.js)
-    this.stamper.compressedJs = LZUTF8.compress(this.js, {
-      outputEncoding: "StorageBinaryString"
-    });
 
     jetpack.writeAsync(this.path + "/sketch.js", this.js);
     jetpack.writeAsync(this.path + "/style.css", this.css);
@@ -237,9 +238,9 @@ module.exports = class FileManager {
     );
   }
 
-  writeToView() {
-    this.mainWindow.webContents.send("writeToView", {
-      stamper: this.stamper
-    });
-  }
+  // writeToView() {
+  //   this.mainWindow.webContents.send("writeToView", {
+  //     stamper: this.stamper
+  //   });
+  // }
 };
