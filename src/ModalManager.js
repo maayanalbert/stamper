@@ -1,10 +1,10 @@
 import "./App.scss";
 import $ from "jquery"
 import React, { Component, useState } from "react";
-
+import { saveAs } from "file-saver";
 import parser from "./parser.js";
 import LZUTF8 from "lzutf8";
-
+import JSZip from "jszip";
 import Modal from "react-bootstrap/Modal";
 const { detect } = require("detect-browser");
 const browser = detect();
@@ -113,7 +113,23 @@ export default class ModalManager extends Component {
       })
     })
   }
+  requestDownload(){
+    var data = this.props.getFileData();
+            // var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
+            // saveAs(blob, "sketch.js");
 
+var zip = new JSZip();
+zip.file("sketch.js", data.js);
+zip.file("index.html", data.html);
+zip.file("style.css", data.css);
+zip.file("pls_dont_touch.stamper", JSON.stringify(data.stamper));
+zip.generateAsync({type:"blob"})
+.then(function(content) {
+    // see FileSaver.js
+    saveAs(content, "stamper_project.zip");
+});
+
+  }
 
   updateStamperJs(js, stamper) {
       console.log("updating stamper")

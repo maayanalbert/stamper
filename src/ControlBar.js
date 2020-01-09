@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
-import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
@@ -453,14 +452,7 @@ return (
           iconType={DownloadIcon}
           uniqueClass="download"
           iconCallback={() => {
-
-            var js = this.props.getFileData().js;
-            var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, "sketch.js");
-
-            var js = this.props.getFileData().stamper;
-            var blob =  new Blob([JSON.stringify(js)], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, "meta.stamper");
+            this.props.modalManagerRef.current.requestDownload()
           }}
           tooltipText="download project"
           

@@ -18,6 +18,7 @@ import { Resizable, ResizableBox } from "react-resizable";
 import styled from "styled-components";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import LZUTF8 from "lzutf8";
 
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-css";
@@ -571,6 +572,10 @@ function logToConsole(message, lineno){
       css: cssStamp.ref.current.state.code,
       js: this.getExportableCode()
     };
+
+        fileData.stamper.compressedJs = LZUTF8.compress(fileData.js, {
+      outputEncoding: "StorageBinaryString"
+    });
 
     return fileData;
   }
@@ -1313,7 +1318,6 @@ stopLooping =setTimeout(() => {
           disablePan={this.disablePan.bind(this)}
           disableZoom={this.disableZoom.bind(this)}
           loadStamperFile={this.loadStamperFile.bind(this)}
-          getFileData={this.getFileData.bind(this)}
           updateControlBarDimensions={this.updateControlBarDimensions.bind(
             this
           )}
@@ -1322,6 +1326,7 @@ stopLooping =setTimeout(() => {
 
         <ModalManager
           loadStamperFile={this.loadStamperFile.bind(this)}
+          getFileData={this.getFileData.bind(this)}
           ref={this.modalManagerRef}
         />
       </div>

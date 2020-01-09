@@ -1,5 +1,6 @@
 const log = require("electron-log");
 const jetpack = require("fs-jetpack");
+
 var _ = require("lodash");
 const {
   app,
@@ -227,10 +228,6 @@ module.exports = class FileManager {
     this.js = files.js;
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
-
-    this.stamper.compressedJs = LZUTF8.compress(this.js, {
-      outputEncoding: "StorageBinaryString"
-    });
 
     jetpack.writeAsync(this.path + "/sketch.js", this.js);
     jetpack.writeAsync(this.path + "/style.css", this.css);
