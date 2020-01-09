@@ -102,7 +102,7 @@ module.exports = class FileManager {
     if (html === undefined || js === undefined) {
       dialog.showMessageBox(this.mainWindow, {
         message:
-          "Oh no! It looks like you're missing some files. Stamper projects must have an index.html file and a sketch.js file.",
+          "Oh no! It looks like you're missing some files. Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
         buttons: ["Ok"]
       });
       return;
@@ -113,7 +113,7 @@ module.exports = class FileManager {
     }catch(e){
        dialog.showMessageBox(this.mainWindow, {
         message:
-          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into stamper land :(`,
+          `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into Stamper land :(`,
         buttons: ["Ok"]
       });
         return     
@@ -136,7 +136,7 @@ module.exports = class FileManager {
   }
 
   readOpenedProject(path){
-this.path = path
+    this.path = path
           jetpack.readAsync(this.path + "/index.html").then(html => {
             jetpack.readAsync(this.path + "/sketch.js").then(js => {
               jetpack.readAsync(this.path + "/style.css").then(css => {
