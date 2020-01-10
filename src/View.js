@@ -446,16 +446,17 @@ function logToConsole(message, lineno){
 
   setInitialPosition(dimension) {
     if (dimension === "x") {
-      return (
-        this.state.sideBarWidth +
-        this.newStampMargin +
-        Math.random() * this.newStampMarginVariance
+      return ( (-this.state.originX + this.state.sideBarWidth 
+        )/this.state.scale +    50   + Math.random() * this.newStampMarginVariance
+   
       );
     } else if (dimension === "y") {
-      return (
-        this.state.topBarHeight +
-        this.newStampMargin +
-        Math.random() * this.newStampMarginVariance
+
+      // Math.random() * this.newStampMarginVariance ) * this.state.scale
+      return ((-this.state.originY + this.state.topBarHeight 
+
+        )/this.state.scale +  50   +    Math.random() * this.newStampMarginVariance
+      
       );
     }
   }
