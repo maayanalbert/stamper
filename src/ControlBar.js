@@ -455,12 +455,12 @@ return (
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addFnStamp(normalFn)
+              this.props.addFnStamp(normalFn, (id) => this.props.requestCompile(id))
             }
             dropDownData={builtInFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(data)
+                this.props.addFnStamp(data, (id) => this.props.requestCompile(id))
             }))}
             tooltipText="function"
           />
@@ -474,7 +474,7 @@ return (
             dropDownData={listenerFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(data)
+                this.props.addFnStamp(data, (id) => this.props.requestCompile(id))
             }))}
             tooltipText="listener"
           />
@@ -485,7 +485,7 @@ return (
             iconType={ BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(varBlob)
+              this.props.addBlobStamp(varBlob, (id) => this.props.requestCompile(id))
             }
             tooltipText="global variable"
           />
@@ -494,7 +494,7 @@ return (
             iconType={BlobStampIcon}
             uniqueClass="commentStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(commentBlob)
+              this.props.addBlobStamp(commentBlob, (id) => this.props.requestCompile(id))
             }
             tooltipText="comment"
           />

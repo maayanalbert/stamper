@@ -298,9 +298,18 @@ export default class View extends Component {
             originY: stamperFile.originY
           },
           () => {
+
+
+            var callback = () => {
+              if(Object.keys(this.state.fnStamps).length === stamperFile.fns.length &&
+                Object.keys(this.state.blobStamps).length === stamperFile.blobs.length){
+                this.requestCompile()
+              }
+            }
+
             this.addConsoleStamp(stamperFile.console);
-            stamperFile.fns.map(data => this.addFnStamp(data));
-            stamperFile.blobs.map(data => this.addBlobStamp(data));
+            stamperFile.fns.map(data => this.addFnStamp(data, callback));
+            stamperFile.blobs.map(data => this.addBlobStamp(data, callback));
 
  
           }
@@ -514,10 +523,10 @@ function logToConsole(message, lineno){
 
   addFnStamp(
     data,
+    callback,
     updateName = false,
     updatePosition = false,
     setIframeDisabled = false,
-    callback = () => null
   ) {
     var defaults = {
       name: "sketch",
@@ -560,7 +569,7 @@ function logToConsole(message, lineno){
     return newName;
   }
 
-  async createFnStamp(data, callback) {
+  async createFnStamp(data, callback = () => null) {
     var name = data.name,
       code = data.code,
       args = data.args,
@@ -616,7 +625,7 @@ function logToConsole(message, lineno){
 
     fnStamps[counter] = { elem: elem, ref: ref };
 
-    this.setState({ fnStamps: fnStamps }, callback);
+    this.setState({ fnStamps: fnStamps }, (counter) => callback(counter));
 
     if (isHtml) {
       this.setState({ htmlID: counter });
@@ -632,7 +641,7 @@ function logToConsole(message, lineno){
     this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole);
   }
 
-  addBlobStamp(data, updatePosition = false, callback = () => null) {
+  addBlobStamp(data, callback, updatePosition = false) {
     var defaults = {
       code: "var z = 10",
       x: this.setInitialPosition("x"),
@@ -658,7 +667,7 @@ function logToConsole(message, lineno){
     this.createBlobStamp(data, callback);
   }
 
-  async createBlobStamp(data, callback) {
+  async createBlobStamp(data, callback = () => null) {
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -698,7 +707,7 @@ function logToConsole(message, lineno){
     );
 
     blobStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ blobStamps: blobStamps }, callback);
+    this.setState({ blobStamps: blobStamps }, (counter) => callback(counter));
   }
 
   getFileData() {
@@ -755,6 +764,7 @@ function logToConsole(message, lineno){
   }
 
   requestCompile(id) {
+
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
     // this.setState({traversalGraph:newTraversalGraph})
@@ -768,9 +778,9 @@ function logToConsole(message, lineno){
 
     this.sendSaveData();
 
-    // this.compileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
+    // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
 
-    // this.compileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
+    // this.recursiveCompileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
 
     Object.values(this.state.fnStamps).map(stamp => {
       var stampRef = stamp.ref.current;
@@ -806,7 +816,7 @@ function logToConsole(message, lineno){
     });
   }
 
-  compileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
+  recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
     if (id in seen) {
       return;
     } else {
@@ -838,7 +848,7 @@ function logToConsole(message, lineno){
         return;
       }
       traversalGraph[id].map(id =>
-        this.compileStamp(id, seen, traversalGraph, duplicateNamedStamps)
+        this.recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps)
       );
     }
   }
@@ -1177,8 +1187,8 @@ stopLooping =setTimeout(() => {
       delete blobStamps[id];
     }
 
-    this.refreshFnStamps(fnStamps);
-    this.refreshBlobStamps(blobStamps);
+    this.refreshFnStamps(fnStamps, () => this.requestCompile(id));
+    this.refreshBlobStamps(blobStamps, () => this.requestCompile(id));
     // this.refreshConsoleStamp(this.state.consoleStamp)
   }
 
@@ -1207,31 +1217,24 @@ stopLooping =setTimeout(() => {
     return data;
   }
 
-  refreshFnStamps(fnStamps) {
-    var fnStampData = [];
-    for (var i in fnStamps) {
-      var stamp = fnStamps[i];
-      var data = stamp.ref.current.getData();
+  refreshFnStamps(fnStamps, callback) {
+    // var fnStampData = [];
+    // for (var i in fnStamps) {
+    //   var stamp = fnStamps[i];
+    //   var data = stamp.ref.current.getData();
 
-      fnStampData.push(data);
-    }
-
-    this.setState({ fnStamps: {} }, () =>
-      fnStampData.map(data => this.addFnStamp(data))
+    //   fnStampData.push(data);
+    // }
+    var fnStamps = _.cloneDeep(this.state.fnStamps)
+    this.setState({ fnStamps: {} }, () => 
+      this.setState({fnStamps:fnStamps}, callback)
     );
   }
 
-  refreshBlobStamps(blobStamps) {
-    var varStampData = [];
-    for (var i in blobStamps) {
-      var stamp = blobStamps[i];
-      var data = stamp.ref.current.getData();
-
-      varStampData.push(data);
-    }
-
-    this.setState({ blobStamps: {} }, () =>
-      varStampData.map(data => this.createBlobStamp(data))
+  refreshBlobStamps(blobStamps, callback) {
+    var blobStamps = _.cloneDeep(this.state.blobStamps)
+    this.setState({ blobStamps: {} }, () => 
+      this.setState({blobStamps:blobStamps}, callback)
     );
   }
 
@@ -1399,12 +1402,12 @@ stopLooping =setTimeout(() => {
         transform:"scale(" + this.state.scale+")"}}>
           {elems}
           {consoleElem}
-          {this.state.lines}
 
         </div>
         </div>
 
         <ControlBar
+        requestCompile = {this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
           addBlobStamp={this.addBlobStamp.bind(this)}
           addFnStamp={this.addFnStamp.bind(this)}

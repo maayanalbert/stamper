@@ -99,8 +99,7 @@ export default class FunctionStamp extends Component {
   componentDidMount() {
     // this.loadp5Lib()
     this.setState({ 
-      iframeHeight: this.props.starterIframeHeight }, () =>
-      this.props.requestCompile(this.props.id)
+      iframeHeight: this.props.starterIframeHeight }
     );
     this.checkName();
     window.addEventListener("message", this.updateLooping);
@@ -430,17 +429,18 @@ export default class FunctionStamp extends Component {
       updatePosition = true;
     }
 
-    var callback = () => null
+    var callback = (id) => this.props.requestCompile(id)
     if(isOpt){
-      callback = () => this.cristalRef.current.changeZIndex()
+      callback = (id) => {this.cristalRef.current.changeZIndex(); 
+        this.props.requestCompile(id)}
     }
 
     var newName = this.props.addStamp(
       data,
+           callback,
       updateName,
       updatePosition,
       setIframeDisabled,
-      callback
     );
     if (isOpt) {
       this.setState({ name: newName }, () => this.checkName());

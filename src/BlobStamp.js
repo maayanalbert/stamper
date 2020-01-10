@@ -43,8 +43,7 @@ export default class BlobStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
-    this.setState({ exportableCode: "" }, () =>
-      this.props.requestCompile(this.props.id)
+    this.setState({ exportableCode: "" }
     );
   }
   setEditorScrolling(isScrolling) {
@@ -156,12 +155,13 @@ export default class BlobStamp extends Component {
       updatePosition = true;
     }
 
-    var callback = () => null
+    var callback = (id) => this.props.requestCompile(id)
     if(isOpt){
-      callback = () => this.cristalRef.current.changeZIndex()
+      callback = (id) => {this.cristalRef.current.changeZIndex(); 
+        this.props.requestCompile(id)}
     }
 
-    this.props.addStamp(data, updatePosition, callback);
+    this.props.addStamp(data, callback,updatePosition);
   }
 
   addErrorLine(lineNum) {
