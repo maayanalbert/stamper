@@ -25,9 +25,6 @@ export default class ConsoleStamp extends Component {
       consoleHeight: this.props.starterConsoleHeight,
       consoleWidth: this.props.starterConsoleWidth,
       lastFreq: 0,
-      originX: this.props.initialOriginX,
-      originY: this.props.initialOriginY,
-      scale: this.props.initialScale,
       hidden: this.props.initialHidden,
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y
@@ -60,33 +57,21 @@ export default class ConsoleStamp extends Component {
     return ConsoleStampIcon;
   }
 
-  toggleHide(scale, originX, originY, callback) {
-    console.log("hiding console")
+  toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
-      var distFromOriginX =
-        (this.state.originX - this.state.x) / this.state.scale;
-      var distFromOriginY =
-        (this.state.originY - this.state.y) / this.state.scale;
-      var x = originX - distFromOriginX * scale;
-      var y = originY - distFromOriginY * scale;
-      this.setState({ hidden: false, scale: scale, x: x, y: y }, 
-        () => {
-          callback()
-      var consoleContainer = document.getElementById("consoleContainer");
-      if(consoleContainer){
-        consoleContainer.scrollTop = consoleContainer.scrollHeight;
-      }
+      this.setState({ hidden: false, savedIframeHeight:this.state.iframeHeight, iframeHeight:0 }, 
+        () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
 
-        });
+      )
+
     } else {
       this.setState(
-        { hidden: true, originX: originX, originY: originY, scale: scale },
+        { hidden: true},
         callback
       );
     }
   }
-
   setEditorScrolling(isScrolling) {
     this.props.disablePan(isScrolling);
   }
@@ -157,9 +142,6 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
       y: this.state.y,
       consoleWidth: this.state.consoleWidth,
       consoleHeight: this.state.consoleHeight,
-      originX: this.state.originX,
-      originY: this.state.originY,
-      scale: this.state.scale,
       hidden: this.state.hidden
     };
 
@@ -206,7 +188,6 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
       <Cristal
        parentID = {this.props.id}
         ref={this.cristalRef}
-        initialScale={this.state.scale}
         closeHidden={true}
         copyHidden={true}
         onResize={this.resizeConsole.bind(this)}

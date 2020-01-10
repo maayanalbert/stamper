@@ -42,20 +42,15 @@ export default class FunctionStamp extends Component {
       iframeHeight: 0,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: this.props.starterEditorWidth,
-      editorHidden: false,
       isSpecialFn: false,
       editorScrolling: false,
       errorLines: this.props.errorLines,
       iframeCode: "",
       editsMade: false,
       runningBorder: false,
-      doubleClickActive: false,
       resizingIframe: false,
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y,
-      originX: this.props.initialOriginX,
-      originY: this.props.initialOriginY,
-      scale: this.props.initialScale,
       hidden: this.props.initialHidden,
       looping:false,
       loopingTransition:""
@@ -67,24 +62,17 @@ export default class FunctionStamp extends Component {
   this.updateLooping = this.updateLooping.bind(this)
   }
 
-  toggleHide(scale, originX, originY, callback) {
+  toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
-      var distFromOriginX =
-        (this.state.originX - this.state.x) / this.state.scale;
-      var distFromOriginY =
-        (this.state.originY - this.state.y) / this.state.scale;
-      var x = originX - distFromOriginX * scale;
-      var y = originY - distFromOriginY * scale;
-      var iframeHeight = this.state.iframeHeight
-      this.setState({ hidden: false, scale: scale, x: x, y: y, savedIframeHeight:iframeHeight, iframeHeight:0 }, 
+      this.setState({ hidden: false, savedIframeHeight:this.state.iframeHeight, iframeHeight:0 }, 
         () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
 
       )
 
     } else {
       this.setState(
-        { hidden: true, originX: originX, originY: originY, scale: scale},
+        { hidden: true},
         callback
       );
     }
@@ -164,10 +152,9 @@ export default class FunctionStamp extends Component {
 
   updateIframeDimensions(movementX = 0, movementY = 0) {
     ipc && ipc.send("edited");
-    var scale = this.props.getScale();
 
-    var width = this.state.iframeWidth + movementX / scale;
-    var height = this.state.iframeHeight + movementY / scale;
+    var width = this.state.iframeWidth + movementX;
+    var height = this.state.iframeHeight + movementY;
     if (width < 30) {
       movementX = 0;
       width = 30;
@@ -178,7 +165,7 @@ export default class FunctionStamp extends Component {
     }
 
     this.setState({ iframeWidth: width, iframeHeight: height });
-    this.cristalRef.current.manualResize(movementX / scale, movementY / scale);
+    this.cristalRef.current.manualResize(movementX, movementY);
   }
 
   setEditorScrolling(isScrolling) {
@@ -221,7 +208,6 @@ export default class FunctionStamp extends Component {
         onMouseOut={() => {
           this.setEditorScrolling(false);
         }}
-        hidden={this.state.editorHidden}
       >
         <br />
         <AceEditor
@@ -474,9 +460,6 @@ export default class FunctionStamp extends Component {
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
       isCss: this.props.isCss,
-      originX: this.state.originX,
-      originY: this.state.originY,
-      scale: this.state.scale,
       hidden: this.state.hidden,
       exported:true
     };
@@ -558,7 +541,6 @@ export default class FunctionStamp extends Component {
           closeHidden={this.props.isHtml || this.props.isCss}
           copyHidden={this.props.isHtml || this.props.isCss}
           initialPosition={{ x: this.state.x, y: this.state.y }}
-          initialScale={this.state.scale}
           className={
             "stamp shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 
           }

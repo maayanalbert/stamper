@@ -70,7 +70,8 @@ export default class View extends Component {
       zoomDisabled:false,
             mouseWheelTimeout: null,
             mouseIsDown:false,
-            downKey:-1
+            downKey:-1,
+            panDisabled:false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -857,37 +858,10 @@ function logToConsole(message, lineno){
 
   disablePan(status) {
     this.setState({panDisabled:status})
-    // this.setOriginCristal(status);
-
-    // Object.values(this.state.fnStamps).map(stamp => {
-    //   var cristalRef = stamp.ref.current.cristalRef;
-    //   cristalRef.current && cristalRef.current.disablePan(status);
-    // });
-
-    // Object.values(this.state.blobStamps).map(stamp => {
-    //   var cristalRef = stamp.ref.current.cristalRef;
-    //   cristalRef.current && cristalRef.current.disablePan(status);
-    // });
-
-    // var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
-    // consoleCristalRef.current && consoleCristalRef.current.disablePan(status);
   }
 
   disableZoom(status) {
-    this.setOriginCristal(status);
-
-    Object.values(this.state.fnStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.disableZoom(status);
-    });
-
-    Object.values(this.state.blobStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.disableZoom(status);
-    });
-
-    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
-    consoleCristalRef.current && consoleCristalRef.current.disableZoom(status);
+    this.setState({zoomDisabled:status})
   }
 
   checkAllNames() {
@@ -1363,9 +1337,6 @@ stopLooping =setTimeout(() => {
 
   toggleHide(stampRef) {
     stampRef.toggleHide(
-      this.state.scale,
-      this.state.originX,
-      this.state.originY,
       () => this.setLayerPicker()
     );
   }

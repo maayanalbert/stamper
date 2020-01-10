@@ -33,9 +33,6 @@ export default class BlobStamp extends Component {
       runningBorder: false,
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y,
-      originX: this.props.initialOriginX,
-      originY: this.props.initialOriginY,
-      scale: this.props.initialScale,
       hidden: this.props.initialHidden,
       codeSize:this.props.starterCodeSize
     };
@@ -69,23 +66,23 @@ export default class BlobStamp extends Component {
     }
   }
 
-  toggleHide(scale, originX, originY, callback) {
+
+  toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
-      var distFromOriginX =
-        (this.state.originX - this.state.x) / this.state.scale;
-      var distFromOriginY =
-        (this.state.originY - this.state.y) / this.state.scale;
-      var x = originX - distFromOriginX * scale;
-      var y = originY - distFromOriginY * scale;
-      this.setState({ hidden: false, scale: scale, x: x, y: y }, callback);
+      this.setState({ hidden: false, savedIframeHeight:this.state.iframeHeight, iframeHeight:0 }, 
+        () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
+
+      )
+
     } else {
       this.setState(
-        { hidden: true, originX: originX, originY: originY, scale: scale },
+        { hidden: true},
         callback
       );
     }
   }
+
   renderEditor() {
     var markers = [];
     for (var i in this.state.errorLines) {
@@ -184,9 +181,6 @@ export default class BlobStamp extends Component {
       editorHeight: this.state.editorHeight,
       x: this.state.x,
       y: this.state.y,
-      originX: this.state.originX,
-      originY: this.state.originY,
-      scale: this.state.scale,
       hidden: this.state.hidden,
       codeSize:this.state.codeSize
     };
@@ -263,7 +257,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           onMove={s => this.setState({ x: s.x, y: s.y })}
-          initialScale={this.state.scale}
+
           className={
             "stamp shadow-sm bg-jsArea " + border + " vertex" + this.props.id
           }

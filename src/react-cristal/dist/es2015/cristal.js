@@ -82,15 +82,9 @@ var Cristal = (function(_super) {
       zIndex: Stacker.getNextIndex(),
       downKey: -1,
       isMoving: false,
-      mouseIsDown: false,
-      scale: 1,
-      panDisabled: false,
       originalHeight: null,
-      mouseWheelTimeout: null,
-      zoomDisabled: false
     };
 
-    _this.space = 32;
     _this.opt = 18;
     _this.cmd = 91
     _this.ctrl = 17
@@ -134,9 +128,7 @@ var Cristal = (function(_super) {
         width = rect.width;
         height = rect.height;
       }
-      if (_this.props.initialScale) {
-        _this.setState({ scale: _this.props.initialScale });
-      }
+
       _this.setState({ width: width, height: height, originalHeight: height });
       _this.setInitialPosition({ width: width, height: height });
     };
@@ -159,35 +151,10 @@ var Cristal = (function(_super) {
       _this.headerElement = el;
     };
 
-    _this.onKeyDown = function(e) {
-      // if (e.keyCode === _this.space) {
-      //   document.body.style.cursor = "grab";
-      // }
-      if(_this.state.downKey === _this.cmd || _this.state.downKey === _this.ctrl){
-  
-        if(e.keyCode === _this.zero){
-           e.preventDefault()
-          _this.zoom(1, window.innerWidth/2, window.innerHeight/2, true)
-        }else if(e.keyCode === _this.plus){
-           e.preventDefault()
-          _this.zoom(_this.state.scale * 2, window.innerWidth/2, window.innerWidth/2, true)
-        }else if(e.keyCode === _this.minus){
-           e.preventDefault()
-          _this.zoom(_this.state.scale * .5, window.innerWidth/2, window.innerWidth/2, true)
-        }
-      }else{
-        _this.setState({ downKey: e.keyCode });
-
-      }
- 
-    };
-
     _this.onKeyUp = function(e) {
-      console.log(e.downKey)
       if(e.keyCode === _this.state.downKey){
       _this.setState({ downKey: -1 });
       }
-      // document.body.style.cursor = "auto";
     };
 
     _this.onMouseDown = function() {
@@ -199,119 +166,20 @@ var Cristal = (function(_super) {
       });
     };
 
-    _this.disablePan = function(status) {
-      _this.setState({ panDisabled: status });
-    };
+    _this.manualResize = function(widthDiff, heightDiff){
 
-    _this.disableZoom = function(status) {
-      _this.setState({ zoomDisabled: status });
-    };
+ 
+        var width = _this.state.width, height = _this.state.height, originalHeight = _this.state.originalHeight
 
-    _this.setPos = function(xDiff, yDiff){
-      ipc && ipc.send("edited");
-      _this.setState({ x: this.state.x + xDiff, y:this.state.y + yDiff});
+        _this.setState({width:width+widthDiff})
     }
 
-    _this.pan = function(changeX, changeY) {
+  _this.onWheel = function(e){
+    if(e.ctrlKey){
+      e.preventDefault()
+    }
+  }
 
-      if (_this.state.panDisabled) {
-        return;
-      }
-            ipc && ipc.send("edited");
-      var _a = _this.state,
-        currentX = _a.x,
-        currentY = _a.y;
-      var newX = currentX + changeX;
-      var newY = currentY + changeY;
-      _this.setState({ x: newX, y: newY }, () => _this.onStartMove(true));
-    };
-
-    _this.manualResize = function(widthDiff, heightDiff) {
-      var width = _this.state.width,
-        height = _this.state.height,
-        originalHeight = _this.state.originalHeight;
-
-      _this.setState({ width: width + widthDiff });
-    };
-
-    _this.zoom = function(
-      newScale,
-      mouseX,
-      mouseY,
-      manual = false,
-      center = false
-    ) {
-      if(_this.state.zoomDisabled){
-        return
-      }
-
-      ipc && ipc.send("edited");
-
-      var scale = _this.state.scale,
-        x = _this.state.x,
-        y = _this.state.y,
-        width = _this.state.width,
-        height = _this.state.height;
-
-      if (newScale < 0.1) {
-        return;
-      }
-
-      var curDistX = mouseX - x,
-        curDistY = mouseY - y;
-
-      var unScaledDistX = curDistX / scale,
-        unScaledDistY = curDistY / scale;
-
-      var scaledDistX = unScaledDistX * newScale,
-        scaledDistY = unScaledDistY * newScale;
-
-      if (center) {
-        var newOriginX = window.innerWidth / 2,
-          newOriginY = window.innerHeight / 2;
-      } else {
-        var newOriginX = mouseX,
-          newOriginY = mouseY;
-      }
-      var newX = newOriginX - scaledDistX,
-        newY = newOriginY - scaledDistY;
-
-      if (manual) {
-        _this.setState({ scale: newScale }, () =>
-          _this.setState({ x: newX, y: newY }, () => _this.notifyStopMove())
-        );
-      } else {
-        _this.setState({ scale: newScale }, () =>
-          _this.setState({ x: newX, y: newY }, () => _this.onStartMove(true))
-        );
-      }
-    };
-
-    _this.onWheel = function(e) {
-      if(e.ctrlKey){
-        e.preventDefault()
-      }
-      return
-      // e.preventDefault()
-      if (_this.state.mouseWheelTimeout) {
-        clearTimeout(_this.state.mouseWheelTimeout);
-      }
-      var newTimeOut = setTimeout(_this.onStoppedMove.bind(_this), 250);
-      _this.setState({ mouseWheelTimeout: newTimeOut });
-      if (e.ctrlKey) {
-        e.preventDefault()
-
-        _this.zoom(_this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
-      } else {
-        if (_this.props.panDisabled) {
-          return;
-        }
-        _this.pan(-e.deltaX, -e.deltaY);
-      }
-    };
-    _this.onGlobalMouseDown = function(e) {
-      _this.setState({ mouseIsDown: true });
-    };
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
 
@@ -328,11 +196,7 @@ var Cristal = (function(_super) {
       var newX = currentX + movementX;
       var newY = currentY + movementY;
 
-      if (_this.state.downKey === _this.space && _this.state.mouseIsDown) {
-        _this.pan(e.movementX, e.movementY);
-
-        return;
-      } else if (isDragging) {
+      if (isDragging) {
         ipc && ipc.send("edited");
         var size =
           currentWidth && currentHeight
@@ -351,15 +215,15 @@ var Cristal = (function(_super) {
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
-      var scale = _this.state.scale;
+  
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
         currentY = _a.y,
         currentWidth = _a.width,
         currentHeight = _a.height;
-      var movementX = e.movementX / scale,
-        movementY = e.movementY / scale;
+      var movementX = e.movementX ,
+        movementY = e.movementY ;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
       var newX = currentX + movementX;
@@ -398,11 +262,11 @@ var Cristal = (function(_super) {
       _this.setState({ isMoving: false });
     };
 
-    _this.onStartMove = function(panning = false) {
+    _this.onStartMove = function() {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
         _this.notifyStartMove();
-        if (_this.state.downKey === _this.opt && panning === false) {
+        if (_this.state.downKey === _this.opt) {
           _this.notifyOptMove();
         }
       }
@@ -493,7 +357,7 @@ var Cristal = (function(_super) {
       var isResizable = _this.props.isResizable;
       if (!isResizable) return;
 
-      var scale = _this.state.scale;
+
       var height = _this.state.height;
       var width = _this.state.width;
       return [
@@ -501,37 +365,37 @@ var Cristal = (function(_super) {
           key: "right-resize",
           onMouseDown: _this.startXResize,
           style: {
-            width: 20 / scale,
-            bottom: 20 / scale,
-            height: height - 30 - 20 / scale
+            width: 20,
+            bottom: 20,
+            height: height - 30 - 20
           }
         }),
         React.createElement(LeftResizeHandle, {
           key: "left-resize",
           onMouseDown: _this.startXLeftResize,
           style: {
-            width: 20 / scale,
-            bottom: 20 / scale,
-            height: height - 30 - 20 / scale
+            width: 20,
+            bottom: 20,
+            height: height - 30 - 20
           }
         }),
         React.createElement(BottomRightResizeHandle, {
           key: "bottom-right-resize",
           onMouseDown: _this.startFullResize,
-          style: { width: 20 / scale, height: 20 / scale }
+          style: { width: 20, height: 20 }
         }),
         React.createElement(BottomLeftResizeHandle, {
           key: "bottom-left-resize",
           onMouseDown: _this.startFullLeftResize,
-          style: { width: 20 / scale, height: 20 / scale }
+          style: { width: 20, height: 20 }
         }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
           onMouseDown: _this.startYResize,
           style: {
-            height: 20 / scale,
-            left: 20 / scale,
-            width: width - (2 * 20) / scale
+            height: 20,
+            left: 20,
+            width: width - (2 * 20)
           }
         })
       ];
@@ -552,25 +416,6 @@ var Cristal = (function(_super) {
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
-
-    ipc &&
-      ipc.on("zoomIn", () => {
-        this.zoom(this.state.scale * 2, window.innerWidth/2, window.innerHeight/2,
-          true)
-      })
-
-    ipc &&
-      ipc.on("zoomOut", () => {
-        this.zoom(this.state.scale * .5, window.innerWidth/2, window.innerHeight/2,
-          true)
-      })
-
-      ipc &&
-      ipc.on("zoomActual", () => {
-        this.zoom(1, window.innerWidth/2, window.innerHeight/2,
-          true)
-      })
-
     // window.addEventListener('resize', this.onWindowResize);
   };
   Cristal.prototype.componentWillUnmount = function() {
@@ -582,6 +427,8 @@ var Cristal = (function(_super) {
     document.removeEventListener("wheel", this.onWheel);
     // window.removeEventListener('resize', this.onWindowResize);
   };
+
+
   Object.defineProperty(Cristal.prototype, "isResizing", {
     get: function() {
       var _a = this.state,
@@ -641,7 +488,7 @@ var Cristal = (function(_super) {
           placement="top"
 
           overlay={
-            <Tooltip id="alert" className="picker" style={{fontSize:12 *_this.state.scale}}
+            <Tooltip id="alert" className="picker" style={{fontSize:12}}
                      >
               {tooltipText}
             </Tooltip>
@@ -755,8 +602,7 @@ var Cristal = (function(_super) {
       width = _a.width,
       height = _a.height,
       isDragging = _a.isDragging,
-      zIndex = _a.zIndex,
-      scale = _a.scale;
+      zIndex = _a.zIndex
     var className = this.props.className;
     var isActive = isDragging || isResizing;
     var style = {
