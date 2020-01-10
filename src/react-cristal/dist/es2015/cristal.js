@@ -160,10 +160,9 @@ var Cristal = (function(_super) {
     };
 
     _this.onKeyDown = function(e) {
-
-      if (e.keyCode === _this.space) {
-        document.body.style.cursor = "grab";
-      }
+      // if (e.keyCode === _this.space) {
+      //   document.body.style.cursor = "grab";
+      // }
       if(_this.state.downKey === _this.cmd || _this.state.downKey === _this.ctrl){
   
         if(e.keyCode === _this.zero){
@@ -188,7 +187,7 @@ var Cristal = (function(_super) {
       if(e.keyCode === _this.state.downKey){
       _this.setState({ downKey: -1 });
       }
-      document.body.style.cursor = "auto";
+      // document.body.style.cursor = "auto";
     };
 
     _this.onMouseDown = function() {
@@ -289,6 +288,10 @@ var Cristal = (function(_super) {
     };
 
     _this.onWheel = function(e) {
+      if(e.ctrlKey){
+        e.preventDefault()
+      }
+      return
       // e.preventDefault()
       if (_this.state.mouseWheelTimeout) {
         clearTimeout(_this.state.mouseWheelTimeout);
@@ -762,8 +765,7 @@ var Cristal = (function(_super) {
       width: width,
       height: height,
       zIndex: zIndex,
-      transform: "scale(" + scale.toString() + ")",
-      transformOrigin: "top left",
+      position: "absolute",
       border: this.props.border,
       outline: this.props.outline
     };
@@ -774,8 +776,7 @@ var Cristal = (function(_super) {
       HeaderComponent = null;
     }
 
-    return ReactDOM.createPortal(
-      React.createElement(
+    return React.createElement(
         Wrapper,
         {
           style: style,
@@ -787,9 +788,7 @@ var Cristal = (function(_super) {
         <div>{HeaderComponent}</div>,
         ContentComponent,
         this.renderResizeHandles()
-      ),
-      document.body
-    );
+      )
   };
   Cristal.defaultProps = {
     children: null,

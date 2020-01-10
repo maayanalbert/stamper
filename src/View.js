@@ -66,13 +66,24 @@ export default class View extends Component {
       originCristal: null,
       pickerData: [],
       sideBarWidth: 0,
-      topBarHeight: 0
+      topBarHeight: 0,
+      zoomDisabled:false,
+            mouseWheelTimeout: null,
+            mouseIsDown:false,
+            downKey:-1
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
+    this.onWheel = this.onWheel.bind(this)
+    this.onKeyDown = this.onKeyDown.bind(this)
+    this.onKeyUp = this.onKeyUp.bind(this)
+    this.onMouseDown = this.onMouseDown.bind(this)
+    this.onMouseUp = this.onMouseUp.bind(this)
+    this.onMouseMove = this.onMouseMove.bind(this)
 
     this.newStampMarginVariance = 100;
     this.newStampMargin = 20;
+    this.space = 32;
 
     ipc &&
       ipc.on("writeToView", (event, files) =>
@@ -92,8 +103,134 @@ export default class View extends Component {
 
   componentDidMount() {
     this.loadStamperFile(defaultSetup.getSetup());
-    document.addEventListener("mousedown", this.onGlobalMouseDown);
+  
+    document.addEventListener("wheel", this.onWheel )
+    document.addEventListener("keydown", this.onKeyDown )
+    document.addEventListener("keyup", this.onKeyUp )
+    document.addEventListener("mousedown", this.onMouseDown )
+        document.addEventListener("mouseup", this.onMouseUp )
+       document.addEventListener("mousemove", this.onMouseMove )
   }
+
+  componentWillUnmount(){
+      document.removeEventListener("wheel", this.onWheel )  
+      document.removeEventListener("keydown", this.onKeyDown )
+      document.removeEventListener("keyup", this.onKeyUp )
+          document.removeEventListener("mousedown", this.onMouseDown )
+        document.removeEventListener("mouseup", this.onMouseUp )
+           document.removeEventListener("mousemove", this.onMouseMove )
+  }
+
+  onKeyDown(e){
+        if (e.keyCode === this.space) {
+        document.body.style.cursor = "grab";
+      }
+      this.setState({ downKey: e.keyCode });
+  }
+
+  onKeyUp(e){
+
+      document.body.style.cursor = "auto";
+      if(e.keyCode === this.state.downKey){
+      this.setState({ downKey: -1 });
+      }
+  }
+  onMouseDown(){
+    this.setState({mouseIsDown:true})
+  }
+
+  onMouseUp(){
+    this.setState({mouseIsDown:false})
+  }
+
+  onMouseMove(e){
+    if(this.state.mouseIsDown && this.state.downKey === this.space){
+      this.pan(-e.deltaX, -e.deltaY)
+    }
+  }
+
+
+
+  onWheel(e){
+      if (this.state.mouseWheelTimeout) {
+        clearTimeout(this.state.mouseWheelTimeout);
+      }else{
+        this.onStartMove()
+      }
+      var newTimeOut = setTimeout(this.onStopMove.bind(this), 250);
+      this.setState({ mouseWheelTimeout: newTimeOut });
+
+    if(e.ctrlKey){
+      this.zoom(this.state.scale-e.deltaY *0.01, e.clientX, e.clientY)
+ 
+    }else{
+      this.pan(-e.deltaX, -e.deltaY)
+    }
+  }
+
+  pan(changeX, changeY){
+      if (this.state.panDisabled) {
+        return;
+      }
+            ipc && ipc.send("edited");
+      var a = this.state,
+        currentX = a.originX,
+        currentY = a.originY;
+      var newX = currentX + changeX;
+      var newY = currentY + changeY;
+      this.setState({ originX: newX, originY: newY });
+    };
+
+  zoom(
+      newScale,
+      mouseX,
+      mouseY,
+      manual = false,
+      center = false
+    ) {
+      if(this.state.zoomDisabled){
+        return
+      }
+
+      ipc && ipc.send("edited");
+
+      var scale = this.state.scale,
+        x = this.state.originX,
+        y = this.state.originY
+
+      if (newScale < 0.1) {
+        return;
+      }
+
+      var curDistX = mouseX - x,
+        curDistY = mouseY - y;
+
+      var unScaledDistX = curDistX / scale,
+        unScaledDistY = curDistY / scale;
+
+      var scaledDistX = unScaledDistX * newScale,
+        scaledDistY = unScaledDistY * newScale;
+
+      if (center) {
+        var newOriginX = window.innerWidth / 2,
+          newOriginY = window.innerHeight / 2;
+      } else {
+        var newOriginX = mouseX,
+          newOriginY = mouseY;
+      }
+      var newX = newOriginX - scaledDistX,
+        newY = newOriginY - scaledDistY;
+
+      if (manual) {
+        this.setState({ scale: newScale }, () =>
+          this.setState({ originX: newX, originY: newY })
+        );
+      } else {
+        this.setState({ scale: newScale }, () =>
+          this.setState({ originX: newX, originY: newY })
+        );
+      }
+    };
 
   updateControlBarDimensions(sideBarWidth, topBarHeight) {
     console.log(sideBarWidth, topBarHeight);
@@ -719,20 +856,21 @@ function logToConsole(message, lineno){
   }
 
   disablePan(status) {
-    this.setOriginCristal(status);
+    this.setState({panDisabled:status})
+    // this.setOriginCristal(status);
 
-    Object.values(this.state.fnStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.disablePan(status);
-    });
+    // Object.values(this.state.fnStamps).map(stamp => {
+    //   var cristalRef = stamp.ref.current.cristalRef;
+    //   cristalRef.current && cristalRef.current.disablePan(status);
+    // });
 
-    Object.values(this.state.blobStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.disablePan(status);
-    });
+    // Object.values(this.state.blobStamps).map(stamp => {
+    //   var cristalRef = stamp.ref.current.cristalRef;
+    //   cristalRef.current && cristalRef.current.disablePan(status);
+    // });
 
-    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
-    consoleCristalRef.current && consoleCristalRef.current.disablePan(status);
+    // var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
+    // consoleCristalRef.current && consoleCristalRef.current.disablePan(status);
   }
 
   disableZoom(status) {
@@ -1147,6 +1285,7 @@ stopLooping =setTimeout(() => {
   }
 
   onStopMove(s) {
+    this.setState({mouseWheelTimeout:null})
     var fnStamps = this.state.fnStamps;
     for (var i in fnStamps) {
       var fnStamp = fnStamps[i].ref.current;
@@ -1173,19 +1312,20 @@ stopLooping =setTimeout(() => {
     if (stampRef) {
       var cristalRef = stampRef.cristalRef.current;
       if (cristalRef) {
-        var x = cristalRef.state.x,
-          y = cristalRef.state.y,
+        console.log(cristalRef.state.y)
+        var x = this.state.originX +cristalRef.state.x *this.state.scale,
+          y = this.state.originY + cristalRef.state.y*this.state.scale ,
           width = cristalRef.state.width,
           height = cristalRef.state.height;
 
         var newX =
           (window.innerWidth - xOff) / 2 +
           xOff -
-          (width / 2) * this.state.scale;
+          (width / 2) *this.state.scale
         var newY =
           (window.innerHeight - yOff) / 2 +
           yOff -
-          (height / 2) * this.state.scale;
+          (height / 2) *this.state.scale
 
         this.manualPan(newX - x, newY - y);
         cristalRef.changeZIndex();
@@ -1194,10 +1334,10 @@ stopLooping =setTimeout(() => {
   }
 
   manualPan(xDiff, yDiff) {
-    var oldTransition = $(".stamp").css("transition");
-    $(".stamp").css({ transition: "all .5s ease" });
-    setTimeout(() => $(".stamp").css({ transition: oldTransition }), 500);
 
+    $(".allStamps").css({ transition: "all .5s ease" });
+    setTimeout(() => $(".allStamps").css({ transition: "" }), 500);
+    ipc && ipc.send("edited");
     this.setState(
       {
         originX: this.state.originX + xDiff,
@@ -1207,18 +1347,18 @@ stopLooping =setTimeout(() => {
       () => this.setOriginCristal()
     );
 
-    Object.values(this.state.fnStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
-    });
+    // Object.values(this.state.fnStamps).map(stamp => {
+    //   var cristalRef = stamp.ref.current.cristalRef;
+    //   cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
+    // });
 
-    Object.values(this.state.blobStamps).map(stamp => {
-      var cristalRef = stamp.ref.current.cristalRef;
-      cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
-    });
+    // Object.values(this.state.blobStamps).map(stamp => {
+    //   var cristalRef = stamp.ref.current.cristalRef;
+    //   cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
+    // });
 
-    var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
-    consoleCristalRef.current && consoleCristalRef.current.setPos(xDiff, yDiff);
+    // var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
+    // consoleCristalRef.current && consoleCristalRef.current.setPos(xDiff, yDiff);
   }
 
   toggleHide(stampRef) {
@@ -1301,14 +1441,17 @@ stopLooping =setTimeout(() => {
 
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
-
     return (
       <div>
-        {this.state.originCristal}
-        <div class="row bg-grey" style={{ height: "100vh" }}>
+        <div class="row bg-grey" style={{ height: "100vh"}}>
+        <div className="allStamps"
+        style={{position:"absolute", left:this.state.originX, top:this.state.originY, 
+        transform:"scale(" + this.state.scale+")"}}>
           {elems}
           {consoleElem}
           {this.state.lines}
+          {this.state.originCristal}
+        </div>
         </div>
 
         <ControlBar
