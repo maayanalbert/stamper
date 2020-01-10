@@ -84,6 +84,11 @@ export default class View extends Component {
     this.newStampMarginVariance = 100;
     this.newStampMargin = 20;
     this.space = 32;
+    this.cmd = 91
+    this.ctrl = 17
+    this.plus = 187
+    this.minus = 189
+    this.zero = 48
 
     ipc &&
       ipc.on("writeToView", (event, files) =>
@@ -110,6 +115,28 @@ export default class View extends Component {
     document.addEventListener("mousedown", this.onMouseDown )
         document.addEventListener("mouseup", this.onMouseUp )
        document.addEventListener("mousemove", this.onMouseMove )
+
+    var centerX = window.innerWidth/2 + this.state.topBarHeight
+    var centerY = window.innerHeight/2  + this.state.sideBarWidth
+
+    ipc &&
+      ipc.on("zoomIn", () => {
+        this.zoom(centerX, 
+          window.innerHeight/2,
+          true)
+      })
+
+    ipc &&
+      ipc.on("zoomOut", () => {
+        this.zoom(this.state.scale * .5,centerX, centerY,
+          true)
+      })
+
+      ipc &&
+      ipc.on("zoomActual", () => {
+        this.zoom(1, centerX, centerY,
+          true)
+      })
   }
 
   componentWillUnmount(){
@@ -125,7 +152,25 @@ export default class View extends Component {
         if (e.keyCode === this.space) {
         document.body.style.cursor = "grab";
       }
-      this.setState({ downKey: e.keyCode });
+
+    var centerX = window.innerWidth/2 + this.state.topBarHeight
+    var centerY = window.innerHeight/2  + this.state.sideBarWidth
+      if(this.state.downKey === this.cmd || this.state.downKey === this.ctrl){
+  
+        if(e.keyCode === this.zero){
+           e.preventDefault()
+          this.zoom(1, centerX, centerY, true)
+        }else if(e.keyCode === this.plus){
+           e.preventDefault()
+          this.zoom(this.state.scale * 2, centerX, centerY, true)
+        }else if(e.keyCode === this.minus){
+           e.preventDefault()
+          this.zoom(this.state.scale * .5, centerX, centerY, true)
+        }
+      }else{
+        this.setState({ downKey: e.keyCode });
+
+      }
   
   }
 
@@ -188,9 +233,7 @@ export default class View extends Component {
   zoom(
       newScale,
       mouseX,
-      mouseY,
-      manual = false,
-      center = false
+      mouseY
     ) {
       if(this.state.zoomDisabled){
         return
@@ -215,25 +258,17 @@ export default class View extends Component {
       var scaledDistX = unScaledDistX * newScale,
         scaledDistY = unScaledDistY * newScale;
 
-      if (center) {
-        var newOriginX = window.innerWidth / 2,
-          newOriginY = window.innerHeight / 2;
-      } else {
         var newOriginX = mouseX,
           newOriginY = mouseY;
-      }
+
       var newX = newOriginX - scaledDistX,
         newY = newOriginY - scaledDistY;
 
-      if (manual) {
+    
         this.setState({ scale: newScale }, () =>
           this.setState({ originX: newX, originY: newY })
         );
-      } else {
-        this.setState({ scale: newScale }, () =>
-          this.setState({ originX: newX, originY: newY })
-        );
-      }
+ 
     };
 
   updateControlBarDimensions(sideBarWidth, topBarHeight) {
@@ -407,23 +442,6 @@ function logToConsole(message, lineno){
     } else if (id in this.state.blobStamps) {
       this.state.blobStamps[id].ref.current.addErrorLine(lineNum);
     }
-  }
-
-  manualZoom(newScale, mouseX, mouseY) {
-    if (this.state.scale === 1) {
-      return;
-    }
-
-    Object.values(this.state.fnStamps).map(fnStamp =>
-      fnStamp.ref.current.cristalRef.current.zoom(newScale, mouseX, mouseY)
-    );
-    Object.values(this.state.blobStamps).map(varStamp =>
-      varStamp.ref.current.cristalRef.current.zoom(newScale, mouseX, mouseY)
-    );
-
-    this.state.console.ref.current.zoom(newScale, mouseX, mouseY);
-    this.cristalRef.current.zoom(newScale, mouseX, mouseY);
-    this.setState({ scale: newScale });
   }
 
   setInitialPosition(dimension) {

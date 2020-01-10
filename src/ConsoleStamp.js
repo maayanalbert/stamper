@@ -186,6 +186,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
 
     return (
       <Cristal
+        getScale={this.props.getScale}
        parentID = {this.props.id}
         ref={this.cristalRef}
         closeHidden={true}

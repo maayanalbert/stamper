@@ -151,9 +151,24 @@ var Cristal = (function(_super) {
       _this.headerElement = el;
     };
 
-        _this.onKeyDown = function(e) {
-      _this.setState({ downKey: e.keyCode });
+
+    _this.onKeyDown = function(e) {
+
+
+      if(_this.state.downKey === _this.cmd || _this.state.downKey === _this.ctrl){
   
+        if(e.keyCode === _this.zero){
+           e.preventDefault()
+        }else if(e.keyCode === _this.plus){
+           e.preventDefault()
+        }else if(e.keyCode === _this.minus){
+           e.preventDefault()
+        }
+      }else{
+        _this.setState({ downKey: e.keyCode });
+
+      }
+ 
     };
 
 
@@ -189,7 +204,7 @@ var Cristal = (function(_super) {
 
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
-
+     var scale = _this.props.getScale()
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
@@ -200,8 +215,9 @@ var Cristal = (function(_super) {
         movementY = e.movementY;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
-      var newX = currentX + movementX;
-      var newY = currentY + movementY;
+      var newX = currentX + movementX/scale;
+      var newY = currentY + movementY/scale;
+ 
 
       if (isDragging) {
         ipc && ipc.send("edited");
@@ -222,15 +238,15 @@ var Cristal = (function(_super) {
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
-  
+        var scale = _this.props.getScale()
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
         currentY = _a.y,
         currentWidth = _a.width,
         currentHeight = _a.height;
-      var movementX = e.movementX ,
-        movementY = e.movementY ;
+      var movementX = e.movementX/scale,
+        movementY = e.movementY/scale;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
       var newX = currentX + movementX;
@@ -364,45 +380,45 @@ var Cristal = (function(_super) {
       var isResizable = _this.props.isResizable;
       if (!isResizable) return;
 
-
+      var scale = _this.props.getScale();
       var height = _this.state.height;
       var width = _this.state.width;
       return [
-        React.createElement(RightResizeHandle, {
+React.createElement(RightResizeHandle, {
           key: "right-resize",
           onMouseDown: _this.startXResize,
           style: {
-            width: 20,
-            bottom: 20,
-            height: height - 30 - 20
+            width: 20 / scale,
+            bottom: 20 / scale,
+            height: height - 30 - 20 / scale
           }
         }),
         React.createElement(LeftResizeHandle, {
           key: "left-resize",
           onMouseDown: _this.startXLeftResize,
           style: {
-            width: 20,
-            bottom: 20,
-            height: height - 30 - 20
+            width: 20 / scale,
+            bottom: 20 / scale,
+            height: height - 30 - 20 / scale
           }
         }),
         React.createElement(BottomRightResizeHandle, {
           key: "bottom-right-resize",
           onMouseDown: _this.startFullResize,
-          style: { width: 20, height: 20 }
+          style: { width: 20 / scale, height: 20 / scale }
         }),
         React.createElement(BottomLeftResizeHandle, {
           key: "bottom-left-resize",
           onMouseDown: _this.startFullLeftResize,
-          style: { width: 20, height: 20 }
+          style: { width: 20 / scale, height: 20 / scale }
         }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
           onMouseDown: _this.startYResize,
           style: {
-            height: 20,
-            left: 20,
-            width: width - (2 * 20)
+            height: 20 / scale,
+            left: 20 / scale,
+            width: width - (2 * 20) / scale
           }
         })
       ];

@@ -531,6 +531,7 @@ export default class FunctionStamp extends Component {
     return (
       <div>
         <Cristal
+                getScale={this.props.getScale}
           initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 50}}
           ref={this.cristalRef}
           isResizable={true}

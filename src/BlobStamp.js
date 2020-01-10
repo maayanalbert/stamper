@@ -253,6 +253,7 @@ export default class BlobStamp extends Component {
     return (
       <div>
         <Cristal
+          getScale={this.props.getScale}
          parentID = {this.props.id}
           ref={this.cristalRef}
           onResize={this.resizeEditor.bind(this)}
