@@ -1158,7 +1158,7 @@ loop()
 
 document.addEventListener('mouseleave', () => {
   window.parent.postMessage({type:"loop", message:"stop", id:${id}}, '*')
-stopLooping =setTimeout(() => {
+_stopLooping =setTimeout(() => {
  noLoop() 
 }, 1000)
 });
@@ -1414,7 +1414,6 @@ stopLooping =setTimeout(() => {
         transform:"scale(" + this.state.scale+")"}}>
           {elems}
           {consoleElem}
-
         </div>
         </div>
 

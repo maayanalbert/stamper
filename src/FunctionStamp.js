@@ -325,7 +325,7 @@ export default class FunctionStamp extends Component {
             fontSize: globals.codeSize,
             opacity: 0.5,
             top: 80,
-            right: 25
+            right: 25,
           }}
           class="text-greyText "
         >
@@ -375,6 +375,7 @@ export default class FunctionStamp extends Component {
                 position: "absolute",
                 width: this.state.iframeWidth,
                 height: this.state.iframeHeight,
+                background:"black"
               }}
               hidden={!this.state.iframeDisabled}
             >
