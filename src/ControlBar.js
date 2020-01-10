@@ -436,17 +436,7 @@ return (
         }}
       >
 
-         <a class="row m-1" >
-        <TopButton
-          iconType={DownloadIcon}
-          uniqueClass="upload"
-          iconCallback={() => {
-            this.props.modalManagerRef.current.requestUpload()
-          }}
-          tooltipText="upload project"
-          alignLeft
-        />
- <span style={{width:100}}/>
+
 
         <TopButton
           iconType={DownloadIcon}
@@ -454,10 +444,10 @@ return (
           iconCallback={() => {
             this.props.modalManagerRef.current.requestDownload()
           }}
-          tooltipText="download project"
-          
+          tooltipText="download javascript"
+          alignLeft
         />
-        </a>
+
 
                  
         <div class="row">
