@@ -151,11 +151,24 @@ function noiseWave() {
   parseCode() {
     try {
       var stamps = parser.jsToStamps(this.state.code);
+      var curNumStamps = this.props.getNumStamps()
+
+
+            var callback = () => {
+console.log(curNumStamps)
+
+                this.props.recompileIfEnoughStamps(stamps.fns.length + curNumStamps.fns, 
+              stamps.blobs.length + curNumStamps.blobs)
+
+            }
+
+
+
       stamps.fns.map(data => {
-        this.props.addFnStamp(data);
+        this.props.addFnStamp(data, callback);
       });
       stamps.blobs.map(data => {
-        this.props.addBlobStamp(data);
+        this.props.addBlobStamp(data, callback);
       });
 
       this.setState({ code: "" });
@@ -332,6 +345,8 @@ function noiseWave() {
             }}
           >
             {pickers}
+            <br/>
+            <br/>
           </div>
         </div>
       </Resizable>

@@ -276,6 +276,16 @@ export default class View extends Component {
     this.setState({ sideBarWidth: sideBarWidth, topBarHeight: topBarHeight });
   }
 
+  recompileIfEnoughStamps(numFns, numBlobs){
+    console.log(numFns, numBlobs)
+
+              if(Object.keys(this.state.fnStamps).length === numFns &&
+                Object.keys(this.state.blobStamps).length === numBlobs){
+                this.requestCompile()
+              }
+            
+  }
+
   loadStamperFile(stamperFile) {
     this.setState(
       {
@@ -299,14 +309,8 @@ export default class View extends Component {
           },
           () => {
 
-
-            var callback = () => {
-              if(Object.keys(this.state.fnStamps).length === stamperFile.fns.length &&
-                Object.keys(this.state.blobStamps).length === stamperFile.blobs.length){
-                this.requestCompile()
-              }
-            }
-
+            var callback = () => this.recompileIfEnoughStamps(stamperFile.fns.length, 
+              stamperFile.blobs.length)
             this.addConsoleStamp(stamperFile.console);
             stamperFile.fns.map(data => this.addFnStamp(data, callback));
             stamperFile.blobs.map(data => this.addBlobStamp(data, callback));
@@ -1383,6 +1387,14 @@ stopLooping =setTimeout(() => {
     this.setState({ pickerData: pickerData });
   }
 
+
+  getNumStamps(){
+    return {
+      fns: Object.keys(this.state.fnStamps).length,
+      blobs:Object.keys(this.state.blobStamps).length
+    }
+  }
+
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1407,6 +1419,7 @@ stopLooping =setTimeout(() => {
         </div>
 
         <ControlBar
+        getNumStamps={this.getNumStamps.bind(this)}
         requestCompile = {this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
           addBlobStamp={this.addBlobStamp.bind(this)}
@@ -1418,6 +1431,7 @@ stopLooping =setTimeout(() => {
             this
           )}
           modalManagerRef={this.modalManagerRef}
+          recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
         />
 
         <ModalManager

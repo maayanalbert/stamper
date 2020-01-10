@@ -106,7 +106,7 @@ export default class ModalManager extends Component {
     this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
       this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
         this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
-          this.attemptToReadFile(files, "pls_dont_touch.stamper", "stamper", readDict, () =>{
+          this.attemptToReadFile(files, "stamper.json", "stamper", readDict, () =>{
             this.openFiles(readDict.html, readDict.js, readDict.css, JSON.parse(readDict.stamper))
           })
         })
@@ -122,7 +122,7 @@ var zip = new JSZip();
 zip.file("sketch.js", data.js);
 zip.file("index.html", data.html);
 zip.file("style.css", data.css);
-zip.file("pls_dont_touch.stamper", JSON.stringify(data.stamper));
+zip.file("stamper.json", JSON.stringify(data.stamper));
 zip.generateAsync({type:"blob"})
 .then(function(content) {
     // see FileSaver.js
@@ -169,6 +169,8 @@ zip.generateAsync({type:"blob"})
     });
     newStamper.console = {};
     newStamper.scale = 1;
+    newStamper.originX = 0
+    newStamper.originY = 0
 
     return newStamper;
   }
