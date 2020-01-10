@@ -151,6 +151,13 @@ var Cristal = (function(_super) {
       _this.headerElement = el;
     };
 
+        _this.onKeyDown = function(e) {
+      _this.setState({ downKey: e.keyCode });
+  
+    };
+
+
+
     _this.onKeyUp = function(e) {
       if(e.keyCode === _this.state.downKey){
       _this.setState({ downKey: -1 });
@@ -265,8 +272,8 @@ var Cristal = (function(_super) {
     _this.onStartMove = function() {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
-        _this.notifyStartMove();
         if (_this.state.downKey === _this.opt) {
+        
           _this.notifyOptMove();
         }
       }

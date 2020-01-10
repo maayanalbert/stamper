@@ -193,6 +193,8 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
         onResize={this.resizeConsole.bind(this)}
         initialPosition={{ x: this.state.x, y: this.state.y }}
         onMove={s => this.setState({ x: s.x, y: s.y })}
+                  onStartResize={this.props.onStartMove.bind(this)}
+          onStopResize={this.props.onStopMove.bind(this)}
         className="stamp bg-lightGrey border border-borderGrey shadow-sm"
         icon={this.getIcon()}
         showClear

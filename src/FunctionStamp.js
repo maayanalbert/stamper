@@ -78,6 +78,7 @@ export default class FunctionStamp extends Component {
     }
   }
 
+
   updateLooping(e){
 
 
@@ -533,6 +534,8 @@ export default class FunctionStamp extends Component {
           initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 50}}
           ref={this.cristalRef}
           isResizable={true}
+                    onStartResize={this.props.onStartMove.bind(this)}
+          onStopResize={this.props.onStopMove.bind(this)}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
           onClose={() => this.props.onDelete(this.props.id)}

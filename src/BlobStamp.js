@@ -70,12 +70,19 @@ export default class BlobStamp extends Component {
   toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
+
       this.setState({ hidden: false, savedIframeHeight:this.state.iframeHeight, iframeHeight:0 }, 
-        () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
+        () => {
+              this.editorRef.current.editor.resize();
+                      this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
+        }
+
+
 
       )
 
     } else {
+
       this.setState(
         { hidden: true},
         callback
@@ -95,7 +102,7 @@ export default class BlobStamp extends Component {
         });
       }
     }
-
+              console.log(Math.floor(this.state.editorWidth * this.props.getScale()))
     return (
       <div
         onMouseOut={() => {
@@ -249,6 +256,8 @@ export default class BlobStamp extends Component {
          parentID = {this.props.id}
           ref={this.cristalRef}
           onResize={this.resizeEditor.bind(this)}
+          onStartResize={this.props.onStartMove.bind(this)}
+          onStopResize={this.props.onStopMove.bind(this)}
           isResizable={true}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}

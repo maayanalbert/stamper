@@ -63,7 +63,6 @@ export default class View extends Component {
       originX: 0,
       originY: 0,
       scale: 1,
-      originCristal: null,
       pickerData: [],
       sideBarWidth: 0,
       topBarHeight: 0,
@@ -127,6 +126,7 @@ export default class View extends Component {
         document.body.style.cursor = "grab";
       }
       this.setState({ downKey: e.keyCode });
+  
   }
 
   onKeyUp(e){
@@ -145,8 +145,10 @@ export default class View extends Component {
   }
 
   onMouseMove(e){
-    if(this.state.mouseIsDown && this.state.downKey === this.space){
-      this.pan(-e.deltaX, -e.deltaY)
+
+    if(this.state.mouseIsDown && this.state.downKey == this.space){
+
+      this.pan(e.movementX, e.movementY)
     }
   }
 
@@ -170,6 +172,7 @@ export default class View extends Component {
   }
 
   pan(changeX, changeY){
+
       if (this.state.panDisabled) {
         return;
       }
@@ -234,7 +237,7 @@ export default class View extends Component {
     };
 
   updateControlBarDimensions(sideBarWidth, topBarHeight) {
-    console.log(sideBarWidth, topBarHeight);
+
     this.setState({ sideBarWidth: sideBarWidth, topBarHeight: topBarHeight });
   }
 
@@ -251,7 +254,6 @@ export default class View extends Component {
         consoleId: -1,
         originX: 0,
         originY: 0,
-        originCristal: null
       },
       () => {
         this.setState(
@@ -265,7 +267,7 @@ export default class View extends Component {
             stamperFile.fns.map(data => this.addFnStamp(data));
             stamperFile.blobs.map(data => this.addBlobStamp(data));
 
-            this.setOriginCristal();
+ 
           }
         );
       }
@@ -447,8 +449,7 @@ function logToConsole(message, lineno){
       consoleWidth: globals.defaultEditorWidth,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
-      originX: 0,
-      originY: 0
+
     };
 
     Object.keys(defaults).map(setting => {
@@ -474,20 +475,17 @@ function logToConsole(message, lineno){
 
     var elem = (
       <ConsoleStamp
-        initialScale={this.state.scale}
         ref={ref}
         initialPosition={{ x: x, y: y }}
         id={counter}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
-        initialScale={this.state.scale}
         disablePan={this.disablePan.bind(this)}
         starterConsoleWidth={consoleWidth}
         starterConsoleHeight={consoleHeight}
         addErrorLine={this.addErrorLine.bind(this)}
         initialHidden={data.hidden}
-        initialOriginX={data.originX}
-        initialOriginY={data.originY}
+        getScale={this.getScale.bind(this)}
       />
     );
 
@@ -516,8 +514,6 @@ function logToConsole(message, lineno){
       isHtml: false,
       isCss: false,
       hidden: false,
-      originX: 0,
-      originY: 0
     };
 
     Object.keys(defaults).map(setting => {
@@ -583,13 +579,10 @@ function logToConsole(message, lineno){
         id={counter}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
-        initialOriginX={data.originX}
-        initialOriginY={data.originY}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addFnStamp.bind(this)}
         onDelete={this.onDelete.bind(this)}
-        initialScale={this.state.scale}
         starterIframeWidth={iframeWidth}
         starterIframeHeight={iframeHeight}
         checkAllNames={this.checkAllNames.bind(this)}
@@ -597,10 +590,8 @@ function logToConsole(message, lineno){
         iframeDisabled={iframeDisabled}
         requestCompile={this.requestCompile.bind(this)}
         getHTML={this.getHTML.bind(this)}
-        getScale={() => {
-          return this.state.scale;
-        }}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
+                getScale={this.getScale.bind(this)}
       />
     );
 
@@ -630,8 +621,6 @@ function logToConsole(message, lineno){
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
-      originX: 0,
-      originY: 0,
       codeSize: globals.codeSize
     };
 
@@ -675,18 +664,17 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
-        initialOriginX={data.originX}
-        initialOriginY={data.originY}
+
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addBlobStamp.bind(this)}
         onDelete={this.onDelete.bind(this)}
-        initialScale={this.state.scale}
         disablePan={this.disablePan.bind(this)}
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         requestCompile={this.requestCompile.bind(this)}
         getExportableCode={this.getExportableCode.bind(this)}
+        getScale={this.getScale.bind(this)}
       />
     );
 
@@ -836,25 +824,6 @@ function logToConsole(message, lineno){
     }
   }
 
-  setOriginCristal(panDisabled = false) {
-    var originCristal = (
-      <Cristal
-        parentID={-1}
-        panDisabled={panDisabled}
-        className=" bg-grey"
-        closeHidden
-        headerHidden
-        copyHidden
-        isResizable={false}
-        initialPosition={{ x: this.state.originX, y: this.state.originY }}
-        initialScale={this.state.scale}
-        onStopMove={s =>
-          this.setState({ originX: s.x, originY: s.y, scale: s.scale })
-        }
-      ></Cristal>
-    );
-    this.setState({ originCristal: originCristal });
-  }
 
   disablePan(status) {
     this.setState({panDisabled:status})
@@ -1286,7 +1255,7 @@ stopLooping =setTimeout(() => {
     if (stampRef) {
       var cristalRef = stampRef.cristalRef.current;
       if (cristalRef) {
-        console.log(cristalRef.state.y)
+    
         var x = this.state.originX +cristalRef.state.x *this.state.scale,
           y = this.state.originY + cristalRef.state.y*this.state.scale ,
           width = cristalRef.state.width,
@@ -1316,23 +1285,7 @@ stopLooping =setTimeout(() => {
       {
         originX: this.state.originX + xDiff,
         originY: this.state.originY + yDiff,
-        originCristal: null
-      },
-      () => this.setOriginCristal()
-    );
-
-    // Object.values(this.state.fnStamps).map(stamp => {
-    //   var cristalRef = stamp.ref.current.cristalRef;
-    //   cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
-    // });
-
-    // Object.values(this.state.blobStamps).map(stamp => {
-    //   var cristalRef = stamp.ref.current.cristalRef;
-    //   cristalRef.current && cristalRef.current.setPos(xDiff, yDiff);
-    // });
-
-    // var consoleCristalRef = this.state.consoleStamp.ref.current.cristalRef;
-    // consoleCristalRef.current && consoleCristalRef.current.setPos(xDiff, yDiff);
+      });
   }
 
   toggleHide(stampRef) {
@@ -1351,6 +1304,10 @@ stopLooping =setTimeout(() => {
       }
     }
     return text.substr(0, Math.min(text.length, 15));
+  }
+
+  getScale(){
+    return this.state.scale
   }
 
   setLayerPicker() {
@@ -1421,7 +1378,7 @@ stopLooping =setTimeout(() => {
           {elems}
           {consoleElem}
           {this.state.lines}
-          {this.state.originCristal}
+
         </div>
         </div>
 
