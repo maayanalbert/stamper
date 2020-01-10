@@ -352,7 +352,8 @@ export default class FunctionStamp extends Component {
           className="ml-1 bg-white shadow" 
           onResize={e => {
 
-            this.updateIframeDimensions(e.movementX, e.movementY);
+            this.updateIframeDimensions(e.movementX/this.props.getScale(), 
+              e.movementY/this.props.getScale());
           }}
           onResizeStart={() => {
             this.props.onStartMove();
@@ -527,12 +528,16 @@ export default class FunctionStamp extends Component {
       return <div></div>;
     }
 
-
+    var iframeWidth = this.state.iframeWidth
+    if(this.props.isCss){
+      iframeWidth = 0
+    }
     return (
       <div>
         <Cristal
                 getScale={this.props.getScale}
-          initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 42, height:this.state.iframeWidth + 125}}
+          initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
+            height:this.state.editorHeight + 150}}
           ref={this.cristalRef}
           isResizable={true}
                     onStartResize={this.props.onStartMove.bind(this)}

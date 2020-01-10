@@ -94,8 +94,8 @@ function getPos(body, comment) {
 
 function addBlob(blobStamps, item, rawCode, lastBlobLine, isComment) {
   if (isComment) {
-    if ((item.type = "Block")) {
-      var code = "/*\n" + item.value + "\n*/";
+    if ((item.type === "Block")) {
+      var code = "/*" + item.value + "*/";
     } else {
       var code = "// " + item.value;
     }

@@ -917,7 +917,7 @@ function logToConsole(message, lineno){
       }
     });
 
-    return runnableCode.join("");
+    return runnableCode.join("\n");
   }
 
   getNumLines(code) {
@@ -1319,7 +1319,9 @@ stopLooping =setTimeout(() => {
         if (i === 0) {
           return " ";
         }
+        if(firstN === text.length){
         firstN = i
+        }
       }
     }
     return text.substr(0, Math.min(firstN, 15));

@@ -383,42 +383,59 @@ var Cristal = (function(_super) {
       var scale = _this.props.getScale();
       var height = _this.state.height;
       var width = _this.state.width;
+      var thickness = 5
+      var color = "transparent"
       return [
 React.createElement(RightResizeHandle, {
           key: "right-resize",
           onMouseDown: _this.startXResize,
           style: {
-            width: 20 / scale,
-            bottom: 20 / scale,
-            height: height - 30 - 20 / scale
+            background:color,
+            right:-thickness/2,
+            width: thickness / scale,
+            bottom: thickness / scale,
+            height: height - 30 - thickness / scale
           }
         }),
         React.createElement(LeftResizeHandle, {
           key: "left-resize",
           onMouseDown: _this.startXLeftResize,
           style: {
-            width: 20 / scale,
-            bottom: 20 / scale,
-            height: height - 30 - 20 / scale
+                        background:color,
+            left:-thickness/2,
+            width: thickness / scale,
+            bottom: thickness / scale,
+            height: height - 30 - thickness / scale
           }
         }),
         React.createElement(BottomRightResizeHandle, {
           key: "bottom-right-resize",
           onMouseDown: _this.startFullResize,
-          style: { width: 20 / scale, height: 20 / scale }
+          style: { 
+background:color,
+   right:-thickness/2,
+   bottom:-thickness/2,
+            width: thickness / scale, 
+            height: thickness / scale }
         }),
         React.createElement(BottomLeftResizeHandle, {
           key: "bottom-left-resize",
           onMouseDown: _this.startFullLeftResize,
-          style: { width: 20 / scale, height: 20 / scale }
+          style: { 
+background:color,
+   left:-thickness/2,
+   bottom:-thickness/2,
+            width: thickness / scale, height: thickness / scale }
         }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
           onMouseDown: _this.startYResize,
           style: {
-            height: 20 / scale,
-            left: 20 / scale,
-            width: width - (2 * 20) / scale
+                        background:color,
+            bottom:-thickness/2,
+            height: thickness / scale,
+            left: thickness / scale,
+            width: width - (2 * thickness) / scale
           }
         })
       ];
