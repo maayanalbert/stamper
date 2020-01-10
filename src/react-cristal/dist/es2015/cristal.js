@@ -267,7 +267,7 @@ var Cristal = (function(_super) {
       if (isResizingXLeft) {
         var newWidth = (currentWidth || 0) - movementX;
         var width = Math.max(newWidth, minWidth);
-        var x = currentX + e.movementX;
+        var x = currentX + movementX;
       }
       if (isResizingY) {
         var newHeight = (currentHeight || 0) + movementY;
@@ -305,7 +305,7 @@ var Cristal = (function(_super) {
       var widthDiff = newWidth - _this.state.width;
       var resizeBlocked = false;
       if (onResize) {
-        var resizeBlocked = onResize(widthDiff, heightDiff);
+        var resizeBlocked = onResize(widthDiff, heightDiff, _this.state.x);
       }
       if (!resizeBlocked) {
         _this.setState({ height: newHeight, width: newWidth, x: newX });

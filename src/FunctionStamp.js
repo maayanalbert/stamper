@@ -375,8 +375,6 @@ export default class FunctionStamp extends Component {
                 position: "absolute",
                 width: this.state.iframeWidth,
                 height: this.state.iframeHeight,
-                color: "transparent",
-                background: "black"
               }}
               hidden={!this.state.iframeDisabled}
             >
@@ -468,7 +466,7 @@ export default class FunctionStamp extends Component {
     return data;
   }
 
-  resizeEditor(widthDiff, heightDiff) {
+  resizeEditor(widthDiff, heightDiff, x) {
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
 
@@ -478,7 +476,8 @@ export default class FunctionStamp extends Component {
 
     this.setState({
       editorHeight: height,
-      editorWidth: width
+      editorWidth: width, 
+      x:x
     });
     this.editorRef.current.editor.resize();
   }
@@ -523,6 +522,7 @@ export default class FunctionStamp extends Component {
       bgColor = "bg-htmlCssArea";
     }
 
+
     if (this.state.hidden) {
       return <div></div>;
     }
@@ -532,7 +532,7 @@ export default class FunctionStamp extends Component {
       <div>
         <Cristal
                 getScale={this.props.getScale}
-          initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 50}}
+          initialSize={{width:this.state.iframeWidth + this.state.editorWidth + 42, height:this.state.iframeWidth + 125}}
           ref={this.cristalRef}
           isResizable={true}
                     onStartResize={this.props.onStartMove.bind(this)}

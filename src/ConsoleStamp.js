@@ -161,6 +161,22 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
       }
   }
 
+    resizeConsole(widthDiff, heightDiff, x) {
+    var height = this.state.consoleHeight + heightDiff;
+    var width = this.state.consoleWidth + widthDiff;
+
+    if (height < 0 || width < 0) {
+      return true;
+    }
+
+    this.setState({
+      consoleHeight: height,
+      consoleWidth: width, 
+      x:x
+    });
+    // this.editorRef.current.editor.resize();
+  }
+
   render() {
     var renderedLogs = _.cloneDeep(this.state.logs);
     if (this.state.lastFreq > 1) {
@@ -200,6 +216,8 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
         icon={this.getIcon()}
         showClear
         onClear={this.clearConsole.bind(this)}
+        onResize={this.resizeConsole.bind(this)}
+                  initialSize={{width:this.state.consoleWidth + 22, height:this.state.consoleHeight + 50 }}
       >
         <div
           id="consoleContainer"

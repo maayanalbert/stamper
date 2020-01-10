@@ -102,12 +102,14 @@ export default class BlobStamp extends Component {
         });
       }
     }
-              console.log(Math.floor(this.state.editorWidth * this.props.getScale()))
+  
     return (
       <div
         onMouseOut={() => {
           this.setEditorScrolling(false);
         }}
+
+     
       >
         <AceEditor
           style={{
@@ -195,12 +197,13 @@ export default class BlobStamp extends Component {
     return data;
   }
 
-  resizeEditor(widthDiff, heightDiff) {
+  resizeEditor(widthDiff, heightDiff, x) {
     var height = this.state.editorHeight;
     var width = this.state.editorWidth;
     this.setState({
       editorHeight: height + heightDiff,
-      editorWidth: width + widthDiff
+      editorWidth: width + widthDiff,
+      x:x
     });
     this.editorRef.current.editor.resize();
   }
@@ -267,6 +270,7 @@ export default class BlobStamp extends Component {
           onOptMove={() => this.copyAndOpt(true)}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           onMove={s => this.setState({ x: s.x, y: s.y })}
+          initialSize={{width:this.state.editorWidth + 22, height:this.state.editorHeight + 50 }}
 
           className={
             "stamp shadow-sm bg-jsArea " + border + " vertex" + this.props.id

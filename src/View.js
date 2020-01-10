@@ -1313,15 +1313,16 @@ stopLooping =setTimeout(() => {
   }
 
   getFirstLine(text) {
+    var firstN = text.length
     for (var i = 0; i < text.length; i++) {
       if (text[i] === "\n") {
         if (i === 0) {
           return " ";
         }
-        return text.substr(0, i);
+        firstN = i
       }
     }
-    return text.substr(0, Math.min(text.length, 15));
+    return text.substr(0, Math.min(firstN, 15));
   }
 
   getScale(){
