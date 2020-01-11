@@ -66,7 +66,7 @@ export default class ModalManager extends Component {
         this.setState({
           modalVisible:true,
           modalHeader:"You have unsaved changes",
-          modalContent:"Are you sure you want to close this project and open a new one?",
+          modalContent:"Are you sure you want to close this project?",
           modalButtons:[
                     {text:"cancel", color:"outline-secondary", callback:this.hideModal},
           {text:"yes", color:"outline-primary", callback:() => { ipc && ipc.send("openNewProject"); this.hideModal()}  }]
