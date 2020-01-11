@@ -1439,6 +1439,7 @@ _stopLooping =setTimeout(() => {
           loadStamperFile={this.loadStamperFile.bind(this)}
           getFileData={this.getFileData.bind(this)}
           ref={this.modalManagerRef}
+          loadStamperFile={this.loadStamperFile.bind(this)}
         />
       </div>
     );

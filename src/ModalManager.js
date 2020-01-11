@@ -7,7 +7,19 @@ import LZUTF8 from "lzutf8";
 import JSZip from "jszip";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+
+
+import pf1, {
+  normalFn,
+  commentBlob,
+  varBlob,
+  listenerFns,
+  builtInFns,
+  worlds
+} from "./starterStamps.js";
+
 const { detect } = require("detect-browser");
+var deepEqual = require('deep-equal')
 const browser = detect();
 
 var userAgent = navigator.userAgent.toLowerCase();
@@ -17,6 +29,8 @@ if (userAgent.indexOf(" electron/") > -1) {
 } else {
   var ipc = false;
 }
+
+
 
 export default class ModalManager extends Component {
   constructor(props) {
@@ -52,7 +66,7 @@ export default class ModalManager extends Component {
         this.setState({
           modalVisible:true,
           modalHeader:"You have unsaved changes",
-          modalContent:"Are you sure you want to close this file?",
+          modalContent:"Are you sure you want to close this project and open a new one?",
           modalButtons:[
                     {text:"cancel", color:"outline-secondary", callback:this.hideModal},
           {text:"yes", color:"outline-primary", callback:() => { ipc && ipc.send("openNewProject"); this.hideModal()}  }]
@@ -135,10 +149,52 @@ export default class ModalManager extends Component {
       })
     })
   }
+
+curIsAWorld(){
+  var curStamper = this.props.getFileData().stamper
+  for(var i = 0; i < worlds.length; i++){
+    var worldStamper = worlds[i].data
+    curStamper.scale = worldStamper.scale
+    curStamper.originX = worldStamper.originX 
+    curStamper.originY = worldStamper.originY
+    if(deepEqual(curStamper, worldStamper)){
+      return true
+    }
+  } 
+
+  return false 
+}
+
+requestWorldLoad(newWorldStamper){
+
+  var buttons = []
+  buttons.push({text:"cancel", color:"outline-secondary", callback:this.hideModal})
+  buttons.push(        {text:"yes", color:"outline-primary", callback:() => {
+         this.props.loadStamperFile(newWorldStamper); this.hideModal()  
+       }})
+  if(!ipc){
+    buttons.push({text:"download first", color:"outline-primary", callback:() => {
+         this.requestDownload(); this.props.loadStamperFile(newWorldStamper); this.hideModal()  
+       }})
+  }
+
+
+  if(this.curIsAWorld()){
+    this.props.loadStamperFile(newWorldStamper)
+  }else{
+    this.setState({
+      modalVisible:true, 
+      modalHeader:"This will overwrite your current work",
+      modalContent:"Would you like to load the example anyways?",
+      modalButtons:buttons
+      })
+  }
+
+}
+
   requestDownload(){
     var data = this.props.getFileData();
-            // var blob =  new Blob([js], { type: "text/plain;charset=utf-8" });
-            // saveAs(blob, "sketch.js");
+
 
 var zip = new JSZip();
 zip.file("sketch.js", data.js);
@@ -151,6 +207,7 @@ zip.generateAsync({type:"blob"})
     saveAs(content, "stamper_project.zip");
 });
 
+this.setState({lastDownloaded:data.stamper})
   }
 
   updateStamperJs(js, stamper) {

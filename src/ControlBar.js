@@ -522,7 +522,7 @@ return (
           iconCallback={null}
           dropDownData={worlds.map(world => ({
             name: world.name,
-            callback: () => this.props.loadStamperFile(world.data)
+            callback: () => this.props.modalManagerRef.current.requestWorldLoad(world.data)
           }))}
           tooltipText="overwrite with example"
           alignRight
