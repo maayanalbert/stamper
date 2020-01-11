@@ -88,7 +88,7 @@ module.exports = class FileManager {
       jetpack.readAsync(path + "/sketch.js").then(js => {
         jetpack.readAsync(path + "/style.css").then(css => {
           jetpack
-            .readAsync(path + "/stamper.js", "json")
+            .readAsync(path + "/stamper.txt", "json")
             .then(stamper => {
               // this.openFiles(html, js, css, stamper);
               this.mainWindow.webContents.send("openFiles", {
@@ -156,7 +156,7 @@ module.exports = class FileManager {
     jetpack.writeAsync(this.path + "/style.css", this.css);
     jetpack.writeAsync(this.path + "/index.html", this.html);
     jetpack.writeAsync(
-      this.path + "/stamper.js",
+      this.path + "/stamper.txt",
       JSON.stringify(this.stamper)
     );
   }
