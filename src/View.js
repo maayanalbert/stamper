@@ -28,7 +28,8 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
 import pf1, {
-  starter
+  starter,
+  stamperHeader
 } from "./starterStamps.js";
 
 var _ = require("lodash");
@@ -728,14 +729,17 @@ function logToConsole(message, lineno){
 
     var fileData = {
       html: htmlStamp.ref.current.state.code,
-      stamper: this.getAllData(),
       css: cssStamp.ref.current.state.code,
       js: this.getExportableCode()
     };
 
-        fileData.stamper.compressedJs = LZUTF8.compress(fileData.js, {
+    var stamper = this.getAllData()
+
+    stamper.compressedJs = LZUTF8.compress(fileData.js, {
       outputEncoding: "StorageBinaryString"
     });
+
+    fileData.stamper = stamperHeader + JSON.stringify(stamper)
 
     return fileData;
   }
@@ -1440,6 +1444,7 @@ _stopLooping =setTimeout(() => {
           getFileData={this.getFileData.bind(this)}
           ref={this.modalManagerRef}
           loadStamperFile={this.loadStamperFile.bind(this)}
+          getAllData={this.getAllData.bind(this)}
         />
       </div>
     );

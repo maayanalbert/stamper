@@ -375,7 +375,7 @@ export default class FunctionStamp extends Component {
                 position: "absolute",
                 width: this.state.iframeWidth,
                 height: this.state.iframeHeight,
-                background:"black"
+                background:"transparent"
               }}
               hidden={!this.state.iframeDisabled}
             >

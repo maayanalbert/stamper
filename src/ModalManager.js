@@ -15,7 +15,7 @@ import pf1, {
   varBlob,
   listenerFns,
   builtInFns,
-  worlds
+  worlds, stamperHeader
 } from "./starterStamps.js";
 
 const { detect } = require("detect-browser");
@@ -142,8 +142,8 @@ export default class ModalManager extends Component {
     this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
       this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
         this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
-          this.attemptToReadFile(files, "stamper.json", "stamper", readDict, () =>{
-            this.openFiles(readDict.html, readDict.js, readDict.css, JSON.parse(readDict.stamper))
+          this.attemptToReadFile(files, "stamper.js", "stamper", readDict, () =>{
+            this.openFiles(readDict.html, readDict.js, readDict.css, readDict.stamper)
           })
         })
       })
@@ -151,12 +151,16 @@ export default class ModalManager extends Component {
   }
 
 curIsAWorld(){
-  var curStamper = this.props.getFileData().stamper
+  var curStamper = this.props.getAllData()
+
   for(var i = 0; i < worlds.length; i++){
     var worldStamper = worlds[i].data
+      console.log(curStamper)
+      console.log(worldStamper)
     curStamper.scale = worldStamper.scale
     curStamper.originX = worldStamper.originX 
     curStamper.originY = worldStamper.originY
+    curStamper.compressedJs = worldStamper.compressedJs
     if(deepEqual(curStamper, worldStamper)){
       return true
     }
@@ -200,7 +204,7 @@ var zip = new JSZip();
 zip.file("sketch.js", data.js);
 zip.file("index.html", data.html);
 zip.file("style.css", data.css);
-zip.file("stamper.json", JSON.stringify(data.stamper));
+zip.file("stamper.js", data.stamper);
 zip.generateAsync({type:"blob"})
 .then(function(content) {
     // see FileSaver.js
@@ -255,6 +259,14 @@ this.setState({lastDownloaded:data.stamper})
   }
 
   openFiles(html, js, css = "", stamper, path) {
+
+    if(stamper){
+    stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
+    }
+
+
+    console.log(stamper)
+    console.log("hello")
 
    
     if (html === undefined || js === undefined) {
