@@ -29,6 +29,11 @@ module.exports = class FileManager {
       this.saveFiles(files);
     });
 
+    ipcMain.on("openNewProject", event => {
+
+      this.openNewProject();
+    });
+
     ipcMain.on("updatePath", (event, data) => {
       this.path = data.path;
       this.name = this.path.replace(/^.*[\\\/]/, "");
@@ -36,6 +41,7 @@ module.exports = class FileManager {
     });
 
     ipcMain.on("edited", event => {
+
       this.mainWindow.setTitle(this.name + " - Edited");
       this.edited = true
     });
@@ -51,12 +57,20 @@ module.exports = class FileManager {
   }
 
   onNewProject() {
+    if(this.edited){
+              this.mainWindow.webContents.send("unsavedWarning");
+    }else{
+      this.openNewProject()
+    }
+  }
+
+  openNewProject(){
     this.resetFiles();
 
     this.name = "Untitled";
     this.mainWindow.setTitle(this.name);
 
-    this.mainWindow.webContents.send("resetView");
+    this.mainWindow.webContents.send("resetView");    
   }
 
   onSaveCommand() {
@@ -67,76 +81,6 @@ module.exports = class FileManager {
     }
   }
 
-  // updateStamperJs(js, stamper) {
-  //   if(stamper === undefined){
-  //     var oldJs = ""
-  //   }else{
-  //         var oldJs = LZUTF8.decompress(stamper.compressedJs, {
-  //      inputEncoding: "StorageBinaryString"
-  //    })
-  //   }
-
-  //   if(oldJs === js){
-  //     return stamper
-  //   }
-
-  //     try{
-  //       var newStamper = parser.jsToStamps(js);
-  //     }catch(e){
-  //       throw "Syntax error in Javascript"
-  //     }
-
-  //     newStamper.fns.push({
-  //       name: "style.css",
-  //       args: " ",
-  //       code: "",
-  //       isCss: true
-  //     });
-  //     newStamper.fns.push({
-  //       name: "index.html",
-  //       args: " ",
-  //       code: "",
-  //       isHtml: true
-  //     });
-  //     newStamper.console = {}
-  //     newStamper.scale = 1
-
-  //     return newStamper
-  // }
-  // openFiles(html, js, css = "", stamper) {
-  //   if (html === undefined || js === undefined) {
-  //     dialog.showMessageBox(this.mainWindow, {
-  //       message:
-  //         "Oh no! It looks like you're missing some files. Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
-  //       buttons: ["Ok"]
-  //     });
-  //     return;
-  //   }
-
-  //   try{
-  //     var newStamper = this.updateStamperJs(js, stamper)
-  //   }catch(e){
-  //      dialog.showMessageBox(this.mainWindow, {
-  //       message:
-  //         `Oh no! It looks like your sketch file has a few syntax errors. We can't parse javascript with syntax errors into Stamper land :(`,
-  //       buttons: ["Ok"]
-  //     });
-  //       return
-  //   }
-
-  //     this.stamper = newStamper
-
-  //     this.stamper.fns.map(stamp => {if(stamp.isHtml){stamp.code = html}})
-  //     this.stamper.fns.map(stamp => {if(stamp.isCss){stamp.code = css}})
-
-  //   this.html = html;
-  //   this.js = js;
-  //   this.css = css
-  //   this.name = this.path.replace(/^.*[\\\/]/, "");
-
-  //   this.writeToView();
-  //   this.mainWindow.setTitle(this.name);
-  // }
 
   readOpenedProject(path) {
     // this.path = path
@@ -185,31 +129,7 @@ module.exports = class FileManager {
     });
   }
 
-  // defaultEquals(stamps){
-  //   var editableStamps = _.clone(stamps)
-  //   Object.values(editableStamps.fns).map(stamp =>
-  //   {
-  //     var neededKeys = {code:"", name:"", args:""}
-  //     Object.keys(stamp).map(key => {
-  //       if(key in neededKeys === false){
-  //         delete stamp[key]
-
-  //       }
-  //     })
-  //   })
-
-  //   Object.values(editableStamps.vars).map(stamp =>
-  //   {
-  //     var neededKeys = {code:""}
-  //     Object.keys(stamp).map(key => {
-  //       if(key in neededKeys === false){
-  //         delete stamp[key]
-  //       }
-  //     })
-  //   })
-
-  //     return _.isEqual(this.stamper, editableStamps)
-  // }
+ 
 
   saveFiles(files) {
     if (this.path === undefined) {

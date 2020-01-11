@@ -45,6 +45,21 @@ export default class ModalManager extends Component {
           files.path
         );
       });
+
+    ipc &&
+      ipc.on("unsavedWarning", (event) => {
+
+        this.setState({
+          modalVisible:true,
+          modalHeader:"You have unsaved changes",
+          modalContent:"Are you sure you want to close this file?",
+          modalButtons:[
+                    {text:"cancel", color:"outline-secondary", callback:this.hideModal},
+          {text:"yes", color:"outline-primary", callback:() => { ipc && ipc.send("openNewProject"); this.hideModal()}  }]
+        })
+
+      });
+
       var inputElem = document.createElement('input', {id:"projectInput", type:"file", 
         webkitdirectory:"true", multiple:"true"} )
 
