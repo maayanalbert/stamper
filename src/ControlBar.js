@@ -51,7 +51,6 @@ var _ = require("lodash");
 
 var esprima = require("esprima");
 
-const defaultSetup = require("./defaultSetup.js");
 
 export default class ControlBar extends Component {
   constructor(props) {
@@ -457,7 +456,7 @@ return (
           iconType={DownloadIcon}
           uniqueClass="download"
           iconCallback={() => {
-            this.props.modalManagerRef.current.requestDownload()
+            this.props.modalManagerRef.current.requestUpload()
           }}
           tooltipText="download javascript"
           alignLeft

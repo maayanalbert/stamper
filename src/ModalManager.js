@@ -6,6 +6,7 @@ import parser from "./parser.js";
 import LZUTF8 from "lzutf8";
 import JSZip from "jszip";
 import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 const { detect } = require("detect-browser");
 const browser = detect();
 
@@ -21,19 +22,21 @@ export default class ModalManager extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      modalButtons:[],
       modalVisible: !ipc && browser && browser.name != "chrome",
       modalHeader: "Use Chrome please!",
       modalContent:
-        "Right now, the web version of Stamper is only supported in Google Chrome."
+        "Right now, the web version of Stamper is only supported in Google Chrome.",
     };
     this.inputElem = null
     this.uploadProject = this.uploadProject.bind(this)
+    this.hideModal = this.hideModal.bind(this)
   }
 
   componentDidMount() {
     ipc &&
       ipc.on("openFiles", (event, files) => {
-        console.log(files);
+
         this.openFiles(
           files.html,
           files.js,
@@ -93,14 +96,18 @@ export default class ModalManager extends Component {
         return 
         }catch{
           this.setState({modalVisible:true, modalHeader:"Oh no! It looks like we had trouble reading one of your files.",
-            modalContent:"Check that your index.html, sketch.js, and style.css are properly configured."})
+            modalContent:"Check that your index.html, sketch.js, and style.css are properly configured.",
+                          modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}]})
         }  
       }
     }
+        
+        callback()
 
   }
 
   uploadProject(e){
+
     var files = e.target.files
     var readDict = {}
     this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
@@ -132,10 +139,10 @@ zip.generateAsync({type:"blob"})
   }
 
   updateStamperJs(js, stamper) {
-      console.log("updating stamper")
+  
     if (stamper === undefined) {
       var oldJs = "";
-          console.log("??")
+
     } else {
             console.log(stamper.compressedJs)
 
@@ -176,12 +183,16 @@ zip.generateAsync({type:"blob"})
   }
 
   openFiles(html, js, css = "", stamper, path) {
+
+   
     if (html === undefined || js === undefined) {
+
       this.setState({
         modalVisible: true,
         modalHeader: "Oh no! It looks like you're missing some files.",
         modalContent:
-          "Stamper projects must have an 'index.html' file and a 'sketch.js' file."
+          "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
+                modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
       });
       return;
     }
@@ -194,7 +205,8 @@ zip.generateAsync({type:"blob"})
         modalHeader:
           "Oh no! It looks like your sketch file has a few syntax errors.",
         modalContent:
-          "We can't parse javascript with syntax errors into Stamper land :("
+          "We can't parse javascript with syntax errors into Stamper land :(",
+                modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
       });
       return;
     }
@@ -214,7 +226,16 @@ zip.generateAsync({type:"blob"})
     ipc && ipc.send("updatePath", { path: path });
   }
 
+  hideModal(){
+    this.setState({modalVisible:false})
+  }
+
   render() {
+
+
+
+    var buttonElems = this.state.modalButtons.map((btnData) => (
+      <Button variant={btnData.color} size="sm" onClick={btnData.callback}>{btnData.text}</Button>))
     return (
       <div>
 
@@ -222,12 +243,15 @@ zip.generateAsync({type:"blob"})
           show={this.state.modalVisible}
           style={{ zIndex: 2000000000000000001 }}
           centered
-          onHide={() => this.setState({ modalVisible: false })}
+          onHide={this.hideModal}
         >
           <Modal.Header closeButton>
             <Modal.Title className="name">{this.state.modalHeader}</Modal.Title>
           </Modal.Header>
           <Modal.Body className="picker">{this.state.modalContent} </Modal.Body>
+  <Modal.Footer hidden={buttonElems.length === 0}>
+    {buttonElems}
+  </Modal.Footer>
         </Modal>
       </div>
     );

@@ -23,6 +23,7 @@ module.exports = class FileManager {
     this.css = "";
     this.js = "";
     this.stamper = undefined;
+    this.edited = false
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
@@ -36,6 +37,7 @@ module.exports = class FileManager {
 
     ipcMain.on("edited", event => {
       this.mainWindow.setTitle(this.name + " - Edited");
+      this.edited = true
     });
   }
 
@@ -228,6 +230,7 @@ module.exports = class FileManager {
     this.js = files.js;
     this.css = files.css;
     this.mainWindow.setTitle(this.name);
+    this.edited = false
 
     jetpack.writeAsync(this.path + "/sketch.js", this.js);
     jetpack.writeAsync(this.path + "/style.css", this.css);

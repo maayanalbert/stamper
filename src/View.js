@@ -27,6 +27,10 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
+import pf1, {
+  starter
+} from "./starterStamps.js";
+
 var _ = require("lodash");
 
 var esprima = require("esprima");
@@ -38,8 +42,6 @@ if (userAgent.indexOf(" electron/") > -1) {
 } else {
   var ipc = false;
 }
-
-const defaultSetup = require("./defaultSetup.js");
 
 export default class View extends Component {
   constructor(props) {
@@ -97,7 +99,7 @@ export default class View extends Component {
 
     ipc &&
       ipc.on("resetView", event =>
-        this.loadStamperFile(defaultSetup.getSetup())
+        this.loadStamperFile(starter)
       );
 
     ipc &&
@@ -107,7 +109,7 @@ export default class View extends Component {
   }
 
   componentDidMount() {
-    this.loadStamperFile(defaultSetup.getSetup());
+    this.loadStamperFile(starter);
   
     document.addEventListener("wheel", this.onWheel )
     document.addEventListener("keydown", this.onKeyDown )
