@@ -539,7 +539,7 @@ export default class FunctionStamp extends Component {
       <div>
         <Cristal
         zIndex={this.props.starterZIndex}
-                  onZChange={s => this.setState({zIndex:s.zIndex}, () => console.log(this.state.name))}
+                  onZChange={s => this.setState({zIndex:s.zIndex}, () => console.log(this.state.name, s.zIndex))}
                 getScale={this.props.getScale}
           initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
             height:this.state.editorHeight + 150}}

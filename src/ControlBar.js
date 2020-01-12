@@ -456,7 +456,7 @@ return (
           iconType={DownloadIcon}
           uniqueClass="download"
           iconCallback={() => {
-            this.props.modalManagerRef.current.requestDownload()
+            this.props.modalManagerRef.current.requestUpload()
           }}
           tooltipText="download javascript"
           alignLeft

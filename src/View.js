@@ -1343,16 +1343,19 @@ _stopLooping =setTimeout(() => {
 
   getFirstLine(text) {
     var firstN = text.length
+
     for (var i = 0; i < text.length; i++) {
       if (text[i] === "\n") {
-        if (i === 0) {
-          return " ";
-        }
         if(firstN === text.length){
         firstN = i
         }
       }
     }
+
+    if(firstN === 0){
+      return " "
+    }
+
     return text.substr(0, Math.min(firstN, 15));
   }
 

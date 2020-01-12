@@ -8,6 +8,9 @@ var Stacker = (function () {
         Stacker.maxIndex++;
         return Stacker.maxIndex;
     };
+     Stacker.updateMaxIndex = function (index) {
+        Stacker.maxIndex = Math.max(Stacker.maxIndex, index)
+    };
     Stacker.maxIndex = 100;
     return Stacker;
 }());

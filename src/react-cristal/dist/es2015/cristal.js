@@ -72,8 +72,10 @@ var Cristal = (function(_super) {
   __extends(Cristal, _super);
   function Cristal() {
     var _this = (_super !== null && _super.apply(this, arguments)) || this;
+
     if(_this.props.zIndex){
       var zIndex = _this.props.zIndex
+      Stacker.updateMaxIndex(zIndex)
     }else{
     var zIndex = Stacker.getNextIndex()
     }
@@ -307,7 +309,7 @@ var Cristal = (function(_super) {
       onMove && onMove(_this.state);
     };
     _this.notifyZChange = function() {
- 
+
       var onZChange = _this.props.onZChange;
       onZChange && onZChange(_this.state);
     };

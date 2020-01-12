@@ -4,9 +4,11 @@ var Stacker = (function () {
     function Stacker() {
     }
     Stacker.getNextIndex = function () {
+    	console.log("getting max index")
         Stacker.maxIndex++;
         return Stacker.maxIndex;
     };
+
     Stacker.maxIndex = 100;
     return Stacker;
 }());
