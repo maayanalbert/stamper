@@ -162,6 +162,16 @@ function setMenu() {
             fileManager.onSaveAsCommand();
           },
           accelerator: "Shift+Cmd+S"
+        },
+        {
+          label: "Show current directory...",
+          click() {
+            if(fileManager.path){
+
+            shell.openItem(fileManager.path)
+            }
+          },
+          accelerator: "Cmd+K"
         }
       ]
     })

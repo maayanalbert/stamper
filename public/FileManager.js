@@ -59,7 +59,7 @@ module.exports = class FileManager {
     this.protectUnsaved(this.openNewProject.bind(this))
   }
 
-  protectUnsaved(yesCallBack = () => null, cancelCallback = () => null ){
+  protectUnsaved(yesCallBack = () => null){
     if(this.edited === false){
       yesCallBack()
    
@@ -70,19 +70,19 @@ module.exports = class FileManager {
     }else{
     const options = {
     type: 'question',
-    buttons: ['Cancel', 'Yes'],
-    defaultId: 1,
+    buttons: ['Yes', "Cancel"],
+    defaultId: 0,
     message: 'This is an unsaved project',
     detail: 'Are you sure you want to close it and lose your work?',
   };
 
   dialog.showMessageBox(null, options, (response) => {
 
-    if(response === 1){
+    if(response === 0){
       yesCallBack()
 
     }else{
-      cancelCallback()
+
    
     }
   });
