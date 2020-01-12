@@ -46,7 +46,7 @@ export default class ModalManager extends Component {
     this.inputElem = null
     this.uploadProject = this.uploadProject.bind(this)
     this.hideModal = this.hideModal.bind(this)
-
+    this.sendSaveData = this.sendSaveData.bind(this)
   }
 
 
@@ -97,6 +97,8 @@ export default class ModalManager extends Component {
       inputElem.addEventListener("change", this.uploadProject)
       document.getElementById("root").appendChild(inputElem)
             this.inputElem = inputElem
+
+      window.addEventListener("beforeunload", this.sendSaveData)
 
   }
 
@@ -175,7 +177,7 @@ requestWorldLoad(newWorldStamper){
          this.props.loadStamperFile(newWorldStamper); this.hideModal()  
        }})
   if(!ipc){
-    buttons.push({text:"download first", color:"outline-primary", callback:() => {
+    buttons.push({text:"yes, but download my current project first", color:"outline-primary", callback:() => {
          this.requestDownload(); this.props.loadStamperFile(newWorldStamper); this.hideModal()  
        }})
   }

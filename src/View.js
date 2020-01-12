@@ -119,6 +119,7 @@ export default class View extends Component {
       this.loadStamperFile(starter);
     }
 
+    
 
   
     document.addEventListener("wheel", this.onWheel )
