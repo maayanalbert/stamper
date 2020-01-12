@@ -106,7 +106,20 @@ export default class View extends Component {
   }
 
   componentDidMount() {
-    this.loadStamperFile(starter);
+    // localStorage.clear()
+    if(!ipc){
+      var storedStamper = JSON.parse(localStorage.getItem('storedStamper'));
+      console.log(storedStamper)
+      if(storedStamper){
+        this.loadStamperFile(storedStamper)
+      }else{
+        this.loadStamperFile(starter)
+      }
+    }else{
+      this.loadStamperFile(starter);
+    }
+
+
   
     document.addEventListener("wheel", this.onWheel )
     document.addEventListener("keydown", this.onKeyDown )

@@ -274,7 +274,7 @@ export default class BlobStamp extends Component {
           initialPosition={{ x: this.state.x, y: this.state.y }}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           initialSize={{width:this.state.editorWidth + 22, height:this.state.editorHeight + 50 }}
-          onZChange={s => this.setState({zIndex:s.zIndex}, () => console.log(this.state.code, s.zIndex))}
+          onZChange={s => this.setState({zIndex:s.zIndex})}
           className={
             "stamp shadow-sm bg-jsArea " + border + " vertex" + this.props.id
           }

@@ -198,6 +198,9 @@ requestWorldLoad(newWorldStamper){
   sendSaveData() {
     console.log("SAVING")
     var fileData = this.props.getFileData();
+    var stamper = this.props.getAllData()
+
+    !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamper));
     if (fileData) {
       ipc && ipc.send("save", fileData);
     }
