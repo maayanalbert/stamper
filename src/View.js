@@ -48,6 +48,7 @@ export default class View extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      compiledBefore: false,
       fnStamps: {},
       scale: 1,
       counter: 0,
@@ -102,11 +103,6 @@ export default class View extends Component {
       ipc.on("resetView", event =>
         this.loadStamperFile(starter)
       );
-
-    ipc &&
-      ipc.on("requestSave", (event, rawCode) => {
-        this.sendSaveData();
-      });
   }
 
   componentDidMount() {
@@ -302,6 +298,7 @@ export default class View extends Component {
         consoleId: -1,
         originX: 0,
         originY: 0,
+        compiledBefore:false
       },
       () => {
         this.setState(
@@ -717,6 +714,28 @@ function logToConsole(message, lineno){
     this.setState({ blobStamps: blobStamps }, (counter) => callback(counter));
   }
 
+  checkForSetup() {
+    var newSetupExists = false;
+    var fnStamps = Object.values(this.state.fnStamps);
+    for (var i = 0; i < fnStamps.length; i++) {
+      var fnStampRef = fnStamps[i].ref.current;
+
+      if (fnStampRef.state.name === "setup") {
+        newSetupExists = true;
+      }
+    }
+
+    if (this.state.setupExists && newSetupExists === false) {
+      this.state.consoleStamp.ref.current.logToConsole(
+        `Stamper Error: You don't have a setup. This will constrain your canvas to a default width and height.`
+      );
+    }
+
+    this.setState({ setupExists: newSetupExists });
+
+    return newSetupExists;
+  }
+
   getFileData() {
     if (
       this.state.htmlID in this.state.fnStamps === false ||
@@ -744,35 +763,6 @@ function logToConsole(message, lineno){
     return fileData;
   }
 
-  sendSaveData() {
-    var fileData = this.getFileData();
-    if (fileData) {
-      ipc && ipc.send("save", fileData);
-    }
-  }
-
-  checkForSetup() {
-    var newSetupExists = false;
-    var fnStamps = Object.values(this.state.fnStamps);
-    for (var i = 0; i < fnStamps.length; i++) {
-      var fnStampRef = fnStamps[i].ref.current;
-
-      if (fnStampRef.state.name === "setup") {
-        newSetupExists = true;
-      }
-    }
-
-    if (this.state.setupExists && newSetupExists === false) {
-      this.state.consoleStamp.ref.current.logToConsole(
-        `Stamper Error: You don't have a setup. This will constrain your canvas to a default width and height.`
-      );
-    }
-
-    this.setState({ setupExists: newSetupExists });
-
-    return newSetupExists;
-  }
-
   requestCompile(id) {
 
     // var newTraversalGraph = this.setLineData()
@@ -786,7 +776,11 @@ function logToConsole(message, lineno){
 
     this.checkForSetup();
 
-    this.sendSaveData();
+    if(this.state.compiledBefore === false){
+      this.setState({compiledBefore:true})
+    }else{
+    ipc && ipc.send("edited");
+    }
 
     // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
 
@@ -1441,10 +1435,10 @@ _stopLooping =setTimeout(() => {
 
         <ModalManager
           loadStamperFile={this.loadStamperFile.bind(this)}
-          getFileData={this.getFileData.bind(this)}
           ref={this.modalManagerRef}
           loadStamperFile={this.loadStamperFile.bind(this)}
           getAllData={this.getAllData.bind(this)}
+          getFileData={this.getFileData.bind(this)}
         />
       </div>
     );

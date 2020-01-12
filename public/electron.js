@@ -19,9 +19,11 @@ const defaultMenu = require('electron-default-menu');
 
 let mainWindow;
 let fileManager;
-
+let manualQuit = false
+let manualClose = false
 
 function createWindow() {
+  manualClose = false
   autoUpdater.checkForUpdates();
 
   mainWindow = new BrowserWindow({
@@ -41,14 +43,40 @@ function createWindow() {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.on("closed", () => {
+
+
+
+
     Menu.setApplicationMenu(Menu.buildFromTemplate([]))
     mainWindow = null;
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
+    ipcMain.removeAllListeners("updatePath");
     ipcMain: null;
 
 
   });
+
+mainWindow.on("close", (event) => {
+ 
+
+
+      if(manualClose === false){
+        
+      
+      event.preventDefault()
+
+      fileManager.protectUnsaved( () => {
+        manualClose = true
+        mainWindow.close()
+
+      })
+
+      }
+      
+    });
+
+
 
   setMenu();
 
@@ -61,14 +89,36 @@ function createWindow() {
 }
 
 app.on("ready", createWindow);
+app.on("before-quit", (event) => {
+
+      if(manualQuit === false){
+        
+      
+      event.preventDefault()
+
+      fileManager.protectUnsaved( () => {
+        manualQuit = true
+        app.quit()
+
+      })
+
+      }
+
+    });
+
+
 
 app.on("window-all-closed", () => {
+
   if (process.platform !== "darwin") {
+
     app.quit();
   }
 });
 
 app.on("activate", () => {
+  manualQuit = false
+
   if (mainWindow === null) {
     createWindow();
   }

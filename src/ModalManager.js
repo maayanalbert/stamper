@@ -61,17 +61,8 @@ export default class ModalManager extends Component {
       });
 
     ipc &&
-      ipc.on("unsavedWarning", (event) => {
-
-        this.setState({
-          modalVisible:true,
-          modalHeader:"You have unsaved changes",
-          modalContent:"Are you sure you want to close this project?",
-          modalButtons:[
-                    {text:"cancel", color:"outline-secondary", callback:this.hideModal},
-          {text:"yes", color:"outline-primary", callback:() => { ipc && ipc.send("openNewProject"); this.hideModal()}  }]
-        })
-
+      ipc.on("requestSave", (event, rawCode) => {
+        this.sendSaveData();
       });
 
       var inputElem = document.createElement('input', {id:"projectInput", type:"file", 
@@ -196,6 +187,14 @@ requestWorldLoad(newWorldStamper){
 
 }
 
+
+  sendSaveData() {
+    var fileData = this.props.getFileData();
+    if (fileData) {
+      ipc && ipc.send("save", fileData);
+    }
+  }
+
   requestDownload(){
     var data = this.props.getFileData();
 
@@ -263,10 +262,6 @@ this.setState({lastDownloaded:data.stamper})
     if(stamper){
     stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
     }
-
-
-    console.log(stamper)
-    console.log("hello")
 
    
     if (html === undefined || js === undefined) {

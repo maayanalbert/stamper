@@ -23,16 +23,13 @@ module.exports = class FileManager {
     this.css = "";
     this.js = "";
     this.stamper = undefined;
+    this.pendingCallback = () => null
     this.edited = false
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
     });
 
-    ipcMain.on("openNewProject", event => {
-
-      this.openNewProject();
-    });
 
     ipcMain.on("updatePath", (event, data) => {
       this.path = data.path;
@@ -41,9 +38,9 @@ module.exports = class FileManager {
     });
 
     ipcMain.on("edited", event => {
+      this.edited = true
 
       this.mainWindow.setTitle(this.name + " - Edited");
-      this.edited = true
     });
   }
 
@@ -54,14 +51,42 @@ module.exports = class FileManager {
     this.css = "";
     this.js = "";
     this.stamper = undefined;
+    this.edited = false
   }
 
   onNewProject() {
-    if(this.edited){
-              this.mainWindow.webContents.send("unsavedWarning");
+
+    this.protectUnsaved(this.openNewProject.bind(this))
+  }
+
+  protectUnsaved(yesCallBack = () => null, cancelCallback = () => null ){
+    if(this.edited === false){
+      yesCallBack()
+   
+    }else if(this.path){
+      this.mainWindow.send("requestSave");
+      this.pendingCallback = yesCallBack
+   
     }else{
-      this.openNewProject()
+    const options = {
+    type: 'question',
+    buttons: ['Cancel', 'Yes'],
+    defaultId: 1,
+    message: 'This is an unsaved project',
+    detail: 'Are you sure you want to close it and lose your work?',
+  };
+
+  dialog.showMessageBox(null, options, (response) => {
+
+    if(response === 1){
+      yesCallBack()
+
+    }else{
+      cancelCallback()
+   
     }
+  });
+    }    
   }
 
   openNewProject(){
@@ -157,6 +182,9 @@ module.exports = class FileManager {
     jetpack.writeAsync(
       this.path + "/stamper.js", this.stamper
     );
+
+    this.pendingCallback()
+    this.pendingCallback = () => null
   }
 
   // writeToView() {
