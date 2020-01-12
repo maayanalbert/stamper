@@ -34,7 +34,8 @@ export default class BlobStamp extends Component {
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y,
       hidden: this.props.initialHidden,
-      codeSize:this.props.starterCodeSize
+      codeSize:this.props.starterCodeSize,
+      zIndex:-1
     };
 
     this.cristalRef = React.createRef();
@@ -191,7 +192,8 @@ export default class BlobStamp extends Component {
       x: this.state.x,
       y: this.state.y,
       hidden: this.state.hidden,
-      codeSize:this.state.codeSize
+      codeSize:this.state.codeSize,
+      zIndex:this.state.zIndex
     };
 
     return data;
@@ -256,6 +258,7 @@ export default class BlobStamp extends Component {
     return (
       <div>
         <Cristal
+             zIndex={this.props.starterZIndex}
           getScale={this.props.getScale}
          parentID = {this.props.id}
           ref={this.cristalRef}
@@ -271,7 +274,7 @@ export default class BlobStamp extends Component {
           initialPosition={{ x: this.state.x, y: this.state.y }}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           initialSize={{width:this.state.editorWidth + 22, height:this.state.editorHeight + 50 }}
-
+          onZChange={s => this.setState({zIndex:s.zIndex}, () => console.log(this.state.code))}
           className={
             "stamp shadow-sm bg-jsArea " + border + " vertex" + this.props.id
           }

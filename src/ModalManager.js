@@ -41,13 +41,19 @@ export default class ModalManager extends Component {
       modalHeader: "Use Chrome please!",
       modalContent:
         "Right now, the web version of Stamper is only supported in Google Chrome.",
+      saveInterval:null
     };
     this.inputElem = null
     this.uploadProject = this.uploadProject.bind(this)
     this.hideModal = this.hideModal.bind(this)
+
   }
 
+
+
   componentDidMount() {
+    let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
+    this.setState({saveInterval:saveInterval})
     ipc &&
       ipc.on("openFiles", (event, files) => {
 
@@ -96,6 +102,8 @@ export default class ModalManager extends Component {
 
   componentWillUnmout(){
     this.inputElem.removeEventListener("change", this.uploadProject)
+    clearInterval(this.state.saveInterval)
+    this.setState({saveInterval:null})
   }
 
   requestUpload() {
@@ -146,8 +154,7 @@ curIsAWorld(){
 
   for(var i = 0; i < worlds.length; i++){
     var worldStamper = worlds[i].data
-      console.log(curStamper)
-      console.log(worldStamper)
+
     curStamper.scale = worldStamper.scale
     curStamper.originX = worldStamper.originX 
     curStamper.originY = worldStamper.originY
@@ -189,6 +196,7 @@ requestWorldLoad(newWorldStamper){
 
 
   sendSaveData() {
+    console.log("SAVING")
     var fileData = this.props.getFileData();
     if (fileData) {
       ipc && ipc.send("save", fileData);

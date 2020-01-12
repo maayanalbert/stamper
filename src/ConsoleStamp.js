@@ -27,7 +27,8 @@ export default class ConsoleStamp extends Component {
       lastFreq: 0,
       hidden: this.props.initialHidden,
       x: this.props.initialPosition.x,
-      y: this.props.initialPosition.y
+      y: this.props.initialPosition.y,
+      zIndex:-1
     };
 
     this.cristalRef = React.createRef();
@@ -142,7 +143,8 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
       y: this.state.y,
       consoleWidth: this.state.consoleWidth,
       consoleHeight: this.state.consoleHeight,
-      hidden: this.state.hidden
+      hidden: this.state.hidden,
+      zIndex:this.state.zIndex
     };
 
     return data;
@@ -202,6 +204,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
 
     return (
       <Cristal
+           zIndex={this.props.starterZIndex}
         getScale={this.props.getScale}
        parentID = {this.props.id}
         ref={this.cristalRef}
@@ -215,6 +218,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
         className="stamp bg-lightGrey border border-borderGrey shadow-sm"
         icon={this.getIcon()}
         showClear
+                  onZChange={s => this.setState({zIndex:s.zIndex})}
         onClear={this.clearConsole.bind(this)}
         onResize={this.resizeConsole.bind(this)}
                   initialSize={{width:this.state.consoleWidth + 22, height:this.state.consoleHeight + 50 }}

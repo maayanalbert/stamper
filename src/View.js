@@ -276,8 +276,6 @@ export default class View extends Component {
   }
 
   recompileIfEnoughStamps(numFns, numBlobs){
-    console.log(numFns, numBlobs)
-
               if(Object.keys(this.state.fnStamps).length === numFns &&
                 Object.keys(this.state.blobStamps).length === numBlobs){
                 this.requestCompile()
@@ -481,7 +479,7 @@ function logToConsole(message, lineno){
       consoleWidth: globals.defaultEditorWidth,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
-
+      zIndex:undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -518,6 +516,7 @@ function logToConsole(message, lineno){
         addErrorLine={this.addErrorLine.bind(this)}
         initialHidden={data.hidden}
         getScale={this.getScale.bind(this)}
+        starterZIndex={data.zIndex}
       />
     );
 
@@ -546,6 +545,7 @@ function logToConsole(message, lineno){
       isHtml: false,
       isCss: false,
       hidden: false,
+      zIndex:undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -601,6 +601,7 @@ function logToConsole(message, lineno){
         ref={ref}
         isHtml={isHtml}
         isCss={isCss}
+        starterZIndex={data.zIndex}
         starterCode={code}
         starterArgs={args}
         starterName={name}
@@ -653,7 +654,8 @@ function logToConsole(message, lineno){
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
-      codeSize: globals.codeSize
+      codeSize: globals.codeSize,
+      zIndex:undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -696,7 +698,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
-
+starterZIndex={data.zIndex}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addBlobStamp.bind(this)}
@@ -1191,8 +1193,12 @@ _stopLooping =setTimeout(() => {
       delete blobStamps[id];
     }
 
+
+
     this.refreshFnStamps(fnStamps, () => this.requestCompile(id));
     this.refreshBlobStamps(blobStamps, () => this.requestCompile(id));
+
+
     // this.refreshConsoleStamp(this.state.consoleStamp)
   }
 
@@ -1221,25 +1227,40 @@ _stopLooping =setTimeout(() => {
     return data;
   }
 
-  refreshFnStamps(fnStamps, callback) {
-    // var fnStampData = [];
-    // for (var i in fnStamps) {
-    //   var stamp = fnStamps[i];
-    //   var data = stamp.ref.current.getData();
+  refreshFnStamps(fnStamps,callback) {
+    var data = []
+    Object.values(fnStamps).map( item => {
 
-    //   fnStampData.push(data);
-    // }
-    var fnStamps = _.cloneDeep(this.state.fnStamps)
-    this.setState({ fnStamps: {} }, () => 
-      this.setState({fnStamps:fnStamps}, callback)
-    );
+      data.push( item.ref.current.getData())
+    } )
+
+    this.setState({fnStamps:{}}, ()=>{
+
+      data.map(stampData => {
+        this.addFnStamp(stampData)
+      })
+
+    })
+
   }
 
-  refreshBlobStamps(blobStamps, callback) {
-    var blobStamps = _.cloneDeep(this.state.blobStamps)
-    this.setState({ blobStamps: {} }, () => 
-      this.setState({blobStamps:blobStamps}, callback)
-    );
+  refreshBlobStamps(blobStamps,callback) {
+
+    var data = []
+    Object.values(blobStamps).map( item => {
+
+      data.push( item.ref.current.getData())
+    } )
+
+    this.setState({blobStamps:{}}, ()=>{
+
+      data.map(stampData => {
+        this.addBlobStamp(stampData)
+      })
+
+    })
+
+
   }
 
   onStartMove() {
@@ -1406,6 +1427,7 @@ _stopLooping =setTimeout(() => {
 
     Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
     Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
+
     return (
       <div>
         <div class="row bg-grey" style={{ height: "100vh"}}>

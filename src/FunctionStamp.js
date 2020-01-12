@@ -53,7 +53,8 @@ export default class FunctionStamp extends Component {
       y: this.props.initialPosition.y,
       hidden: this.props.initialHidden,
       looping:false,
-      loopingTransition:""
+      loopingTransition:"",
+      zIndex:-1
     };
 
     this.cristalRef = React.createRef();
@@ -462,7 +463,8 @@ export default class FunctionStamp extends Component {
       isHtml: this.props.isHtml,
       isCss: this.props.isCss,
       hidden: this.state.hidden,
-      exported:true
+      exported:true,
+      zIndex:this.state.zIndex
     };
 
     return data;
@@ -536,6 +538,8 @@ export default class FunctionStamp extends Component {
     return (
       <div>
         <Cristal
+        zIndex={this.props.starterZIndex}
+                  onZChange={s => this.setState({zIndex:s.zIndex}, () => console.log(this.state.name))}
                 getScale={this.props.getScale}
           initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
             height:this.state.editorHeight + 150}}

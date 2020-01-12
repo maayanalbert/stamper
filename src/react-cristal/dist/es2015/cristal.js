@@ -72,6 +72,12 @@ var Cristal = (function(_super) {
   __extends(Cristal, _super);
   function Cristal() {
     var _this = (_super !== null && _super.apply(this, arguments)) || this;
+    if(_this.props.zIndex){
+      var zIndex = _this.props.zIndex
+    }else{
+    var zIndex = Stacker.getNextIndex()
+    }
+
     _this.state = {
       x: padding,
       y: padding,
@@ -79,11 +85,12 @@ var Cristal = (function(_super) {
       isResizingX: false,
       isResizingY: false,
       isResizingXLeft: false,
-      zIndex: Stacker.getNextIndex(),
+      zIndex: zIndex,
       downKey: -1,
       isMoving: false,
       originalHeight: null,
     };
+
 
     _this.opt = 18;
     _this.cmd = 91
@@ -299,6 +306,11 @@ var Cristal = (function(_super) {
       var onMove = _this.props.onMove;
       onMove && onMove(_this.state);
     };
+    _this.notifyZChange = function() {
+ 
+      var onZChange = _this.props.onZChange;
+      onZChange && onZChange(_this.state);
+    };
     _this.notifyResize = function(newWidth, newHeight, newX) {
       var onResize = _this.props.onResize;
       var heightDiff = newHeight - _this.state.height;
@@ -445,8 +457,10 @@ background:color,
       var zIndex = _this.state.zIndex;
       _this.setState({
         zIndex: Stacker.getNextIndex(zIndex)
-      });
+      }, _this.notifyZChange);
+
     };
+
     return _this;
   }
   Cristal.prototype.componentDidMount = function() {
@@ -456,6 +470,8 @@ background:color,
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
+
+    this.notifyZChange()
     // window.addEventListener('resize', this.onWindowResize);
   };
   Cristal.prototype.componentWillUnmount = function() {
