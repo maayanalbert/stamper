@@ -128,7 +128,14 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      this.setState({ iframeCode: this.props.getHTML(this.props.id), looping:true, loopingTransition:"" });
+      if(this.props.isCss){
+        var iframeCode = ""
+      }else{
+        var iframeCode = this.props.getHTML(this.props.id)
+      }
+
+
+      this.setState({ iframeCode: iframeCode, looping:true, loopingTransition:"" });
       for (var i = 0; i < newErrors.length; i++) {
         this.addErrorLine(newErrors[i]);
       }
@@ -199,7 +206,14 @@ export default class FunctionStamp extends Component {
     }
 
     if (this.props.isCss) {
-      mode = "css";
+      var nameArr = this.state.name.split(".")
+      if(nameArr.length > 0){
+     mode = nameArr[nameArr.length -1]
+      }else{
+        mode = ""
+      }
+
+
     } else if (this.props.isHtml) {
       mode = "html";
     }
@@ -273,12 +287,15 @@ export default class FunctionStamp extends Component {
     }
 
     var argsColor = "greyText";
-
+    var namePlaceholder = "function name..."
+    if(this.props.isCss){
+      namePlaceholder = "file name..."
+    }
     return (
       <div>
         <input
-          placeholder="function name..."
-          disabled={this.props.isHtml || this.props.isCss}
+          placeholder={namePlaceholder}
+          disabled={this.props.isHtml}
           onChange={event => {
             this.setState({ name: event.target.value, editsMade: true }, () =>
               this.checkName()
@@ -415,7 +432,7 @@ export default class FunctionStamp extends Component {
   }
 
   copyAndOpt(isOpt = false) {
-    if (this.props.isCss || this.props.isHtml) {
+    if (this.props.isHtml) {
       return;
     }
 
@@ -552,8 +569,8 @@ export default class FunctionStamp extends Component {
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-          closeHidden={this.props.isHtml || this.props.isCss}
-          copyHidden={this.props.isHtml || this.props.isCss}
+          closeHidden={this.props.isHtml}
+          copyHidden={this.props.isHtml}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           className={
             "stamp shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 

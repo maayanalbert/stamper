@@ -54,7 +54,6 @@ export default class View extends Component {
       counter: 0,
       blobStamps: {},
       htmlID: -1,
-      cssID: -1,
       consoleStamp: null,
       setupExists: true,
       htmlAsksForCss: true,
@@ -304,7 +303,6 @@ export default class View extends Component {
         blobStamps: {},
         counter: 0,
         htmlID: -1,
-        cssID: -1,
         scale: 1,
         consoleStamp: null,
         consoleId: -1,
@@ -384,15 +382,50 @@ function logToConsole(message, lineno){
     }`;
   }
 
+
+  replaceFileStamps(parser){
+    Object.values(this.state.fnStamps).map(cssStamp => {
+     
+    if(cssStamp.ref.current.props.isCss){
+      var name =cssStamp.ref.current.state.name
+      var code = cssStamp.ref.current.state.code
+
+
+      var srcNodes = parser(`[src="${name}"]`)
+      for(var i = 0; i < srcNodes.length; i++ ){
+        var singleNode = srcNodes.eq(i)
+        var tagName = srcNodes.get(i).tagName
+        singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`)
+      }
+
+
+
+
+      if(name.endsWith(".js")){
+        parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`)
+      }else if(name.endsWith(".css")){
+        parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`)
+      }
+
+
+
+    }
+
+    })
+
+
+
+
+  }
+
   getHTML(id) {
     if (
-      this.state.htmlID in this.state.fnStamps === false ||
-      this.state.cssID in this.state.fnStamps === false
+      this.state.htmlID in this.state.fnStamps === false
     ) {
       return "";
     }
 
-    if (id === this.state.htmlID || id === this.state.cssID) {
+    if (id === this.state.htmlID) {
       var runnableCode = "";
       var ranges = [];
     } else {
@@ -402,33 +435,26 @@ function logToConsole(message, lineno){
     }
 
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
-    var cssStamp = this.state.fnStamps[this.state.cssID];
+
+
 
     var html = htmlStamp.ref.current.state.code;
 
     const parser = cheerio.load(html, { withStartIndices: true });
+    this.replaceFileStamps(parser)
+
+
+
     var jsBlockStr =
       "<script type='text/javascript'>" + runnableCode + "</script>";
-    var cssBlockStr =
-      "<style>" + cssStamp.ref.current.state.runnableInnerCode + "</style>";
+
     var jsSelector = '[src="sketch.js"]';
-    var cssSelector = '[href="style.css"]';
+
 
     var jsBlock = parser(jsBlockStr);
-    var cssBlock = parser(cssBlockStr);
+
 
     // const start = parser(jsSelector).get(0).startIndex;
-
-    var htmlAsksForCss = parser(cssSelector).length > 0;
-    if (htmlAsksForCss === false && this.state.htmlAsksForCss === true) {
-      this.state.consoleStamp.ref.current.logToConsole(
-        `Stamper Error: Your index.html is missing a div for style.css. Make sure you're linking to style.css and not another stylesheet.`
-      );
-      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1);
-      this.setState({ htmlAsksForCss: htmlAsksForCss });
-    } else if (htmlAsksForCss === true && this.state.htmlAsksForCss === false) {
-      this.setState({ htmlAsksForCss: htmlAsksForCss });
-    }
 
     var htmlAsksForJs = parser(jsSelector).length > 0;
     if (htmlAsksForJs === false && this.state.htmlAsksForJs === true) {
@@ -441,7 +467,7 @@ function logToConsole(message, lineno){
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     }
 
-    parser(cssSelector).replaceWith(cssBlock);
+
 
     parser("head").prepend(
       "<script class='errorListener' >" +
@@ -591,8 +617,8 @@ function logToConsole(message, lineno){
 
     data.iframeDisabled = setIframeDisabled;
 
-    this.createFnStamp(data, callback);
-    this.refreshBlobStamps(this.state.blobStamps);
+    this.createFnStamp(data, () => this.refreshBlobStamps(this.state.blobStamps, callback));
+    // this.refreshBlobStamps(this.state.blobStamps, () => this.createFnStamp(data, callback));
     return newName;
   }
 
@@ -657,8 +683,6 @@ function logToConsole(message, lineno){
 
     if (isHtml) {
       this.setState({ htmlID: counter });
-    } else if (isCss) {
-      this.setState({ cssID: counter });
     }
   }
 
@@ -763,17 +787,14 @@ starterZIndex={data.zIndex}
 
   getFileData() {
     if (
-      this.state.htmlID in this.state.fnStamps === false ||
-      this.state.cssID in this.state.fnStamps === false
+      this.state.htmlID in this.state.fnStamps === false
     ) {
       return;
     }
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
-    var cssStamp = this.state.fnStamps[this.state.cssID];
 
     var fileData = {
       html: htmlStamp.ref.current.state.code,
-      css: cssStamp.ref.current.state.code,
       js: this.getExportableCode()
     };
 
@@ -799,6 +820,7 @@ starterZIndex={data.zIndex}
 
     var duplicateNamedStamps = this.checkAllNames();
 
+
     this.checkForSetup();
 
     if(this.state.compiledBefore === false){
@@ -817,7 +839,6 @@ starterZIndex={data.zIndex}
         var newErrors = [];
         if (
           stampRef.props.id in duplicateNamedStamps &&
-          stampRef.props.isCss === false &&
           stampRef.props.isHtml === false
         ) {
           newErrors.push(0);
@@ -902,7 +923,6 @@ starterZIndex={data.zIndex}
         nameDict[name] += 1;
       }
     });
-
     var duplicateNamedStamps = {};
     Object.values(this.state.fnStamps).map(stamp => {
       if (stamp.ref.current) {
@@ -912,7 +932,7 @@ starterZIndex={data.zIndex}
           duplicateNamedStamps[stamp.ref.current.props.id] = "";
 
           this.state.consoleStamp.ref.current.logToConsole(
-            `Stamper Error: Multiple functions shouldn't have the same name. Consider channging one of your ${name}s to something else.`
+            `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your ${name}s to something else.`
           );
         }
       }
@@ -1052,28 +1072,28 @@ starterZIndex={data.zIndex}
       }
     });
 
-    Object.keys(this.state.fnStamps).map(id => {
-      if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
-        lineData.push([id, setupID]);
-        if (setupID in traversalGraph === false) {
-          traversalGraph[setupID] = [];
-        }
-        traversalGraph[setupID].push(id);
-      }
-    });
+    // Object.keys(this.state.fnStamps).map(id => {
+    //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
+    //     lineData.push([id, setupID]);
+    //     if (setupID in traversalGraph === false) {
+    //       traversalGraph[setupID] = [];
+    //     }
+    //     traversalGraph[setupID].push(id);
+    //   }
+    // });
 
     this.setState({ lineData: lineData }, () => this.setLines());
 
-    Object.keys(this.state.fnStamps).map(id => {
-      if (id != this.state.htmlID && id != this.state.cssID) {
-        if (this.state.htmlID in traversalGraph === false) {
-          traversalGraph[this.state.htmlID] = [];
-        }
-        traversalGraph[this.state.htmlID].push(id);
-      }
-    });
+    // Object.keys(this.state.fnStamps).map(id => {
+    //   if (id != this.state.htmlID && id != this.state.cssID) {
+    //     if (this.state.htmlID in traversalGraph === false) {
+    //       traversalGraph[this.state.htmlID] = [];
+    //     }
+    //     traversalGraph[this.state.htmlID].push(id);
+    //   }
+    // });
 
-    traversalGraph[this.state.cssID] = [this.state.htmlID];
+    // traversalGraph[this.state.cssID] = [this.state.htmlID];
 
     return traversalGraph;
   }
