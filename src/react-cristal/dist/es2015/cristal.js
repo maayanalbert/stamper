@@ -206,7 +206,7 @@ var Cristal = (function(_super) {
     }
 
   _this.onWheel = function(e){
-    console.log("wheelin")
+
     if(e.ctrlKey){
       e.preventDefault()
     }
@@ -473,17 +473,17 @@ background:color,
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
-    var iframeElem = document.getElementById("iframe" + this.props.parentID)
+    // var iframeElem = document.getElementById("iframe" + this.props.parentID)
 
-    if(iframeElem){
-      console.log(iframeElem.contentWindow.document)
-      iframeElem.contentWindow.document.onwheel = function (e) {
+    // if(iframeElem){
+    //   console.log(iframeElem.contentWindow.document)
+    //   iframeElem.contentWindow.document.onwheel = function (e) {
 
-        console.log("wheelin2")
+    //     console.log("wheelin2")
 
 
-      }
-    } 
+    //   }
+    // } 
 
     this.notifyZChange()
     // window.addEventListener('resize', this.onWindowResize);

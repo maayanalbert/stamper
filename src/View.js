@@ -348,12 +348,12 @@ window.onerror = function (message, url, lineno, colno) {
 }
 
 
-document.onwheel = function (e) {
+// document.onwheel = function (e) {
 
-  console.log(document)
+//   console.log(document)
 
 
-}
+// }
 
 function logToConsole(message, lineno){
 
