@@ -109,7 +109,7 @@ export default class View extends Component {
     // localStorage.clear()
     if(!ipc){
       var storedStamper = JSON.parse(localStorage.getItem('storedStamper'));
-      console.log(storedStamper)
+
       if(storedStamper){
         this.loadStamperFile(storedStamper)
       }else{
@@ -1250,7 +1250,7 @@ _stopLooping =setTimeout(() => {
     return data;
   }
 
-  refreshFnStamps(fnStamps,callback) {
+  refreshFnStamps(fnStamps,callback = () => null) {
     var data = []
     Object.values(fnStamps).map( item => {
 
@@ -1265,9 +1265,11 @@ _stopLooping =setTimeout(() => {
 
     })
 
+    callback()
+
   }
 
-  refreshBlobStamps(blobStamps,callback) {
+  refreshBlobStamps(blobStamps,callback = () => null) {
 
     var data = []
     Object.values(blobStamps).map( item => {
@@ -1282,6 +1284,8 @@ _stopLooping =setTimeout(() => {
       })
 
     })
+
+    callback()
 
 
   }

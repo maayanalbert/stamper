@@ -473,17 +473,14 @@ background:color,
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
-    // var iframeElem = document.getElementById("iframe" + this.props.parentID)
+    var iframeElem = document.getElementById("iframe" + this.props.parentID)
 
-    // if(iframeElem){
-    //   console.log(iframeElem.contentWindow.document)
-    //   iframeElem.contentWindow.document.onwheel = function (e) {
-
-    //     console.log("wheelin2")
+    if(iframeElem){
 
 
-    //   }
-    // } 
+      iframeElem.addEventListener("wheel", (e) => console.log(e))
+
+    } 
 
     this.notifyZChange()
     // window.addEventListener('resize', this.onWindowResize);
