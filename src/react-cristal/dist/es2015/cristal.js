@@ -25,7 +25,7 @@ import { Stacker } from "./stacker";
 import styled from "styled-components";
 import DeleteStampIcon from "./../../../icons/trash.svg";
 import CopyIcon from "./../../../icons/copy.svg";
-import ClearConsoleIcon from "./../../../icons/slash.svg";
+import ClearConsoleIcon from "./../../../icons/rotate-ccw.svg";
 import CodeSizeIcon from "./../../../icons/type.svg";
 import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 import "./../../../App.scss";
@@ -206,6 +206,7 @@ var Cristal = (function(_super) {
     }
 
   _this.onWheel = function(e){
+    console.log("wheelin")
     if(e.ctrlKey){
       e.preventDefault()
     }
@@ -472,6 +473,17 @@ background:color,
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
+    var iframeElem = document.getElementById("iframe" + this.props.parentID)
+
+    if(iframeElem){
+      console.log(iframeElem.contentWindow.document)
+      iframeElem.contentWindow.document.onwheel = function (e) {
+
+        console.log("wheelin2")
+
+
+      }
+    } 
 
     this.notifyZChange()
     // window.addEventListener('resize', this.onWindowResize);
@@ -483,6 +495,7 @@ background:color,
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("keyup", this.onKeyUp);
     document.removeEventListener("wheel", this.onWheel);
+
     // window.removeEventListener('resize', this.onWindowResize);
   };
 
@@ -523,7 +536,7 @@ background:color,
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
-      opacity = globals.iconOpacity
+      opacity = opacity * .5
     }
 
 

@@ -22,6 +22,7 @@ import ListenerStampIcon from "./icons/bell.svg";
 import BlobStampIcon from "./icons/code.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
 import DownloadIcon from "./icons/download.svg";
+import UploadIcon from "./icons/upload.svg";
 import WorldsIcon from "./icons/archive.svg";
 import GlobalVarIcon from "./icons/globe.svg";
 import CommentIcon from "./icons/message-square.svg";
@@ -36,7 +37,7 @@ import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
-import Modal from 'react-bootstrap/Modal'
+import Modal from "react-bootstrap/Modal";
 
 import pf1, {
   normalFn,
@@ -51,6 +52,13 @@ var _ = require("lodash");
 
 var esprima = require("esprima");
 
+var userAgent = navigator.userAgent.toLowerCase();
+if (userAgent.indexOf(" electron/") > -1) {
+  const electron = window.require("electron");
+  var ipc = electron.ipcRenderer;
+} else {
+  var ipc = false;
+}
 
 export default class ControlBar extends Component {
   constructor(props) {
@@ -60,11 +68,11 @@ export default class ControlBar extends Component {
     this.minJsImporterHeight = 30;
     this.topBarHeight = 60;
     this.minWidth = 150;
-    this.minNonSideBarWidth = 30
+    this.minNonSideBarWidth = 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
     this.state = {
-      jsImporterHeight:110,
+      jsImporterHeight: 110,
       sideBarWidth: 200,
       pickerHeight:
         window.innerHeight -
@@ -87,17 +95,28 @@ function noiseWave() {
   }
 
   componentDidMount() {
-    this.props.updateControlBarDimensions(this.state.sideBarWidth, this.topBarHeight)
-    window.addEventListener('resize', this.onWindowResize.bind(this));
+    this.props.updateControlBarDimensions(
+      this.state.sideBarWidth,
+      this.topBarHeight
+    );
+    window.addEventListener("resize", this.onWindowResize.bind(this));
   }
   componentWillUnmount() {
-    window.removeEventListener("resize", this.onWindowResize)
+    window.removeEventListener("resize", this.onWindowResize);
   }
 
-  onWindowResize(e){
-    this.setState({pickerHeight: window.innerHeight - (this.topBarHeight + this.importButtonHeight + this.state.jsImporterHeight)})
-    if(this.state.sideBarWidth > window.innerWidth - this.minNonSideBarWidth){
-      this.setState({sideBarWidth: window.innerWidth - this.minNonSideBarWidth})
+  onWindowResize(e) {
+    this.setState({
+      pickerHeight:
+        window.innerHeight -
+        (this.topBarHeight +
+          this.importButtonHeight +
+          this.state.jsImporterHeight)
+    });
+    if (this.state.sideBarWidth > window.innerWidth - this.minNonSideBarWidth) {
+      this.setState({
+        sideBarWidth: window.innerWidth - this.minNonSideBarWidth
+      });
     }
   }
 
@@ -126,13 +145,21 @@ function noiseWave() {
           width={this.state.sideBarWidth}
           onResize={e => {
             var newWidth = this.state.sideBarWidth + e.movementX;
-            if (newWidth > this.minWidth && newWidth <= window.innerWidth - this.minNonSideBarWidth) {
+            if (
+              newWidth > this.minWidth &&
+              newWidth <= window.innerWidth - this.minNonSideBarWidth
+            ) {
               this.setState({ sideBarWidth: newWidth }, () =>
                 this.editorRef.current.editor.resize()
               );
             }
           }}
-          onResizeStop={e => this.props.updateControlBarDimensions(this.state.sideBarWidth, this.topBarHeight)}
+          onResizeStop={e =>
+            this.props.updateControlBarDimensions(
+              this.state.sideBarWidth,
+              this.topBarHeight
+            )
+          }
           height={window.innerHeight - this.topBarHeight}
           axis="x"
           handle={this.renderSideBarResizeHandle()}
@@ -150,18 +177,16 @@ function noiseWave() {
   parseCode() {
     try {
       var stamps = parser.jsToStamps(this.state.code);
-      var curNumStamps = this.props.getNumStamps()
+      var curNumStamps = this.props.getNumStamps();
 
+      var callback = () => {
+        console.log(curNumStamps);
 
-            var callback = () => {
-console.log(curNumStamps)
-
-                this.props.recompileIfEnoughStamps(stamps.fns.length + curNumStamps.fns, 
-              stamps.blobs.length + curNumStamps.blobs)
-
-            }
-
-
+        this.props.recompileIfEnoughStamps(
+          stamps.fns.length + curNumStamps.fns,
+          stamps.blobs.length + curNumStamps.blobs
+        );
+      };
 
       stamps.fns.map(data => {
         this.props.addFnStamp(data, callback);
@@ -194,7 +219,7 @@ console.log(curNumStamps)
                 this.topBarHeight +
                 this.importButtonHeight),
             background: "transparent",
-            fontFamily: 'Inconsolata',
+            fontFamily: "Inconsolata"
           }}
           mode="javascript"
           theme="p5"
@@ -255,14 +280,12 @@ console.log(curNumStamps)
     this.props.pickerData.map(item => {
       if (item.status) {
         var iconType = VisibilityIcon;
-        var iconNameCallback =                   () =>
-                    centerCallback(this.state.sideBarWidth, this.topBarHeight)
-             
+        var iconNameCallback = () =>
+          centerCallback(this.state.sideBarWidth, this.topBarHeight);
       } else {
         var iconType = VisibilityOffIcon;
-        var iconNameCallback = null
+        var iconNameCallback = null;
       }
-
 
       var overalOpacity = 1;
       var centerCallback = item.centerCallback;
@@ -278,23 +301,25 @@ console.log(curNumStamps)
               style={{ opacity: overalOpacity }}
               class="d-flex justify-content-between p-1 pl-2 pr-3"
             >
-              <div clas="row border-bottom" style={{ overflow: "hidden" }}
-                                onClick={() =>
-                    centerCallback(this.state.sideBarWidth, this.topBarHeight)
-                  }>
+              <div
+                clas="row border-bottom"
+                style={{ overflow: "hidden" }}
+                onClick={() =>
+                  centerCallback(this.state.sideBarWidth, this.topBarHeight)
+                }
+              >
                 {this.createIcon(
                   "type" + item.id.toString(),
                   item.icon,
                   iconNameCallback,
-                         item.name
+                  item.name
                 )}
-
               </div>
 
               {this.createIcon(
                 "hide" + item.id.toString(),
                 iconType,
-                item.hideCallback,
+                item.hideCallback
               )}
             </div>
           </div>
@@ -322,7 +347,10 @@ console.log(curNumStamps)
                   +this.importButtonHeight)
           ) {
             this.setState(
-              { pickerHeight: this.state.pickerHeight + e.movementY, jsImporterHeight:this.state.jsImporterHeight - e.movementY },
+              {
+                pickerHeight: this.state.pickerHeight + e.movementY,
+                jsImporterHeight: this.state.jsImporterHeight - e.movementY
+              },
               () => this.editorRef.current.editor.resize()
             );
           }
@@ -344,51 +372,58 @@ console.log(curNumStamps)
             }}
           >
             {pickers}
-            <br/>
-            <br/>
+            <br />
+            <br />
           </div>
         </div>
       </Resizable>
     );
   }
 
-  createIcon(
-    uniqueClass,
-    iconType,
-    hideCallback = null,
-    text
-  ) {
-   
+  createIcon(uniqueClass, iconType, hideCallback = null, text) {
     var mouseOverCallback = () => {
       $("." + uniqueClass + "Icon").css({ opacity: "1" });
-      $("." + uniqueClass + "Text").removeClass("text-greyText").addClass("text-greyIcon");
+      $("." + uniqueClass + "Text")
+        .removeClass("text-greyText")
+        .addClass("text-greyIcon");
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass + "Icon").css({ opacity:globals.iconOpacity });
-      $("." + uniqueClass + "Text").addClass("text-greyText").removeClass("text-greyIcon");
+      $("." + uniqueClass + "Icon").css({ opacity: globals.iconOpacity });
+      $("." + uniqueClass + "Text")
+        .addClass("text-greyText")
+        .removeClass("text-greyIcon");
     };
     if (!hideCallback) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
     }
-    if(text){
-return (
-<div onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}>
-      {React.createElement("img", {
-      style: { height: globals.iconSize, opacity:globals.iconOpacity, width: globals.iconSize },
-      className: " m-1 text-greyIcon " + uniqueClass + "Icon",
-      onClick: hideCallback,
-      src: iconType
-    })}
-        <b class={"text-greyText picker ml-1 " + uniqueClass + "Text"}>
-          {text}
-        </b>
-      </div>)
+    if (text) {
+      return (
+        <div onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}>
+          {React.createElement("img", {
+            style: {
+              height: globals.iconSize,
+              opacity: globals.iconOpacity,
+              width: globals.iconSize
+            },
+            className: " m-1 text-greyIcon " + uniqueClass + "Icon",
+            onClick: hideCallback,
+            src: iconType
+          })}
+          <b class={"text-greyText picker ml-1 " + uniqueClass + "Text"}>
+            {text}
+          </b>
+        </div>
+      );
     }
 
     return React.createElement("img", {
-      style: { height: globals.iconSize, opacity:globals.iconOpacity, width: globals.iconSize },
+      style: {
+        height: globals.iconSize,
+        opacity: globals.iconOpacity,
+        width: globals.iconSize
+      },
       className: " m-1 text-greyIcon " + uniqueClass + "Icon",
       onClick: hideCallback,
       onMouseOver: mouseOverCallback,
@@ -449,37 +484,47 @@ return (
           zIndex: 1000000000000000001
         }}
       >
+        <span style={{ width: 50 }} hidden={!ipc} />
+        <div class="row ml-1" hidden={ipc}>
+          <TopButton
+  
+            iconType={UploadIcon}
+            uniqueClass="upload"
+            iconCallback={() => {
+              this.props.modalManagerRef.current.requestUpload();
+            }}
+            tooltipText="upload project"
+            alignLeft
+          />
+          <span style={{ width: 100 }} />
+          <TopButton
 
+            iconType={DownloadIcon}
+            uniqueClass="download"
+            iconCallback={() => {
+              this.props.modalManagerRef.current.requestUpload();
+            }}
+            tooltipText="download project"
+          />
+        </div>
 
-
-        <TopButton
-          iconType={DownloadIcon}
-          uniqueClass="download"
-          iconCallback={() => {
-            this.props.modalManagerRef.current.requestUpload()
-          }}
-          tooltipText="download javascript"
-          alignLeft
-        />
-
-
-                 
         <div class="row">
           <TopButton
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addFnStamp(normalFn, (id) => this.props.requestCompile(id))
+              this.props.addFnStamp(normalFn, id =>
+                this.props.requestCompile(id)
+              )
             }
             dropDownData={builtInFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(data, (id) => this.props.requestCompile(id))
+                this.props.addFnStamp(data, id => this.props.requestCompile(id))
             }))}
             tooltipText="function"
           />
-          <span style={{width:50}}/>
-
+          <span style={{ width: 50 }} />
 
           <TopButton
             iconType={ListenerStampIcon}
@@ -488,32 +533,34 @@ return (
             dropDownData={listenerFns.map(data => ({
               name: data.name,
               callback: () =>
-                this.props.addFnStamp(data, (id) => this.props.requestCompile(id))
+                this.props.addFnStamp(data, id => this.props.requestCompile(id))
             }))}
             tooltipText="listener"
           />
 
-                  <span style={{width:50}}/>
+          <span style={{ width: 50 }} />
 
           <TopButton
-            iconType={ BlobStampIcon}
+            iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(varBlob, (id) => this.props.requestCompile(id))
+              this.props.addBlobStamp(varBlob, id =>
+                this.props.requestCompile(id)
+              )
             }
             tooltipText="global variable"
           />
-        <span style={{width:50}}/>
+          <span style={{ width: 50 }} />
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="commentStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(commentBlob, (id) => this.props.requestCompile(id))
+              this.props.addBlobStamp(commentBlob, id =>
+                this.props.requestCompile(id)
+              )
             }
             tooltipText="comment"
           />
-
-
         </div>
 
         <TopButton
@@ -522,14 +569,12 @@ return (
           iconCallback={null}
           dropDownData={worlds.map(world => ({
             name: world.name,
-            callback: () => this.props.modalManagerRef.current.requestWorldLoad(world.data)
+            callback: () =>
+              this.props.modalManagerRef.current.requestWorldLoad(world.data)
           }))}
           tooltipText="overwrite with example"
           alignRight
         />
-
-
-
       </div>
     );
   }
@@ -565,25 +610,31 @@ class TopButton extends Component {
   createIcon(iconType, callback, givenUniqueClass, size) {
     var uniqueClass = givenUniqueClass;
     var mouseOverCallback = () => {
+// $(".tooltip" + givenUniqueClass).addClass("text-black")
+//         .removeClass("text-greyText");
 
-        this.setState({ mouseOverDropDown: true }, () =>
-          $("." + uniqueClass).css({ opacity: "1" })
-        );
-
+      this.setState({ mouseOverDropDown: true }, () =>
+        $("." + uniqueClass).css({ opacity: "1" })
+      );
     };
 
     var mouseOutCallback = () => {
 
-        this.setState(
-          { mouseOverDropDown: false },
+// $(".tooltip" + givenUniqueClass).addClass("text-greyText")
+//         .removeClass("text-black");
 
-          () => {
-            if (this.state.down === false || (iconType != ExpandMoreIcon && this.props.iconCallback) ) {
-              $("." + uniqueClass).css({ opacity: globals.iconOpacity });
-            }
+      this.setState(
+        { mouseOverDropDown: false },
+
+        () => {
+          if (
+            this.state.down === false ||
+            (iconType != ExpandMoreIcon && this.props.iconCallback)
+          ) {
+            $("." + uniqueClass).css({ opacity: globals.iconOpacity });
           }
-        );
-
+        }
+      );
     };
 
     if (!callback) {
@@ -607,26 +658,34 @@ class TopButton extends Component {
     }
 
     var dropDowns = this.props.dropDownData.map(data => (
-
       <div
         class={
           this.props.uniqueClass +
           data.name +
           " picker text-greyText p-2 pl-3 pr-3"
         }
-        onMouseOver={() => { if(!data.name){return}
+        onMouseOver={() => {
+          if (!data.name) {
+            return;
+          }
           this.setState({ mouseOverDropDown: true });
           $("." + this.props.uniqueClass + data.name).css({
             background: "rgb(240, 240, 240)"
           });
         }}
-        onMouseOut={() => {if(!data.name){return}
+        onMouseOut={() => {
+          if (!data.name) {
+            return;
+          }
           this.setState({ mouseOverDropDown: false });
           $("." + this.props.uniqueClass + data.name).css({
             background: "transparent"
           });
         }}
-        onClick={() => {if(!data.name){return}
+        onClick={() => {
+          if (!data.name) {
+            return;
+          }
           data.callback();
           this.setState({ down: false });
         }}
@@ -649,50 +708,59 @@ class TopButton extends Component {
     );
   }
 
-
-  renderTooltip(){
-    if(this.props.alignRight){
-      return(
-
-      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"1", position:"absolute", right:15, top:5,
-      transition:"all .2s ease-out"}}
-      >
-      {this.props.tooltipText}</div>
-
-        )
+  renderTooltip() {
+    if (this.props.alignRight) {
+      return (
+        <div
+          class={"picker text-greyText tooltip" + this.props.uniqueClass}
+          style={{
+            opacity: "1",
+            position: "absolute",
+            right: 15,
+            top: 5,
+            transition: "all .2s ease-out"
+          }}
+        >
+          {this.props.tooltipText}
+        </div>
+      );
     }
 
-    if(this.props.alignLeft){
-      return(
-
-      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"1", position:"absolute", left:15, top:5,
-      transition:"all .2s ease-out"}}
-      >
-      {this.props.tooltipText}</div>
-
-        )
+    if (this.props.alignLeft) {
+      return (
+        <div
+          class={"picker text-greyText tooltip" + this.props.uniqueClass}
+          style={{
+            opacity: "1",
+            position: "absolute",
+            left: 15,
+            top: 5
+          }}
+        >
+          {this.props.tooltipText}
+        </div>
+      );
     }
 
-    var offset = "-138px"
-    if(this.props.dropDownData){
-      var offset = "-133px"
+    var offset = "-138px";
+    if (this.props.dropDownData) {
+      var offset = "-133px";
     }
-    return(
-      <div style = {{position:"absolute", top:5}}>
-      <div style={{position:"absolute", width:300, left:offset}} >
-      <div class={"picker text-greyText tooltip" + this.props.uniqueClass}
-      style={{opacity:"1", textAlign:"center",
-      transition:"all .2s ease-out"}}
-      >
-      {this.props.tooltipText}</div>
+    return (
+      <div style={{ position: "absolute", top: 5 }}>
+        <div style={{ position: "absolute", width: 300, left: offset }}>
+          <div
+            class={"picker text-greyText tooltip" + this.props.uniqueClass}
+            style={{
+              opacity: "1",
+              textAlign: "center"
+            }}
+          >
+            {this.props.tooltipText}
+          </div>
+        </div>
       </div>
-      </div>
-     
-  
-    )
-
+    );
   }
   render() {
     if (this.state.down) {
@@ -715,33 +783,22 @@ class TopButton extends Component {
       );
     }
 
-          // onMouseOver={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "1"})}
-      // onMouseOut={() => $(".tooltip" + this.props.uniqueClass).css({opacity: "0"})}
 
     return (
-      <div class="m-3 mt-4"
+      <div class="m-3 mt-4">
+        {this.renderTooltip()}
+        <div>
+          {this.createIcon(
+            this.props.iconType,
+            this.props.iconCallback,
+            this.props.uniqueClass,
+            20
+          )}
 
-      >
-
-            {this.renderTooltip()}
-              <div
-
-
-              >
-
-            {this.createIcon(
-              this.props.iconType,
-              this.props.iconCallback,
-              this.props.uniqueClass,
-              20
-            )}
-
-            {expandButton}
-          </div>
-     
+          {expandButton}
+        </div>
 
         {this.renderDropDowns()}
-
       </div>
     );
   }

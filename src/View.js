@@ -347,6 +347,14 @@ window.onerror = function (message, url, lineno, colno) {
   logToConsole(message, lineno)
 }
 
+
+document.onwheel = function (e) {
+
+  console.log(document)
+
+
+}
+
 function logToConsole(message, lineno){
 
       var adjLineNum = -1
@@ -453,11 +461,12 @@ function logToConsole(message, lineno){
     }
 
     parser(".errorListener").replaceWith(
-      "<script class='errorListener' >" +
+      `<script class='errorListener'>` +
         this.getIframeErrorCallBack(ranges, linesToJs) +
         "</script>"
     );
     parser(jsSelector).replaceWith(jsBlock);
+
     return parser.html();
   }
 

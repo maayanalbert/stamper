@@ -5,7 +5,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
-import ConsoleStampIcon from "./icons/printer.svg";
+import ConsoleStampIcon from "./icons/message-square.svg";
 
 var _ = require("lodash");
 
@@ -33,11 +33,11 @@ export default class ConsoleStamp extends Component {
 
     this.cristalRef = React.createRef();
     this.limit = 100
+    this.receiveMessage = this.receiveMessage.bind(this)
   }
 
-  componentDidMount() {
-    window.addEventListener("message", e => {
-      if(e.data.type != "error"){
+  receiveMessage(e){
+     if(e.data.type != "error"){
         return
       }
       this.logToConsole(e.data.message);
@@ -47,7 +47,14 @@ export default class ConsoleStamp extends Component {
       var id = e.data.id;
 
       this.props.addErrorLine(lineNum, id);
-    });
+  }
+
+  componentDidMount() {
+    window.addEventListener("message", this.receiveMessage);
+  }
+
+  componentWillUnmount(){
+    window.removeEventListener("message", this.receiveMessage);
   }
 
   clearConsole() {
