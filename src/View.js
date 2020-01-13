@@ -386,7 +386,7 @@ function logToConsole(message, lineno){
   replaceFileStamps(parser){
     Object.values(this.state.fnStamps).map(cssStamp => {
      
-    if(cssStamp.ref.current.props.isCss){
+    if(cssStamp.ref.current.props.isFile){
       var name =cssStamp.ref.current.state.name
       var code = cssStamp.ref.current.state.code
 
@@ -592,7 +592,7 @@ function logToConsole(message, lineno){
       iframeWidth: globals.defaultIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
-      isCss: false,
+      isFile: false,
       hidden: false,
       zIndex:undefined
     };
@@ -636,7 +636,7 @@ function logToConsole(message, lineno){
       iframeWidth = data.iframeWidth,
       iframeHeight = data.iframeHeight,
       isHtml = data.isHtml,
-      isCss = data.isCss,
+      isFile = data.isFile,
       hidden = data.hidden;
 
     const release = await this.counterMutex.acquire();
@@ -650,7 +650,7 @@ function logToConsole(message, lineno){
       <FunctionStamp
         ref={ref}
         isHtml={isHtml}
-        isCss={isCss}
+        isFile={isFile}
         starterZIndex={data.zIndex}
         starterCode={code}
         starterArgs={args}
@@ -865,7 +865,7 @@ starterZIndex={data.zIndex}
 
         if (
           stampRef.props.id in duplicateNamedStamps &&
-          stampRef.props.isCss === false &&
+          stampRef.props.isFile === false &&
           stampRef.props.isHtml === false
         ) {
           newErrors.push(0);
@@ -896,7 +896,7 @@ starterZIndex={data.zIndex}
 
       if (
         stampRef.props.id in duplicateNamedStamps &&
-        stampRef.props.isCss === false &&
+        stampRef.props.isFile === false &&
         stampRef.props.isHtml === false
       ) {
         newErrors.push(0);
@@ -971,7 +971,7 @@ starterZIndex={data.zIndex}
 
     Object.values(this.state.fnStamps).map(stamp => {
       if (
-        stamp.ref.current.props.isCss === false &&
+        stamp.ref.current.props.isFile === false &&
         stamp.ref.current.props.isHtml === false
       ) {
         var state = stamp.ref.current.state;
@@ -1129,7 +1129,7 @@ starterZIndex={data.zIndex}
     Object.values(this.state.fnStamps).map(stamp => {
       if (
         stamp.ref.current.state.name != "draw" &&
-        stamp.ref.current.props.isCss === false &&
+        stamp.ref.current.props.isFile === false &&
         stamp.ref.current.props.isHtml === false &&
         (this.isListener(stamp.ref.current.state.name) === false ||
           this.isListener(this.state.fnStamps[id].ref.current.state.name) ===

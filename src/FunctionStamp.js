@@ -128,7 +128,7 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      if(this.props.isCss){
+      if(this.props.isFile){
         var iframeCode = ""
       }else{
         var iframeCode = this.props.getHTML(this.props.id)
@@ -201,11 +201,11 @@ export default class FunctionStamp extends Component {
 
     var theme = "p5";
     var mode = "javascript";
-    if (this.props.isHtml || this.props.isCss) {
+    if (this.props.isHtml || this.props.isFile) {
       theme = "solarized_light";
     }
 
-    if (this.props.isCss) {
+    if (this.props.isFile) {
       var nameArr = this.state.name.split(".")
       if(nameArr.length > 0){
      mode = nameArr[nameArr.length -1]
@@ -282,13 +282,13 @@ export default class FunctionStamp extends Component {
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
-    } else if (this.props.isHtml || this.props.isCss) {
+    } else if (this.props.isHtml || this.props.isFile) {
       nameColor = "htmlCssName";
     }
 
     var argsColor = "greyText";
     var namePlaceholder = "function name..."
-    if(this.props.isCss){
+    if(this.props.isFile){
       namePlaceholder = "file name..."
     }
     return (
@@ -313,7 +313,7 @@ export default class FunctionStamp extends Component {
         <input
           // @cameron styling for arguments field
           placeholder="arguments..."
-          disabled={this.props.isHtml || this.props.isCss}
+          disabled={this.props.isHtml || this.props.isFile}
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
             ipc && ipc.send("edited");
@@ -334,7 +334,7 @@ export default class FunctionStamp extends Component {
     }
 
     return (
-      <div hidden={this.props.isCss}>
+      <div hidden={this.props.isFile}>
 
         <div
           hidden={!this.state.resizingIframe}
@@ -450,9 +450,12 @@ export default class FunctionStamp extends Component {
 
     var callback = (id) => this.props.requestCompile(id)
     if(isOpt){
-      console.log(this.cristalRef)
-      callback = (id) => {this.cristalRef.current.changeZIndex(); 
-        this.props.requestCompile(id)}
+
+      callback = (id) => {
+this.props.requestCompile(id)
+
+this.cristalRef.current.changeZIndex() 
+       }
     }
 
     var newName = this.props.addStamp(
@@ -479,7 +482,7 @@ export default class FunctionStamp extends Component {
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
-      isCss: this.props.isCss,
+      isFile: this.props.isFile,
       hidden: this.state.hidden,
       exported:true,
       zIndex:this.state.zIndex
@@ -508,7 +511,7 @@ export default class FunctionStamp extends Component {
     var icon = FunctionStampIcon;
     if (this.props.isHtml) {
       icon = HtmlStampIcon;
-    } else if (this.props.isCss) {
+    } else if (this.props.isFile) {
       icon = CssStampIcon;
     } else if (this.state.isSpecialFn) {
       if(globals.specialFns[this.state.name]){
@@ -540,7 +543,7 @@ export default class FunctionStamp extends Component {
     // <!-- @cameron little white div thing --> scroll down to style
 
     var bgColor = "bg-jsArea";
-    if (this.props.isHtml || this.props.isCss) {
+    if (this.props.isHtml || this.props.isFile) {
       bgColor = "bg-htmlCssArea";
     }
 
@@ -550,7 +553,7 @@ export default class FunctionStamp extends Component {
     }
 
     var iframeWidth = this.state.iframeWidth
-    if(this.props.isCss){
+    if(this.props.isFile){
       iframeWidth = 0
     }
     return (
