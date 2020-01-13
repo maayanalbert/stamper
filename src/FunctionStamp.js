@@ -450,6 +450,7 @@ export default class FunctionStamp extends Component {
 
     var callback = (id) => this.props.requestCompile(id)
     if(isOpt){
+      console.log(this.cristalRef)
       callback = (id) => {this.cristalRef.current.changeZIndex(); 
         this.props.requestCompile(id)}
     }

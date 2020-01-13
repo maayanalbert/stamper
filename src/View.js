@@ -687,7 +687,6 @@ function logToConsole(message, lineno){
       this.setState({ htmlID: counter });
     }
 
-    console.log(this.state.blobStamps)
   }
 
   addNewIframeConsole(newConsole) {
@@ -725,7 +724,7 @@ function logToConsole(message, lineno){
   }
 
   async createBlobStamp(data, callback = () => null) {
-    console.log("CREATING A BLOB STAMP")
+
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -1246,14 +1245,13 @@ _stopLooping =setTimeout(() => {
       ipc && ipc.send("edited");
       delete blobStamps[id];
     }
+    this.setState({fnStamps:{}}, () => this.setState({fnStamps:fnStamps}, () => {
+      this.requestCompile(id)
+    }))
+    this.setState({blobStamps:{}}, () => this.setState({blobStamps:blobStamps}, () => {
+      this.requestCompile()
+    }))
 
-
-
-    this.refreshFnStamps(fnStamps, () => this.requestCompile(id));
-    this.refreshBlobStamps(blobStamps, () => this.requestCompile(id));
-
-
-    // this.refreshConsoleStamp(this.state.consoleStamp)
   }
 
   refreshConsoleStamp(consoleStamp) {
@@ -1305,7 +1303,7 @@ _stopLooping =setTimeout(() => {
   }
 
   refreshBlobStamps(blobStamps,callback = () => null) {
-    console.log(callback)
+    
     var data = []
     Object.values(blobStamps).map( item => {
 
