@@ -617,8 +617,9 @@ function logToConsole(message, lineno){
 
     data.iframeDisabled = setIframeDisabled;
 
-    this.createFnStamp(data, () => this.refreshBlobStamps(this.state.blobStamps, callback));
-    // this.refreshBlobStamps(this.state.blobStamps, () => this.createFnStamp(data, callback));
+    this.createFnStamp(data, callback);
+    // this.refreshBlobStamps(this.state.blobStamps);
+    // this.createFnStamp(data, callback)
     return newName;
   }
 
@@ -677,13 +678,16 @@ function logToConsole(message, lineno){
       />
     );
 
-    fnStamps[counter] = { elem: elem, ref: ref };
-
-    this.setState({ fnStamps: fnStamps }, (counter) => callback(counter));
+    this.setState({fnStamps:{}}, () => {
+      fnStamps[counter] ={ elem: elem, ref: ref }
+      this.setState({fnStamps:fnStamps}, counter => callback(counter)) 
+    })
 
     if (isHtml) {
       this.setState({ htmlID: counter });
     }
+
+    console.log(this.state.blobStamps)
   }
 
   addNewIframeConsole(newConsole) {
@@ -721,6 +725,7 @@ function logToConsole(message, lineno){
   }
 
   async createBlobStamp(data, callback = () => null) {
+    console.log("CREATING A BLOB STAMP")
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -759,8 +764,14 @@ starterZIndex={data.zIndex}
       />
     );
 
-    blobStamps[counter] = { elem: elem, ref: ref };
-    this.setState({ blobStamps: blobStamps }, (counter) => callback(counter));
+
+    this.setState({blobStamps:{}}, () => {
+      blobStamps[counter] ={ elem: elem, ref: ref }
+      this.setState({blobStamps:blobStamps}, counter => callback(counter)) 
+    })
+
+
+
   }
 
   checkForSetup() {
@@ -1280,17 +1291,21 @@ _stopLooping =setTimeout(() => {
     this.setState({fnStamps:{}}, ()=>{
 
       data.map(stampData => {
-        this.addFnStamp(stampData)
+        this.addFnStamp(stampData, () => {
+          if(Object.values(this.state.fnStamps).length === data.length){
+            callback()
+          }
+        })
       })
 
     })
 
-    callback()
+    
 
   }
 
   refreshBlobStamps(blobStamps,callback = () => null) {
-
+    console.log(callback)
     var data = []
     Object.values(blobStamps).map( item => {
 
@@ -1300,12 +1315,14 @@ _stopLooping =setTimeout(() => {
     this.setState({blobStamps:{}}, ()=>{
 
       data.map(stampData => {
-        this.addBlobStamp(stampData)
+        this.addBlobStamp(stampData, () => {
+          if(Object.values(this.state.blobStamps).length === data.length){
+            callback()
+          }
+        })
       })
 
     })
-
-    callback()
 
 
   }
@@ -1441,7 +1458,7 @@ _stopLooping =setTimeout(() => {
         if (!stampRef) {
           return;
         }
-        var name = this.getFirstLine(stampRef.state.code);
+        var name = this.getFirstLine(stampRef.state.code) + stampRef.props.id;
       }
 
       pickerData.push({
