@@ -223,7 +223,7 @@ export default class ModalManager extends Component {
   }
 
 curIsAWorld(){
-  var curStamper = this.props.getAllData()
+  var curStamper = this.props.getStamperObject()
 
   for(var i = 0; i < worlds.length; i++){
     var worldStamper = worlds[i].data
@@ -245,17 +245,17 @@ requestWorldLoad(newWorldStamper){
   var buttons = []
   buttons.push({text:"cancel", color:"outline-secondary", callback:this.hideModal})
   buttons.push(        {text:"yes", color:"outline-primary", callback:() => {
-         this.props.loadStamperFile(newWorldStamper); this.hideModal()  
+         this.props.loadStamperObject(newWorldStamper); this.hideModal()  
        }})
   if(!ipc){
     buttons.push({text:"yes, but download my current project first", color:"outline-primary", callback:() => {
-         this.requestDownload(); this.props.loadStamperFile(newWorldStamper); this.hideModal()  
+         this.requestDownload(); this.props.loadStamperObject(newWorldStamper); this.hideModal()  
        }})
   }
 
 
   if(this.curIsAWorld()){
-    this.props.loadStamperFile(newWorldStamper)
+    this.props.loadStamperObject(newWorldStamper)
   }else{
     this.setState({
       modalVisible:true, 
@@ -271,73 +271,61 @@ requestWorldLoad(newWorldStamper){
   sendSaveData() {
     console.log("SAVING")
     var fileData = this.props.getFileData();
-    var stamper = this.props.getAllData()
+    var stamperObject = this.props.getStamperObject()
 
-    // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamper));
+    // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
     if (fileData) {
       ipc && ipc.send("save", fileData);
     }
   }
 
   requestDownload(){
-    var data = this.props.getFileData();
+//     var data = this.props.getFileData();
 
 
-var zip = new JSZip();
-zip.file("sketch.js", data.js);
-zip.file("index.html", data.html);
-zip.file("style.css", data.css);
-zip.file("stamper.js", data.stamper);
-zip.generateAsync({type:"blob"})
-.then(function(content) {
-    // see FileSaver.js
-    saveAs(content, "stamper_project.zip");
-});
+// var zip = new JSZip();
+// zip.file("sketch.js", data.js);
+// zip.file("index.html", data.html);
+// zip.file("style.css", data.css);
+// zip.file("stamper.js", data.stamper);
+// zip.generateAsync({type:"blob"})
+// .then(function(content) {
+//     // see FileSaver.js
+//     saveAs(content, "stamper_project.zip");
+// });
 
-this.setState({lastDownloaded:data.stamper})
+// this.setState({lastDownloaded:data.stamper})
   }
 
-  updateStamperJs(js, stamper) {
+  updateStamperObject(js, stamperObject) {
   
-    if (stamper === undefined) {
+    if (stamperObject === undefined) {
       var oldJs = "";
 
     } else {
-      var oldJs = LZUTF8.decompress(stamper.compressedJs, {
+      var oldJs = LZUTF8.decompress(stamperObject.compressedJs, {
         inputEncoding: "StorageBinaryString"
       });
     }
 
 
     if (oldJs === js) {
-      return stamper;
+      return stamperObject;
     }
 
     try {
-      var newStamper = parser.jsToStamps(js);
+      var newStamperObject = parser.jsToStamps(js);
     } catch (e) {
       throw "Syntax error in Javascript";
     }
 
-    // newStamper.fns.push({
-    //   name: "style.css",
-    //   args: " ",
-    //   code: "",
-    //   isCss: true
-    // });
-    // newStamper.fns.push({
-    //   name: "index.html",
-    //   args: " ",
-    //   code: "",
-    //   isHtml: true
-    // });
-    newStamper.console = {hidden:true};
-    newStamper.scale = 1;
-    newStamper.originX = 0
-    newStamper.originY = 0
-    newStamper.imgs = []
+    newStamperObject.console = {hidden:true};
+    newStamperObject.scale = 1;
+    newStamperObject.originX = 0
+    newStamperObject.originY = 0
+    newStamperObject.imgs = []
 
-    return newStamper;
+    return newStamperObject;
   }
 
    stampifyFiles(readDict, path){
@@ -353,14 +341,14 @@ this.setState({lastDownloaded:data.stamper})
       return;     
     }
 
-    var stamper = undefined
+    var stamperObject = undefined
     if("stamper.js" in readDict){
-      var stamperText = readDict["stamper.js"].content
-      stamper = JSON.parse(stamperText.substring(stamperHeader.length, stamperText.length))
+      var stamperFileContent = readDict["stamper.js"].content
+      stamperObject = JSON.parse(stamperFileContent.substring(stamperHeader.length, stamperFileContent.length))
     }
 
     try{
-      stamper = this.updateStamperJs(readDict["sketch.js"].content, stamper)
+      stamperObject = this.updateStamperObject(readDict["sketch.js"].content, stamperObject)
     } catch (e) {
       this.setState({
         modalVisible: true,
@@ -377,7 +365,7 @@ this.setState({lastDownloaded:data.stamper})
 
 
 
-    stamper.fns.map(singleFnData => {
+    stamperObject.fns.map(singleFnData => {
       if(!singleFnData.isFile && !singleFnData.isImg){
         fnData.push(singleFnData)
       }else if(singleFnData.name in readDict){
@@ -420,9 +408,9 @@ this.setState({lastDownloaded:data.stamper})
     })
 
 
-    stamper.fns = fnData
+    stamperObject.fns = fnData
 
-    this.props.loadStamperFile(stamper);
+    this.props.loadStamperObject(stamperObject);
     ipc && ipc.send("updatePath", { path: path });
 
   }
@@ -471,7 +459,7 @@ this.setState({lastDownloaded:data.stamper})
   //     }
   //   });
 
-  //   this.props.loadStamperFile(newStamper);
+  //   this.props.loadStamperObject(newStamper);
   //   ipc && ipc.send("updatePath", { path: path });
   // }
 

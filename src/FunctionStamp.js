@@ -348,7 +348,7 @@ export default class FunctionStamp extends Component {
   renderIframe() {
 
     var loopingOpacity = .0
-    if(this.state.looping){
+    if(this.state.looping === false){
       loopingOpacity = .5
     }
 
@@ -383,7 +383,7 @@ export default class FunctionStamp extends Component {
           }}
           class="text-greyText "
         >
-         {"active"}
+         {"paused"}
         </div>
         <Resizable
           className="ml-1 bg-white shadow" 
@@ -592,9 +592,9 @@ this.cristalRef.current.changeZIndex()
       iframeWidth = 0
     }
 
-    var heightAnchor = this.state.editorHeight
+    var initialHeight = this.state.editorHeight + 150
     if(this.props.isImg){
-      heightAnchor = this.state.iframeHeight
+      initialHeight = this.state.iframeHeight + 125
 
     }
 
@@ -605,7 +605,7 @@ this.cristalRef.current.changeZIndex()
                   onZChange={s => this.setState({zIndex:s.zIndex})}
                 getScale={this.props.getScale}
           initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
-            height:heightAnchor + 150}}
+            height:initialHeight}}
           ref={this.cristalRef}
           isResizable={true}
                     onStartResize={this.props.onStartMove.bind(this)}

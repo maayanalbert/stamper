@@ -94,13 +94,13 @@ export default class View extends Component {
     this.zero = 48
 
     ipc &&
-      ipc.on("writeToView", (event, files) =>
-        this.loadStamperFile(files.stamper)
+      ipc.on("writeToView", (event, data) =>
+        this.loadStamperObject(data.stamperObject)
       );
 
     ipc &&
       ipc.on("resetView", event =>
-        this.loadStamperFile(starter)
+        this.loadStamperObject(starter)
       );
   }
 
@@ -110,12 +110,12 @@ export default class View extends Component {
     //   var storedStamper = JSON.parse(localStorage.getItem('storedStamper'));
 
     //   if(storedStamper){
-    //     this.loadStamperFile(storedStamper)
+    //     this.loadStamperObject(storedStamper)
     //   }else{
-    //     this.loadStamperFile(starter)
+    //     this.loadStamperObject(starter)
     //   }
     // }else{
-      this.loadStamperFile(starter);
+      this.loadStamperObject(starter);
     // }
 
     
@@ -296,7 +296,7 @@ export default class View extends Component {
             
   }
 
-  loadStamperFile(stamperFile) {
+  loadStamperObject(stamperObject) {
     this.setState(
       {
         fnStamps: {},
@@ -313,17 +313,17 @@ export default class View extends Component {
       () => {
         this.setState(
           {
-            scale: stamperFile.scale,
-            originX: stamperFile.originX,
-            originY: stamperFile.originY
+            scale: stamperObject.scale,
+            originX: stamperObject.originX,
+            originY: stamperObject.originY
           },
           () => {
 
-            var callback = () => this.recompileIfEnoughStamps(stamperFile.fns.length, 
-              stamperFile.blobs.length)
-            this.addConsoleStamp(stamperFile.console);
-            stamperFile.fns.map(data => this.addFnStamp(data, callback));
-            stamperFile.blobs.map(data => this.addBlobStamp(data, callback));
+            var callback = () => this.recompileIfEnoughStamps(stamperObject.fns.length, 
+              stamperObject.blobs.length)
+            this.addConsoleStamp(stamperObject.console);
+            stamperObject.fns.map(data => this.addFnStamp(data, callback));
+            stamperObject.blobs.map(data => this.addBlobStamp(data, callback));
 
  
           }
@@ -849,13 +849,13 @@ starterZIndex={data.zIndex}
       js: this.getExportableCode()
     };
 
-    var stamper = this.getAllData()
+    var stamperObject = this.getStamperObject()
 
-    stamper.compressedJs = LZUTF8.compress(fileData.js, {
+    stamperObject.compressedJs = LZUTF8.compress(fileData.js, {
       outputEncoding: "StorageBinaryString"
     });
 
-    fileData.stamper = stamperHeader + JSON.stringify(stamper)
+    fileData.stamperFileContent = stamperHeader + JSON.stringify(stamperObject)
 
     return fileData;
   }
@@ -1278,8 +1278,8 @@ _stopLooping =setTimeout(() => {
     ipc && ipc.send("edited");
     
 
-    var allData = this.getAllData(id)
-    this.loadStamperFile(allData)
+    var allData = this.getStamperObject(id)
+    this.loadStamperObject(allData)
 
   }
 
@@ -1288,7 +1288,7 @@ _stopLooping =setTimeout(() => {
     this.setState({ consoleStamp: null }, () => this.addConsoleStamp(data));
   }
 
-  getAllData(id) {
+  getStamperObject(id) {
     var data = {
       fns: [],
       blobs: [],
@@ -1552,7 +1552,7 @@ _stopLooping =setTimeout(() => {
           addFnStamp={this.addFnStamp.bind(this)}
           disablePan={this.disablePan.bind(this)}
           disableZoom={this.disableZoom.bind(this)}
-          loadStamperFile={this.loadStamperFile.bind(this)}
+          loadStamperObject={this.loadStamperObject.bind(this)}
           updateControlBarDimensions={this.updateControlBarDimensions.bind(
             this
           )}
@@ -1561,10 +1561,10 @@ _stopLooping =setTimeout(() => {
         />
 
         <ModalManager
-          loadStamperFile={this.loadStamperFile.bind(this)}
+          loadStamperObject={this.loadStamperObject.bind(this)}
           ref={this.modalManagerRef}
-          loadStamperFile={this.loadStamperFile.bind(this)}
-          getAllData={this.getAllData.bind(this)}
+          loadStamperObject={this.loadStamperObject.bind(this)}
+          getStamperObject={this.getStamperObject.bind(this)}
           getFileData={this.getFileData.bind(this)}
         />
       </div>
