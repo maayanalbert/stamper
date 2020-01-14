@@ -44,7 +44,7 @@ export default class ModalManager extends Component {
       saveInterval:null
     };
     this.inputElem = null
-    this.uploadProject = this.uploadProject.bind(this)
+    this.readFiles = this.readFiles.bind(this)
     this.hideModal = this.hideModal.bind(this)
     this.sendSaveData = this.sendSaveData.bind(this)
   }
@@ -55,15 +55,9 @@ export default class ModalManager extends Component {
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({saveInterval:saveInterval})
     ipc &&
-      ipc.on("openFiles", (event, files) => {
+      ipc.on("requestUpload", (event) => {
 
-        this.openFiles(
-          files.html,
-          files.js,
-          files.css,
-          files.stamper,
-          files.path
-        );
+        this.requestUpload()
       });
 
     ipc &&
@@ -94,7 +88,7 @@ export default class ModalManager extends Component {
       styleAttr.value = "true"; 
       inputElem.setAttributeNode(styleAttr)
 
-      inputElem.addEventListener("change", this.uploadProject)
+      inputElem.addEventListener("change", this.readFiles)
       document.getElementById("root").appendChild(inputElem)
             this.inputElem = inputElem
 
@@ -103,7 +97,7 @@ export default class ModalManager extends Component {
   }
 
   componentWillUnmout(){
-    this.inputElem.removeEventListener("change", this.uploadProject)
+    this.inputElem.removeEventListener("change", this.readFiles)
     clearInterval(this.state.saveInterval)
     this.setState({saveInterval:null})
   }
@@ -112,29 +106,6 @@ export default class ModalManager extends Component {
     document.getElementById("projectInput").click()
   }
 
-  // attemptToReadFile(files, name, key, readDict, callback){
-
-  //   for(var i = 0; i < files.length; i++){
-  //     if(files[i].name === name){
-  //       var reader = new FileReader()
-  //       reader.onload = function(e){
-  //         readDict[key] = e.target.result
-  //         callback()
-  //       }
-  //       try{
-  //       reader.readAsText(files[i])
-  //       return 
-  //       }catch{
-  //         this.setState({modalVisible:true, modalHeader:"Oh no! It looks like we had trouble reading one of your files.",
-  //           modalContent:"Check that your index.html, sketch.js, and style.css are properly configured.",
-  //                         modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}]})
-  //       }  
-  //     }
-  //   }
-        
-  //       callback()
-
-  // }
 
 
   readFile(file, readDict, callback){
@@ -152,20 +123,8 @@ export default class ModalManager extends Component {
     }
 
     reader.onload = function(e){
-      readDict[fileName] = {content:e.target.result, type:fileType}
-      // if(fileType === "image"){
-      //   var image = new Image();
-      //   image.src = e.target.result
-      //   image.onload = function(){
-      //     console.log(image.width)
-      //     console.log(image.height)
-      //     readDict[fileName].width = image.width
-      //     readDict[fileName].height = image.height
-      //     callback()
-      //   }
-      // }else{
+      readDict[fileName] = {content:e.target.result, type:fileType, path:file.path}
         callback()
-      // }
   
     }
 
@@ -187,7 +146,8 @@ export default class ModalManager extends Component {
 
   }
 
-  uploadProject(e){
+  readFiles(e){
+    console.log(e.target.files)
 
     var files = []
     for(var i = 0; i< e.target.files.length; i++){
@@ -207,19 +167,6 @@ export default class ModalManager extends Component {
       this.readFile(files[i], readDict, () => callback() )
     }
 
-
-    // var files = e.target.files
-    // console.log(files)
-    // var readDict = {}
-    // this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
-    //   this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
-    //     this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
-    //       this.attemptToReadFile(files, "stamper.js", "stamper", readDict, () =>{
-    //         this.openFiles(readDict.html, readDict.js, readDict.css, readDict.stamper)
-    //       })
-    //     })
-    //   })
-    // })
   }
 
 curIsAWorld(){
@@ -401,8 +348,6 @@ requestWorldLoad(newWorldStamper){
           code: readDict[name].content,
           isImg: true,
           hidden:true
-          // iframeWidth:readDict[name].width,
-          // iframeHeight:readDict[name].height
         });        
       }
     })
@@ -410,58 +355,18 @@ requestWorldLoad(newWorldStamper){
 
     stamperObject.fns = fnData
 
+    var projectPathArr = readDict["index.html"].path.split("/")
+    projectPathArr.pop()
+
+    console.log(projectPathArr)
+    var projectPath = projectPathArr.join("/") + "/"
+    var projectName = projectPathArr.pop()
+
     this.props.loadStamperObject(stamperObject);
-    ipc && ipc.send("updatePath", { path: path });
+    ipc && ipc.send("updatePath", { path: projectPath, name:projectName});
 
   }
 
-  // openFiles(html, js, css = "", stamper, path) {
-
-  //   // if(stamper){
-  //   // stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
-  //   // }
-
-   
-  //   // if (html === undefined || js === undefined) {
-
-  //   //   this.setState({
-  //   //     modalVisible: true,
-  //   //     modalHeader: "Oh no! It looks like you're missing some files.",
-  //   //     modalContent:
-  //   //       "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
-  //   //             modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
-  //   //   });
-  //   //   return;
-  //   // }
-
-  //   try {
-  //     var newStamper = this.updateStamperJs(js, stamper);
-  //   } catch (e) {
-  //     this.setState({
-  //       modalVisible: true,
-  //       modalHeader:
-  //         "Oh no! It looks like your sketch file has a few syntax errors.",
-  //       modalContent:
-  //         "We can't parse javascript with syntax errors into Stamper land :(",
-  //               modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
-  //     });
-  //     return;
-  //   }
-
-  //   newStamper.fns.map(stamp => {
-  //     if (stamp.isHtml) {
-  //       stamp.code = html;
-  //     }
-  //   });
-  //   newStamper.fns.map(stamp => {
-  //     if (stamp.isCss) {
-  //       stamp.code = css;
-  //     }
-  //   });
-
-  //   this.props.loadStamperObject(newStamper);
-  //   ipc && ipc.send("updatePath", { path: path });
-  // }
 
   hideModal(){
     this.setState({modalVisible:false})

@@ -33,7 +33,7 @@ module.exports = class FileManager {
 
     ipcMain.on("updatePath", (event, data) => {
       this.path = data.path;
-      this.name = this.path.replace(/^.*[\\\/]/, "");
+      this.name = data.name;
       this.mainWindow.setTitle(this.name);
     });
 
@@ -106,40 +106,8 @@ module.exports = class FileManager {
     }
   }
 
-
-  readOpenedProject(path) {
-    // this.path = path
-    jetpack.readAsync(path + "/index.html").then(html => {
-      jetpack.readAsync(path + "/sketch.js").then(js => {
-        jetpack.readAsync(path + "/style.css").then(css => {
-          jetpack.readAsync(path + "/stamper.js")
-            .then(stamper => {
-              // this.openFiles(html, js, css, stamper);
-              this.mainWindow.webContents.send("openFiles", {
-                html: html,
-                js: js,
-                css: css,
-                stamper: stamper,
-                path: path
-              });
-            });
-        });
-      });
-    });
-  }
-
   onOpenCommand() {
-    dialog
-      .showOpenDialog(this.mainWindow, { properties: ["openDirectory"] })
-      .then(result => {
-        if (result.canceled === false) {
-          if (result.filePaths.length != 1) {
-            return;
-          }
-
-          this.readOpenedProject(result.filePaths[0]);
-        }
-      });
+      this.mainWindow.webContents.send("requestUpload")
   }
 
   onSaveAsCommand() {
