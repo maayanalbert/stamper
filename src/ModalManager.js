@@ -153,9 +153,20 @@ export default class ModalManager extends Component {
 
     reader.onload = function(e){
       readDict[fileName] = {content:e.target.result, type:fileType}
-
-
-      callback()
+      // if(fileType === "image"){
+      //   var image = new Image();
+      //   image.src = e.target.result
+      //   image.onload = function(){
+      //     console.log(image.width)
+      //     console.log(image.height)
+      //     readDict[fileName].width = image.width
+      //     readDict[fileName].height = image.height
+      //     callback()
+      //   }
+      // }else{
+        callback()
+      // }
+  
     }
 
 
@@ -363,25 +374,16 @@ this.setState({lastDownloaded:data.stamper})
     }
 
     var fnData = []
-    var imgData = []
 
-    console.log(stamper.fns)
+
+
     stamper.fns.map(singleFnData => {
-      console.log(singleFnData, !singleFnData.isFile)
-      if(!singleFnData.isFile){
+      if(!singleFnData.isFile && !singleFnData.isImg){
         fnData.push(singleFnData)
       }else if(singleFnData.name in readDict){
         singleFnData.code = readDict[singleFnData.name].content
         readDict[singleFnData.name].transferred = true
         fnData.push(singleFnData)
-      }
-    })
-
-    stamper.imgs.map(singleImgData => {
-      if(singleImgData.name in readDict){
-        singleImgData.url = readDict[singleImgData.name].content
-        readDict[singleImgData.name].transferred = true
-        imgData.push(singleImgData)
       }
     })
 
@@ -403,71 +405,72 @@ this.setState({lastDownloaded:data.stamper})
           isFile: true
         });
       }else if(readDict[name].type === "image"){
-        imgData.push({
+        fnData.push({
           name: name,
-          url: readDict[name].content
+          args: " ",
+          code: readDict[name].content,
+          isImg: true,
+          // iframeWidth:readDict[name].width,
+          // iframeHeight:readDict[name].height
         });        
       }
     })
 
-    console.log(readDict)
-    console.log(stamper)
 
     stamper.fns = fnData
-    stamper.imgs = imgData
 
     this.props.loadStamperFile(stamper);
     ipc && ipc.send("updatePath", { path: path });
 
   }
 
-  openFiles(html, js, css = "", stamper, path) {
+  // openFiles(html, js, css = "", stamper, path) {
 
-    // if(stamper){
-    // stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
-    // }
+  //   // if(stamper){
+  //   // stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
+  //   // }
 
    
-    // if (html === undefined || js === undefined) {
+  //   // if (html === undefined || js === undefined) {
 
-    //   this.setState({
-    //     modalVisible: true,
-    //     modalHeader: "Oh no! It looks like you're missing some files.",
-    //     modalContent:
-    //       "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
-    //             modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
-    //   });
-    //   return;
-    // }
+  //   //   this.setState({
+  //   //     modalVisible: true,
+  //   //     modalHeader: "Oh no! It looks like you're missing some files.",
+  //   //     modalContent:
+  //   //       "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
+  //   //             modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
+  //   //   });
+  //   //   return;
+  //   // }
 
-    try {
-      var newStamper = this.updateStamperJs(js, stamper);
-    } catch (e) {
-      this.setState({
-        modalVisible: true,
-        modalHeader:
-          "Oh no! It looks like your sketch file has a few syntax errors.",
-        modalContent:
-          "We can't parse javascript with syntax errors into Stamper land :(",
-                modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
-      });
-      return;
-    }
+  //   try {
+  //     var newStamper = this.updateStamperJs(js, stamper);
+  //   } catch (e) {
+  //     this.setState({
+  //       modalVisible: true,
+  //       modalHeader:
+  //         "Oh no! It looks like your sketch file has a few syntax errors.",
+  //       modalContent:
+  //         "We can't parse javascript with syntax errors into Stamper land :(",
+  //               modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
+  //     });
+  //     return;
+  //   }
 
-    newStamper.fns.map(stamp => {
-      if (stamp.isHtml) {
-        stamp.code = html;
-      }
-    });
-    newStamper.fns.map(stamp => {
-      if (stamp.isCss) {
-        stamp.code = css;
-      }
-    });
+  //   newStamper.fns.map(stamp => {
+  //     if (stamp.isHtml) {
+  //       stamp.code = html;
+  //     }
+  //   });
+  //   newStamper.fns.map(stamp => {
+  //     if (stamp.isCss) {
+  //       stamp.code = css;
+  //     }
+  //   });
 
-    this.props.loadStamperFile(newStamper);
-    ipc && ipc.send("updatePath", { path: path });
-  }
+  //   this.props.loadStamperFile(newStamper);
+  //   ipc && ipc.send("updatePath", { path: path });
+  // }
 
   hideModal(){
     this.setState({modalVisible:false})

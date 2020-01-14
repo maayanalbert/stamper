@@ -106,17 +106,17 @@ export default class View extends Component {
 
   componentDidMount() {
     // localStorage.clear()
-    if(!ipc){
-      var storedStamper = JSON.parse(localStorage.getItem('storedStamper'));
+    // if(!ipc){
+    //   var storedStamper = JSON.parse(localStorage.getItem('storedStamper'));
 
-      if(storedStamper){
-        this.loadStamperFile(storedStamper)
-      }else{
-        this.loadStamperFile(starter)
-      }
-    }else{
+    //   if(storedStamper){
+    //     this.loadStamperFile(storedStamper)
+    //   }else{
+    //     this.loadStamperFile(starter)
+    //   }
+    // }else{
       this.loadStamperFile(starter);
-    }
+    // }
 
     
 
@@ -384,11 +384,11 @@ function logToConsole(message, lineno){
 
 
   replaceFileStamps(parser){
-    Object.values(this.state.fnStamps).map(cssStamp => {
+    Object.values(this.state.fnStamps).map(item => {
      
-    if(cssStamp.ref.current.props.isFile){
-      var name =cssStamp.ref.current.state.name
-      var code = cssStamp.ref.current.state.code
+    if(item.ref.current.props.isFile){
+      var name =item.ref.current.state.name
+      var code = item.ref.current.state.code
 
 
       var srcNodes = parser(`[src="${name}"]`)
@@ -418,6 +418,23 @@ function logToConsole(message, lineno){
 
   }
 
+
+  loadAssets(runnableCode){
+    Object.values(this.state.fnStamps).map(item => {
+      var name = item.ref.current.state.name
+      var code = item.ref.current.state.code
+      if(item.ref.current.props.isFile || item.ref.current.props.isImg){
+        runnableCode = runnableCode
+        .replace(`'${name}'`, `"${code}"` )
+        .replace("`" + name + "`", `"${code}"` )
+        .replace( `"${name}"`, `"${code}"` )
+
+      }
+    } )
+    console.log(runnableCode)
+    return runnableCode   
+  }
+
   getHTML(id) {
     if (
       this.state.htmlID in this.state.fnStamps === false
@@ -430,7 +447,7 @@ function logToConsole(message, lineno){
       var ranges = [];
     } else {
       var codeData = this.getRunnableCode(id);
-      var runnableCode = codeData.runnableCode;
+      var runnableCode = this.loadAssets(codeData.runnableCode);
       var ranges = codeData.ranges;
     }
 
@@ -595,6 +612,7 @@ function logToConsole(message, lineno){
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
       isFile: false,
+      isImg:false,
       hidden: false,
       zIndex:undefined
     };
@@ -640,6 +658,7 @@ function logToConsole(message, lineno){
       iframeHeight = data.iframeHeight,
       isHtml = data.isHtml,
       isFile = data.isFile,
+      isImg = data.isImg,
       hidden = data.hidden;
 
 
@@ -656,6 +675,7 @@ function logToConsole(message, lineno){
         ref={ref}
         isHtml={isHtml}
         isFile={isFile}
+        isImg={isImg}
         starterZIndex={data.zIndex}
         starterCode={code}
         starterArgs={args}
@@ -885,9 +905,7 @@ starterZIndex={data.zIndex}
         var newErrors = [];
 
         if (
-          stampRef.props.id in duplicateNamedStamps &&
-          stampRef.props.isFile === false &&
-          stampRef.props.isHtml === false
+          stampRef.props.id in duplicateNamedStamps
         ) {
           newErrors.push(0);
         }
@@ -917,7 +935,6 @@ starterZIndex={data.zIndex}
 
       if (
         stampRef.props.id in duplicateNamedStamps &&
-        stampRef.props.isFile === false &&
         stampRef.props.isHtml === false
       ) {
         newErrors.push(0);
@@ -993,7 +1010,8 @@ starterZIndex={data.zIndex}
     Object.values(this.state.fnStamps).map(stamp => {
       if (
         stamp.ref.current.props.isFile === false &&
-        stamp.ref.current.props.isHtml === false
+        stamp.ref.current.props.isHtml === false &&
+        stamp.ref.current.props.isImg === false
       ) {
         var state = stamp.ref.current.state;
         code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
@@ -1151,6 +1169,7 @@ starterZIndex={data.zIndex}
       if (
         stamp.ref.current.state.name != "draw" &&
         stamp.ref.current.props.isFile === false &&
+        stamp.ref.current.props.isImg === false &&
         stamp.ref.current.props.isHtml === false &&
         (this.isListener(stamp.ref.current.state.name) === false ||
           this.isListener(this.state.fnStamps[id].ref.current.state.name) ===

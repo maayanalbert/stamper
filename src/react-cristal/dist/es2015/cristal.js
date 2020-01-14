@@ -200,9 +200,10 @@ var Cristal = (function(_super) {
     _this.manualResize = function(widthDiff, heightDiff){
 
  
-        var width = _this.state.width, height = _this.state.height, originalHeight = _this.state.originalHeight
+        var width = _this.state.width, 
+        height = _this.state.height
 
-        _this.setState({width:width+widthDiff})
+        _this.setState({width:width+widthDiff, height:height + heightDiff})
     }
 
   _this.onWheel = function(e){

@@ -10,6 +10,8 @@ import FileStampIcon from "./icons/file.svg";
 import HtmlStampIcon from "./icons/layout.svg";
 import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
+import ImageStampIcon from "./icons/image.svg";
+
 
 import "./theme-p5.js";
 
@@ -33,15 +35,24 @@ if (userAgent.indexOf(" electron/") > -1) {
 export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
+    var starterEditorWidth = this.props.starterEditorWidth
+    if(this.props.isImg){
+      starterEditorWidth = 0
+    }
+    var starterArgs = this.props.starterArgs
+    if(this.props.isHtml || this.props.isFile || this.props.isImg){
+      starterArgs = " "
+    }
+
     this.state = {
       code: this.props.starterCode,
       name: this.props.starterName,
-      args: this.props.starterArgs,
+      args: starterArgs,
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
       iframeHeight: 0,
       editorHeight: this.props.starterEditorHeight,
-      editorWidth: this.props.starterEditorWidth,
+      editorWidth: starterEditorWidth,
       isSpecialFn: false,
       editorScrolling: false,
       errorLines: this.props.errorLines,
@@ -128,7 +139,7 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      if(this.props.isFile){
+      if(this.props.isFile || this.props.isImg){
         var iframeCode = ""
       }else{
         var iframeCode = this.props.getHTML(this.props.id)
@@ -173,6 +184,11 @@ export default class FunctionStamp extends Component {
     }
 
     this.setState({ iframeWidth: width, iframeHeight: height });
+
+    if(this.props.isImg === false){
+      movementY = 0
+    }
+
     this.cristalRef.current.manualResize(movementX, movementY);
   }
 
@@ -201,7 +217,7 @@ export default class FunctionStamp extends Component {
 
     var theme = "p5";
     var mode = "javascript";
-    if (this.props.isHtml || this.props.isFile) {
+    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
       theme = "solarized_light";
     }
 
@@ -282,7 +298,7 @@ export default class FunctionStamp extends Component {
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
-    } else if (this.props.isHtml || this.props.isFile) {
+    } else if (this.props.isHtml || this.props.isFile || this.props.isImg) {
       nameColor = "htmlCssName";
     }
 
@@ -290,6 +306,8 @@ export default class FunctionStamp extends Component {
     var namePlaceholder = "function name..."
     if(this.props.isFile){
       namePlaceholder = "file name..."
+    }else if(this.props.isImg){
+      namePlaceholder = "image name..."
     }
     return (
       <div>
@@ -313,7 +331,7 @@ export default class FunctionStamp extends Component {
         <input
           // @cameron styling for arguments field
           placeholder="arguments..."
-          disabled={this.props.isHtml || this.props.isFile}
+          disabled={this.props.isHtml || this.props.isFile || this.props.isImg}
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
             ipc && ipc.send("edited");
@@ -332,6 +350,7 @@ export default class FunctionStamp extends Component {
     if(this.state.looping){
       loopingOpacity = .5
     }
+
 
     return (
       <div hidden={this.props.isFile}>
@@ -399,7 +418,10 @@ export default class FunctionStamp extends Component {
             >
               {" "}
             </div>
+            <img src={this.state.code} hidden={!this.props.isImg}
+            style={{height:this.state.iframeHeight, width:this.state.iframeWidth}}/>
             <iframe
+              hidden = {this.props.isImg}
               ref={iframeElem => {
                 if (iframeElem) {
                   this.props.addNewIframeConsole(
@@ -483,6 +505,7 @@ this.cristalRef.current.changeZIndex()
       iframeHeight: this.state.iframeHeight,
       isHtml: this.props.isHtml,
       isFile: this.props.isFile,
+      isImg: this.props.isImg,
       hidden: this.state.hidden,
       exported:true,
       zIndex:this.state.zIndex
@@ -492,6 +515,12 @@ this.cristalRef.current.changeZIndex()
   }
 
   resizeEditor(widthDiff, heightDiff, x) {
+
+    if(this.props.isImg){
+      return true
+    }
+
+
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
 
@@ -513,7 +542,9 @@ this.cristalRef.current.changeZIndex()
       icon = HtmlStampIcon;
     } else if (this.props.isFile) {
       icon = FileStampIcon;
-    } else if (this.state.isSpecialFn) {
+    } else if(this.props.isImg){
+      icon = ImageStampIcon
+    }else if (this.state.isSpecialFn) {
       if(globals.specialFns[this.state.name]){
       icon = BuiltInStampIcon;
       }else{
@@ -543,7 +574,7 @@ this.cristalRef.current.changeZIndex()
     // <!-- @cameron little white div thing --> scroll down to style
 
     var bgColor = "bg-jsArea";
-    if (this.props.isHtml || this.props.isFile) {
+    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
       bgColor = "bg-htmlCssArea";
     }
 
