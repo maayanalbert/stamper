@@ -431,7 +431,7 @@ function logToConsole(message, lineno){
 
       }
     } )
-    console.log(runnableCode)
+
     return runnableCode   
   }
 

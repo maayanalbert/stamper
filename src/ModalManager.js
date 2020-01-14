@@ -331,7 +331,7 @@ this.setState({lastDownloaded:data.stamper})
     //   code: "",
     //   isHtml: true
     // });
-    newStamper.console = {};
+    newStamper.console = {hidden:true};
     newStamper.scale = 1;
     newStamper.originX = 0
     newStamper.originY = 0
@@ -395,14 +395,16 @@ this.setState({lastDownloaded:data.stamper})
           name: name,
           args: " ",
           code: readDict[name].content,
-          isHtml: true
+          isHtml: true,
+          hidden:true
         });
       }else if(readDict[name].type === "text"){
         fnData.push({
           name: name,
           args: " ",
           code: readDict[name].content,
-          isFile: true
+          isFile: true,
+          hidden:true
         });
       }else if(readDict[name].type === "image"){
         fnData.push({
@@ -410,6 +412,7 @@ this.setState({lastDownloaded:data.stamper})
           args: " ",
           code: readDict[name].content,
           isImg: true,
+          hidden:true
           // iframeWidth:readDict[name].width,
           // iframeHeight:readDict[name].height
         });        

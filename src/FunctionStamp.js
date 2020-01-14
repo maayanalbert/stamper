@@ -50,7 +50,7 @@ export default class FunctionStamp extends Component {
       args: starterArgs,
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
-      iframeHeight: 0,
+      iframeHeight: this.props.starterIframeHeight,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: starterEditorWidth,
       isSpecialFn: false,
@@ -68,6 +68,7 @@ export default class FunctionStamp extends Component {
       zIndex:-1
     };
 
+
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
 
@@ -77,10 +78,10 @@ export default class FunctionStamp extends Component {
   toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
-      this.setState({ hidden: false, savedIframeHeight:this.state.iframeHeight, iframeHeight:0 }, 
-        () => this.setState({iframeHeight:this.state.savedIframeHeight}, callback)
+      this.setState({ hidden: false, iframeHeight:this.state.iframeHeight }, 
+        callback)
 
-      )
+      
 
     } else {
       this.setState(
@@ -110,9 +111,9 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
-    this.setState({ 
-      iframeHeight: this.props.starterIframeHeight }
-    );
+    // this.setState({ 
+    //   iframeHeight: this.props.starterIframeHeight }
+    // );
     this.checkName();
     window.addEventListener("message", this.updateLooping);
 
@@ -418,8 +419,11 @@ export default class FunctionStamp extends Component {
             >
               {" "}
             </div>
-            <img src={this.state.code} hidden={!this.props.isImg}
-            style={{height:this.state.iframeHeight, width:this.state.iframeWidth}}/>
+            <div style={{height:this.state.iframeHeight, width:this.state.iframeWidth}}
+            hidden={!this.props.isImg}
+            >
+            <img src={this.state.code}/>
+            </div>
             <iframe
               hidden = {this.props.isImg}
               ref={iframeElem => {
@@ -587,6 +591,13 @@ this.cristalRef.current.changeZIndex()
     if(this.props.isFile){
       iframeWidth = 0
     }
+
+    var heightAnchor = this.state.editorHeight
+    if(this.props.isImg){
+      heightAnchor = this.state.iframeHeight
+
+    }
+
     return (
       <div>
         <Cristal
@@ -594,7 +605,7 @@ this.cristalRef.current.changeZIndex()
                   onZChange={s => this.setState({zIndex:s.zIndex})}
                 getScale={this.props.getScale}
           initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
-            height:this.state.editorHeight + 150}}
+            height:heightAnchor + 150}}
           ref={this.cristalRef}
           isResizable={true}
                     onStartResize={this.props.onStartMove.bind(this)}
