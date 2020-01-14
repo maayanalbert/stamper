@@ -59,6 +59,7 @@ module.exports = class FileManager {
     this.protectUnsaved(this.openNewProject.bind(this))
   }
 
+
   protectUnsaved(yesCallBack = () => null){
     if(this.edited === false){
       yesCallBack()
@@ -76,18 +77,15 @@ module.exports = class FileManager {
     detail: 'Are you sure you want to close it and lose your work?',
   };
 
-  dialog.showMessageBox(null, options, (response) => {
+  dialog.showMessageBox(null, options).then(data => {
 
-    if(response === 0){
+    if(data.response === 0){
       yesCallBack()
-
-    }else{
-
-   
     }
-  });
-    }    
-  }
+  })
+}
+}
+
 
   openNewProject(){
     this.resetFiles();

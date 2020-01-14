@@ -61,12 +61,13 @@ mainWindow.on("close", (event) => {
  
 
 
-      if(manualClose === false){
+      if(manualClose === false && manualQuit === false){
         
       
       event.preventDefault()
 
       fileManager.protectUnsaved( () => {
+
         manualClose = true
         mainWindow.close()
 

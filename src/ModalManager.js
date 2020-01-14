@@ -103,8 +103,10 @@ export default class ModalManager extends Component {
   }
 
   requestUpload() {
-    document.getElementById("projectInput").click()
+document.getElementById("projectInput").dispatchEvent(new MouseEvent("click"))
   }
+
+
 
 
 
@@ -380,7 +382,6 @@ requestWorldLoad(newWorldStamper){
       <Button variant={btnData.color} size="sm" onClick={btnData.callback}>{btnData.text}</Button>))
     return (
       <div>
-
         <Modal
           show={this.state.modalVisible}
           style={{ zIndex: 2000000000000000001 }}
