@@ -708,7 +708,7 @@ function logToConsole(message, lineno){
   }
 
   addBlobStamp(data, callback, updatePosition = false) {
-    console.log(data)
+
     var defaults = {
       code: "var z = 10",
       x: this.setInitialPosition("x"),
@@ -737,7 +737,7 @@ function logToConsole(message, lineno){
 
   async createBlobStamp(data, callback = () => null) {
     const release = await this.counterMutex.acquire();
-    console.log(data)
+
 
     var x = data.x,
       y = data.y,
@@ -782,8 +782,8 @@ starterZIndex={data.zIndex}
       blobStamps[stampID] ={ elem: elem, ref: ref }
   
       this.setState({blobStamps:blobStamps}, counter => {
-        console.log('BLOBSTAMPS')
-            console.log(this.state.blobStamps)
+
+        
         callback(stampID)
         release()
 }
@@ -1261,67 +1261,6 @@ _stopLooping =setTimeout(() => {
 
     var allData = this.getAllData(id)
     this.loadStamperFile(allData)
-
-//     var fnData = []
-//     Object.keys(this.state.fnStamps).map(stampID => {
-//       if(stampID != id ){
-
-//       fnData.push(this.state.fnStamps[stampID].ref.current.getData())
-//       }
-
-//     })
-
-
-//     var blobData = []
-//     Object.keys(this.state.blobStamps).map(stampID => {
-//       if(stampID != id ){
-//       blobData.push(this.state.blobStamps[stampID].ref.current.getData())
-//       }
-//     })
-
-//     this.setState({blobStamps:{}})
-//     this.setState({fnStamps:{}})
-// console.log(blobData)
-//     blobData.map(data => {
-//       console.log(data)
-//       this.addBlobStamp(data)
-//     })
-// fnData.map(data => this.addFnStamp(data))
-
-    // var fnStamps = this.state.fnStamps
-    // Object.keys(fnStamps).map(stampID => {
-    //   if(stampID != id){
-
-    //     fnStamps[stampID] = this.state.fnStamps[stampID]
-    //   }
-    // })
-
-    // var blobStamps = this.state.blobStamps
-    // Object.keys(blobStamps).map(stampID => {
-    //   if(stampID != id){
-    //     blobStamps[stampID] = this.state.blobStamps[stampID]
-    //   }
-    // })
-
-    // var fnStamps = Object.assign({}, this.state.fnStamps)
-    // var blobStamps = Object.assign({}, this.state.blobStamps)
-    // console.log(this.state.blobStamps)
-
-    // if (id in fnStamps) {
-    //   ipc && ipc.send("edited");
-    //   delete fnStamps[id];
-    // } else if (id in blobStamps) {
-    //   ipc && ipc.send("edited");
-    //   delete blobStamps[id];
-
-    // }
-// this.setState({fnStamps:fnStamps}, () => {
-//       this.requestCompile(id)
-//     })
-//   this.setState({blobStamps:blobStamps}, () => {
-//       this.requestCompile()
-
-//     })
 
   }
 

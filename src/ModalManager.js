@@ -112,43 +112,103 @@ export default class ModalManager extends Component {
     document.getElementById("projectInput").click()
   }
 
-  attemptToReadFile(files, name, key, readDict, callback){
+  // attemptToReadFile(files, name, key, readDict, callback){
 
-    for(var i = 0; i < files.length; i++){
-      if(files[i].name === name){
-        var reader = new FileReader()
-        reader.onload = function(e){
-          readDict[key] = e.target.result
-          callback()
-        }
-        try{
-        reader.readAsText(files[i])
-        return 
-        }catch{
+  //   for(var i = 0; i < files.length; i++){
+  //     if(files[i].name === name){
+  //       var reader = new FileReader()
+  //       reader.onload = function(e){
+  //         readDict[key] = e.target.result
+  //         callback()
+  //       }
+  //       try{
+  //       reader.readAsText(files[i])
+  //       return 
+  //       }catch{
+  //         this.setState({modalVisible:true, modalHeader:"Oh no! It looks like we had trouble reading one of your files.",
+  //           modalContent:"Check that your index.html, sketch.js, and style.css are properly configured.",
+  //                         modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}]})
+  //       }  
+  //     }
+  //   }
+        
+  //       callback()
+
+  // }
+
+
+  readFile(file, readDict, callback){
+    var reader = new FileReader()
+    var nameArr = file.webkitRelativePath.split("/")
+    var fileName = ""
+    if(nameArr.length > 0){
+      fileName = nameArr.slice(1, nameArr.length).join("/")
+    }
+
+    if(file.type.startsWith("text")){
+      var fileType = "text"
+    }else if(file.type.startsWith("image")){
+      var fileType = "image"
+    }
+
+    reader.onload = function(e){
+      readDict[fileName] = {content:e.target.result, type:fileType}
+
+
+      callback()
+    }
+
+
+
+
+    try{
+    if(file.type.startsWith("text")){
+      reader.readAsText(file)
+    }else if(file.type.startsWith("image")){
+      reader.readAsDataURL(file)
+    }
+    }catch{
+      readDict[fileName] = {}
           this.setState({modalVisible:true, modalHeader:"Oh no! It looks like we had trouble reading one of your files.",
             modalContent:"Check that your index.html, sketch.js, and style.css are properly configured.",
-                          modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}]})
-        }  
-      }
+                          modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}]})      
     }
-        
-        callback()
 
   }
 
   uploadProject(e){
 
-    var files = e.target.files
+    var files = []
+    for(var i = 0; i< e.target.files.length; i++){
+      if(e.target.files[i].name.startsWith(".") === false){
+        files.push(e.target.files[i])
+      }
+    }
+
     var readDict = {}
-    this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
-      this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
-        this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
-          this.attemptToReadFile(files, "stamper.js", "stamper", readDict, () =>{
-            this.openFiles(readDict.html, readDict.js, readDict.css, readDict.stamper)
-          })
-        })
-      })
-    })
+    var callback = () => {
+      if(Object.keys(readDict).length === files.length){
+        this.stampifyFiles(readDict)
+      }
+    }
+    for(var i = 0; i < files.length; i++){
+
+      this.readFile(files[i], readDict, () => callback() )
+    }
+
+
+    // var files = e.target.files
+    // console.log(files)
+    // var readDict = {}
+    // this.attemptToReadFile(files, "sketch.js", "js", readDict, () => {
+    //   this.attemptToReadFile(files, "index.html", "html", readDict, ()=>{
+    //     this.attemptToReadFile(files, "style.css", "css", readDict, () =>{
+    //       this.attemptToReadFile(files, "stamper.js", "stamper", readDict, () =>{
+    //         this.openFiles(readDict.html, readDict.js, readDict.css, readDict.stamper)
+    //       })
+    //     })
+    //   })
+    // })
   }
 
 curIsAWorld(){
@@ -202,7 +262,7 @@ requestWorldLoad(newWorldStamper){
     var fileData = this.props.getFileData();
     var stamper = this.props.getAllData()
 
-    !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamper));
+    // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamper));
     if (fileData) {
       ipc && ipc.send("save", fileData);
     }
@@ -232,8 +292,6 @@ this.setState({lastDownloaded:data.stamper})
       var oldJs = "";
 
     } else {
-            console.log(stamper.compressedJs)
-
       var oldJs = LZUTF8.decompress(stamper.compressedJs, {
         inputEncoding: "StorageBinaryString"
       });
@@ -250,44 +308,137 @@ this.setState({lastDownloaded:data.stamper})
       throw "Syntax error in Javascript";
     }
 
-    newStamper.fns.push({
-      name: "style.css",
-      args: " ",
-      code: "",
-      isCss: true
-    });
-    newStamper.fns.push({
-      name: "index.html",
-      args: " ",
-      code: "",
-      isHtml: true
-    });
+    // newStamper.fns.push({
+    //   name: "style.css",
+    //   args: " ",
+    //   code: "",
+    //   isCss: true
+    // });
+    // newStamper.fns.push({
+    //   name: "index.html",
+    //   args: " ",
+    //   code: "",
+    //   isHtml: true
+    // });
     newStamper.console = {};
     newStamper.scale = 1;
     newStamper.originX = 0
     newStamper.originY = 0
+    newStamper.imgs = []
 
     return newStamper;
   }
 
-  openFiles(html, js, css = "", stamper, path) {
+   stampifyFiles(readDict, path){
 
-    if(stamper){
-    stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
-    }
-
-   
-    if (html === undefined || js === undefined) {
-
-      this.setState({
+    if("index.html" in readDict === false || "sketch.js" in readDict === false){
+       this.setState({
         modalVisible: true,
         modalHeader: "Oh no! It looks like you're missing some files.",
         modalContent:
           "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
                 modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
       });
+      return;     
+    }
+
+    var stamper = undefined
+    if("stamper.js" in readDict){
+      var stamperText = readDict["stamper.js"].content
+      stamper = JSON.parse(stamperText.substring(stamperHeader.length, stamperText.length))
+    }
+
+    try{
+      stamper = this.updateStamperJs(readDict["sketch.js"].content, stamper)
+    } catch (e) {
+      this.setState({
+        modalVisible: true,
+        modalHeader:
+          "Oh no! It looks like your sketch file has a few syntax errors.",
+        modalContent:
+          "We can't parse javascript with syntax errors into Stamper land :(",
+                modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
+      });
       return;
     }
+
+    var fnData = []
+    var imgData = []
+
+    console.log(stamper.fns)
+    stamper.fns.map(singleFnData => {
+      console.log(singleFnData, !singleFnData.isFile)
+      if(!singleFnData.isFile){
+        fnData.push(singleFnData)
+      }else if(singleFnData.name in readDict){
+        singleFnData.code = readDict[singleFnData.name].content
+        readDict[singleFnData.name].transferred = true
+        fnData.push(singleFnData)
+      }
+    })
+
+    stamper.imgs.map(singleImgData => {
+      if(singleImgData.name in readDict){
+        singleImgData.url = readDict[singleImgData.name].content
+        readDict[singleImgData.name].transferred = true
+        imgData.push(singleImgData)
+      }
+    })
+
+    Object.keys(readDict).map(name => {
+      if(name === "sketch.js" || name === "stamper.js" || readDict[name].transferred){
+        return
+      }else if(name === "index.html"){
+        fnData.push({
+          name: name,
+          args: " ",
+          code: readDict[name].content,
+          isHtml: true
+        });
+      }else if(readDict[name].type === "text"){
+        fnData.push({
+          name: name,
+          args: " ",
+          code: readDict[name].content,
+          isFile: true
+        });
+      }else if(readDict[name].type === "image"){
+        imgData.push({
+          name: name,
+          url: readDict[name].content
+        });        
+      }
+    })
+
+    console.log(readDict)
+    console.log(stamper)
+
+    stamper.fns = fnData
+    stamper.imgs = imgData
+
+    this.props.loadStamperFile(stamper);
+    ipc && ipc.send("updatePath", { path: path });
+
+  }
+
+  openFiles(html, js, css = "", stamper, path) {
+
+    // if(stamper){
+    // stamper = JSON.parse(stamper.substring(stamperHeader.length, stamper.length))
+    // }
+
+   
+    // if (html === undefined || js === undefined) {
+
+    //   this.setState({
+    //     modalVisible: true,
+    //     modalHeader: "Oh no! It looks like you're missing some files.",
+    //     modalContent:
+    //       "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
+    //             modalButtons:[{text:"ok", color:"outline-secondary", callback:this.hideModal}],
+    //   });
+    //   return;
+    // }
 
     try {
       var newStamper = this.updateStamperJs(js, stamper);

@@ -45,8 +45,7 @@ export default class BlobStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
-    console.log(this)
-    console.log(this.props)
+
 
 
     this.setState({ exportableCode: "" }
