@@ -6,7 +6,7 @@ import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
 import FunctionStampIcon from "./icons/box.svg";
-import CssStampIcon from "./icons/pen-tool.svg";
+import FileStampIcon from "./icons/file.svg";
 import HtmlStampIcon from "./icons/layout.svg";
 import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
@@ -512,7 +512,7 @@ this.cristalRef.current.changeZIndex()
     if (this.props.isHtml) {
       icon = HtmlStampIcon;
     } else if (this.props.isFile) {
-      icon = CssStampIcon;
+      icon = FileStampIcon;
     } else if (this.state.isSpecialFn) {
       if(globals.specialFns[this.state.name]){
       icon = BuiltInStampIcon;
