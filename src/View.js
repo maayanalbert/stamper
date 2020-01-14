@@ -552,11 +552,13 @@ function logToConsole(message, lineno){
 
     var ref = React.createRef();
 
+    var stampID = counter.toString()
+
     var elem = (
       <ConsoleStamp
         ref={ref}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={stampID}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         disablePan={this.disablePan.bind(this)}
@@ -570,7 +572,7 @@ function logToConsole(message, lineno){
     );
 
     var consoleStamp = { elem: elem, ref: ref };
-    this.setState({ consoleStamp: consoleStamp, consoleId: counter });
+    this.setState({ consoleStamp: consoleStamp, consoleId: stampID });
   }
 
   addFnStamp(
@@ -624,6 +626,7 @@ function logToConsole(message, lineno){
   }
 
   async createFnStamp(data, callback = () => null) {
+        const release = await this.counterMutex.acquire();
     var name = data.name,
       code = data.code,
       args = data.args,
@@ -639,12 +642,14 @@ function logToConsole(message, lineno){
       isFile = data.isFile,
       hidden = data.hidden;
 
-    const release = await this.counterMutex.acquire();
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
 
-    var fnStamps = this.state.fnStamps;
+    var counter = this.state.counter;
+    this.setState({ counter: counter + 1 });
+
+    var fnStamps = Object.assign({}, this.state.fnStamps);
     var ref = React.createRef();
+
+    var stampID = counter.toString()
 
     var elem = (
       <FunctionStamp
@@ -659,7 +664,7 @@ function logToConsole(message, lineno){
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={stampID}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
         onStartMove={this.onStartMove.bind(this)}
@@ -678,13 +683,19 @@ function logToConsole(message, lineno){
       />
     );
 
-    this.setState({fnStamps:{}}, () => {
-      fnStamps[counter] ={ elem: elem, ref: ref }
-      this.setState({fnStamps:fnStamps}, counter => callback(counter)) 
-    })
+    
+      fnStamps[stampID] ={ elem: elem, ref: ref }
+      this.setState({fnStamps:fnStamps}, counter => 
+
+{
+  release()
+  callback(stampID)
+}
+        ) 
+
 
     if (isHtml) {
-      this.setState({ htmlID: counter });
+      this.setState({ htmlID: stampID });
     }
 
   }
@@ -697,6 +708,7 @@ function logToConsole(message, lineno){
   }
 
   addBlobStamp(data, callback, updatePosition = false) {
+    console.log(data)
     var defaults = {
       code: "var z = 10",
       x: this.setInitialPosition("x"),
@@ -724,6 +736,8 @@ function logToConsole(message, lineno){
   }
 
   async createBlobStamp(data, callback = () => null) {
+    const release = await this.counterMutex.acquire();
+    console.log(data)
 
     var x = data.x,
       y = data.y,
@@ -732,12 +746,12 @@ function logToConsole(message, lineno){
       editorHeight = data.editorHeight,
       errorLines = data.errorLines,
       hidden = data.hidden;
-    const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
+    this.setState({ counter: counter + 1 });
 
-    var blobStamps = this.state.blobStamps;
+    var blobStamps = Object.assign({}, this.state.blobStamps);
     var ref = React.createRef();
+    var stampID = counter.toString()
 
     var elem = (
       <BlobStamp
@@ -745,7 +759,7 @@ function logToConsole(message, lineno){
         starterCode={code}
         errorLines={{}}
         initialPosition={{ x: x, y: y }}
-        id={counter}
+        id={stampID}
         starterCodeSize={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
@@ -764,10 +778,17 @@ starterZIndex={data.zIndex}
     );
 
 
-    this.setState({blobStamps:{}}, () => {
-      blobStamps[counter] ={ elem: elem, ref: ref }
-      this.setState({blobStamps:blobStamps}, counter => callback(counter)) 
-    })
+
+      blobStamps[stampID] ={ elem: elem, ref: ref }
+  
+      this.setState({blobStamps:blobStamps}, counter => {
+        console.log('BLOBSTAMPS')
+            console.log(this.state.blobStamps)
+        callback(stampID)
+        release()
+}
+        ) 
+
 
 
 
@@ -1235,22 +1256,72 @@ _stopLooping =setTimeout(() => {
   }
 
   onDelete(id) {
-    var fnStamps = this.state.fnStamps;
-    var blobStamps = this.state.blobStamps;
+    ipc && ipc.send("edited");
+    
 
-    if (id in fnStamps) {
-      ipc && ipc.send("edited");
-      delete fnStamps[id];
-    } else if (id in blobStamps) {
-      ipc && ipc.send("edited");
-      delete blobStamps[id];
-    }
-    this.setState({fnStamps:{}}, () => this.setState({fnStamps:fnStamps}, () => {
-      this.requestCompile(id)
-    }))
-    this.setState({blobStamps:{}}, () => this.setState({blobStamps:blobStamps}, () => {
-      this.requestCompile()
-    }))
+    var allData = this.getAllData(id)
+    this.loadStamperFile(allData)
+
+//     var fnData = []
+//     Object.keys(this.state.fnStamps).map(stampID => {
+//       if(stampID != id ){
+
+//       fnData.push(this.state.fnStamps[stampID].ref.current.getData())
+//       }
+
+//     })
+
+
+//     var blobData = []
+//     Object.keys(this.state.blobStamps).map(stampID => {
+//       if(stampID != id ){
+//       blobData.push(this.state.blobStamps[stampID].ref.current.getData())
+//       }
+//     })
+
+//     this.setState({blobStamps:{}})
+//     this.setState({fnStamps:{}})
+// console.log(blobData)
+//     blobData.map(data => {
+//       console.log(data)
+//       this.addBlobStamp(data)
+//     })
+// fnData.map(data => this.addFnStamp(data))
+
+    // var fnStamps = this.state.fnStamps
+    // Object.keys(fnStamps).map(stampID => {
+    //   if(stampID != id){
+
+    //     fnStamps[stampID] = this.state.fnStamps[stampID]
+    //   }
+    // })
+
+    // var blobStamps = this.state.blobStamps
+    // Object.keys(blobStamps).map(stampID => {
+    //   if(stampID != id){
+    //     blobStamps[stampID] = this.state.blobStamps[stampID]
+    //   }
+    // })
+
+    // var fnStamps = Object.assign({}, this.state.fnStamps)
+    // var blobStamps = Object.assign({}, this.state.blobStamps)
+    // console.log(this.state.blobStamps)
+
+    // if (id in fnStamps) {
+    //   ipc && ipc.send("edited");
+    //   delete fnStamps[id];
+    // } else if (id in blobStamps) {
+    //   ipc && ipc.send("edited");
+    //   delete blobStamps[id];
+
+    // }
+// this.setState({fnStamps:fnStamps}, () => {
+//       this.requestCompile(id)
+//     })
+//   this.setState({blobStamps:blobStamps}, () => {
+//       this.requestCompile()
+
+//     })
 
   }
 
@@ -1259,7 +1330,7 @@ _stopLooping =setTimeout(() => {
     this.setState({ consoleStamp: null }, () => this.addConsoleStamp(data));
   }
 
-  getAllData() {
+  getAllData(id) {
     var data = {
       fns: [],
       blobs: [],
@@ -1268,12 +1339,23 @@ _stopLooping =setTimeout(() => {
       originX: this.state.originX,
       originY: this.state.originY
     };
-    Object.values(this.state.fnStamps).map(stamp =>
-      data.fns.push(stamp.ref.current.getData())
+    Object.keys(this.state.fnStamps).map(stampID =>{
+      if(stampID != id){
+        var stamp = this.state.fnStamps[stampID]
+        data.fns.push(stamp.ref.current.getData())
+      }
+    }
+
+
     );
 
-    Object.values(this.state.blobStamps).map(stamp =>
-      data.blobs.push(stamp.ref.current.getData())
+    Object.keys(this.state.blobStamps).map(stampID =>{
+      if(stampID != id){
+        var stamp = this.state.blobStamps[stampID]
+        data.blobs.push(stamp.ref.current.getData())
+      }
+    }
+
     );
 
     return data;

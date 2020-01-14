@@ -22,6 +22,7 @@ if (userAgent.indexOf(" electron/") > -1) {
 export default class BlobStamp extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       code: this.props.starterCode,
       editorScrolling: false,
@@ -44,6 +45,10 @@ export default class BlobStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
+    console.log(this)
+    console.log(this.props)
+
+
     this.setState({ exportableCode: "" }
     );
   }
