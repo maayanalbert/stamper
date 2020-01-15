@@ -26,6 +26,7 @@ import UploadIcon from "./icons/upload.svg";
 import WorldsIcon from "./icons/archive.svg";
 import GlobalVarIcon from "./icons/globe.svg";
 import CommentIcon from "./icons/message-square.svg";
+import FileStampIcon from "./icons/file.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -45,7 +46,8 @@ import pf1, {
   varBlob,
   listenerFns,
   builtInFns,
-  worlds
+  worlds,
+  sampleFile
 } from "./starterStamps.js";
 
 var _ = require("lodash");
@@ -71,6 +73,7 @@ export default class ControlBar extends Component {
     this.minNonSideBarWidth = 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
+    this.spanWidth = 35
     this.state = {
       jsImporterHeight: 110,
       sideBarWidth: 200,
@@ -524,7 +527,7 @@ function noiseWave() {
             }))}
             tooltipText="function"
           />
-          <span style={{ width: 50 }} />
+          <span style={{ width: this.spanWidth }} />
 
           <TopButton
             iconType={ListenerStampIcon}
@@ -538,7 +541,7 @@ function noiseWave() {
             tooltipText="listener"
           />
 
-          <span style={{ width: 50 }} />
+          <span style={{ width: this.spanWidth }} />
 
           <TopButton
             iconType={BlobStampIcon}
@@ -550,7 +553,7 @@ function noiseWave() {
             }
             tooltipText="global variable"
           />
-          <span style={{ width: 50 }} />
+          <span style={{ width: this.spanWidth }} />
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="commentStamp"
@@ -560,6 +563,18 @@ function noiseWave() {
               )
             }
             tooltipText="comment"
+          />
+
+          <span style={{ width: this.spanWidth }} />
+          <TopButton
+            iconType={FileStampIcon}
+            uniqueClass="fileStamp"
+            iconCallback={() =>
+              this.props.addFnStamp(sampleFile, id =>
+                this.props.requestCompile(id)
+              )
+            }
+            tooltipText="file"
           />
         </div>
 
@@ -742,7 +757,7 @@ class TopButton extends Component {
       );
     }
 
-    var offset = "-138px";
+    var offset = "-140px";
     if (this.props.dropDownData) {
       var offset = "-133px";
     }

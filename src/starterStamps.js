@@ -144,6 +144,12 @@ export const commentBlob = {
   codeSize: globals.bigCodeSize
 };
 
+export const sampleFile = {
+  name: "sample.js",
+  code: "// put some code to import into your js in here",
+  isFile:true
+};
+
 export const varBlob = { code: "var global1 = 1" };
 
 export default function DefaultExportPlaceholder() {

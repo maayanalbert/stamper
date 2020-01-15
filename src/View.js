@@ -1496,7 +1496,7 @@ _stopLooping =setTimeout(() => {
         if (!stampRef) {
           return;
         }
-        var name = this.getFirstLine(stampRef.state.code) + stampRef.props.id;
+        var name = this.getFirstLine(stampRef.state.code);
       }
 
       pickerData.push({
