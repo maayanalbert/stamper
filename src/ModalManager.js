@@ -78,13 +78,20 @@ export default class ModalManager extends Component {
         this.sendSaveData();
       });
 
+
+    this.createInputElement()
+
+    window.addEventListener("beforeunload", this.sendSaveData);
+  }
+
+
+  createInputElement(){
     var inputElem = document.createElement("input", {
       id: "projectInput",
       type: "file",
       webkitdirectory: "true",
       multiple: "true"
     });
-
     var idAttr = document.createAttribute("id");
     idAttr.value = "projectInput";
     inputElem.setAttributeNode(idAttr);
@@ -108,8 +115,6 @@ export default class ModalManager extends Component {
     inputElem.addEventListener("change", this.checkFiles);
     document.getElementById("root").appendChild(inputElem);
     this.inputElem = inputElem;
-
-    window.addEventListener("beforeunload", this.sendSaveData);
   }
 
   componentWillUnmout() {
@@ -179,7 +184,6 @@ export default class ModalManager extends Component {
   }
 
   uploadImage(e){
-    console.log(e.target.files)
 
     if(e.target.files.length === 0){
       return
@@ -211,6 +215,7 @@ export default class ModalManager extends Component {
   }
 
   checkFiles(e) {
+    console.log(e.target.files)
 
 
     var askedAboutCdn = false;
@@ -226,6 +231,7 @@ export default class ModalManager extends Component {
         files.push(e.target.files[i]);
       }
     }
+
 
     if (containsLib && askedAboutCdn === false) {
       var buttons = [];
@@ -256,6 +262,7 @@ export default class ModalManager extends Component {
     } else {
       this.readFiles(files);
     }
+
   }
 
   curIsAWorld() {
@@ -484,11 +491,16 @@ export default class ModalManager extends Component {
 
     stamperObject.fns = fnData;
 
+    var projectPath = ""
+    var projectName = ""
+    if(ipc){
     var projectPathArr = readDict["index.html"].path.split("/");
     projectPathArr.pop();
 
-    var projectPath = projectPathArr.join("/") + "/";
-    var projectName = projectPathArr.pop();
+    projectPath = projectPathArr.join("/") + "/";
+    projectName = projectPathArr.pop();
+
+    }
 
     this.props.loadStamperObject(stamperObject);
     ipc && ipc.send("updatePath", { path: projectPath, name: projectName });
@@ -499,6 +511,7 @@ export default class ModalManager extends Component {
   }
 
   render() {
+
     var buttonElems = this.state.modalButtons.map(btnData => (
       <Button variant={btnData.color} size="sm" onClick={btnData.callback}>
         {btnData.text}
@@ -506,6 +519,7 @@ export default class ModalManager extends Component {
     ));
     return (
       <div>
+
       <input type="file" hidden={true} id="imageInput" accept="image/*"
       onChange={(e) =>  this.uploadImage(e)}/>
         <Modal

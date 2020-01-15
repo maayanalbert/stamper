@@ -46,12 +46,12 @@ export default class View extends Component {
     super(props);
     this.state = {
       compiledBefore: false,
-      fnStamps: {},
-      holderBlobStamps: {},
-      holderFnStamps: {},
+      fnStampRefs: {},
+      fnStampElems:{},
       scale: 1,
       counter: 0,
-      blobStamps: {},
+      blobStampRefs: {},
+      blobStampElems:{},
       htmlID: -1,
       consoleStamp: null,
       setupExists: true,
@@ -262,8 +262,8 @@ export default class View extends Component {
 
   recompileIfEnoughStamps(numFns, numBlobs) {
     if (
-      Object.keys(this.state.fnStamps).length === numFns &&
-      Object.keys(this.state.blobStamps).length === numBlobs
+      Object.keys(this.state.fnStampRefs).length === numFns &&
+      Object.keys(this.state.blobStampRefs).length === numBlobs
     ) {
       this.requestCompile();
     }
@@ -272,8 +272,10 @@ export default class View extends Component {
   loadStamperObject(stamperObject) {
     this.setState(
       {
-        fnStamps: {},
-        blobStamps: {},
+        fnStampRefs: {},
+        blobStampRefs: {},
+        fnStampElems:{},
+        blobStampElems:{},
         counter: 0,
         htmlID: -1,
         scale: 1,
@@ -356,10 +358,10 @@ function logToConsole(message, lineno){
   }
 
   replaceFileStamps(parser) {
-    Object.values(this.state.fnStamps).map(item => {
-      if (item.ref.current.props.isFile) {
-        var name = item.ref.current.state.name;
-        var code = item.ref.current.state.code;
+    Object.values(this.state.fnStampRefs).map(item => {
+      if (item.current.props.isFile) {
+        var name = item.current.state.name;
+        var code = item.current.state.code;
 
         var srcNodes = parser(`[src="${name}"]`);
         for (var i = 0; i < srcNodes.length; i++) {
@@ -378,10 +380,10 @@ function logToConsole(message, lineno){
   }
 
   loadAssets(runnableCode) {
-    Object.values(this.state.fnStamps).map(item => {
-      var name = item.ref.current.state.name;
-      var code = item.ref.current.state.code;
-      if (item.ref.current.props.isFile || item.ref.current.props.isImg) {
+    Object.values(this.state.fnStampRefs).map(item => {
+      var name = item.current.state.name;
+      var code = item.current.state.code;
+      if (item.current.props.isFile || item.current.props.isImg) {
         runnableCode = runnableCode
           .replace(`'${name}'`, `"${code}"`)
           .replace("`" + name + "`", `"${code}"`)
@@ -393,7 +395,7 @@ function logToConsole(message, lineno){
   }
 
   getHTML(id) {
-    if (this.state.htmlID in this.state.fnStamps === false) {
+    if (this.state.htmlID in this.state.fnStampRefs === false) {
       return "";
     }
 
@@ -406,9 +408,9 @@ function logToConsole(message, lineno){
       var ranges = codeData.ranges;
     }
 
-    var htmlStamp = this.state.fnStamps[this.state.htmlID];
+    var htmlStamp = this.state.fnStampRefs[this.state.htmlID];
 
-    var html = htmlStamp.ref.current.state.code;
+    var html = htmlStamp.current.state.code;
 
     const parser = cheerio.load(html, { withStartIndices: true });
     this.replaceFileStamps(parser);
@@ -427,7 +429,7 @@ function logToConsole(message, lineno){
       this.state.consoleStamp.ref.current.logToConsole(
         `Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`
       );
-      this.state.fnStamps[this.state.htmlID].ref.current.addErrorLine(-1);
+      this.state.fnStampRefs[this.state.htmlID].current.addErrorLine(-1);
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
       this.setState({ htmlAsksForJs: htmlAsksForJs });
@@ -461,10 +463,10 @@ function logToConsole(message, lineno){
   }
 
   addErrorLine(lineNum, id) {
-    if (id in this.state.fnStamps) {
-      this.state.fnStamps[id].ref.current.addErrorLine(lineNum);
-    } else if (id in this.state.blobStamps) {
-      this.state.blobStamps[id].ref.current.addErrorLine(lineNum);
+    if (id in this.state.fnStampRefs) {
+      this.state.fnStampRefs[id].current.addErrorLine(lineNum);
+    } else if (id in this.state.blobStampRefs) {
+      this.state.blobStampRefs[id].current.addErrorLine(lineNum);
     }
   }
 
@@ -585,7 +587,7 @@ function logToConsole(message, lineno){
     data.iframeDisabled = setIframeDisabled;
 
     this.createFnStamp(data, callback);
-    // this.refreshBlobStamps(this.state.blobStamps);
+    // this.refreshblobStampRefs(this.state.blobStampRefs);
     // this.createFnStamp(data, callback)
     return newName;
   }
@@ -611,7 +613,8 @@ function logToConsole(message, lineno){
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, () => release());
 
-    var fnStamps = Object.assign({}, this.state.fnStamps);
+    var fnStampRefs = Object.assign({}, this.state.fnStampRefs);
+    var fnStampElems = Object.assign({}, this.state.fnStampElems);
     var ref = React.createRef();
 
     var stampID = counter.toString();
@@ -649,11 +652,13 @@ function logToConsole(message, lineno){
       />
     );
 
-    fnStamps[stampID] = { elem: elem, ref: ref };
+    fnStampRefs[stampID] = ref;
+    fnStampElems[stampID] = elem
 
     this.setState(
       {
-        fnStamps: fnStamps,
+        fnStampRefs: fnStampRefs,
+        fnStampElems:fnStampElems
 
       },
           counter => callback(stampID)
@@ -712,7 +717,8 @@ function logToConsole(message, lineno){
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, () => release());
 
-    var blobStamps = Object.assign({}, this.state.blobStamps);
+    var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
+    var blobStampElems = Object.assign({}, this.state.blobStampElems);
     var ref = React.createRef();
     var stampID = counter.toString();
 
@@ -740,18 +746,21 @@ function logToConsole(message, lineno){
       />
     );
 
-    blobStamps[stampID] = { elem: elem, ref: ref };
+    blobStampRefs[stampID] = ref
+    blobStampElems[stampID] = elem
 
-    this.setState({ blobStamps: blobStamps }, counter => {
+    this.setState({ blobStampRefs: blobStampRefs ,
+      blobStampElems:blobStampElems
+    }, counter => {
       callback(stampID);
     });
   }
 
   checkForSetup() {
     var newSetupExists = false;
-    var fnStamps = Object.values(this.state.fnStamps);
-    for (var i = 0; i < fnStamps.length; i++) {
-      var fnStampRef = fnStamps[i].ref.current;
+    var fnStampRefs = Object.values(this.state.fnStampRefs);
+    for (var i = 0; i < fnStampRefs.length; i++) {
+      var fnStampRef = fnStampRefs[i].current;
 
       if (fnStampRef.state.name === "setup") {
         newSetupExists = true;
@@ -770,13 +779,13 @@ function logToConsole(message, lineno){
   }
 
   getFileData() {
-    if (this.state.htmlID in this.state.fnStamps === false) {
+    if (this.state.htmlID in this.state.fnStampRefs === false) {
       return;
     }
-    var htmlStamp = this.state.fnStamps[this.state.htmlID];
+    var htmlStamp = this.state.fnStampRefs[this.state.htmlID];
 
     var fileData = {
-      html: htmlStamp.ref.current.state.code,
+      html: htmlStamp.current.state.code,
       js: this.getExportableCode()
     };
 
@@ -813,8 +822,8 @@ function logToConsole(message, lineno){
 
     // this.recursiveCompileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
 
-    Object.values(this.state.fnStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
+    Object.values(this.state.fnStampRefs).map(stamp => {
+      var stampRef = stamp.current;
       if (stampRef) {
         var newErrors = [];
         if (
@@ -828,8 +837,8 @@ function logToConsole(message, lineno){
       }
     });
 
-    Object.values(this.state.blobStamps).map(stamp => {
-      var stampRef = stamp.ref.current;
+    Object.values(this.state.blobStampRefs).map(stamp => {
+      var stampRef = stamp.current;
       if (stampRef) {
         var newErrors = [];
 
@@ -849,10 +858,10 @@ function logToConsole(message, lineno){
       seen[id] = "";
     }
 
-    if (id in this.state.fnStamps) {
-      var stampRef = this.state.fnStamps[id].ref.current;
-    } else if (id in this.state.blobStamps) {
-      var stampRef = this.state.blobStamps[id].ref.current;
+    if (id in this.state.fnStampRefs) {
+      var stampRef = this.state.fnStampRefs[id].current;
+    } else if (id in this.state.blobStampRefs) {
+      var stampRef = this.state.blobStampRefs[id].current;
     } else {
       return;
     }
@@ -893,9 +902,9 @@ function logToConsole(message, lineno){
 
   checkAllNames() {
     var nameDict = {};
-    Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current) {
-        var name = stamp.ref.current.state.name;
+    Object.values(this.state.fnStampRefs).map(stamp => {
+      if (stamp.current) {
+        var name = stamp.current.state.name;
         if (!(name in nameDict)) {
           nameDict[name] = 0;
         }
@@ -903,12 +912,12 @@ function logToConsole(message, lineno){
       }
     });
     var duplicateNamedStamps = {};
-    Object.values(this.state.fnStamps).map(stamp => {
-      if (stamp.ref.current) {
-        var stampRef = stamp.ref.current;
-        var name = stamp.ref.current.state.name;
+    Object.values(this.state.fnStampRefs).map(stamp => {
+      if (stamp.current) {
+        var stampRef = stamp.current;
+        var name = stamp.current.state.name;
         if (nameDict[name] > 1) {
-          duplicateNamedStamps[stamp.ref.current.props.id] = "";
+          duplicateNamedStamps[stamp.current.props.id] = "";
 
           this.state.consoleStamp.ref.current.logToConsole(
             `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your ${name}s to something else.`
@@ -926,11 +935,11 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    Object.values(this.state.blobStamps).map(blobStamp => {
-      code = blobStamp.ref.current.state.code;
+    Object.values(this.state.blobStampRefs).map(blobStamp => {
+      code = blobStamp.current.state.code;
       curLine = this.addCodeBlock(
         code,
-        blobStamp.ref.current.props.id,
+        blobStamp.current.props.id,
         runnableCode,
         ranges,
         curLine,
@@ -938,17 +947,17 @@ function logToConsole(message, lineno){
       );
     });
 
-    Object.values(this.state.fnStamps).map(stamp => {
+    Object.values(this.state.fnStampRefs).map(stamp => {
       if (
-        stamp.ref.current.props.isFile === false &&
-        stamp.ref.current.props.isHtml === false &&
-        stamp.ref.current.props.isImg === false
+        stamp.current.props.isFile === false &&
+        stamp.current.props.isHtml === false &&
+        stamp.current.props.isImg === false
       ) {
-        var state = stamp.ref.current.state;
+        var state = stamp.current.state;
         code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
         curLine = this.addCodeBlock(
           code,
-          stamp.ref.current.props.id,
+          stamp.current.props.id,
           runnableCode,
           ranges,
           curLine,
@@ -1009,8 +1018,8 @@ function logToConsole(message, lineno){
     var setupID = -1;
     var traversalGraph = {};
 
-    Object.keys(this.state.blobStamps).map(id => {
-      var stampRef = this.state.blobStamps[id].ref.current;
+    Object.keys(this.state.blobStampRefs).map(id => {
+      var stampRef = this.state.blobStampRefs[id].current;
       var code = stampRef.state.code;
       var identifiers = parser.getIdentifiers(code);
 
@@ -1022,8 +1031,8 @@ function logToConsole(message, lineno){
       }
     });
 
-    Object.keys(this.state.fnStamps).map(id => {
-      var stampRef = this.state.fnStamps[id].ref.current;
+    Object.keys(this.state.fnStampRefs).map(id => {
+      var stampRef = this.state.fnStampRefs[id].current;
 
       if (stampRef.state.name === "setup") {
         setupID = id;
@@ -1052,7 +1061,7 @@ function logToConsole(message, lineno){
       }
     });
 
-    // Object.keys(this.state.fnStamps).map(id => {
+    // Object.keys(this.state.fnStampRefs).map(id => {
     //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
     //     lineData.push([id, setupID]);
     //     if (setupID in traversalGraph === false) {
@@ -1064,7 +1073,7 @@ function logToConsole(message, lineno){
 
     this.setState({ lineData: lineData }, () => this.setLines());
 
-    // Object.keys(this.state.fnStamps).map(id => {
+    // Object.keys(this.state.fnStampRefs).map(id => {
     //   if (id != this.state.htmlID && id != this.state.cssID) {
     //     if (this.state.htmlID in traversalGraph === false) {
     //       traversalGraph[this.state.htmlID] = [];
@@ -1084,11 +1093,11 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    Object.values(this.state.blobStamps).map(blobStamp => {
-      code = blobStamp.ref.current.state.code;
+    Object.values(this.state.blobStampRefs).map(blobStamp => {
+      code = blobStamp.current.state.code;
       curLine = this.addCodeBlock(
         code,
-        blobStamp.ref.current.props.id,
+        blobStamp.current.props.id,
         runnableCode,
         ranges,
         curLine,
@@ -1096,21 +1105,21 @@ function logToConsole(message, lineno){
       );
     });
 
-    Object.values(this.state.fnStamps).map(stamp => {
+    Object.values(this.state.fnStampRefs).map(stamp => {
       if (
-        stamp.ref.current.state.name != "draw" &&
-        stamp.ref.current.props.isFile === false &&
-        stamp.ref.current.props.isImg === false &&
-        stamp.ref.current.props.isHtml === false &&
-        (this.isListener(stamp.ref.current.state.name) === false ||
-          this.isListener(this.state.fnStamps[id].ref.current.state.name) ===
+        stamp.current.state.name != "draw" &&
+        stamp.current.props.isFile === false &&
+        stamp.current.props.isImg === false &&
+        stamp.current.props.isHtml === false &&
+        (this.isListener(stamp.current.state.name) === false ||
+          this.isListener(this.state.fnStampRefs[id].current.state.name) ===
             false)
       ) {
-        var state = stamp.ref.current.state;
+        var state = stamp.current.state;
         code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
         curLine = this.addCodeBlock(
           code,
-          stamp.ref.current.props.id,
+          stamp.current.props.id,
           runnableCode,
           ranges,
           curLine,
@@ -1120,13 +1129,13 @@ function logToConsole(message, lineno){
     });
 
     if (
-      id in this.state.fnStamps == false ||
-      this.state.fnStamps[id].ref.current === null
+      id in this.state.fnStampRefs == false ||
+      this.state.fnStampRefs[id].current === null
     ) {
       return runnableCode.join("");
     }
 
-    var fnStampRef = this.state.fnStamps[id].ref.current;
+    var fnStampRef = this.state.fnStampRefs[id].current;
     var state = fnStampRef.state;
     if (state.name === "draw" || this.isListener(state.name)) {
       var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
@@ -1208,8 +1217,22 @@ _stopLooping =setTimeout(() => {
   onDelete(id) {
     ipc && ipc.send("edited");
 
-    var allData = this.getStamperObject(id);
-    this.loadStamperObject(allData);
+    if(id in this.state.fnStampRefs){
+      var fnStampRefs = Object.assign({}, this.state.fnStampRefs);
+      var fnStampElems = Object.assign({}, this.state.fnStampElems);
+      delete fnStampRefs[id]
+      fnStampElems[id] = (<span hidden={true}/>)
+      this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems})
+    }else if(id in this.state.blobStampRefs){
+      var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
+      var blobStampElems = Object.assign({}, this.state.blobStampElems);
+      delete blobStampRefs[id]
+      blobStampElems[id] = (<span hidden={true}/>)
+      this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems})
+    }
+
+    // var allData = this.getStamperObject(id);
+    // this.loadStamperObject(allData);
   }
 
   refreshConsoleStamp(consoleStamp) {
@@ -1226,33 +1249,33 @@ _stopLooping =setTimeout(() => {
       originX: this.state.originX,
       originY: this.state.originY
     };
-    Object.keys(this.state.fnStamps).map(stampID => {
+    Object.keys(this.state.fnStampRefs).map(stampID => {
       if (stampID != id) {
-        var stamp = this.state.fnStamps[stampID];
-        data.fns.push(stamp.ref.current.getData());
+        var stamp = this.state.fnStampRefs[stampID];
+        data.fns.push(stamp.current.getData());
       }
     });
 
-    Object.keys(this.state.blobStamps).map(stampID => {
+    Object.keys(this.state.blobStampRefs).map(stampID => {
       if (stampID != id) {
-        var stamp = this.state.blobStamps[stampID];
-        data.blobs.push(stamp.ref.current.getData());
+        var stamp = this.state.blobStampRefs[stampID];
+        data.blobs.push(stamp.current.getData());
       }
     });
 
     return data;
   }
 
-  refreshFnStamps(fnStamps, callback = () => null) {
+  refreshfnStampRefs(fnStampRefs, callback = () => null) {
     var data = [];
-    Object.values(fnStamps).map(item => {
-      data.push(item.ref.current.getData());
+    Object.values(fnStampRefs).map(item => {
+      data.push(item.current.getData());
     });
 
-    this.setState({ fnStamps: {} }, () => {
+    this.setState({ fnStampRefs: {} }, () => {
       data.map(stampData => {
         this.addFnStamp(stampData, () => {
-          if (Object.values(this.state.fnStamps).length === data.length) {
+          if (Object.values(this.state.fnStampRefs).length === data.length) {
             callback();
           }
         });
@@ -1260,16 +1283,16 @@ _stopLooping =setTimeout(() => {
     });
   }
 
-  refreshBlobStamps(blobStamps, callback = () => null) {
+  refreshblobStampRefs(blobStampRefs, callback = () => null) {
     var data = [];
-    Object.values(blobStamps).map(item => {
-      data.push(item.ref.current.getData());
+    Object.values(blobStampRefs).map(item => {
+      data.push(item.current.getData());
     });
 
-    this.setState({ blobStamps: {} }, () => {
+    this.setState({ blobStampRefs: {} }, () => {
       data.map(stampData => {
         this.addBlobStamp(stampData, () => {
-          if (Object.values(this.state.blobStamps).length === data.length) {
+          if (Object.values(this.state.blobStampRefs).length === data.length) {
             callback();
           }
         });
@@ -1278,9 +1301,9 @@ _stopLooping =setTimeout(() => {
   }
 
   onStartMove() {
-    var fnStamps = this.state.fnStamps;
-    for (var i in fnStamps) {
-      var fnStamp = fnStamps[i].ref.current;
+    var fnStampRefs = this.state.fnStampRefs;
+    for (var i in fnStampRefs) {
+      var fnStamp = fnStampRefs[i].current;
 
       fnStamp.setIframeDisabled(true);
     }
@@ -1290,9 +1313,9 @@ _stopLooping =setTimeout(() => {
 
   onStopMove(s) {
     this.setState({ mouseWheelTimeout: null });
-    var fnStamps = this.state.fnStamps;
-    for (var i in fnStamps) {
-      var fnStamp = fnStamps[i].ref.current;
+    var fnStampRefs = this.state.fnStampRefs;
+    for (var i in fnStampRefs) {
+      var fnStamp = fnStampRefs[i].current;
       fnStamp.setIframeDisabled(false);
     }
 
@@ -1302,10 +1325,10 @@ _stopLooping =setTimeout(() => {
   centerOnStamp(id, xOff, yOff) {
     var stampRef;
 
-    if (id in this.state.fnStamps) {
-      stampRef = this.state.fnStamps[id].ref.current;
-    } else if (id in this.state.blobStamps) {
-      stampRef = this.state.blobStamps[id].ref.current;
+    if (id in this.state.fnStampRefs) {
+      stampRef = this.state.fnStampRefs[id].current;
+    } else if (id in this.state.blobStampRefs) {
+      stampRef = this.state.blobStampRefs[id].current;
     } else if (
       this.state.consoleStamp.ref.current &&
       id === this.state.consoleStamp.ref.current.props.id
@@ -1388,18 +1411,18 @@ _stopLooping =setTimeout(() => {
       });
     }
 
-    var fnIds = Object.keys(this.state.fnStamps);
-    var blobIds = Object.keys(this.state.blobStamps);
+    var fnIds = Object.keys(this.state.fnStampRefs);
+    var blobIds = Object.keys(this.state.blobStampRefs);
     var allIds = fnIds.concat(blobIds);
     allIds.map(id => {
-      if (id in this.state.fnStamps) {
-        var stampRef = this.state.fnStamps[id].ref.current;
+      if (id in this.state.fnStampRefs) {
+        var stampRef = this.state.fnStampRefs[id].current;
         if (!stampRef) {
           return;
         }
         var name = stampRef.state.name;
-      } else if (id in this.state.blobStamps) {
-        var stampRef = this.state.blobStamps[id].ref.current;
+      } else if (id in this.state.blobStampRefs) {
+        var stampRef = this.state.blobStampRefs[id].current;
         if (!stampRef) {
           return;
         }
@@ -1422,8 +1445,8 @@ _stopLooping =setTimeout(() => {
 
   getNumStamps() {
     return {
-      fns: Object.keys(this.state.fnStamps).length,
-      blobs: Object.keys(this.state.blobStamps).length
+      fns: Object.keys(this.state.fnStampRefs).length,
+      blobs: Object.keys(this.state.blobStampRefs).length
     };
   }
 
@@ -1434,11 +1457,11 @@ _stopLooping =setTimeout(() => {
       var consoleElem = null;
     }
 
-    var fnElems = [];
-    var blobElems = []
+    // var fnElems = [];
+    // var blobElems = []
 
-    Object.values(this.state.fnStamps).map(stamp => fnElems.push(stamp.elem));
-    Object.values(this.state.blobStamps).map(stamp => blobElems.push(stamp.elem));
+    // Object.values(this.state.fnStampElems).map(stamp => fnElems.push(stamp.elem));
+    // Object.values(this.state.fnStampElems).map(stamp => blobElems.push(stamp.elem));
 
 
 
@@ -1454,8 +1477,8 @@ _stopLooping =setTimeout(() => {
               transform: "scale(" + this.state.scale + ")"
             }}
           >
-            {fnElems}
-            {blobElems}
+            {Object.values(this.state.fnStampElems)}
+            {Object.values(this.state.blobStampElems)}
             {consoleElem}
           </div>
         </div>
