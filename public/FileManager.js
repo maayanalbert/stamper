@@ -19,9 +19,7 @@ module.exports = class FileManager {
     this.mainWindow = mainWindow;
     this.path = undefined;
     this.name = "";
-    this.html = "";
-    this.css = "";
-    this.js = "";
+    this.fileDict = {}
     this.stamper = undefined;
     this.pendingCallback = () => null
     this.edited = false
@@ -35,6 +33,7 @@ module.exports = class FileManager {
     ipcMain.on("updatePath", (event, data) => {
       this.path = data.path;
       this.name = data.name;
+      this.fileDict = data.fileDict
       this.mainWindow.setTitle(this.name);
     });
 
@@ -48,9 +47,7 @@ module.exports = class FileManager {
   resetFiles() {
     this.path = undefined;
     this.name = "";
-    this.html = "";
-    this.css = "";
-    this.js = "";
+    this.fileDict = {}
     this.stamper = undefined;
     this.edited = false
   }
@@ -122,33 +119,73 @@ module.exports = class FileManager {
 
  
 
-  saveFiles(files) {
+  saveFiles(newFileDict) {
+
+    console.log(this.path)
+
     if (this.path === undefined) {
       return;
     }
 
-    if (
-      this.html === files.html &&
-      _.isEqual(this.stamper, files.stamper) &&
-      this.js === files.js &&
-      this.css === files.css
-    ) {
-      return;
-    }
+    Object.keys(newFileDict).map(name => {
+      var newContent = newFileDict[name].content
+      var oldContent
+      if(this.fileDict[name]){
+        oldContent = this.fileDict[name].content
+              this.fileDict[name].updated = true
+      }
 
-    this.html = files.html;
-    this.stamper = files.stamper;
-    this.js = files.js;
-    this.css = files.css;
+      if(oldContent != newContent){
+        if(newFileDict[name].type === "image"){
+        var uri = newFileDict[name].content
+
+        var idx = uri.indexOf('base64,') + 'base64,'.length; 
+        var newConent = uri.substring(idx);
+        var decodedContent = atob(newConent)
+        jetpack.writeAsync(this.path + name, decodedContent)
+        jetpack.writeAsync(this.path + name, decodedContent)
+        }else{
+        jetpack.writeAsync(this.path + name, newContent)
+        }
+
+      }
+
+
+    })
+
+    Object.keys(this.fileDict).map(name => {
+      if(!this.fileDict[name].updated){
+        jetpack.removeAsync(this.path + name)
+      }
+
+    })
+
+    this.fileDict = newFileDict
+
+  
+
+    // if (
+    //   this.html === files.html &&
+    //   _.isEqual(this.stamper, files.stamper) &&
+    //   this.js === files.js &&
+    //   this.css === files.css
+    // ) {
+    //   return;
+    // }
+
+    // this.html = files.html;
+    // this.stamper = files.stamper;
+    // this.js = files.js;
+    // this.css = files.css;
     this.mainWindow.setTitle(this.name);
     this.edited = false
 
-    jetpack.writeAsync(this.path + "/sketch.js", this.js);
-    jetpack.writeAsync(this.path + "/style.css", this.css);
-    jetpack.writeAsync(this.path + "/index.html", this.html);
-    jetpack.writeAsync(
-      this.path + "/stamper.js", this.stamper
-    );
+    // jetpack.writeAsync(this.path + "/sketch.js", this.js);
+    // jetpack.writeAsync(this.path + "/style.css", this.css);
+    // jetpack.writeAsync(this.path + "/index.html", this.html);
+    // jetpack.writeAsync(
+    //   this.path + "/stamper.js", this.stamper
+    // );
 
     this.pendingCallback()
     this.pendingCallback = () => null

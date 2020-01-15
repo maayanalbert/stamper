@@ -323,12 +323,13 @@ export default class ModalManager extends Component {
   }
 
   sendSaveData() {
-    // console.log("SAVING")
+    console.log("SAVING")
     // var fileData = this.props.getFileDict();
     // var stamperObject = this.props.getStamperObject()
     // // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
     // if (fileData) {
-    //   ipc && ipc.send("save", fileData);
+      console.log(this.props.getFileDict())
+      ipc && ipc.send("save", this.props.getFileDict());
     // }
   }
 
@@ -360,8 +361,9 @@ export default class ModalManager extends Component {
   }
 
   updateStamperObject(js, stamperObject) {
+    console.log(js)
     if (stamperObject === undefined) {
-      var oldJs = "";
+      var oldJs = undefined;
     } else {
       var oldJs = LZUTF8.decompress(stamperObject.compressedJs, {
         inputEncoding: "StorageBinaryString"
@@ -515,7 +517,7 @@ export default class ModalManager extends Component {
     }
 
     this.props.loadStamperObject(stamperObject);
-    ipc && ipc.send("updatePath", { path: projectPath, name: projectName });
+    ipc && ipc.send("updatePath", { path: projectPath, name: projectName, fileDict:fileDict });
   }
 
   hideModal() {
