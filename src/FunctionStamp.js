@@ -520,9 +520,7 @@ this.cristalRef.current.changeZIndex()
 
   resizeEditor(widthDiff, heightDiff, x) {
 
-    if(this.props.isImg){
-      return true
-    }
+
 
 
     var height = this.state.editorHeight + heightDiff;
@@ -601,13 +599,14 @@ this.cristalRef.current.changeZIndex()
     return (
       <div>
         <Cristal
+
         zIndex={this.props.starterZIndex}
                   onZChange={s => this.setState({zIndex:s.zIndex})}
                 getScale={this.props.getScale}
           initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
             height:initialHeight}}
           ref={this.cristalRef}
-          isResizable={true}
+          isResizable={!this.props.isImg}
                     onStartResize={this.props.onStartMove.bind(this)}
           onStopResize={this.props.onStopMove.bind(this)}
           onStartMove={this.props.onStartMove}
@@ -627,6 +626,7 @@ this.cristalRef.current.changeZIndex()
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
           parentID = {this.props.id}
+
         >
           <div onMouseLeave={this.compileCallback.bind(this)}>
             <div

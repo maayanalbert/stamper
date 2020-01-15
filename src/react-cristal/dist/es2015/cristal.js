@@ -394,6 +394,7 @@ var Cristal = (function(_super) {
     };
     _this.renderResizeHandles = function() {
       var isResizable = _this.props.isResizable;
+
       if (!isResizable) return;
 
       var scale = _this.props.getScale();
