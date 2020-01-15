@@ -134,7 +134,7 @@ export default class ModalManager extends Component {
       .dispatchEvent(new MouseEvent("click"));
   }
 
-  readFile(file, readDict, callback) {
+  readFile(file, fileDict, callback) {
     var reader = new FileReader();
     var nameArr = file.webkitRelativePath.split("/");
     var fileName = "";
@@ -143,7 +143,7 @@ export default class ModalManager extends Component {
     }
 
     if (this.state.cdnLibs && file.name in this.libs) {
-      readDict[fileName] = {};
+      fileDict[fileName] = {};
       return;
     }
 
@@ -154,7 +154,7 @@ export default class ModalManager extends Component {
     }
 
     reader.onload = function(e) {
-      readDict[fileName] = {
+      fileDict[fileName] = {
         content: e.target.result,
         type: fileType,
         path: file.path
@@ -169,7 +169,7 @@ export default class ModalManager extends Component {
         reader.readAsDataURL(file);
       }
     } catch {
-      readDict[fileName] = {};
+      fileDict[fileName] = {};
       this.setState({
         modalVisible: true,
         modalHeader:
@@ -203,14 +203,14 @@ export default class ModalManager extends Component {
   }
 
   readFiles(files) {
-    var readDict = {};
+    var fileDict = {};
     var callback = () => {
-      if (Object.keys(readDict).length === files.length) {
-        this.stampifyFiles(readDict);
+      if (Object.keys(fileDict).length === files.length) {
+        this.stampifyFiles(fileDict);
       }
     };
     for (var i = 0; i < files.length; i++) {
-      this.readFile(files[i], readDict, () => callback());
+      this.readFile(files[i], fileDict, () => callback());
     }
   }
 
@@ -324,7 +324,7 @@ export default class ModalManager extends Component {
 
   sendSaveData() {
     // console.log("SAVING")
-    // var fileData = this.props.getFileData();
+    // var fileData = this.props.getFileDict();
     // var stamperObject = this.props.getStamperObject()
     // // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
     // if (fileData) {
@@ -333,18 +333,30 @@ export default class ModalManager extends Component {
   }
 
   requestDownload() {
-    //     var data = this.props.getFileData();
-    // var zip = new JSZip();
-    // zip.file("sketch.js", data.js);
-    // zip.file("index.html", data.html);
-    // zip.file("style.css", data.css);
-    // zip.file("stamper.js", data.stamper);
-    // zip.generateAsync({type:"blob"})
-    // .then(function(content) {
-    //     // see FileSaver.js
-    //     saveAs(content, "stamper_project.zip");
-    // });
-    // this.setState({lastDownloaded:data.stamper})
+    var fileDict = this.props.getFileDict()
+    console.log(fileDict)
+    var zip = new JSZip()
+    Object.keys(fileDict).map(name =>{
+      if(fileDict[name].type === "image"){
+        var uri = fileDict[name].content
+
+        var idx = uri.indexOf('base64,') + 'base64,'.length; 
+        var content = uri.substring(idx);
+
+        zip.file(name, content, {base64: true});
+
+      }else{
+      zip.file(name, fileDict[name].content)
+      }
+
+    })
+
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+
+        saveAs(content, "stamper_project.zip");
+    });
+
   }
 
   updateStamperObject(js, stamperObject) {
@@ -389,10 +401,10 @@ export default class ModalManager extends Component {
     return indexContent;
   }
 
-  stampifyFiles(readDict, path) {
+  stampifyFiles(fileDict, path) {
     if (
-      "index.html" in readDict === false ||
-      "sketch.js" in readDict === false
+      "index.html" in fileDict === false ||
+      "sketch.js" in fileDict === false
     ) {
       this.setState({
         modalVisible: true,
@@ -407,14 +419,14 @@ export default class ModalManager extends Component {
     }
 
     if (this.state.cdnLibs) {
-      readDict["index.html"].content = this.replaceFilesWithCDN(
-        readDict["index.html"].content
+      fileDict["index.html"].content = this.replaceFilesWithCDN(
+        fileDict["index.html"].content
       );
     }
 
     var stamperObject = undefined;
-    if ("stamper.js" in readDict) {
-      var stamperFileContent = readDict["stamper.js"].content;
+    if ("stamper.js" in fileDict) {
+      var stamperFileContent = fileDict["stamper.js"].content;
       stamperObject = JSON.parse(
         stamperFileContent.substring(
           stamperHeader.length,
@@ -425,7 +437,7 @@ export default class ModalManager extends Component {
 
     try {
       stamperObject = this.updateStamperObject(
-        readDict["sketch.js"].content,
+        fileDict["sketch.js"].content,
         stamperObject
       );
     } catch (e) {
@@ -447,42 +459,42 @@ export default class ModalManager extends Component {
     stamperObject.fns.map(singleFnData => {
       if (!singleFnData.isFile && !singleFnData.isImg) {
         fnData.push(singleFnData);
-      } else if (singleFnData.name in readDict) {
-        singleFnData.code = readDict[singleFnData.name].content;
-        readDict[singleFnData.name].transferred = true;
+      } else if (singleFnData.name in fileDict) {
+        singleFnData.code = fileDict[singleFnData.name].content;
+        fileDict[singleFnData.name].transferred = true;
         fnData.push(singleFnData);
       }
     });
 
-    Object.keys(readDict).map(name => {
+    Object.keys(fileDict).map(name => {
       if (
         name === "sketch.js" ||
         name === "stamper.js" ||
-        readDict[name].transferred ||
-        Object.keys(readDict[name]) === 0
+        fileDict[name].transferred ||
+        Object.keys(fileDict[name]) === 0
       ) {
         return;
       } else if (name === "index.html") {
         fnData.push({
           name: name,
           args: " ",
-          code: readDict[name].content,
+          code: fileDict[name].content,
           isHtml: true,
           hidden: true
         });
-      } else if (readDict[name].type === "text") {
+      } else if (fileDict[name].type === "text") {
         fnData.push({
           name: name,
           args: " ",
-          code: readDict[name].content,
+          code: fileDict[name].content,
           isFile: true,
           hidden: true
         });
-      } else if (readDict[name].type === "image") {
+      } else if (fileDict[name].type === "image") {
         fnData.push({
           name: name,
           args: " ",
-          code: readDict[name].content,
+          code: fileDict[name].content,
           isImg: true,
           hidden: true
         });
@@ -494,7 +506,7 @@ export default class ModalManager extends Component {
     var projectPath = ""
     var projectName = ""
     if(ipc){
-    var projectPathArr = readDict["index.html"].path.split("/");
+    var projectPathArr = fileDict["index.html"].path.split("/");
     projectPathArr.pop();
 
     projectPath = projectPathArr.join("/") + "/";

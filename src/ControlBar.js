@@ -506,7 +506,7 @@ function noiseWave() {
             iconType={DownloadIcon}
             uniqueClass="download"
             iconCallback={() => {
-              this.props.modalManagerRef.current.requestUpload();
+              this.props.modalManagerRef.current.requestDownload();
             }}
             tooltipText="download project"
           />

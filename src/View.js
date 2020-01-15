@@ -778,26 +778,26 @@ function logToConsole(message, lineno){
     return newSetupExists;
   }
 
-  getFileData() {
-    if (this.state.htmlID in this.state.fnStampRefs === false) {
-      return;
-    }
-    var htmlStamp = this.state.fnStampRefs[this.state.htmlID];
-
-    var fileData = {
-      html: htmlStamp.current.state.code,
-      js: this.getExportableCode()
-    };
-
-    var stamperObject = this.getStamperObject();
-
-    stamperObject.compressedJs = LZUTF8.compress(fileData.js, {
+  getFileDict() {
+    var fileDict = {}
+    fileDict["sketch.js"] = {content:this.getExportableCode(), type:"text"}
+    var stamperObject = this.getStamperObject()
+    stamperObject.compressedJs = LZUTF8.compress(fileDict["sketch.js"].content, {
       outputEncoding: "StorageBinaryString"
     });
 
-    fileData.stamperFileContent = stamperHeader + JSON.stringify(stamperObject);
+    fileDict["stamper.js"] = {content:stamperHeader + JSON.stringify(stamperObject), type:"text"}
 
-    return fileData;
+    Object.values(this.state.fnStampRefs).map(item => {
+      var code = item.current.state.code
+      var name = item.current.state.name
+      if(item.current.props.isFile || item.current.props.isHtml){
+        fileDict[name] = {content:code, type:'text'}
+      }else if(item.current.props.isImg){
+        fileDict[name] = {content:code, type:"image"}
+      }
+    })
+    return fileDict
   }
 
   requestCompile(id) {
@@ -1504,7 +1504,7 @@ _stopLooping =setTimeout(() => {
           ref={this.modalManagerRef}
           loadStamperObject={this.loadStamperObject.bind(this)}
           getStamperObject={this.getStamperObject.bind(this)}
-          getFileData={this.getFileData.bind(this)}
+          getFileDict={this.getFileDict.bind(this)}
           addFnStamp={this.addFnStamp.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
         />
