@@ -27,10 +27,7 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
-import pf1, {
-  starter,
-  stamperHeader
-} from "./starterStamps.js";
+import pf1, { starter, stamperHeader } from "./starterStamps.js";
 
 var _ = require("lodash");
 
@@ -50,6 +47,8 @@ export default class View extends Component {
     this.state = {
       compiledBefore: false,
       fnStamps: {},
+      holderBlobStamps: {},
+      holderFnStamps: {},
       scale: 1,
       counter: 0,
       blobStamps: {},
@@ -69,39 +68,36 @@ export default class View extends Component {
       pickerData: [],
       sideBarWidth: 0,
       topBarHeight: 0,
-      zoomDisabled:false,
-            mouseWheelTimeout: null,
-            mouseIsDown:false,
-            downKey:-1,
-            panDisabled:false
+      zoomDisabled: false,
+      mouseWheelTimeout: null,
+      mouseIsDown: false,
+      downKey: -1,
+      panDisabled: false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
-    this.onWheel = this.onWheel.bind(this)
-    this.onKeyDown = this.onKeyDown.bind(this)
-    this.onKeyUp = this.onKeyUp.bind(this)
-    this.onMouseDown = this.onMouseDown.bind(this)
-    this.onMouseUp = this.onMouseUp.bind(this)
-    this.onMouseMove = this.onMouseMove.bind(this)
+    this.onWheel = this.onWheel.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
 
     this.newStampMarginVariance = 100;
     this.newStampMargin = 20;
     this.space = 32;
-    this.cmd = 91
-    this.ctrl = 17
-    this.plus = 187
-    this.minus = 189
-    this.zero = 48
+    this.cmd = 91;
+    this.ctrl = 17;
+    this.plus = 187;
+    this.minus = 189;
+    this.zero = 48;
 
     ipc &&
       ipc.on("writeToView", (event, data) =>
         this.loadStamperObject(data.stamperObject)
       );
 
-    ipc &&
-      ipc.on("resetView", event =>
-        this.loadStamperObject(starter)
-      );
+    ipc && ipc.on("resetView", event => this.loadStamperObject(starter));
   }
 
   componentDidMount() {
@@ -115,185 +111,162 @@ export default class View extends Component {
     //     this.loadStamperObject(starter)
     //   }
     // }else{
-      this.loadStamperObject(starter);
+    this.loadStamperObject(starter);
     // }
 
-    
+    document.addEventListener("wheel", this.onWheel);
+    document.addEventListener("keydown", this.onKeyDown);
+    document.addEventListener("keyup", this.onKeyUp);
+    document.addEventListener("mousedown", this.onMouseDown);
+    document.addEventListener("mouseup", this.onMouseUp);
+    document.addEventListener("mousemove", this.onMouseMove);
 
-  
-    document.addEventListener("wheel", this.onWheel )
-    document.addEventListener("keydown", this.onKeyDown )
-    document.addEventListener("keyup", this.onKeyUp )
-    document.addEventListener("mousedown", this.onMouseDown )
-        document.addEventListener("mouseup", this.onMouseUp )
-       document.addEventListener("mousemove", this.onMouseMove )
-
-    var centerX = window.innerWidth/2 + this.state.topBarHeight
-    var centerY = window.innerHeight/2  + this.state.sideBarWidth
+    var centerX = window.innerWidth / 2 + this.state.topBarHeight;
+    var centerY = window.innerHeight / 2 + this.state.sideBarWidth;
 
     ipc &&
       ipc.on("zoomIn", () => {
-        this.zoom(centerX, 
-          window.innerHeight/2,
-          true)
-      })
+        this.zoom(centerX, window.innerHeight / 2, true);
+      });
 
     ipc &&
       ipc.on("zoomOut", () => {
-        this.zoom(this.state.scale * .5,centerX, centerY,
-          true)
-      })
+        this.zoom(this.state.scale * 0.5, centerX, centerY, true);
+      });
 
-      ipc &&
+    ipc &&
       ipc.on("zoomActual", () => {
-        this.zoom(1, centerX, centerY,
-          true)
-      })
+        this.zoom(1, centerX, centerY, true);
+      });
   }
 
-  componentWillUnmount(){
-      document.removeEventListener("wheel", this.onWheel )  
-      document.removeEventListener("keydown", this.onKeyDown )
-      document.removeEventListener("keyup", this.onKeyUp )
-          document.removeEventListener("mousedown", this.onMouseDown )
-        document.removeEventListener("mouseup", this.onMouseUp )
-           document.removeEventListener("mousemove", this.onMouseMove )
+  componentWillUnmount() {
+    document.removeEventListener("wheel", this.onWheel);
+    document.removeEventListener("keydown", this.onKeyDown);
+    document.removeEventListener("keyup", this.onKeyUp);
+    document.removeEventListener("mousedown", this.onMouseDown);
+    document.removeEventListener("mouseup", this.onMouseUp);
+    document.removeEventListener("mousemove", this.onMouseMove);
   }
 
-  onKeyDown(e){
-        if (e.keyCode === this.space) {
-        document.body.style.cursor = "grab";
+  onKeyDown(e) {
+    if (e.keyCode === this.space) {
+      document.body.style.cursor = "grab";
+    }
+
+    var centerX = window.innerWidth / 2 + this.state.topBarHeight;
+    var centerY = window.innerHeight / 2 + this.state.sideBarWidth;
+    if (this.state.downKey === this.cmd || this.state.downKey === this.ctrl) {
+      if (e.keyCode === this.zero) {
+        e.preventDefault();
+        this.zoom(1, centerX, centerY, true);
+      } else if (e.keyCode === this.plus) {
+        e.preventDefault();
+        this.zoom(this.state.scale * 2, centerX, centerY, true);
+      } else if (e.keyCode === this.minus) {
+        e.preventDefault();
+        this.zoom(this.state.scale * 0.5, centerX, centerY, true);
       }
-
-    var centerX = window.innerWidth/2 + this.state.topBarHeight
-    var centerY = window.innerHeight/2  + this.state.sideBarWidth
-      if(this.state.downKey === this.cmd || this.state.downKey === this.ctrl){
-  
-        if(e.keyCode === this.zero){
-           e.preventDefault()
-          this.zoom(1, centerX, centerY, true)
-        }else if(e.keyCode === this.plus){
-           e.preventDefault()
-          this.zoom(this.state.scale * 2, centerX, centerY, true)
-        }else if(e.keyCode === this.minus){
-           e.preventDefault()
-          this.zoom(this.state.scale * .5, centerX, centerY, true)
-        }
-      }else{
-        this.setState({ downKey: e.keyCode });
-
-      }
-  
+    } else {
+      this.setState({ downKey: e.keyCode });
+    }
   }
 
-  onKeyUp(e){
-
-      document.body.style.cursor = "auto";
-      if(e.keyCode === this.state.downKey){
+  onKeyUp(e) {
+    document.body.style.cursor = "auto";
+    if (e.keyCode === this.state.downKey) {
       this.setState({ downKey: -1 });
-      }
+    }
   }
-  onMouseDown(){
-    this.setState({mouseIsDown:true})
-  }
-
-  onMouseUp(){
-    this.setState({mouseIsDown:false})
+  onMouseDown() {
+    this.setState({ mouseIsDown: true });
   }
 
-  onMouseMove(e){
+  onMouseUp() {
+    this.setState({ mouseIsDown: false });
+  }
 
-    if(this.state.mouseIsDown && this.state.downKey == this.space){
-
-      this.pan(e.movementX, e.movementY)
+  onMouseMove(e) {
+    if (this.state.mouseIsDown && this.state.downKey == this.space) {
+      this.pan(e.movementX, e.movementY);
     }
   }
 
+  onWheel(e) {
+    if (this.state.mouseWheelTimeout) {
+      clearTimeout(this.state.mouseWheelTimeout);
+    } else {
+      this.onStartMove();
+    }
+    var newTimeOut = setTimeout(this.onStopMove.bind(this), 250);
+    this.setState({ mouseWheelTimeout: newTimeOut });
 
-
-  onWheel(e){
-      if (this.state.mouseWheelTimeout) {
-        clearTimeout(this.state.mouseWheelTimeout);
-      }else{
-        this.onStartMove()
-      }
-      var newTimeOut = setTimeout(this.onStopMove.bind(this), 250);
-      this.setState({ mouseWheelTimeout: newTimeOut });
-
-    if(e.ctrlKey){
-      this.zoom(this.state.scale-e.deltaY *0.01, e.clientX, e.clientY)
- 
-    }else{
-      this.pan(-e.deltaX, -e.deltaY)
+    if (e.ctrlKey) {
+      this.zoom(this.state.scale - e.deltaY * 0.01, e.clientX, e.clientY);
+    } else {
+      this.pan(-e.deltaX, -e.deltaY);
     }
   }
 
-  pan(changeX, changeY){
+  pan(changeX, changeY) {
+    if (this.state.panDisabled) {
+      return;
+    }
+    ipc && ipc.send("edited");
+    var a = this.state,
+      currentX = a.originX,
+      currentY = a.originY;
+    var newX = currentX + changeX;
+    var newY = currentY + changeY;
+    this.setState({ originX: newX, originY: newY });
+  }
 
-      if (this.state.panDisabled) {
-        return;
-      }
-            ipc && ipc.send("edited");
-      var a = this.state,
-        currentX = a.originX,
-        currentY = a.originY;
-      var newX = currentX + changeX;
-      var newY = currentY + changeY;
-      this.setState({ originX: newX, originY: newY });
-    };
+  zoom(newScale, mouseX, mouseY) {
+    if (this.state.zoomDisabled) {
+      return;
+    }
 
-  zoom(
-      newScale,
-      mouseX,
-      mouseY
-    ) {
-      if(this.state.zoomDisabled){
-        return
-      }
+    ipc && ipc.send("edited");
 
-      ipc && ipc.send("edited");
+    var scale = this.state.scale,
+      x = this.state.originX,
+      y = this.state.originY;
 
-      var scale = this.state.scale,
-        x = this.state.originX,
-        y = this.state.originY
+    if (newScale < 0.1) {
+      return;
+    }
 
-      if (newScale < 0.1) {
-        return;
-      }
+    var curDistX = mouseX - x,
+      curDistY = mouseY - y;
 
-      var curDistX = mouseX - x,
-        curDistY = mouseY - y;
+    var unScaledDistX = curDistX / scale,
+      unScaledDistY = curDistY / scale;
 
-      var unScaledDistX = curDistX / scale,
-        unScaledDistY = curDistY / scale;
+    var scaledDistX = unScaledDistX * newScale,
+      scaledDistY = unScaledDistY * newScale;
 
-      var scaledDistX = unScaledDistX * newScale,
-        scaledDistY = unScaledDistY * newScale;
+    var newOriginX = mouseX,
+      newOriginY = mouseY;
 
-        var newOriginX = mouseX,
-          newOriginY = mouseY;
+    var newX = newOriginX - scaledDistX,
+      newY = newOriginY - scaledDistY;
 
-      var newX = newOriginX - scaledDistX,
-        newY = newOriginY - scaledDistY;
-
-    
-        this.setState({ scale: newScale }, () =>
-          this.setState({ originX: newX, originY: newY })
-        );
- 
-    };
+    this.setState({ scale: newScale }, () =>
+      this.setState({ originX: newX, originY: newY })
+    );
+  }
 
   updateControlBarDimensions(sideBarWidth, topBarHeight) {
-
     this.setState({ sideBarWidth: sideBarWidth, topBarHeight: topBarHeight });
   }
 
-  recompileIfEnoughStamps(numFns, numBlobs){
-              if(Object.keys(this.state.fnStamps).length === numFns &&
-                Object.keys(this.state.blobStamps).length === numBlobs){
-                this.requestCompile()
-              }
-            
+  recompileIfEnoughStamps(numFns, numBlobs) {
+    if (
+      Object.keys(this.state.fnStamps).length === numFns &&
+      Object.keys(this.state.blobStamps).length === numBlobs
+    ) {
+      this.requestCompile();
+    }
   }
 
   loadStamperObject(stamperObject) {
@@ -308,7 +281,7 @@ export default class View extends Component {
         consoleId: -1,
         originX: 0,
         originY: 0,
-        compiledBefore:false
+        compiledBefore: false
       },
       () => {
         this.setState(
@@ -318,14 +291,14 @@ export default class View extends Component {
             originY: stamperObject.originY
           },
           () => {
-
-            var callback = () => this.recompileIfEnoughStamps(stamperObject.fns.length, 
-              stamperObject.blobs.length)
+            var callback = () =>
+              this.recompileIfEnoughStamps(
+                stamperObject.fns.length,
+                stamperObject.blobs.length
+              );
             this.addConsoleStamp(stamperObject.console);
             stamperObject.fns.map(data => this.addFnStamp(data, callback));
             stamperObject.blobs.map(data => this.addBlobStamp(data, callback));
-
- 
           }
         );
       }
@@ -382,63 +355,45 @@ function logToConsole(message, lineno){
     }`;
   }
 
-
-  replaceFileStamps(parser){
+  replaceFileStamps(parser) {
     Object.values(this.state.fnStamps).map(item => {
-     
-    if(item.ref.current.props.isFile){
-      var name =item.ref.current.state.name
-      var code = item.ref.current.state.code
+      if (item.ref.current.props.isFile) {
+        var name = item.ref.current.state.name;
+        var code = item.ref.current.state.code;
 
+        var srcNodes = parser(`[src="${name}"]`);
+        for (var i = 0; i < srcNodes.length; i++) {
+          var singleNode = srcNodes.eq(i);
+          var tagName = srcNodes.get(i).tagName;
+          singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`);
+        }
 
-      var srcNodes = parser(`[src="${name}"]`)
-      for(var i = 0; i < srcNodes.length; i++ ){
-        var singleNode = srcNodes.eq(i)
-        var tagName = srcNodes.get(i).tagName
-        singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`)
+        if (name.endsWith(".js")) {
+          parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`);
+        } else if (name.endsWith(".css")) {
+          parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`);
+        }
       }
-
-
-
-
-      if(name.endsWith(".js")){
-        parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`)
-      }else if(name.endsWith(".css")){
-        parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`)
-      }
-
-
-
-    }
-
-    })
-
-
-
-
+    });
   }
 
-
-  loadAssets(runnableCode){
+  loadAssets(runnableCode) {
     Object.values(this.state.fnStamps).map(item => {
-      var name = item.ref.current.state.name
-      var code = item.ref.current.state.code
-      if(item.ref.current.props.isFile || item.ref.current.props.isImg){
+      var name = item.ref.current.state.name;
+      var code = item.ref.current.state.code;
+      if (item.ref.current.props.isFile || item.ref.current.props.isImg) {
         runnableCode = runnableCode
-        .replace(`'${name}'`, `"${code}"` )
-        .replace("`" + name + "`", `"${code}"` )
-        .replace( `"${name}"`, `"${code}"` )
-
+          .replace(`'${name}'`, `"${code}"`)
+          .replace("`" + name + "`", `"${code}"`)
+          .replace(`"${name}"`, `"${code}"`);
       }
-    } )
+    });
 
-    return runnableCode   
+    return runnableCode;
   }
 
   getHTML(id) {
-    if (
-      this.state.htmlID in this.state.fnStamps === false
-    ) {
+    if (this.state.htmlID in this.state.fnStamps === false) {
       return "";
     }
 
@@ -453,23 +408,17 @@ function logToConsole(message, lineno){
 
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
 
-
-
     var html = htmlStamp.ref.current.state.code;
 
     const parser = cheerio.load(html, { withStartIndices: true });
-    this.replaceFileStamps(parser)
-
-
+    this.replaceFileStamps(parser);
 
     var jsBlockStr =
       "<script type='text/javascript'>" + runnableCode + "</script>";
 
     var jsSelector = '[src="sketch.js"]';
 
-
     var jsBlock = parser(jsBlockStr);
-
 
     // const start = parser(jsSelector).get(0).startIndex;
 
@@ -483,8 +432,6 @@ function logToConsole(message, lineno){
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     }
-
-
 
     parser("head").prepend(
       "<script class='errorListener' >" +
@@ -523,17 +470,17 @@ function logToConsole(message, lineno){
 
   setInitialPosition(dimension) {
     if (dimension === "x") {
-      return ( (-this.state.originX + this.state.sideBarWidth 
-        )/this.state.scale +    50   + Math.random() * this.newStampMarginVariance
-   
+      return (
+        (-this.state.originX + this.state.sideBarWidth) / this.state.scale +
+        50 +
+        Math.random() * this.newStampMarginVariance
       );
     } else if (dimension === "y") {
-
       // Math.random() * this.newStampMarginVariance ) * this.state.scale
-      return ((-this.state.originY + this.state.topBarHeight 
-
-        )/this.state.scale +  50   +    Math.random() * this.newStampMarginVariance
-      
+      return (
+        (-this.state.originY + this.state.topBarHeight) / this.state.scale +
+        50 +
+        Math.random() * this.newStampMarginVariance
       );
     }
   }
@@ -545,7 +492,7 @@ function logToConsole(message, lineno){
       consoleWidth: globals.defaultEditorWidth,
       consoleHeight: globals.defaultVarEditorHeight,
       hidden: false,
-      zIndex:undefined
+      zIndex: undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -569,7 +516,7 @@ function logToConsole(message, lineno){
 
     var ref = React.createRef();
 
-    var stampID = counter.toString()
+    var stampID = counter.toString();
 
     var elem = (
       <ConsoleStamp
@@ -597,7 +544,7 @@ function logToConsole(message, lineno){
     callback,
     updateName = false,
     updatePosition = false,
-    setIframeDisabled = false,
+    setIframeDisabled = false
   ) {
     var defaults = {
       name: "sketch",
@@ -612,9 +559,9 @@ function logToConsole(message, lineno){
       iframeHeight: globals.defaultEditorHeight,
       isHtml: false,
       isFile: false,
-      isImg:false,
+      isImg: false,
       hidden: false,
-      zIndex:undefined
+      zIndex: undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -644,7 +591,6 @@ function logToConsole(message, lineno){
   }
 
   async createFnStamp(data, callback = () => null) {
-        const release = await this.counterMutex.acquire();
     var name = data.name,
       code = data.code,
       args = data.args,
@@ -661,14 +607,14 @@ function logToConsole(message, lineno){
       isImg = data.isImg,
       hidden = data.hidden;
 
-
+    const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
-    this.setState({ counter: counter + 1 });
+    this.setState({ counter: counter + 1 }, () => release());
 
     var fnStamps = Object.assign({}, this.state.fnStamps);
     var ref = React.createRef();
 
-    var stampID = counter.toString()
+    var stampID = counter.toString();
 
     var elem = (
       <FunctionStamp
@@ -699,25 +645,24 @@ function logToConsole(message, lineno){
         requestCompile={this.requestCompile.bind(this)}
         getHTML={this.getHTML.bind(this)}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
-                getScale={this.getScale.bind(this)}
+        getScale={this.getScale.bind(this)}
       />
     );
 
-    
-      fnStamps[stampID] ={ elem: elem, ref: ref }
-      this.setState({fnStamps:fnStamps}, counter => 
+    fnStamps[stampID] = { elem: elem, ref: ref };
 
-{
-  release()
-  callback(stampID)
-}
-        ) 
+    this.setState(
+      {
+        fnStamps: fnStamps,
 
+      },
+          counter => callback(stampID)
+  
+    );
 
     if (isHtml) {
       this.setState({ htmlID: stampID });
     }
-
   }
 
   addNewIframeConsole(newConsole) {
@@ -728,7 +673,6 @@ function logToConsole(message, lineno){
   }
 
   addBlobStamp(data, callback, updatePosition = false) {
-
     var defaults = {
       code: "var z = 10",
       x: this.setInitialPosition("x"),
@@ -737,7 +681,7 @@ function logToConsole(message, lineno){
       editorHeight: globals.defaultVarEditorHeight,
       hidden: false,
       codeSize: globals.codeSize,
-      zIndex:undefined
+      zIndex: undefined
     };
 
     Object.keys(defaults).map(setting => {
@@ -758,7 +702,6 @@ function logToConsole(message, lineno){
   async createBlobStamp(data, callback = () => null) {
     const release = await this.counterMutex.acquire();
 
-
     var x = data.x,
       y = data.y,
       code = data.code,
@@ -767,11 +710,11 @@ function logToConsole(message, lineno){
       errorLines = data.errorLines,
       hidden = data.hidden;
     var counter = this.state.counter;
-    this.setState({ counter: counter + 1 });
+    this.setState({ counter: counter + 1 }, () => release());
 
     var blobStamps = Object.assign({}, this.state.blobStamps);
     var ref = React.createRef();
-    var stampID = counter.toString()
+    var stampID = counter.toString();
 
     var elem = (
       <BlobStamp
@@ -783,7 +726,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
-starterZIndex={data.zIndex}
+        starterZIndex={data.zIndex}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
         addStamp={this.addBlobStamp.bind(this)}
@@ -797,21 +740,11 @@ starterZIndex={data.zIndex}
       />
     );
 
+    blobStamps[stampID] = { elem: elem, ref: ref };
 
-
-      blobStamps[stampID] ={ elem: elem, ref: ref }
-  
-      this.setState({blobStamps:blobStamps}, counter => {
-
-        
-        callback(stampID)
-        release()
-}
-        ) 
-
-
-
-
+    this.setState({ blobStamps: blobStamps }, counter => {
+      callback(stampID);
+    });
   }
 
   checkForSetup() {
@@ -837,9 +770,7 @@ starterZIndex={data.zIndex}
   }
 
   getFileData() {
-    if (
-      this.state.htmlID in this.state.fnStamps === false
-    ) {
+    if (this.state.htmlID in this.state.fnStamps === false) {
       return;
     }
     var htmlStamp = this.state.fnStamps[this.state.htmlID];
@@ -849,19 +780,18 @@ starterZIndex={data.zIndex}
       js: this.getExportableCode()
     };
 
-    var stamperObject = this.getStamperObject()
+    var stamperObject = this.getStamperObject();
 
     stamperObject.compressedJs = LZUTF8.compress(fileData.js, {
       outputEncoding: "StorageBinaryString"
     });
 
-    fileData.stamperFileContent = stamperHeader + JSON.stringify(stamperObject)
+    fileData.stamperFileContent = stamperHeader + JSON.stringify(stamperObject);
 
     return fileData;
   }
 
   requestCompile(id) {
-
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
     // this.setState({traversalGraph:newTraversalGraph})
@@ -871,13 +801,12 @@ starterZIndex={data.zIndex}
 
     var duplicateNamedStamps = this.checkAllNames();
 
-
     this.checkForSetup();
 
-    if(this.state.compiledBefore === false){
-      this.setState({compiledBefore:true})
-    }else{
-    ipc && ipc.send("edited");
+    if (this.state.compiledBefore === false) {
+      this.setState({ compiledBefore: true });
+    } else {
+      ipc && ipc.send("edited");
     }
 
     // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
@@ -904,9 +833,7 @@ starterZIndex={data.zIndex}
       if (stampRef) {
         var newErrors = [];
 
-        if (
-          stampRef.props.id in duplicateNamedStamps
-        ) {
+        if (stampRef.props.id in duplicateNamedStamps) {
           newErrors.push(0);
         }
 
@@ -946,18 +873,22 @@ starterZIndex={data.zIndex}
         return;
       }
       traversalGraph[id].map(id =>
-        this.recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps)
+        this.recursiveCompileStamp(
+          id,
+          seen,
+          traversalGraph,
+          duplicateNamedStamps
+        )
       );
     }
   }
 
-
   disablePan(status) {
-    this.setState({panDisabled:status})
+    this.setState({ panDisabled: status });
   }
 
   disableZoom(status) {
-    this.setState({zoomDisabled:status})
+    this.setState({ zoomDisabled: status });
   }
 
   checkAllNames() {
@@ -1276,11 +1207,9 @@ _stopLooping =setTimeout(() => {
 
   onDelete(id) {
     ipc && ipc.send("edited");
-    
 
-    var allData = this.getStamperObject(id)
-    this.loadStamperObject(allData)
-
+    var allData = this.getStamperObject(id);
+    this.loadStamperObject(allData);
   }
 
   refreshConsoleStamp(consoleStamp) {
@@ -1297,72 +1226,55 @@ _stopLooping =setTimeout(() => {
       originX: this.state.originX,
       originY: this.state.originY
     };
-    Object.keys(this.state.fnStamps).map(stampID =>{
-      if(stampID != id){
-        var stamp = this.state.fnStamps[stampID]
-        data.fns.push(stamp.ref.current.getData())
+    Object.keys(this.state.fnStamps).map(stampID => {
+      if (stampID != id) {
+        var stamp = this.state.fnStamps[stampID];
+        data.fns.push(stamp.ref.current.getData());
       }
-    }
+    });
 
-
-    );
-
-    Object.keys(this.state.blobStamps).map(stampID =>{
-      if(stampID != id){
-        var stamp = this.state.blobStamps[stampID]
-        data.blobs.push(stamp.ref.current.getData())
+    Object.keys(this.state.blobStamps).map(stampID => {
+      if (stampID != id) {
+        var stamp = this.state.blobStamps[stampID];
+        data.blobs.push(stamp.ref.current.getData());
       }
-    }
-
-    );
+    });
 
     return data;
   }
 
-  refreshFnStamps(fnStamps,callback = () => null) {
-    var data = []
-    Object.values(fnStamps).map( item => {
+  refreshFnStamps(fnStamps, callback = () => null) {
+    var data = [];
+    Object.values(fnStamps).map(item => {
+      data.push(item.ref.current.getData());
+    });
 
-      data.push( item.ref.current.getData())
-    } )
-
-    this.setState({fnStamps:{}}, ()=>{
-
+    this.setState({ fnStamps: {} }, () => {
       data.map(stampData => {
         this.addFnStamp(stampData, () => {
-          if(Object.values(this.state.fnStamps).length === data.length){
-            callback()
+          if (Object.values(this.state.fnStamps).length === data.length) {
+            callback();
           }
-        })
-      })
-
-    })
-
-    
-
+        });
+      });
+    });
   }
 
-  refreshBlobStamps(blobStamps,callback = () => null) {
-    
-    var data = []
-    Object.values(blobStamps).map( item => {
+  refreshBlobStamps(blobStamps, callback = () => null) {
+    var data = [];
+    Object.values(blobStamps).map(item => {
+      data.push(item.ref.current.getData());
+    });
 
-      data.push( item.ref.current.getData())
-    } )
-
-    this.setState({blobStamps:{}}, ()=>{
-
+    this.setState({ blobStamps: {} }, () => {
       data.map(stampData => {
         this.addBlobStamp(stampData, () => {
-          if(Object.values(this.state.blobStamps).length === data.length){
-            callback()
+          if (Object.values(this.state.blobStamps).length === data.length) {
+            callback();
           }
-        })
-      })
-
-    })
-
-
+        });
+      });
+    });
   }
 
   onStartMove() {
@@ -1377,7 +1289,7 @@ _stopLooping =setTimeout(() => {
   }
 
   onStopMove(s) {
-    this.setState({mouseWheelTimeout:null})
+    this.setState({ mouseWheelTimeout: null });
     var fnStamps = this.state.fnStamps;
     for (var i in fnStamps) {
       var fnStamp = fnStamps[i].ref.current;
@@ -1404,20 +1316,19 @@ _stopLooping =setTimeout(() => {
     if (stampRef) {
       var cristalRef = stampRef.cristalRef.current;
       if (cristalRef) {
-    
-        var x = this.state.originX +cristalRef.state.x *this.state.scale,
-          y = this.state.originY + cristalRef.state.y*this.state.scale ,
+        var x = this.state.originX + cristalRef.state.x * this.state.scale,
+          y = this.state.originY + cristalRef.state.y * this.state.scale,
           width = cristalRef.state.width,
           height = cristalRef.state.height;
 
         var newX =
           (window.innerWidth - xOff) / 2 +
           xOff -
-          (width / 2) *this.state.scale
+          (width / 2) * this.state.scale;
         var newY =
           (window.innerHeight - yOff) / 2 +
           yOff -
-          (height / 2) *this.state.scale
+          (height / 2) * this.state.scale;
 
         this.manualPan(newX - x, newY - y);
         cristalRef.changeZIndex();
@@ -1426,43 +1337,39 @@ _stopLooping =setTimeout(() => {
   }
 
   manualPan(xDiff, yDiff) {
-
     $(".allStamps").css({ transition: "all .5s ease" });
     setTimeout(() => $(".allStamps").css({ transition: "" }), 500);
     ipc && ipc.send("edited");
-    this.setState(
-      {
-        originX: this.state.originX + xDiff,
-        originY: this.state.originY + yDiff,
-      });
+    this.setState({
+      originX: this.state.originX + xDiff,
+      originY: this.state.originY + yDiff
+    });
   }
 
   toggleHide(stampRef) {
-    stampRef.toggleHide(
-      () => this.setLayerPicker()
-    );
+    stampRef.toggleHide(() => this.setLayerPicker());
   }
 
   getFirstLine(text) {
-    var firstN = text.length
+    var firstN = text.length;
 
     for (var i = 0; i < text.length; i++) {
       if (text[i] === "\n") {
-        if(firstN === text.length){
-        firstN = i
+        if (firstN === text.length) {
+          firstN = i;
         }
       }
     }
 
-    if(firstN === 0){
-      return " "
+    if (firstN === 0) {
+      return " ";
     }
 
     return text.substr(0, Math.min(firstN, 15));
   }
 
-  getScale(){
-    return this.state.scale
+  getScale() {
+    return this.state.scale;
   }
 
   setLayerPicker() {
@@ -1513,12 +1420,11 @@ _stopLooping =setTimeout(() => {
     this.setState({ pickerData: pickerData });
   }
 
-
-  getNumStamps(){
+  getNumStamps() {
     return {
       fns: Object.keys(this.state.fnStamps).length,
-      blobs:Object.keys(this.state.blobStamps).length
-    }
+      blobs: Object.keys(this.state.blobStamps).length
+    };
   }
 
   render() {
@@ -1528,25 +1434,35 @@ _stopLooping =setTimeout(() => {
       var consoleElem = null;
     }
 
-    var elems = [];
+    var fnElems = [];
+    var blobElems = []
 
-    Object.values(this.state.fnStamps).map(stamp => elems.push(stamp.elem));
-    Object.values(this.state.blobStamps).map(stamp => elems.push(stamp.elem));
+    Object.values(this.state.fnStamps).map(stamp => fnElems.push(stamp.elem));
+    Object.values(this.state.blobStamps).map(stamp => blobElems.push(stamp.elem));
+
+
 
     return (
       <div>
-        <div class="row bg-grey" style={{ height: "100vh"}}>
-        <div className="allStamps"
-        style={{position:"absolute", left:this.state.originX, top:this.state.originY, 
-        transform:"scale(" + this.state.scale+")"}}>
-          {elems}
-          {consoleElem}
-        </div>
+        <div class="row bg-grey" style={{ height: "100vh" }}>
+          <div
+            className="allStamps"
+            style={{
+              position: "absolute",
+              left: this.state.originX,
+              top: this.state.originY,
+              transform: "scale(" + this.state.scale + ")"
+            }}
+          >
+            {fnElems}
+            {blobElems}
+            {consoleElem}
+          </div>
         </div>
 
         <ControlBar
-        getNumStamps={this.getNumStamps.bind(this)}
-        requestCompile = {this.requestCompile.bind(this)}
+          getNumStamps={this.getNumStamps.bind(this)}
+          requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
           addBlobStamp={this.addBlobStamp.bind(this)}
           addFnStamp={this.addFnStamp.bind(this)}
