@@ -26,6 +26,7 @@ module.exports = class FileManager {
     this.pendingCallback = () => null
     this.edited = false
 
+
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
     });

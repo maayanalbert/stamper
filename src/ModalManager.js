@@ -41,12 +41,24 @@ export default class ModalManager extends Component {
       modalHeader: "Use Chrome please!",
       modalContent:
         "Right now, the web version of Stamper is only supported in Google Chrome.",
-      saveInterval:null
+      saveInterval:null,
+      cdnLibs:false,
+      askedAboutCdn:false
     };
     this.inputElem = null
-    this.readFiles = this.readFiles.bind(this)
+    this.checkFiles = this.checkFiles.bind(this)
     this.hideModal = this.hideModal.bind(this)
     this.sendSaveData = this.sendSaveData.bind(this)
+    this.libs = {
+      "p5.js":"https://cdn.jsdelivr.net/npm/p5",
+      "p5.min.js":"https://cdn.jsdelivr.net/npm/p5",
+      "p5.dom.js":"https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.dom.js",
+      "p5.dom.min.js":"https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.dom.min.js",
+      "p5.sound.js": "p5.sound.jshttps://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.sound.js",
+      "p5.sound.min.js":"https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.sound.min.js",
+      "p5.accessibility.js":"https://cdn.jsdelivr.net/gh/processing/p5.accessibility@0.2.0/dist/p5.accessibility.js",
+      "p5.accessibility.min.js":"https://cdn.jsdelivr.net/gh/processing/p5.accessibility@0.2.0/dist/p5.accessibility.js"
+    }
   }
 
 
@@ -88,7 +100,7 @@ export default class ModalManager extends Component {
       styleAttr.value = "true"; 
       inputElem.setAttributeNode(styleAttr)
 
-      inputElem.addEventListener("change", this.readFiles)
+      inputElem.addEventListener("change", this.checkFiles)
       document.getElementById("root").appendChild(inputElem)
             this.inputElem = inputElem
 
@@ -97,7 +109,7 @@ export default class ModalManager extends Component {
   }
 
   componentWillUnmout(){
-    this.inputElem.removeEventListener("change", this.readFiles)
+    this.inputElem.removeEventListener("change", this.checkFiles)
     clearInterval(this.state.saveInterval)
     this.setState({saveInterval:null})
   }
@@ -111,11 +123,19 @@ document.getElementById("projectInput").dispatchEvent(new MouseEvent("click"))
 
 
   readFile(file, readDict, callback){
+
     var reader = new FileReader()
     var nameArr = file.webkitRelativePath.split("/")
     var fileName = ""
     if(nameArr.length > 0){
       fileName = nameArr.slice(1, nameArr.length).join("/")
+    }
+
+
+    if(this.state.cdnLibs && file.name in this.libs){
+
+      readDict[fileName] = {}
+      return
     }
 
     if(file.type.startsWith("text")){
@@ -148,16 +168,7 @@ document.getElementById("projectInput").dispatchEvent(new MouseEvent("click"))
 
   }
 
-  readFiles(e){
-    console.log(e.target.files)
-
-    var files = []
-    for(var i = 0; i< e.target.files.length; i++){
-      if(e.target.files[i].name.startsWith(".") === false){
-        files.push(e.target.files[i])
-      }
-    }
-
+  readFiles(files){
     var readDict = {}
     var callback = () => {
       if(Object.keys(readDict).length === files.length){
@@ -167,6 +178,51 @@ document.getElementById("projectInput").dispatchEvent(new MouseEvent("click"))
     for(var i = 0; i < files.length; i++){
 
       this.readFile(files[i], readDict, () => callback() )
+    }
+
+  }
+
+  checkFiles(e){
+    console.log(e.target.files)
+
+    var askedAboutCdn = false
+    this.setState({askedAboutCdn:askedAboutCdn})
+
+
+    var files = []
+    var containsLib = false
+    for(var i = 0; i< e.target.files.length; i++){
+      if(e.target.files[i].name in this.libs){
+        containsLib = true
+      }
+      if(e.target.files[i].name.startsWith(".") === false){
+        files.push(e.target.files[i])
+      }
+    }
+
+    if(containsLib && askedAboutCdn === false){
+
+  var buttons = []
+  buttons.push(        {text:"no", color:"outline-secondary", 
+    callback:() => {
+         this.setState({cdnLibs:false}, () => this.readFiles(files) ); this.hideModal() ; 
+       }})
+  buttons.push(        {text:"yes", color:"outline-primary", 
+    callback:() => {
+         this.setState({cdnLibs:true}, () => this.readFiles(files)); this.hideModal() ;
+       }})
+
+
+      this.setState({
+        modalVisible: true,
+        modalHeader:
+          "Would you like to import p5's core libraries via CDN?",
+        modalContent:
+          "The libraries are currently stored in large files in your project. This may cause Stamper to run slowly. Importing them via CDN won't cause them to behave differently but will speed up Stamper.",
+                modalButtons:buttons,
+      });
+    }else{
+      this.readFiles(files)
     }
 
   }
@@ -218,14 +274,14 @@ requestWorldLoad(newWorldStamper){
 
 
   sendSaveData() {
-    console.log("SAVING")
-    var fileData = this.props.getFileData();
-    var stamperObject = this.props.getStamperObject()
+    // console.log("SAVING")
+    // var fileData = this.props.getFileData();
+    // var stamperObject = this.props.getStamperObject()
 
-    // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
-    if (fileData) {
-      ipc && ipc.send("save", fileData);
-    }
+    // // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
+    // if (fileData) {
+    //   ipc && ipc.send("save", fileData);
+    // }
   }
 
   requestDownload(){
@@ -277,6 +333,22 @@ requestWorldLoad(newWorldStamper){
     return newStamperObject;
   }
 
+
+  replaceFilesWithCDN(indexContent){
+    Object.keys(this.libs).map(libName => {
+
+      indexContent = indexContent
+      .replace(`src="${libName}"`, `src="${this.libs[libName]}"`)
+      .replace(`src='${libName}'`, `src='${this.libs[libName]}'`)
+      .replace("src=" + "`" + libName + "`", "src=" + "`" + this.libs[libName] + "`")
+
+
+    })
+
+    return indexContent
+  }
+
+
    stampifyFiles(readDict, path){
 
     if("index.html" in readDict === false || "sketch.js" in readDict === false){
@@ -289,6 +361,11 @@ requestWorldLoad(newWorldStamper){
       });
       return;     
     }
+
+    if(this.state.cdnLibs){
+    readDict["index.html"].content = this.replaceFilesWithCDN(readDict["index.html"].content)
+    }
+
 
     var stamperObject = undefined
     if("stamper.js" in readDict){
@@ -325,7 +402,7 @@ requestWorldLoad(newWorldStamper){
     })
 
     Object.keys(readDict).map(name => {
-      if(name === "sketch.js" || name === "stamper.js" || readDict[name].transferred){
+      if(name === "sketch.js" || name === "stamper.js" || readDict[name].transferred || Object.keys(readDict[name]) === 0){
         return
       }else if(name === "index.html"){
         fnData.push({
@@ -360,7 +437,6 @@ requestWorldLoad(newWorldStamper){
     var projectPathArr = readDict["index.html"].path.split("/")
     projectPathArr.pop()
 
-    console.log(projectPathArr)
     var projectPath = projectPathArr.join("/") + "/"
     var projectName = projectPathArr.pop()
 
