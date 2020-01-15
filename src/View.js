@@ -1566,6 +1566,8 @@ _stopLooping =setTimeout(() => {
           loadStamperObject={this.loadStamperObject.bind(this)}
           getStamperObject={this.getStamperObject.bind(this)}
           getFileData={this.getFileData.bind(this)}
+          addFnStamp={this.addFnStamp.bind(this)}
+          requestCompile={this.requestCompile.bind(this)}
         />
       </div>
     );

@@ -118,6 +118,11 @@ export default class ModalManager extends Component {
     this.setState({ saveInterval: null });
   }
 
+  requestImageUpload(){
+
+    document.getElementById("imageInput").click()
+  }
+
   requestUpload() {
     document
       .getElementById("projectInput")
@@ -173,6 +178,26 @@ export default class ModalManager extends Component {
     }
   }
 
+  uploadImage(e){
+    console.log(e.target.files)
+
+    if(e.target.files.length === 0){
+      return
+    }
+    var file = e.target.files[0]
+    var reader = new FileReader()
+
+    var callback = (imgData) => this.props.addFnStamp(imgData, (id) => this.props.requestCompile(id))
+
+    reader.onload = function(e){
+      var imgData = {code:e.target.result, name:file.name, isImg:true}
+      callback(imgData)
+    }
+
+    reader.readAsDataURL(file)
+
+  }
+
   readFiles(files) {
     var readDict = {};
     var callback = () => {
@@ -186,7 +211,7 @@ export default class ModalManager extends Component {
   }
 
   checkFiles(e) {
-    console.log(e.target.files);
+
 
     var askedAboutCdn = false;
     this.setState({ askedAboutCdn: askedAboutCdn });
@@ -346,11 +371,11 @@ export default class ModalManager extends Component {
   replaceFilesWithCDN(indexContent) {
     Object.keys(this.libs).map(libName => {
       indexContent = indexContent
-        .replace(`src="${libName}"`, `src="${this.libs[libName]}"`)
-        .replace(`src='${libName}'`, `src='${this.libs[libName]}'`)
+        .replace(`"${libName}"`, `"${this.libs[libName]}"`)
+        .replace(`'${libName}'`, `'${this.libs[libName]}'`)
         .replace(
-          "src=" + "`" + libName + "`",
-          "src=" + "`" + this.libs[libName] + "`"
+          "`" + libName + "`",
+          "`" + this.libs[libName] + "`"
         );
     });
 
@@ -481,6 +506,8 @@ export default class ModalManager extends Component {
     ));
     return (
       <div>
+      <input type="file" hidden={true} id="imageInput" accept="image/*"
+      onChange={(e) =>  this.uploadImage(e)}/>
         <Modal
           show={this.state.modalVisible}
           style={{ zIndex: 2000000000000000001 }}

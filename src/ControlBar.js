@@ -27,6 +27,7 @@ import WorldsIcon from "./icons/archive.svg";
 import GlobalVarIcon from "./icons/globe.svg";
 import CommentIcon from "./icons/message-square.svg";
 import FileStampIcon from "./icons/file.svg";
+import ImageStampIcon from "./icons/image.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -575,6 +576,16 @@ function noiseWave() {
               )
             }
             tooltipText="file"
+          />
+
+          <span style={{ width: this.spanWidth }} />
+          <TopButton
+            iconType={ImageStampIcon}
+            uniqueClass="imageStamp"
+            iconCallback={() =>
+              this.props.modalManagerRef.current.requestImageUpload()
+            }
+            tooltipText="image"
           />
         </div>
 

@@ -95,7 +95,7 @@ export default class FunctionStamp extends Component {
   updateLooping(e){
 
 
-      if(e.data.type != "loop" || e.data.id != this.props.id){
+      if(e.data.type != "loop" || e.data.id != this.props.id || this.props.isHtml || this.props.isImg){
         return
       }
       if(e.data.message === "start"){
