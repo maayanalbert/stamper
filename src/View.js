@@ -801,6 +801,7 @@ function logToConsole(message, lineno){
   }
 
   requestCompile(id) {
+
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
     // this.setState({traversalGraph:newTraversalGraph})
@@ -1222,14 +1223,17 @@ _stopLooping =setTimeout(() => {
       var fnStampElems = Object.assign({}, this.state.fnStampElems);
       delete fnStampRefs[id]
       fnStampElems[id] = (<span hidden={true}/>)
-      this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems})
+      this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems}, () => 
+        this.requestCompile(id))
     }else if(id in this.state.blobStampRefs){
       var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
       var blobStampElems = Object.assign({}, this.state.blobStampElems);
       delete blobStampRefs[id]
       blobStampElems[id] = (<span hidden={true}/>)
-      this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems})
+      this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems}, () => 
+        this.requestCompile(id))
     }
+
 
     // var allData = this.getStamperObject(id);
     // this.loadStamperObject(allData);
@@ -1396,6 +1400,7 @@ _stopLooping =setTimeout(() => {
   }
 
   setLayerPicker() {
+
     var pickerData = [];
 
     if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
