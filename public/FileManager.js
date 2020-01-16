@@ -1,5 +1,6 @@
 const log = require("electron-log");
 const jetpack = require("fs-jetpack");
+var chokidar = require("chokidar");
 
 var _ = require("lodash");
 const {
@@ -19,79 +20,121 @@ module.exports = class FileManager {
     this.mainWindow = mainWindow;
     this.path = undefined;
     this.name = "Untitled";
-    this.fileDict = {}
+    this.fileDict = {};
     this.stamper = undefined;
-    this.pendingCallback = () => null
-    this.edited = false
-
+    this.pendingCallback = () => null;
+    this.edited = false;
+    this.watcher = null
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
     });
 
-
     ipcMain.on("updatePath", (event, data) => {
+  
       this.path = data.path;
       this.name = data.name;
-      this.fileDict = data.fileDict
+      this.fileDict = data.fileDict;
       this.mainWindow.setTitle(this.name);
+      this.watcher = chokidar.watch(this.path, {
+          ignored: /[\/\\]\./,
+          persistent: true
+      });
+
+      this.watcher
+      .on('ready', () => console.log("watcher reader"))
+      .on("raw", this.fileChange.bind(this))
+
     });
 
     ipcMain.on("edited", event => {
-      this.edited = true
+      this.edited = true;
 
       this.mainWindow.setTitle(this.name + " - Edited");
     });
   }
 
+  fileChange(event, path, detail){
+        console.log(path)
+        console.log(event)
+        console.log(detail)
+        if(event === "root-changed"){
+      // const options = {
+      //   type: "message",
+      //   buttons: ["Ok"],
+      //   defaultId: 0,
+      //   message: "It looks like you've changed the name or path of your project.",
+      //   detail: "Pleae specify where your project now is."
+      // };
+
+          dialog.showMessageBox(null, {message:"It looks like you've changed the name or path of your project.", 
+            detail:"Please specify where your project now is."})
+          this.mainWindow.send("requestUpload");
+        }
+        // console.log(event)
+        // console.log(detail)
+        // console.log("///")
+        // var pathArr = path.split("/")
+        // var projectNameInd
+        // for(var i = 0; i < pathArr.length; i++){
+        //   if(pathArr[i] === this.name){
+        //     projectNameInd = i
+        //   }
+        // }
+        // if(!projectNameInd){return}
+        // if(projectNameInd === pathArr.length - 1){
+        //   this.path = path
+        //   this.name = pathArr.pop()
+        //   // console.log(this.path)
+        //   // console.log(this.name)
+        // }
+
+        // var name = pathArr.substring(projectNameInd + 1)    
+  }
+
   resetFiles() {
     this.path = undefined;
     this.name = "Untitled";
-    this.fileDict = {}
+    this.fileDict = {};
     this.stamper = undefined;
-    this.edited = false
+    this.edited = false;
+    this.watcher = null
   }
 
   onNewProject() {
-
-    this.protectUnsaved(this.openNewProject.bind(this))
+    this.protectUnsaved(this.openNewProject.bind(this));
   }
 
-
-  protectUnsaved(yesCallBack = () => null){
-    if(this.edited === false){
-      yesCallBack()
-   
-    }else if(this.path){
+  protectUnsaved(yesCallBack = () => null) {
+    if (this.edited === false) {
+      yesCallBack();
+    } else if (this.path) {
       this.mainWindow.send("requestSave");
-      this.pendingCallback = yesCallBack
-   
-    }else{
-    const options = {
-    type: 'question',
-    buttons: ['Yes', "Cancel"],
-    defaultId: 0,
-    message: 'This is an unsaved project',
-    detail: 'Are you sure you want to close it and lose your work?',
-  };
+      this.pendingCallback = yesCallBack;
+    } else {
+      const options = {
+        type: "question",
+        buttons: ["Yes", "Cancel"],
+        defaultId: 0,
+        message: "This is an unsaved project",
+        detail: "Are you sure you want to close it and lose your work?"
+      };
 
-  dialog.showMessageBox(null, options).then(data => {
-
-    if(data.response === 0){
-      yesCallBack()
+      dialog.showMessageBox(null, options).then(data => {
+        if (data.response === 0) {
+          yesCallBack();
+        }
+      });
     }
-  })
-}
-}
+  }
 
-
-  openNewProject(){
+  openNewProject() {
     this.resetFiles();
 
     this.name = "Untitled";
     this.mainWindow.setTitle(this.name);
 
-    this.mainWindow.webContents.send("resetView");    
+    this.mainWindow.webContents.send("resetView");
   }
 
   onSaveCommand() {
@@ -103,7 +146,7 @@ module.exports = class FileManager {
   }
 
   onOpenCommand() {
-      this.mainWindow.webContents.send("requestUpload")
+    this.mainWindow.webContents.send("requestUpload");
   }
 
   onSaveAsCommand() {
@@ -117,52 +160,43 @@ module.exports = class FileManager {
     });
   }
 
- 
-
   saveFiles(newFileDict) {
-    console.log(this.path)
-
+    console.log(this.path);
 
     if (this.path === undefined) {
       return;
     }
 
     Object.keys(newFileDict).map(name => {
-      var newContent = newFileDict[name].content
-      var oldContent
-      if(this.fileDict[name]){
-        oldContent = this.fileDict[name].content
-              this.fileDict[name].updated = true
+      var newContent = newFileDict[name].content;
+      var oldContent;
+      if (this.fileDict[name]) {
+        oldContent = this.fileDict[name].content;
+        this.fileDict[name].updated = true;
       }
 
-      if(oldContent != newContent){
-        if(newFileDict[name].type === "image"){
-        var uri = newFileDict[name].content
+      if (oldContent != newContent) {
+        if (newFileDict[name].type === "image") {
+          var uri = newFileDict[name].content;
 
-        var idx = uri.indexOf('base64,') + 'base64,'.length; 
-        var headerlessUri = uri.substring(idx);
- 
-        var buf = new Buffer(headerlessUri, "base64")
-        jetpack.writeAsync(this.path + name, buf)
-        }else{
-        jetpack.writeAsync(this.path + name, newContent)
+          var idx = uri.indexOf("base64,") + "base64,".length;
+          var headerlessUri = uri.substring(idx);
+
+          var buf = new Buffer(headerlessUri, "base64");
+          jetpack.writeAsync(this.path + name, buf);
+        } else {
+          jetpack.writeAsync(this.path + name, newContent);
         }
-
       }
-
-
-    })
+    });
 
     Object.keys(this.fileDict).map(name => {
-      if(!this.fileDict[name].updated){
-        jetpack.removeAsync(this.path + name)
+      if (!this.fileDict[name].updated) {
+        jetpack.removeAsync(this.path + name);
       }
+    });
 
-    })
-
-    this.fileDict = newFileDict
-
-
+    this.fileDict = newFileDict;
 
     // if (
     //   this.html === files.html &&
@@ -178,7 +212,7 @@ module.exports = class FileManager {
     // this.js = files.js;
     // this.css = files.css;
     this.mainWindow.setTitle(this.name);
-    this.edited = false
+    this.edited = false;
 
     // jetpack.writeAsync(this.path + "/sketch.js", this.js);
     // jetpack.writeAsync(this.path + "/style.css", this.css);
@@ -187,8 +221,8 @@ module.exports = class FileManager {
     //   this.path + "/stamper.js", this.stamper
     // );
 
-    this.pendingCallback()
-    this.pendingCallback = () => null
+    this.pendingCallback();
+    this.pendingCallback = () => null;
   }
 
   // writeToView() {

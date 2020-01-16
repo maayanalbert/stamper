@@ -71,6 +71,7 @@ export default class ModalManager extends Component {
     this.setState({ saveInterval: saveInterval });
     ipc &&
       ipc.on("requestUpload", event => {
+
         this.requestUpload();
       });
 
