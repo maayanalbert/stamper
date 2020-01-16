@@ -8,6 +8,7 @@ import JSZip from "jszip";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
+
 import pf1, {
   normalFn,
   commentBlob,
@@ -114,10 +115,12 @@ export default class ModalManager extends Component {
 
     inputElem.addEventListener("change", this.checkFiles);
     document.getElementById("root").appendChild(inputElem);
+
     this.inputElem = inputElem;
   }
 
   componentWillUnmout() {
+            window.removeEventListener("beforeunload", this.sendSaveData);
     this.inputElem.removeEventListener("change", this.checkFiles);
     clearInterval(this.state.saveInterval);
     this.setState({ saveInterval: null });
@@ -324,13 +327,16 @@ export default class ModalManager extends Component {
 
   sendSaveData() {
     console.log("SAVING")
-    // var fileData = this.props.getFileDict();
-    // var stamperObject = this.props.getStamperObject()
-    // // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
-    // if (fileData) {
+    var stamperObject = this.props.getStamperObject()
+    var compressedStamperObj =  LZUTF8.compress(JSON.stringify(stamperObject), {
+      outputEncoding: "StorageBinaryString"
+    })
+
+    !ipc && localStorage.setItem('storedStamper', compressedStamperObj);
+
 
       ipc && ipc.send("save", this.props.getFileDict());
-    // }
+
   }
 
   requestDownload() {
