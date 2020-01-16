@@ -76,6 +76,35 @@ export default class ModalManager extends Component {
       });
 
     ipc &&
+      ipc.on("exteriorChanges", event => {
+      var buttons = [];
+      buttons.push({
+        text: "lose changes",
+        color: "outline-secondary",
+        callback: () => {
+          this.hideModal();
+        }
+      });
+      buttons.push({
+        text: "re-open project",
+        color: "outline-primary",
+        callback: () => {
+          this.requestUpload();
+          this.hideModal();
+        }
+      });
+
+      this.setState({
+        modalVisible: true,
+        modalHeader: "It looks like you've made changes outside of Stamper",
+        modalContent:
+          "If you'd like Stamper to reflect these changes, please re-open your project.",
+        modalButtons: buttons
+      });
+
+      });
+
+    ipc &&
       ipc.on("requestSave", (event, rawCode) => {
         this.sendSaveData();
       });

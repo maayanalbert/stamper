@@ -42,7 +42,6 @@ module.exports = class FileManager {
       });
 
       this.watcher
-      .on('ready', () => console.log("watcher reader"))
       .on("raw", this.fileChange.bind(this))
 
     });
@@ -55,41 +54,7 @@ module.exports = class FileManager {
   }
 
   fileChange(event, path, detail){
-        console.log(path)
-        console.log(event)
-        console.log(detail)
-        if(event === "root-changed"){
-      // const options = {
-      //   type: "message",
-      //   buttons: ["Ok"],
-      //   defaultId: 0,
-      //   message: "It looks like you've changed the name or path of your project.",
-      //   detail: "Pleae specify where your project now is."
-      // };
-
-          dialog.showMessageBox(null, {message:"It looks like you've changed the name or path of your project.", 
-            detail:"Please specify where your project now is."})
-          this.mainWindow.send("requestUpload");
-        }
-        // console.log(event)
-        // console.log(detail)
-        // console.log("///")
-        // var pathArr = path.split("/")
-        // var projectNameInd
-        // for(var i = 0; i < pathArr.length; i++){
-        //   if(pathArr[i] === this.name){
-        //     projectNameInd = i
-        //   }
-        // }
-        // if(!projectNameInd){return}
-        // if(projectNameInd === pathArr.length - 1){
-        //   this.path = path
-        //   this.name = pathArr.pop()
-        //   // console.log(this.path)
-        //   // console.log(this.name)
-        // }
-
-        // var name = pathArr.substring(projectNameInd + 1)    
+    this.mainWindow.send("exteriorChanges");
   }
 
   resetFiles() {
