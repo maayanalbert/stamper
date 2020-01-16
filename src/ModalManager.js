@@ -215,7 +215,7 @@ export default class ModalManager extends Component {
   }
 
   checkFiles(e) {
-    console.log(e.target.files)
+
 
 
     var askedAboutCdn = false;
@@ -328,14 +328,14 @@ export default class ModalManager extends Component {
     // var stamperObject = this.props.getStamperObject()
     // // !ipc && localStorage.setItem('storedStamper', JSON.stringify(stamperObject));
     // if (fileData) {
-      console.log(this.props.getFileDict())
+
       ipc && ipc.send("save", this.props.getFileDict());
     // }
   }
 
   requestDownload() {
     var fileDict = this.props.getFileDict()
-    console.log(fileDict)
+
     var zip = new JSZip()
     Object.keys(fileDict).map(name =>{
       if(fileDict[name].type === "image"){
@@ -361,7 +361,7 @@ export default class ModalManager extends Component {
   }
 
   updateStamperObject(js, stamperObject) {
-    console.log(js)
+
     if (stamperObject === undefined) {
       var oldJs = undefined;
     } else {
@@ -431,7 +431,7 @@ export default class ModalManager extends Component {
       var stamperFileContent = fileDict["stamper.js"].content;
       stamperObject = JSON.parse(
         stamperFileContent.substring(
-          stamperHeader.length,
+          stamperFileContent.indexOf("{"),
           stamperFileContent.length
         )
       );
@@ -459,7 +459,7 @@ export default class ModalManager extends Component {
     var fnData = [];
 
     stamperObject.fns.map(singleFnData => {
-      if (!singleFnData.isFile && !singleFnData.isImg) {
+      if (!singleFnData.isFile && !singleFnData.isImg && !singleFnData.isHtml) {
         fnData.push(singleFnData);
       } else if (singleFnData.name in fileDict) {
         singleFnData.code = fileDict[singleFnData.name].content;
@@ -468,6 +468,7 @@ export default class ModalManager extends Component {
       }
     });
 
+
     Object.keys(fileDict).map(name => {
       if (
         name === "sketch.js" ||
@@ -475,7 +476,7 @@ export default class ModalManager extends Component {
         fileDict[name].transferred ||
         Object.keys(fileDict[name]) === 0
       ) {
-        return;
+        // pass
       } else if (name === "index.html") {
         fnData.push({
           name: name,
@@ -515,6 +516,7 @@ export default class ModalManager extends Component {
     projectName = projectPathArr.pop();
 
     }
+
 
     this.props.loadStamperObject(stamperObject);
     ipc && ipc.send("updatePath", { path: projectPath, name: projectName, fileDict:fileDict });

@@ -18,7 +18,7 @@ module.exports = class FileManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
     this.path = undefined;
-    this.name = "";
+    this.name = "Untitled";
     this.fileDict = {}
     this.stamper = undefined;
     this.pendingCallback = () => null
@@ -46,7 +46,7 @@ module.exports = class FileManager {
 
   resetFiles() {
     this.path = undefined;
-    this.name = "";
+    this.name = "Untitled";
     this.fileDict = {}
     this.stamper = undefined;
     this.edited = false
@@ -110,7 +110,7 @@ module.exports = class FileManager {
     dialog.showSaveDialog(this.mainWindow).then(result => {
       if (result.canceled === false) {
         this.name = result.filePath.replace(/^.*[\\\/]/, "");
-        this.path = result.filePath;
+        this.path = result.filePath + "/";
 
         this.mainWindow.send("requestSave");
       }
@@ -120,8 +120,8 @@ module.exports = class FileManager {
  
 
   saveFiles(newFileDict) {
-
     console.log(this.path)
+
 
     if (this.path === undefined) {
       return;
@@ -140,10 +140,10 @@ module.exports = class FileManager {
         var uri = newFileDict[name].content
 
         var idx = uri.indexOf('base64,') + 'base64,'.length; 
-        var newConent = uri.substring(idx);
-        var decodedContent = atob(newConent)
-        jetpack.writeAsync(this.path + name, decodedContent)
-        jetpack.writeAsync(this.path + name, decodedContent)
+        var headerlessUri = uri.substring(idx);
+ 
+        var buf = new Buffer(headerlessUri, "base64")
+        jetpack.writeAsync(this.path + name, buf)
         }else{
         jetpack.writeAsync(this.path + name, newContent)
         }
@@ -162,7 +162,7 @@ module.exports = class FileManager {
 
     this.fileDict = newFileDict
 
-  
+
 
     // if (
     //   this.html === files.html &&
