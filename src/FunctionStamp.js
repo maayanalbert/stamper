@@ -12,7 +12,6 @@ import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 import ImageStampIcon from "./icons/image.svg";
 
-
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";
@@ -35,13 +34,13 @@ if (userAgent.indexOf(" electron/") > -1) {
 export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
-    var starterEditorWidth = this.props.starterEditorWidth
-    if(this.props.isImg){
-      starterEditorWidth = 0
+    var starterEditorWidth = this.props.starterEditorWidth;
+    if (this.props.isImg) {
+      starterEditorWidth = 0;
     }
-    var starterArgs = this.props.starterArgs
-    if(this.props.isHtml || this.props.isFile || this.props.isImg){
-      starterArgs = " "
+    var starterArgs = this.props.starterArgs;
+    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
+      starterArgs = " ";
     }
 
     this.state = {
@@ -63,64 +62,55 @@ export default class FunctionStamp extends Component {
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y,
       hidden: this.props.initialHidden,
-      looping:false,
-      loopingTransition:"",
-      zIndex:-1
+      looping: false,
+      loopingTransition: "",
+      zIndex: -1
     };
-
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
 
-  this.updateLooping = this.updateLooping.bind(this)
+    this.updateLooping = this.updateLooping.bind(this);
   }
 
   toggleHide(callback) {
     ipc && ipc.send("edited");
     if (this.state.hidden) {
-      this.setState({ hidden: false, iframeHeight:this.state.iframeHeight }, 
-        callback)
-
-      
-
-    } else {
       this.setState(
-        { hidden: true},
+        { hidden: false, iframeHeight: this.state.iframeHeight },
         callback
       );
+    } else {
+      this.setState({ hidden: true }, callback);
     }
   }
 
-
-  updateLooping(e){
-
-
-      if(e.data.type != "loop" || e.data.id != this.props.id || this.props.isHtml || this.props.isImg){
-        return
-      }
-      if(e.data.message === "start"){
-
-  
-        this.setState({looping : true, loopingTransition : ""})
-      }else if (e.data.message === "stop"){
-
-        this.setState({looping : false, loopingTransition:"all 1s ease-in"})
-      }
-
+  updateLooping(e) {
+    if (
+      e.data.type != "loop" ||
+      e.data.id != this.props.id ||
+      this.props.isHtml ||
+      this.props.isImg
+    ) {
+      return;
+    }
+    if (e.data.message === "start") {
+      this.setState({ looping: true, loopingTransition: "" });
+    } else if (e.data.message === "stop") {
+      this.setState({ looping: false, loopingTransition: "all 1s ease-in" });
+    }
   }
 
   componentDidMount() {
     // this.loadp5Lib()
-    // this.setState({ 
+    // this.setState({
     //   iframeHeight: this.props.starterIframeHeight }
     // );
     this.checkName();
     window.addEventListener("message", this.updateLooping);
-
   }
 
-  componentWillUnmount(){
-
+  componentWillUnmount() {
     window.removeEventListener("message", this.updateLooping);
   }
 
@@ -140,14 +130,17 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      if(this.props.isFile || this.props.isImg){
-        var iframeCode = ""
-      }else{
-        var iframeCode = this.props.getHTML(this.props.id)
+      if (this.props.isFile || this.props.isImg) {
+        var iframeCode = "";
+      } else {
+        var iframeCode = this.props.getHTML(this.props.id);
       }
 
-
-      this.setState({ iframeCode: iframeCode, looping:true, loopingTransition:"" });
+      this.setState({
+        iframeCode: iframeCode,
+        looping: true,
+        loopingTransition: ""
+      });
       for (var i = 0; i < newErrors.length; i++) {
         this.addErrorLine(newErrors[i]);
       }
@@ -156,18 +149,18 @@ export default class FunctionStamp extends Component {
 
   loadp5Lib() {
     this.editorRef.current &&
-    this.editorRef.current.editor.completers.push({
-      getCompletions: function(editor, session, pos, prefix, callback) {
-        var completions = [];
-        p5Lib.forEach(function(w) {
-          completions.push({
-            value: w,
-            meta: "p5.js"
+      this.editorRef.current.editor.completers.push({
+        getCompletions: function(editor, session, pos, prefix, callback) {
+          var completions = [];
+          p5Lib.forEach(function(w) {
+            completions.push({
+              value: w,
+              meta: "p5.js"
+            });
           });
-        });
-        callback(null, completions);
-      }
-    });
+          callback(null, completions);
+        }
+      });
   }
 
   updateIframeDimensions(movementX = 0, movementY = 0) {
@@ -186,8 +179,8 @@ export default class FunctionStamp extends Component {
 
     this.setState({ iframeWidth: width, iframeHeight: height });
 
-    if(this.props.isImg === false){
-      movementY = 0
+    if (this.props.isImg === false) {
+      movementY = 0;
     }
 
     this.cristalRef.current.manualResize(movementX, movementY);
@@ -223,14 +216,12 @@ export default class FunctionStamp extends Component {
     }
 
     if (this.props.isFile) {
-      var nameArr = this.state.name.split(".")
-      if(nameArr.length > 0){
-     mode = nameArr[nameArr.length -1]
-      }else{
-        mode = ""
+      var nameArr = this.state.name.split(".");
+      if (nameArr.length > 0) {
+        mode = nameArr[nameArr.length - 1];
+      } else {
+        mode = "";
       }
-
-
     } else if (this.props.isHtml) {
       mode = "html";
     }
@@ -248,7 +239,7 @@ export default class FunctionStamp extends Component {
             width: this.state.editorWidth,
             height: this.state.editorHeight,
             background: "transparent",
-            fontFamily: 'Inconsolata',
+            fontFamily: "Inconsolata"
           }}
           mode={mode}
           theme={theme}
@@ -283,9 +274,8 @@ export default class FunctionStamp extends Component {
       this.props.requestCompile(this.props.id);
       this.setState({ editsMade: false, runningBorder: true }, () =>
         setTimeout(() => {
-          this.setState({ runningBorder: false }, )
-        }
-      , 300)
+          this.setState({ runningBorder: false });
+        }, 300)
       );
     }
   }
@@ -304,11 +294,11 @@ export default class FunctionStamp extends Component {
     }
 
     var argsColor = "greyText";
-    var namePlaceholder = "function name..."
-    if(this.props.isFile){
-      namePlaceholder = "file name..."
-    }else if(this.props.isImg){
-      namePlaceholder = "image name..."
+    var namePlaceholder = "function name...";
+    if (this.props.isFile) {
+      namePlaceholder = "file name...";
+    } else if (this.props.isImg) {
+      namePlaceholder = "image name...";
     }
     return (
       <div>
@@ -346,16 +336,13 @@ export default class FunctionStamp extends Component {
   }
 
   renderIframe() {
-
-    var loopingOpacity = .0
-    if(this.state.looping === false){
-      loopingOpacity = .5
+    var loopingOpacity = 0.0;
+    if (this.state.looping === false) {
+      loopingOpacity = 0.5;
     }
-
 
     return (
       <div hidden={this.props.isFile}>
-
         <div
           hidden={!this.state.resizingIframe}
           style={{
@@ -363,18 +350,18 @@ export default class FunctionStamp extends Component {
             fontSize: globals.codeSize,
             opacity: 0.5,
             top: 80,
-            right: 25,
+            right: 25
           }}
           class="text-greyText "
         >
-         {"W:" + Math.floor(this.state.iframeWidth) +
+          {"W:" +
+            Math.floor(this.state.iframeWidth) +
             " H:" +
             Math.floor(this.state.iframeHeight)}
         </div>
-<div
-
+        <div
           style={{
-            transition:this.state.loopingTransition,
+            transition: this.state.loopingTransition,
             position: "absolute",
             fontSize: globals.codeSize,
             opacity: loopingOpacity,
@@ -383,14 +370,15 @@ export default class FunctionStamp extends Component {
           }}
           class="text-greyText "
         >
-         {"paused"}
+          {"paused"}
         </div>
         <Resizable
-          className="ml-1 bg-white shadow" 
+          className="ml-1 bg-white shadow"
           onResize={e => {
-
-            this.updateIframeDimensions(e.movementX/this.props.getScale(), 
-              e.movementY/this.props.getScale());
+            this.updateIframeDimensions(
+              e.movementX / this.props.getScale(),
+              e.movementY / this.props.getScale()
+            );
           }}
           onResizeStart={() => {
             this.props.onStartMove();
@@ -400,32 +388,37 @@ export default class FunctionStamp extends Component {
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
           }}
-          width={this.state.iframeHeight}
-          height={this.state.iframeWidth}
+onMouseOver={this.compileCallback.bind(this)}
+
+   
           style={{
             overflow: "hidden",
-            zIndex: 5
+            zIndex: 5,
+            border:"none"
           }}
         >
-          <div onMouseOver={this.compileCallback.bind(this)}>
+          <div >
             <div
               style={{
                 position: "absolute",
                 width: this.state.iframeWidth,
                 height: this.state.iframeHeight,
-                background:"transparent"
+                background: "transparent"
               }}
               hidden={!this.state.iframeDisabled}
             >
               {" "}
             </div>
-            <div style={{height:this.state.iframeHeight, width:this.state.iframeWidth}}
-            hidden={!this.props.isImg}
+            <div
+              style={{
+                height: this.state.iframeHeight,
+                width: this.state.iframeWidth
+              }}
             >
-            <img src={this.state.code}/>
-            </div>
+              <img src={this.state.code} hidden={!this.props.isImg} />
+          
             <iframe
-              hidden = {this.props.isImg}
+              hidden={this.props.isImg}
               ref={iframeElem => {
                 if (iframeElem) {
                   this.props.addNewIframeConsole(
@@ -437,18 +430,18 @@ export default class FunctionStamp extends Component {
               scrolling="no"
               style={{
                 border: "none",
-                height: this.state.iframeHeight + globals.iframeMargin,
-                width: this.state.iframeWidth + 2*globals.iframeMargin,
-                margin: "-" + globals.iframeMargin.toString() + "px"
+             
+                height: this.state.iframeHeight,
+                width: this.state.iframeWidth,
                 // pointerEvents:"none"
               }}
               srcdoc={this.state.iframeCode}
               sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
               allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
             />
+              </div>
           </div>
         </Resizable>
- 
       </div>
     );
   }
@@ -463,7 +456,7 @@ export default class FunctionStamp extends Component {
     }
 
     var data = this.getData();
-        data.zIndex = undefined
+    data.zIndex = undefined;
 
     var updateName = false,
       updatePosition = false,
@@ -475,22 +468,21 @@ export default class FunctionStamp extends Component {
       updatePosition = true;
     }
 
-    var callback = (id) => this.props.requestCompile(id)
-    if(isOpt){
+    var callback = id => this.props.requestCompile(id);
+    if (isOpt) {
+      callback = id => {
+        this.props.requestCompile(id);
 
-      callback = (id) => {
-this.props.requestCompile(id)
-
-this.cristalRef.current.changeZIndex() 
-       }
+        this.cristalRef.current.changeZIndex();
+      };
     }
 
     var newName = this.props.addStamp(
       data,
-           callback,
+      callback,
       updateName,
       updatePosition,
-      setIframeDisabled,
+      setIframeDisabled
     );
     if (isOpt) {
       this.setState({ name: newName }, () => this.checkName());
@@ -512,18 +504,14 @@ this.cristalRef.current.changeZIndex()
       isFile: this.props.isFile,
       isImg: this.props.isImg,
       hidden: this.state.hidden,
-      exported:true,
-      zIndex:this.state.zIndex
+      exported: true,
+      zIndex: this.state.zIndex
     };
 
     return data;
   }
 
   resizeEditor(widthDiff, heightDiff, x) {
-
-
-
-
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
 
@@ -533,8 +521,8 @@ this.cristalRef.current.changeZIndex()
 
     this.setState({
       editorHeight: height,
-      editorWidth: width, 
-      x:x
+      editorWidth: width,
+      x: x
     });
     this.editorRef.current.editor.resize();
   }
@@ -545,15 +533,14 @@ this.cristalRef.current.changeZIndex()
       icon = HtmlStampIcon;
     } else if (this.props.isFile) {
       icon = FileStampIcon;
-    } else if(this.props.isImg){
-      icon = ImageStampIcon
-    }else if (this.state.isSpecialFn) {
-      if(globals.specialFns[this.state.name]){
-      icon = BuiltInStampIcon;
-      }else{
-        icon = ListenerStampIcon
+    } else if (this.props.isImg) {
+      icon = ImageStampIcon;
+    } else if (this.state.isSpecialFn) {
+      if (globals.specialFns[this.state.name]) {
+        icon = BuiltInStampIcon;
+      } else {
+        icon = ListenerStampIcon;
       }
-
     }
 
     return icon;
@@ -581,34 +568,33 @@ this.cristalRef.current.changeZIndex()
       bgColor = "bg-htmlCssArea";
     }
 
-
     if (this.state.hidden) {
       return <div></div>;
     }
 
-    var iframeWidth = this.state.iframeWidth
-    if(this.props.isFile){
-      iframeWidth = 0
+    var iframeWidth = this.state.iframeWidth;
+    if (this.props.isFile) {
+      iframeWidth = 0;
     }
 
-    var initialHeight = this.state.editorHeight + 150
-    if(this.props.isImg){
-      initialHeight = this.state.iframeHeight + 125
-
+    var initialHeight = this.state.editorHeight + 150;
+    if (this.props.isImg) {
+      initialHeight = this.state.iframeHeight + 125;
     }
 
     return (
       <div>
         <Cristal
-
-        zIndex={this.props.starterZIndex}
-                  onZChange={s => this.setState({zIndex:s.zIndex})}
-                getScale={this.props.getScale}
-          initialSize={{width:iframeWidth + this.state.editorWidth + 42, 
-            height:initialHeight}}
+          zIndex={this.props.starterZIndex}
+          onZChange={s => this.setState({ zIndex: s.zIndex })}
+          getScale={this.props.getScale}
+          initialSize={{
+            width: iframeWidth + this.state.editorWidth + 42,
+            height: initialHeight
+          }}
           ref={this.cristalRef}
           isResizable={!this.props.isImg}
-                    onStartResize={this.props.onStartMove.bind(this)}
+          onStartResize={this.props.onStartMove.bind(this)}
           onStopResize={this.props.onStopMove.bind(this)}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
@@ -619,15 +605,19 @@ this.cristalRef.current.changeZIndex()
           copyHidden={this.props.isHtml}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           className={
-            "stamp shadow-sm " + bgColor + " " + border + " vertex" + this.props.id 
+            "stamp shadow-sm " +
+            bgColor +
+            " " +
+            border +
+            " vertex" +
+            this.props.id
           }
           onResize={this.resizeEditor.bind(this)}
           onStartResize={this.props.onStartMove}
           onStopResize={this.props.onStopMove}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
-          parentID = {this.props.id}
-
+          parentID={this.props.id}
         >
           <div onMouseLeave={this.compileCallback.bind(this)}>
             <div
