@@ -53,8 +53,29 @@ module.exports = class FileManager {
     });
   }
 
+  isExteriorChange(event, path){
+     if(event === "root-changed"){
+      return true
+    }
+
+    var fileName = path.substring(path.indexOf(this.path) + this.path.length)
+    console.log(fileName)
+    if(!this.fileDict[fileName]){
+      return true
+    }
+
+    var existingContent = this.fileDict[fileName].content
+    var newContent = jetpack.read(path)
+    return newContent != existingContent
+
+
+  }
+
   fileChange(event, path, detail){
-    this.mainWindow.send("exteriorChanges");
+
+    if(this.isExteriorChange(event, path)){
+      this.mainWindow.send("exteriorChanges");
+    }
   }
 
   resetFiles() {
@@ -125,6 +146,16 @@ module.exports = class FileManager {
     });
   }
 
+  uriToText(uri){
+
+          var idx = uri.indexOf("base64,") + "base64,".length;
+          var headerlessUri = uri.substring(idx);
+
+          var buf = new Buffer(headerlessUri, "base64");
+          return buf
+
+  }
+
   saveFiles(newFileDict) {
     console.log(this.path);
 
@@ -144,11 +175,7 @@ module.exports = class FileManager {
         if (newFileDict[name].type === "image") {
           var uri = newFileDict[name].content;
 
-          var idx = uri.indexOf("base64,") + "base64,".length;
-          var headerlessUri = uri.substring(idx);
-
-          var buf = new Buffer(headerlessUri, "base64");
-          jetpack.writeAsync(this.path + name, buf);
+          jetpack.writeAsync(this.path + name, this.uriToText(uri));
         } else {
           jetpack.writeAsync(this.path + name, newContent);
         }
