@@ -463,6 +463,7 @@ export default class FunctionStamp extends Component {
     }
 
     var data = this.getData();
+        data.zIndex = undefined
 
     var updateName = false,
       updatePosition = false,

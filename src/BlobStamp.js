@@ -154,6 +154,7 @@ export default class BlobStamp extends Component {
 
   copyAndOpt(isOpt = false) {
     var data = this.getData();
+    data.zIndex = undefined
 
     var updatePosition = false;
     if (isOpt === false) {
