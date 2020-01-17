@@ -43,6 +43,7 @@ module.exports = class FileManager {
 
       this.watcher
       .on("raw", this.fileChange.bind(this))
+      .on('error', error => log(`Watcher error: ${error}`))
 
     });
 
@@ -86,7 +87,7 @@ module.exports = class FileManager {
   }
 
   resetFiles() {
-        this.watcher = null
+    this.watcher.unwatch(this.path);
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
