@@ -1483,7 +1483,8 @@ _stopLooping =setTimeout(() => {
 
     return (
       <div>
-        <div class="row bg-grey" style={{ height: "100vh" }}>
+        <div class="row bg-grey" 
+        style={{ height: "100vh" }}>
           <div
             className="allStamps"
             style={{

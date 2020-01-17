@@ -21,7 +21,7 @@ module.exports = class FileManager {
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
-    this.stamper = undefined;
+
     this.pendingCallback = () => null;
     this.edited = false;
     this.watcher = null
@@ -59,12 +59,17 @@ module.exports = class FileManager {
     }
 
     var fileName = path.substring(path.indexOf(this.path) + this.path.length)
-    console.log(fileName)
-    if(!this.fileDict[fileName]){
+    var file = this.fileDict[fileName]
+    if(!file){
       return true
     }
 
-    var existingContent = this.fileDict[fileName].content
+    var existingContent = file.content
+    if(file.type === "image"){
+      existingContent = this.uriToText(existingContent)
+    }
+
+
     var newContent = jetpack.read(path)
     return newContent != existingContent
 
@@ -75,16 +80,18 @@ module.exports = class FileManager {
 
     if(this.isExteriorChange(event, path)){
       this.mainWindow.send("exteriorChanges");
+      this.resetFiles()
     }
+
   }
 
   resetFiles() {
+        this.watcher = null
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
-    this.stamper = undefined;
     this.edited = false;
-    this.watcher = null
+    this.mainWindow.setTitle(this.name);
   }
 
   onNewProject() {
@@ -117,8 +124,6 @@ module.exports = class FileManager {
   openNewProject() {
     this.resetFiles();
 
-    this.name = "Untitled";
-    this.mainWindow.setTitle(this.name);
 
     this.mainWindow.webContents.send("resetView");
   }
@@ -132,7 +137,12 @@ module.exports = class FileManager {
   }
 
   onOpenCommand() {
-    this.mainWindow.webContents.send("requestUpload");
+
+    this.protectUnsaved(this.openProject.bind(this));
+  }
+
+  openProject(){
+      this.mainWindow.webContents.send("requestUpload");  
   }
 
   onSaveAsCommand() {
