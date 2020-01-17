@@ -61,13 +61,13 @@ module.exports = class FileManager {
 
     var fileName = path.substring(path.indexOf(this.path) + this.path.length)
     var file = this.fileDict[fileName]
-    if(!file){
-      return true
-    }
-
-    var existingContent = file.content
-    if(file.type === "image"){
-      existingContent = this.uriToText(existingContent)
+    if(file){
+      var existingContent = file.content
+      if(file.type === "image"){
+        existingContent = this.uriToText(existingContent)
+      }
+    }else{
+      var existingContent = undefined
     }
 
 
@@ -87,12 +87,24 @@ module.exports = class FileManager {
   }
 
   resetFiles() {
-    this.watcher.unwatch(this.path);
-    this.path = undefined;
-    this.name = "Untitled";
-    this.fileDict = {};
-    this.edited = false;
-    this.mainWindow.setTitle(this.name);
+    if(this.watcher){
+      this.watcher.close().then( () => {
+        this.path = undefined;
+        this.name = "Untitled";
+        this.fileDict = {};
+        this.edited = false;
+        this.mainWindow.setTitle(this.name);
+        this.watcher = null
+      })
+    }else{
+          this.path = undefined;
+        this.name = "Untitled";
+        this.fileDict = {};
+        this.edited = false;
+        this.mainWindow.setTitle(this.name);
+        this.watcher = null    
+    }
+
   }
 
   onNewProject() {
