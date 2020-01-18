@@ -92,12 +92,7 @@ export default class View extends Component {
     this.minus = 189;
     this.zero = 48;
 
-    ipc &&
-      ipc.on("writeToView", (event, data) =>
-        this.loadStamperObject(data.stamperObject)
-      );
 
-    ipc && ipc.on("resetView", event => this.loadStamperObject(starter));
   }
 
   getInitialStamper(){

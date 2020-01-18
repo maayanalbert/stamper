@@ -22,6 +22,7 @@ let mainWindow;
 let fileManager;
 let manualQuit = false;
 let manualClose = false;
+let worldNames = ["starter", "empty", "particles"]
 
 
 function createWindow() {
@@ -107,6 +108,19 @@ app.on("activate", () => {
 function setMenu() {
   var menu = defaultMenu(app, shell);
 
+  var worldButtons = worldNames.map( name => 
+
+          {
+          return {
+            label:name, 
+            click(){
+          fileManager.onNewProject(name)
+            }
+          }
+        }
+
+        )
+
   menu.splice(1, 0, {
     label: "File",
     submenu: [
@@ -124,6 +138,10 @@ function setMenu() {
           fileManager.onOpenCommand();
         },
         accelerator: "Cmd+O"
+      },
+      {
+        label: "Load example...",
+        submenu:worldButtons
       },
       { type: "separator" },
 
@@ -146,10 +164,18 @@ function setMenu() {
         click() {
           if (fileManager.path) {
             shell.openItem(fileManager.path);
+          }else{
+                  const options = {
+
+        buttons: ["Ok"],
+        message: "This project isn't saved anywhere yet.",
+      };
+
+      dialog.showMessageBox(null, options)
           }
         },
         accelerator: "Cmd+K"
-      }
+      },
     ]
   });
 

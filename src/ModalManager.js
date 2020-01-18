@@ -15,6 +15,7 @@ import pf1, {
   listenerFns,
   builtInFns,
   worlds,
+  starter,
   stamperHeader
 } from "./starterStamps.js";
 
@@ -103,6 +104,16 @@ export default class ModalManager extends Component {
       ipc.on("requestSave", (event, rawCode) => {
         this.sendSaveData();
       });
+
+    ipc && ipc.on("resetView", (event, data) => {
+      for(var i = 0; i< worlds.length; i++){
+        if(data.exampleName === worlds[i].name){
+          this.props.loadStamperObject(worlds[i].data)
+          return
+        }
+      }
+      this.props.loadStamperObject(starter)
+    })
 
 
     this.createInputElement();

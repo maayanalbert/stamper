@@ -108,8 +108,9 @@ module.exports = class FileManager {
 
   }
 
-  onNewProject() {
-    this.protectUnsaved(this.openNewProject.bind(this));
+  onNewProject(exampleName) {
+   
+    this.protectUnsaved(() => this.openNewProject(exampleName));
   }
 
   protectUnsaved(yesCallBack = () => null) {
@@ -135,11 +136,12 @@ module.exports = class FileManager {
     }
   }
 
-  openNewProject() {
+  openNewProject(exampleName) {
+
     this.resetFiles();
 
 
-    this.mainWindow.webContents.send("resetView");
+    this.mainWindow.webContents.send("resetView", {exampleName:exampleName});
   }
 
   onSaveCommand() {

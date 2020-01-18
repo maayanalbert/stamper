@@ -488,7 +488,8 @@ function noiseWave() {
           zIndex: 1000000000000000001
         }}
       >
-        <span style={{ width: 50 }} hidden={!ipc} />
+
+        <span hidden={!ipc}/>
         <div class="row ml-1" hidden={ipc}>
           <TopButton
   
@@ -589,7 +590,9 @@ function noiseWave() {
           />
         </div>
 
-        <TopButton
+                <span hidden={!ipc}/>
+       <div hidden={ipc}>
+        <TopButton 
           iconType={WorldsIcon}
           uniqueClass="worlds"
           iconCallback={null}
@@ -601,6 +604,7 @@ function noiseWave() {
           tooltipText="overwrite with example"
           alignRight
         />
+        </div>
       </div>
     );
   }
