@@ -86,24 +86,25 @@ module.exports = class FileManager {
 
   }
 
-  resetFiles() {
-    if(this.watcher){
-      this.watcher.close().then( () => {
+  actuallyResetFiles(){
         this.path = undefined;
         this.name = "Untitled";
         this.fileDict = {};
         this.edited = false;
         this.mainWindow.setTitle(this.name);
-        this.watcher = null
-      })
-    }else{
-          this.path = undefined;
-        this.name = "Untitled";
-        this.fileDict = {};
-        this.edited = false;
-        this.mainWindow.setTitle(this.name);
         this.watcher = null    
-    }
+  }
+
+
+
+  resetFiles() {
+
+      this.watcher && this.watcher.close().then( () => {
+        this.actuallyResetFiles()
+      })
+
+      !this.watcher && this.actuallyResetFiles()
+
 
   }
 
