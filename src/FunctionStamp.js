@@ -35,17 +35,22 @@ export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
     var starterEditorWidth = this.props.starterEditorWidth;
-    if (this.props.isImg) {
+    if (this.props.isImg || this.props.isBlob) {
       starterEditorWidth = 0;
     }
     var starterArgs = this.props.starterArgs;
-    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
+    if (this.props.isHtml || this.props.isFile || this.props.isImg || this.props.isBlob) {
       starterArgs = " ";
+    }
+
+    var starterName = this.props.starterName
+    if(this.props.isBlob){
+      starterName = ""
     }
 
     this.state = {
       code: this.props.starterCode,
-      name: this.props.starterName,
+      name: starterName,
       args: starterArgs,
       iframeDisabled: this.props.iframeDisabled,
       iframeWidth: this.props.starterIframeWidth,
@@ -64,7 +69,8 @@ export default class FunctionStamp extends Component {
       hidden: this.props.initialHidden,
       looping: false,
       loopingTransition: "",
-      zIndex: -1
+      zIndex: -1,
+      exportableCode:""
     };
 
     this.cristalRef = React.createRef();
@@ -90,7 +96,7 @@ export default class FunctionStamp extends Component {
       e.data.type != "loop" ||
       e.data.id != this.props.id ||
       this.props.isHtml ||
-      this.props.isImg
+      this.props.isImg || this.props.isBlob
     ) {
       return;
     }
@@ -103,9 +109,6 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
-    // this.setState({
-    //   iframeHeight: this.props.starterIframeHeight }
-    // );
     this.checkName();
     window.addEventListener("message", this.updateLooping);
   }
@@ -130,14 +133,20 @@ export default class FunctionStamp extends Component {
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      if (this.props.isFile || this.props.isImg) {
-        var iframeCode = "";
-      } else {
-        var iframeCode = this.props.getHTML(this.props.id);
+      var iframeCode = ""
+      var exportableCode = ""
+
+
+      if(this.props.isBlob){
+        exportableCode = this.props.getExportableCode()
+      }else if(this.props.isFile === false && this.props.isImg === false){
+        iframeCode = this.props.getHTML(this.props.id);
+
       }
 
       this.setState({
         iframeCode: iframeCode,
+        exportableCode:exportableCode,
         looping: true,
         loopingTransition: ""
       });
@@ -281,6 +290,10 @@ export default class FunctionStamp extends Component {
   }
 
   renderFunctionName() {
+
+    if(this.props.isBlob){
+      return null
+    }
     var displayName = "";
     if (this.state.name != this.props.starterName) {
       var displayName = this.state.Name;
@@ -505,7 +518,8 @@ onMouseOver={this.compileCallback.bind(this)}
       isImg: this.props.isImg,
       hidden: this.state.hidden,
       exported: true,
-      zIndex: this.state.zIndex
+      zIndex: this.state.zIndex,
+      isBlob:this.props.isBlob
     };
 
     return data;

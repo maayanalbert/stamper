@@ -910,6 +910,7 @@ function logToConsole(message, lineno){
   checkAllNames() {
     var nameDict = {};
     Object.values(this.state.fnStampRefs).map(stamp => {
+      if(stamp.current.props.isBlob){return}
       if (stamp.current) {
         var name = stamp.current.state.name;
         if (!(name in nameDict)) {
@@ -920,6 +921,7 @@ function logToConsole(message, lineno){
     });
     var duplicateNamedStamps = {};
     Object.values(this.state.fnStampRefs).map(stamp => {
+      if(stamp.current.props.isBlob){return}
       if (stamp.current) {
         var stampRef = stamp.current;
         var name = stamp.current.state.name;
@@ -942,26 +944,32 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    Object.values(this.state.blobStampRefs).map(blobStamp => {
-      code = blobStamp.current.state.code;
-      curLine = this.addCodeBlock(
-        code,
-        blobStamp.current.props.id,
-        runnableCode,
-        ranges,
-        curLine,
-        false
-      );
-    });
+    // Object.values(this.state.blobStampRefs).map(blobStamp => {
+    //   code = blobStamp.current.state.code;
+    //   curLine = this.addCodeBlock(
+    //     code,
+    //     blobStamp.current.props.id,
+    //     runnableCode,
+    //     ranges,
+    //     curLine,
+    //     false
+    //   );
+    // });
 
     Object.values(this.state.fnStampRefs).map(stamp => {
-      if (
-        stamp.current.props.isFile === false &&
-        stamp.current.props.isHtml === false &&
-        stamp.current.props.isImg === false
-      ) {
+      if(stamp.current.props.isFile  ||
+        stamp.current.props.isHtml ||
+        stamp.current.props.isImg ){
+        return
+      }
+
+
+      if(stamp.current.props.isBlob){
+        var code = stamp.current.state.code;
+      }else {
         var state = stamp.current.state;
-        code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+      }
         curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
@@ -970,7 +978,7 @@ function logToConsole(message, lineno){
           curLine,
           true
         );
-      }
+
     });
 
     return runnableCode.join("\n");
@@ -1018,81 +1026,81 @@ function logToConsole(message, lineno){
     this.setState({ lines: lines });
   }
 
-  setLineData() {
-    var declaredDict = {};
-    var undeclaredArr = [];
-    var lineData = [];
-    var setupID = -1;
-    var traversalGraph = {};
+  // setLineData() {
+  //   var declaredDict = {};
+  //   var undeclaredArr = [];
+  //   var lineData = [];
+  //   var setupID = -1;
+  //   var traversalGraph = {};
 
-    Object.keys(this.state.blobStampRefs).map(id => {
-      var stampRef = this.state.blobStampRefs[id].current;
-      var code = stampRef.state.code;
-      var identifiers = parser.getIdentifiers(code);
+  //   Object.keys(this.state.blobStampRefs).map(id => {
+  //     var stampRef = this.state.blobStampRefs[id].current;
+  //     var code = stampRef.state.code;
+  //     var identifiers = parser.getIdentifiers(code);
 
-      if (identifiers) {
-        identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-        identifiers.undeclared.map(identifier =>
-          undeclaredArr.push([identifier, id])
-        );
-      }
-    });
+  //     if (identifiers) {
+  //       identifiers.declared.map(identifier => (declaredDict[identifier] = id));
+  //       identifiers.undeclared.map(identifier =>
+  //         undeclaredArr.push([identifier, id])
+  //       );
+  //     }
+  //   });
 
-    Object.keys(this.state.fnStampRefs).map(id => {
-      var stampRef = this.state.fnStampRefs[id].current;
+  //   Object.keys(this.state.fnStampRefs).map(id => {
+  //     var stampRef = this.state.fnStampRefs[id].current;
 
-      if (stampRef.state.name === "setup") {
-        setupID = id;
-      }
-      var state = stampRef.state;
-      var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-      var identifiers = parser.getIdentifiers(code);
-      if (identifiers) {
-        identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-        identifiers.undeclared.map(identifier =>
-          undeclaredArr.push([identifier, id])
-        );
-      }
-    });
+  //     if (stampRef.state.name === "setup") {
+  //       setupID = id;
+  //     }
+  //     var state = stampRef.state;
+  //     var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+  //     var identifiers = parser.getIdentifiers(code);
+  //     if (identifiers) {
+  //       identifiers.declared.map(identifier => (declaredDict[identifier] = id));
+  //       identifiers.undeclared.map(identifier =>
+  //         undeclaredArr.push([identifier, id])
+  //       );
+  //     }
+  //   });
 
-    undeclaredArr.map(undeclaredItem => {
-      var identifier = undeclaredItem[0];
-      var usingFn = undeclaredItem[1];
-      var declaringFn = declaredDict[identifier];
-      if (declaringFn && usingFn) {
-        lineData.push([usingFn, declaringFn]);
-        if (declaringFn in traversalGraph === false) {
-          traversalGraph[declaringFn] = [];
-        }
-        traversalGraph[declaringFn].push(usingFn);
-      }
-    });
+  //   undeclaredArr.map(undeclaredItem => {
+  //     var identifier = undeclaredItem[0];
+  //     var usingFn = undeclaredItem[1];
+  //     var declaringFn = declaredDict[identifier];
+  //     if (declaringFn && usingFn) {
+  //       lineData.push([usingFn, declaringFn]);
+  //       if (declaringFn in traversalGraph === false) {
+  //         traversalGraph[declaringFn] = [];
+  //       }
+  //       traversalGraph[declaringFn].push(usingFn);
+  //     }
+  //   });
 
-    // Object.keys(this.state.fnStampRefs).map(id => {
-    //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
-    //     lineData.push([id, setupID]);
-    //     if (setupID in traversalGraph === false) {
-    //       traversalGraph[setupID] = [];
-    //     }
-    //     traversalGraph[setupID].push(id);
-    //   }
-    // });
+  //   // Object.keys(this.state.fnStampRefs).map(id => {
+  //   //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
+  //   //     lineData.push([id, setupID]);
+  //   //     if (setupID in traversalGraph === false) {
+  //   //       traversalGraph[setupID] = [];
+  //   //     }
+  //   //     traversalGraph[setupID].push(id);
+  //   //   }
+  //   // });
 
-    this.setState({ lineData: lineData }, () => this.setLines());
+  //   this.setState({ lineData: lineData }, () => this.setLines());
 
-    // Object.keys(this.state.fnStampRefs).map(id => {
-    //   if (id != this.state.htmlID && id != this.state.cssID) {
-    //     if (this.state.htmlID in traversalGraph === false) {
-    //       traversalGraph[this.state.htmlID] = [];
-    //     }
-    //     traversalGraph[this.state.htmlID].push(id);
-    //   }
-    // });
+  //   // Object.keys(this.state.fnStampRefs).map(id => {
+  //   //   if (id != this.state.htmlID && id != this.state.cssID) {
+  //   //     if (this.state.htmlID in traversalGraph === false) {
+  //   //       traversalGraph[this.state.htmlID] = [];
+  //   //     }
+  //   //     traversalGraph[this.state.htmlID].push(id);
+  //   //   }
+  //   // });
 
-    // traversalGraph[this.state.cssID] = [this.state.htmlID];
+  //   // traversalGraph[this.state.cssID] = [this.state.htmlID];
 
-    return traversalGraph;
-  }
+  //   return traversalGraph;
+  // }
 
   getRunnableCode(id) {
     var runnableCode = [];
@@ -1100,17 +1108,17 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    Object.values(this.state.blobStampRefs).map(blobStamp => {
-      code = blobStamp.current.state.code;
-      curLine = this.addCodeBlock(
-        code,
-        blobStamp.current.props.id,
-        runnableCode,
-        ranges,
-        curLine,
-        false
-      );
-    });
+    // Object.values(this.state.blobStampRefs).map(blobStamp => {
+    //   code = blobStamp.current.state.code;
+    //   curLine = this.addCodeBlock(
+    //     code,
+    //     blobStamp.current.props.id,
+    //     runnableCode,
+    //     ranges,
+    //     curLine,
+    //     false
+    //   );
+    // });
 
     Object.values(this.state.fnStampRefs).map(stamp => {
       if (
@@ -1123,7 +1131,12 @@ function logToConsole(message, lineno){
             false)
       ) {
         var state = stamp.current.state;
-        code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        if(stamp.current.props.isBlob){
+          var code = state.code
+        }else{
+          var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        }
+
         curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
@@ -1231,14 +1244,15 @@ _stopLooping =setTimeout(() => {
       fnStampElems[id] = (<span hidden={true}/>)
       this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems}, () => 
         this.requestCompile(id))
-    }else if(id in this.state.blobStampRefs){
-      var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
-      var blobStampElems = Object.assign({}, this.state.blobStampElems);
-      delete blobStampRefs[id]
-      blobStampElems[id] = (<span hidden={true}/>)
-      this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems}, () => 
-        this.requestCompile(id))
     }
+    // else if(id in this.state.blobStampRefs){
+    //   var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
+    //   var blobStampElems = Object.assign({}, this.state.blobStampElems);
+    //   delete blobStampRefs[id]
+    //   blobStampElems[id] = (<span hidden={true}/>)
+    //   this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems}, () => 
+    //     this.requestCompile(id))
+    // }
 
 
     // var allData = this.getStamperObject(id);
@@ -1266,49 +1280,49 @@ _stopLooping =setTimeout(() => {
       }
     });
 
-    Object.keys(this.state.blobStampRefs).map(stampID => {
-      if (stampID != id) {
-        var stamp = this.state.blobStampRefs[stampID];
-        data.blobs.push(stamp.current.getData());
-      }
-    });
+    // Object.keys(this.state.blobStampRefs).map(stampID => {
+    //   if (stampID != id) {
+    //     var stamp = this.state.blobStampRefs[stampID];
+    //     data.blobs.push(stamp.current.getData());
+    //   }
+    // });
 
     return data;
   }
 
-  refreshfnStampRefs(fnStampRefs, callback = () => null) {
-    var data = [];
-    Object.values(fnStampRefs).map(item => {
-      data.push(item.current.getData());
-    });
+  // refreshfnStampRefs(fnStampRefs, callback = () => null) {
+  //   var data = [];
+  //   Object.values(fnStampRefs).map(item => {
+  //     data.push(item.current.getData());
+  //   });
 
-    this.setState({ fnStampRefs: {} }, () => {
-      data.map(stampData => {
-        this.addFnStamp(stampData, () => {
-          if (Object.values(this.state.fnStampRefs).length === data.length) {
-            callback();
-          }
-        });
-      });
-    });
-  }
+  //   this.setState({ fnStampRefs: {} }, () => {
+  //     data.map(stampData => {
+  //       this.addFnStamp(stampData, () => {
+  //         if (Object.values(this.state.fnStampRefs).length === data.length) {
+  //           callback();
+  //         }
+  //       });
+  //     });
+  //   });
+  // }
 
-  refreshblobStampRefs(blobStampRefs, callback = () => null) {
-    var data = [];
-    Object.values(blobStampRefs).map(item => {
-      data.push(item.current.getData());
-    });
+  // refreshblobStampRefs(blobStampRefs, callback = () => null) {
+  //   var data = [];
+  //   Object.values(blobStampRefs).map(item => {
+  //     data.push(item.current.getData());
+  //   });
 
-    this.setState({ blobStampRefs: {} }, () => {
-      data.map(stampData => {
-        this.addBlobStamp(stampData, () => {
-          if (Object.values(this.state.blobStampRefs).length === data.length) {
-            callback();
-          }
-        });
-      });
-    });
-  }
+  //   this.setState({ blobStampRefs: {} }, () => {
+  //     data.map(stampData => {
+  //       this.addBlobStamp(stampData, () => {
+  //         if (Object.values(this.state.blobStampRefs).length === data.length) {
+  //           callback();
+  //         }
+  //       });
+  //     });
+  //   });
+  // }
 
   onStartMove() {
     var fnStampRefs = this.state.fnStampRefs;
@@ -1337,8 +1351,6 @@ _stopLooping =setTimeout(() => {
 
     if (id in this.state.fnStampRefs) {
       stampRef = this.state.fnStampRefs[id].current;
-    } else if (id in this.state.blobStampRefs) {
-      stampRef = this.state.blobStampRefs[id].current;
     } else if (
       this.state.consoleStamp.ref.current &&
       id === this.state.consoleStamp.ref.current.props.id
@@ -1422,22 +1434,18 @@ _stopLooping =setTimeout(() => {
       });
     }
 
-    var fnIds = Object.keys(this.state.fnStampRefs);
-    var blobIds = Object.keys(this.state.blobStampRefs);
-    var allIds = fnIds.concat(blobIds);
-    allIds.map(id => {
+    Object.keys(this.state.fnStampRefs).map(id => {
       if (id in this.state.fnStampRefs) {
         var stampRef = this.state.fnStampRefs[id].current;
         if (!stampRef) {
           return;
         }
+        if(stampRef.props.isBlob){
+var name = this.getFirstLine(stampRef.state.code);
+        }else{
         var name = stampRef.state.name;
-      } else if (id in this.state.blobStampRefs) {
-        var stampRef = this.state.blobStampRefs[id].current;
-        if (!stampRef) {
-          return;
         }
-        var name = this.getFirstLine(stampRef.state.code);
+
       }
 
       pickerData.push({
@@ -1457,7 +1465,7 @@ _stopLooping =setTimeout(() => {
   getNumStamps() {
     return {
       fns: Object.keys(this.state.fnStampRefs).length,
-      blobs: Object.keys(this.state.blobStampRefs).length
+      blobs: 0
     };
   }
 
@@ -1490,7 +1498,6 @@ _stopLooping =setTimeout(() => {
             }}
           >
             {Object.values(this.state.fnStampElems)}
-            {Object.values(this.state.blobStampElems)}
             {consoleElem}
           </div>
         </div>
