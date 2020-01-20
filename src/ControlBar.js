@@ -4,7 +4,7 @@ import $ from "jquery";
 import pf, { globals, p5Lib } from "./globals.js";
 import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
-import BlobStamp from "./BlobStamp.js";
+
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
@@ -187,17 +187,14 @@ function noiseWave() {
         console.log(curNumStamps);
 
         this.props.recompileIfEnoughStamps(
-          stamps.fns.length + curNumStamps.fns,
-          stamps.blobs.length + curNumStamps.blobs
+          stamps.fns.length + curNumStamps.fns
         );
       };
 
       stamps.fns.map(data => {
         this.props.addFnStamp(data, callback);
       });
-      stamps.blobs.map(data => {
-        this.props.addBlobStamp(data, callback);
-      });
+
 
       this.setState({ code: "" });
     } catch (e) {
@@ -549,7 +546,7 @@ function noiseWave() {
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(varBlob, id =>
+              this.props.addFnStamp(varBlob, id =>
                 this.props.requestCompile(id)
               )
             }
@@ -560,7 +557,7 @@ function noiseWave() {
             iconType={BlobStampIcon}
             uniqueClass="commentStamp"
             iconCallback={() =>
-              this.props.addBlobStamp(commentBlob, id =>
+              this.props.addFnStamp(commentBlob, id =>
                 this.props.requestCompile(id)
               )
             }

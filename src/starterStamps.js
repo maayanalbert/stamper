@@ -141,7 +141,8 @@ ellipse(posX, posY, 30, 30)`
 
 export const commentBlob = {
   code: `/*\n  comment here\n*/`,
-  codeSize: globals.bigCodeSize
+  codeSize: globals.bigCodeSize,
+  isBlob:true
 };
 
 export const sampleFile = {
@@ -150,7 +151,7 @@ export const sampleFile = {
   isFile:true
 };
 
-export const varBlob = { code: "var global1 = 1" };
+export const varBlob = { code: "var global1 = 1", isBlob:true };
 
 export default function DefaultExportPlaceholder() {
   return null;

@@ -7,7 +7,7 @@ import FunctionStamp from "./FunctionStamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
-import BlobStamp from "./BlobStamp.js";
+
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
@@ -50,8 +50,6 @@ export default class View extends Component {
       fnStampElems:{},
       scale: 1,
       counter: 0,
-      blobStampRefs: {},
-      blobStampElems:{},
       htmlID: -1,
       consoleStamp: null,
       setupExists: true,
@@ -266,10 +264,9 @@ export default class View extends Component {
     this.setState({ sideBarWidth: sideBarWidth, topBarHeight: topBarHeight });
   }
 
-  recompileIfEnoughStamps(numFns, numBlobs) {
+  recompileIfEnoughStamps(numFns) {
     if (
-      Object.keys(this.state.fnStampRefs).length === numFns &&
-      Object.keys(this.state.blobStampRefs).length === numBlobs
+      Object.keys(this.state.fnStampRefs).length === numFns
     ) {
       this.requestCompile();
     }
@@ -279,9 +276,9 @@ export default class View extends Component {
     this.setState(
       {
         fnStampRefs: {},
-        blobStampRefs: {},
+    
         fnStampElems:{},
-        blobStampElems:{},
+  
         counter: 0,
         htmlID: -1,
         scale: 1,
@@ -301,12 +298,10 @@ export default class View extends Component {
           () => {
             var callback = () =>
               this.recompileIfEnoughStamps(
-                stamperObject.fns.length,
-                stamperObject.blobs.length
+                stamperObject.fns.length
               );
             this.addConsoleStamp(stamperObject.console);
             stamperObject.fns.map(data => this.addFnStamp(data, callback));
-            stamperObject.blobs.map(data => this.addBlobStamp(data, callback));
           }
         );
       }
@@ -471,8 +466,6 @@ function logToConsole(message, lineno){
   addErrorLine(lineNum, id) {
     if (id in this.state.fnStampRefs) {
       this.state.fnStampRefs[id].current.addErrorLine(lineNum);
-    } else if (id in this.state.blobStampRefs) {
-      this.state.blobStampRefs[id].current.addErrorLine(lineNum);
     }
   }
 
@@ -568,8 +561,10 @@ function logToConsole(message, lineno){
       isHtml: false,
       isFile: false,
       isImg: false,
+      isBlob:false,
       hidden: false,
-      zIndex: undefined
+      zIndex: undefined,
+      codeSize:globals.codeSize
     };
 
     Object.keys(defaults).map(setting => {
@@ -593,8 +588,7 @@ function logToConsole(message, lineno){
     data.iframeDisabled = setIframeDisabled;
 
     this.createFnStamp(data, callback);
-    // this.refreshblobStampRefs(this.state.blobStampRefs);
-    // this.createFnStamp(data, callback)
+
     return newName;
   }
 
@@ -624,6 +618,7 @@ function logToConsole(message, lineno){
     var ref = React.createRef();
 
     var stampID = counter.toString();
+    console.log(data.codeSize)
 
     var elem = (
       <FunctionStamp
@@ -631,6 +626,8 @@ function logToConsole(message, lineno){
         isHtml={isHtml}
         isFile={isFile}
         isImg={isImg}
+        isBlob={data.isBlob}
+        getExportableCode={this.getExportableCode.bind(this)}
         starterZIndex={data.zIndex}
         starterCode={code}
         starterArgs={args}
@@ -639,6 +636,7 @@ function logToConsole(message, lineno){
         starterEditorWidth={editorWidth}
         starterEditorHeight={editorHeight}
         initialPosition={{ x: x, y: y }}
+        starterCodeSize={data.codeSize}
         id={stampID}
         deleteFrame={this.deleteFrame}
         initialHidden={hidden}
@@ -681,85 +679,6 @@ function logToConsole(message, lineno){
       return;
     }
     this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole);
-  }
-
-  addBlobStamp(data, callback, updatePosition = false) {
-    var defaults = {
-      code: "var z = 10",
-      x: this.setInitialPosition("x"),
-      y: this.setInitialPosition("y"),
-      editorWidth: globals.defaultEditorWidth,
-      editorHeight: globals.defaultVarEditorHeight,
-      hidden: false,
-      codeSize: globals.codeSize,
-      zIndex: undefined
-    };
-
-    Object.keys(defaults).map(setting => {
-      if (setting in data) {
-        defaults[setting] = data[setting];
-      }
-    });
-    data = defaults;
-
-    if (updatePosition) {
-      data.x += globals.copyOffset * 2 * this.state.scale;
-      data.y += globals.copyOffset * 2 * this.state.scale;
-    }
-
-    this.createBlobStamp(data, callback);
-  }
-
-  async createBlobStamp(data, callback = () => null) {
-    const release = await this.counterMutex.acquire();
-
-    var x = data.x,
-      y = data.y,
-      code = data.code,
-      editorWidth = data.editorWidth,
-      editorHeight = data.editorHeight,
-      errorLines = data.errorLines,
-      hidden = data.hidden;
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, () => release());
-
-    var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
-    var blobStampElems = Object.assign({}, this.state.blobStampElems);
-    var ref = React.createRef();
-    var stampID = counter.toString();
-
-    var elem = (
-      <BlobStamp
-        ref={ref}
-        starterCode={code}
-        errorLines={{}}
-        initialPosition={{ x: x, y: y }}
-        id={stampID}
-        starterCodeSize={data.codeSize}
-        deleteFrame={this.deleteFrame}
-        initialHidden={hidden}
-        starterZIndex={data.zIndex}
-        onStartMove={this.onStartMove.bind(this)}
-        onStopMove={this.onStopMove.bind(this)}
-        addStamp={this.addBlobStamp.bind(this)}
-        onDelete={this.onDelete.bind(this)}
-        disablePan={this.disablePan.bind(this)}
-        starterEditorWidth={editorWidth}
-        starterEditorHeight={editorHeight}
-        requestCompile={this.requestCompile.bind(this)}
-        getExportableCode={this.getExportableCode.bind(this)}
-        getScale={this.getScale.bind(this)}
-      />
-    );
-
-    blobStampRefs[stampID] = ref
-    blobStampElems[stampID] = elem
-
-    this.setState({ blobStampRefs: blobStampRefs ,
-      blobStampElems:blobStampElems
-    }, counter => {
-      callback(stampID);
-    });
   }
 
   checkForSetup() {
@@ -844,18 +763,6 @@ function logToConsole(message, lineno){
       }
     });
 
-    Object.values(this.state.blobStampRefs).map(stamp => {
-      var stampRef = stamp.current;
-      if (stampRef) {
-        var newErrors = [];
-
-        if (stampRef.props.id in duplicateNamedStamps) {
-          newErrors.push(0);
-        }
-
-        stampRef.clearErrorsAndUpdate(newErrors);
-      }
-    });
   }
 
   recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
@@ -867,8 +774,6 @@ function logToConsole(message, lineno){
 
     if (id in this.state.fnStampRefs) {
       var stampRef = this.state.fnStampRefs[id].current;
-    } else if (id in this.state.blobStampRefs) {
-      var stampRef = this.state.blobStampRefs[id].current;
     } else {
       return;
     }
@@ -944,17 +849,6 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    // Object.values(this.state.blobStampRefs).map(blobStamp => {
-    //   code = blobStamp.current.state.code;
-    //   curLine = this.addCodeBlock(
-    //     code,
-    //     blobStamp.current.props.id,
-    //     runnableCode,
-    //     ranges,
-    //     curLine,
-    //     false
-    //   );
-    // });
 
     Object.values(this.state.fnStampRefs).map(stamp => {
       if(stamp.current.props.isFile  ||
@@ -966,11 +860,18 @@ function logToConsole(message, lineno){
 
       if(stamp.current.props.isBlob){
         var code = stamp.current.state.code;
+                curLine = this.addCodeBlock(
+          code,
+          stamp.current.props.id,
+          runnableCode,
+          ranges,
+          curLine,
+          false
+        );
       }else {
         var state = stamp.current.state;
         var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-      }
-        curLine = this.addCodeBlock(
+                curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
           runnableCode,
@@ -978,6 +879,8 @@ function logToConsole(message, lineno){
           curLine,
           true
         );
+      }
+
 
     });
 
@@ -985,8 +888,10 @@ function logToConsole(message, lineno){
   }
 
   getNumLines(code) {
+
     var numLines = 0;
     for (var i = 0; i < code.length; i++) {
+
       if (code[i] === "\n") {
         numLines += 1;
       }
@@ -996,7 +901,7 @@ function logToConsole(message, lineno){
   }
 
   addCodeBlock(code, id, runnableCode, ranges, curLine, isFn) {
-    code = code.trim() + "\n";
+    code = code + "\n";
     var start = curLine;
     var end = curLine + this.getNumLines(code) - 1;
     runnableCode.push(code);
@@ -1026,81 +931,81 @@ function logToConsole(message, lineno){
     this.setState({ lines: lines });
   }
 
-  // setLineData() {
-  //   var declaredDict = {};
-  //   var undeclaredArr = [];
-  //   var lineData = [];
-  //   var setupID = -1;
-  //   var traversalGraph = {};
+  setLineData() {
+    var declaredDict = {};
+    var undeclaredArr = [];
+    var lineData = [];
+    var setupID = -1;
+    var traversalGraph = {};
 
-  //   Object.keys(this.state.blobStampRefs).map(id => {
-  //     var stampRef = this.state.blobStampRefs[id].current;
-  //     var code = stampRef.state.code;
-  //     var identifiers = parser.getIdentifiers(code);
+    // Object.keys(this.state.blobStampRefs).map(id => {
+    //   var stampRef = this.state.blobStampRefs[id].current;
+    //   var code = stampRef.state.code;
+    //   var identifiers = parser.getIdentifiers(code);
 
-  //     if (identifiers) {
-  //       identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-  //       identifiers.undeclared.map(identifier =>
-  //         undeclaredArr.push([identifier, id])
-  //       );
-  //     }
-  //   });
+    //   if (identifiers) {
+    //     identifiers.declared.map(identifier => (declaredDict[identifier] = id));
+    //     identifiers.undeclared.map(identifier =>
+    //       undeclaredArr.push([identifier, id])
+    //     );
+    //   }
+    // });
 
-  //   Object.keys(this.state.fnStampRefs).map(id => {
-  //     var stampRef = this.state.fnStampRefs[id].current;
+    Object.keys(this.state.fnStampRefs).map(id => {
+      var stampRef = this.state.fnStampRefs[id].current;
 
-  //     if (stampRef.state.name === "setup") {
-  //       setupID = id;
-  //     }
-  //     var state = stampRef.state;
-  //     var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-  //     var identifiers = parser.getIdentifiers(code);
-  //     if (identifiers) {
-  //       identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-  //       identifiers.undeclared.map(identifier =>
-  //         undeclaredArr.push([identifier, id])
-  //       );
-  //     }
-  //   });
+      if (stampRef.state.name === "setup") {
+        setupID = id;
+      }
+      var state = stampRef.state;
+      var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+      var identifiers = parser.getIdentifiers(code);
+      if (identifiers) {
+        identifiers.declared.map(identifier => (declaredDict[identifier] = id));
+        identifiers.undeclared.map(identifier =>
+          undeclaredArr.push([identifier, id])
+        );
+      }
+    });
 
-  //   undeclaredArr.map(undeclaredItem => {
-  //     var identifier = undeclaredItem[0];
-  //     var usingFn = undeclaredItem[1];
-  //     var declaringFn = declaredDict[identifier];
-  //     if (declaringFn && usingFn) {
-  //       lineData.push([usingFn, declaringFn]);
-  //       if (declaringFn in traversalGraph === false) {
-  //         traversalGraph[declaringFn] = [];
-  //       }
-  //       traversalGraph[declaringFn].push(usingFn);
-  //     }
-  //   });
+    undeclaredArr.map(undeclaredItem => {
+      var identifier = undeclaredItem[0];
+      var usingFn = undeclaredItem[1];
+      var declaringFn = declaredDict[identifier];
+      if (declaringFn && usingFn) {
+        lineData.push([usingFn, declaringFn]);
+        if (declaringFn in traversalGraph === false) {
+          traversalGraph[declaringFn] = [];
+        }
+        traversalGraph[declaringFn].push(usingFn);
+      }
+    });
 
-  //   // Object.keys(this.state.fnStampRefs).map(id => {
-  //   //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
-  //   //     lineData.push([id, setupID]);
-  //   //     if (setupID in traversalGraph === false) {
-  //   //       traversalGraph[setupID] = [];
-  //   //     }
-  //   //     traversalGraph[setupID].push(id);
-  //   //   }
-  //   // });
+    // Object.keys(this.state.fnStampRefs).map(id => {
+    //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
+    //     lineData.push([id, setupID]);
+    //     if (setupID in traversalGraph === false) {
+    //       traversalGraph[setupID] = [];
+    //     }
+    //     traversalGraph[setupID].push(id);
+    //   }
+    // });
 
-  //   this.setState({ lineData: lineData }, () => this.setLines());
+    this.setState({ lineData: lineData }, () => this.setLines());
 
-  //   // Object.keys(this.state.fnStampRefs).map(id => {
-  //   //   if (id != this.state.htmlID && id != this.state.cssID) {
-  //   //     if (this.state.htmlID in traversalGraph === false) {
-  //   //       traversalGraph[this.state.htmlID] = [];
-  //   //     }
-  //   //     traversalGraph[this.state.htmlID].push(id);
-  //   //   }
-  //   // });
+    // Object.keys(this.state.fnStampRefs).map(id => {
+    //   if (id != this.state.htmlID && id != this.state.cssID) {
+    //     if (this.state.htmlID in traversalGraph === false) {
+    //       traversalGraph[this.state.htmlID] = [];
+    //     }
+    //     traversalGraph[this.state.htmlID].push(id);
+    //   }
+    // });
 
-  //   // traversalGraph[this.state.cssID] = [this.state.htmlID];
+    // traversalGraph[this.state.cssID] = [this.state.htmlID];
 
-  //   return traversalGraph;
-  // }
+    return traversalGraph;
+  }
 
   getRunnableCode(id) {
     var runnableCode = [];
@@ -1108,17 +1013,6 @@ function logToConsole(message, lineno){
     var curLine = 1;
     var code;
 
-    // Object.values(this.state.blobStampRefs).map(blobStamp => {
-    //   code = blobStamp.current.state.code;
-    //   curLine = this.addCodeBlock(
-    //     code,
-    //     blobStamp.current.props.id,
-    //     runnableCode,
-    //     ranges,
-    //     curLine,
-    //     false
-    //   );
-    // });
 
     Object.values(this.state.fnStampRefs).map(stamp => {
       if (
@@ -1132,12 +1026,20 @@ function logToConsole(message, lineno){
       ) {
         var state = stamp.current.state;
         if(stamp.current.props.isBlob){
+
           var code = state.code
+
+          curLine = this.addCodeBlock(
+          code,
+          stamp.current.props.id,
+          runnableCode,
+          ranges,
+          curLine,
+          false
+        );
         }else{
           var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-        }
-
-        curLine = this.addCodeBlock(
+          curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
           runnableCode,
@@ -1145,6 +1047,7 @@ function logToConsole(message, lineno){
           curLine,
           true
         );
+        }
       }
     });
 
@@ -1186,6 +1089,8 @@ function logToConsole(message, lineno){
       runnableCode.join(""),
       state.name
     );
+
+
 
     return { ranges: ranges, runnableCode: runnableCode };
   }
@@ -1245,18 +1150,7 @@ _stopLooping =setTimeout(() => {
       this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems}, () => 
         this.requestCompile(id))
     }
-    // else if(id in this.state.blobStampRefs){
-    //   var blobStampRefs = Object.assign({}, this.state.blobStampRefs);
-    //   var blobStampElems = Object.assign({}, this.state.blobStampElems);
-    //   delete blobStampRefs[id]
-    //   blobStampElems[id] = (<span hidden={true}/>)
-    //   this.setState({blobStampRefs:blobStampRefs, blobStampElems:blobStampElems}, () => 
-    //     this.requestCompile(id))
-    // }
 
-
-    // var allData = this.getStamperObject(id);
-    // this.loadStamperObject(allData);
   }
 
   refreshConsoleStamp(consoleStamp) {
@@ -1267,7 +1161,6 @@ _stopLooping =setTimeout(() => {
   getStamperObject(id) {
     var data = {
       fns: [],
-      blobs: [],
       scale: this.state.scale,
       console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
@@ -1280,49 +1173,11 @@ _stopLooping =setTimeout(() => {
       }
     });
 
-    // Object.keys(this.state.blobStampRefs).map(stampID => {
-    //   if (stampID != id) {
-    //     var stamp = this.state.blobStampRefs[stampID];
-    //     data.blobs.push(stamp.current.getData());
-    //   }
-    // });
+
 
     return data;
   }
 
-  // refreshfnStampRefs(fnStampRefs, callback = () => null) {
-  //   var data = [];
-  //   Object.values(fnStampRefs).map(item => {
-  //     data.push(item.current.getData());
-  //   });
-
-  //   this.setState({ fnStampRefs: {} }, () => {
-  //     data.map(stampData => {
-  //       this.addFnStamp(stampData, () => {
-  //         if (Object.values(this.state.fnStampRefs).length === data.length) {
-  //           callback();
-  //         }
-  //       });
-  //     });
-  //   });
-  // }
-
-  // refreshblobStampRefs(blobStampRefs, callback = () => null) {
-  //   var data = [];
-  //   Object.values(blobStampRefs).map(item => {
-  //     data.push(item.current.getData());
-  //   });
-
-  //   this.setState({ blobStampRefs: {} }, () => {
-  //     data.map(stampData => {
-  //       this.addBlobStamp(stampData, () => {
-  //         if (Object.values(this.state.blobStampRefs).length === data.length) {
-  //           callback();
-  //         }
-  //       });
-  //     });
-  //   });
-  // }
 
   onStartMove() {
     var fnStampRefs = this.state.fnStampRefs;
@@ -1464,8 +1319,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
   getNumStamps() {
     return {
-      fns: Object.keys(this.state.fnStampRefs).length,
-      blobs: 0
+      fns: Object.keys(this.state.fnStampRefs).length
     };
   }
 
@@ -1475,12 +1329,6 @@ var name = this.getFirstLine(stampRef.state.code);
     } else {
       var consoleElem = null;
     }
-
-    // var fnElems = [];
-    // var blobElems = []
-
-    // Object.values(this.state.fnStampElems).map(stamp => fnElems.push(stamp.elem));
-    // Object.values(this.state.fnStampElems).map(stamp => blobElems.push(stamp.elem));
 
 
 
@@ -1506,7 +1354,6 @@ var name = this.getFirstLine(stampRef.state.code);
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
-          addBlobStamp={this.addBlobStamp.bind(this)}
           addFnStamp={this.addFnStamp.bind(this)}
           disablePan={this.disablePan.bind(this)}
           disableZoom={this.disableZoom.bind(this)}

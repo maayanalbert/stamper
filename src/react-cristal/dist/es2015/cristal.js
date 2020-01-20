@@ -624,8 +624,8 @@ background:color,
 
       var makeBigIcon = createIcon(this, 
         CodeSizeIcon, 
-        !_a.showMakeBig, "mouseOnBig",
-         _a.onMakeBig,
+        !_a.showCodeSize, "mouseOnBig",
+         _a.onCodeSize,
          "toggle text size" )
 
       var sideButtons = (

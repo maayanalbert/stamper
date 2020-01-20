@@ -35,7 +35,7 @@ export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
     var starterEditorWidth = this.props.starterEditorWidth;
-    if (this.props.isImg || this.props.isBlob) {
+    if (this.props.isImg) {
       starterEditorWidth = 0;
     }
     var starterArgs = this.props.starterArgs;
@@ -48,13 +48,20 @@ export default class FunctionStamp extends Component {
       starterName = ""
     }
 
+    var starterIframeWidth = this.props.starterIframeWidth
+    var starterIframeHeight = this.props.starterIframeHeight
+    if(this.props.isFile || this.props.isBlob){
+      starterIframeWidth = 0
+      starterIframeHeight = 0
+    }
+
     this.state = {
       code: this.props.starterCode,
       name: starterName,
       args: starterArgs,
       iframeDisabled: this.props.iframeDisabled,
-      iframeWidth: this.props.starterIframeWidth,
-      iframeHeight: this.props.starterIframeHeight,
+      iframeWidth: starterIframeWidth,
+      iframeHeight: starterIframeHeight,
       editorHeight: this.props.starterEditorHeight,
       editorWidth: starterEditorWidth,
       isSpecialFn: false,
@@ -70,7 +77,8 @@ export default class FunctionStamp extends Component {
       looping: false,
       loopingTransition: "",
       zIndex: -1,
-      exportableCode:""
+      exportableCode:"",
+      codeSize:this.props.starterCodeSize
     };
 
     this.cristalRef = React.createRef();
@@ -129,6 +137,7 @@ export default class FunctionStamp extends Component {
   }
 
   clearErrorsAndUpdate(newErrors = []) {
+
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 
@@ -241,7 +250,7 @@ export default class FunctionStamp extends Component {
           this.setEditorScrolling(false);
         }}
       >
-        <br />
+        <br hidden={this.props.isBlob}/>
         <AceEditor
           markers={markers}
           style={{
@@ -257,7 +266,7 @@ export default class FunctionStamp extends Component {
             ipc && ipc.send("edited");
           }}
           name={"name" + this.props.id.toString()}
-          fontSize={globals.codeSize}
+          fontSize={this.state.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
           showGutter={false}
@@ -291,9 +300,6 @@ export default class FunctionStamp extends Component {
 
   renderFunctionName() {
 
-    if(this.props.isBlob){
-      return null
-    }
     var displayName = "";
     if (this.state.name != this.props.starterName) {
       var displayName = this.state.Name;
@@ -355,7 +361,7 @@ export default class FunctionStamp extends Component {
     }
 
     return (
-      <div hidden={this.props.isFile}>
+      <div>
         <div
           hidden={!this.state.resizingIframe}
           style={{
@@ -519,7 +525,8 @@ onMouseOver={this.compileCallback.bind(this)}
       hidden: this.state.hidden,
       exported: true,
       zIndex: this.state.zIndex,
-      isBlob:this.props.isBlob
+      isBlob:this.props.isBlob,
+      codeSize:this.state.codeSize
     };
 
     return data;
@@ -591,9 +598,11 @@ onMouseOver={this.compileCallback.bind(this)}
       iframeWidth = 0;
     }
 
-    var initialHeight = this.state.editorHeight + 150;
+    var initialHeight = this.state.editorHeight + globals.fnTitleHeight + 60;
     if (this.props.isImg) {
-      initialHeight = this.state.iframeHeight + 125;
+      initialHeight = this.state.iframeHeight + globals.fnTitleHeight + 35;
+    }else if(this.props.isBlob){
+      initialHeight = this.state.editorHeight + 60
     }
 
     return (
@@ -632,10 +641,21 @@ onMouseOver={this.compileCallback.bind(this)}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
           parentID={this.props.id}
+          showCodeSize={this.props.isBlob}
+          onCodeSize ={() => {
+            console.log(this.state.codeSize)
+            console.log(globals.codeSize)
+            if(this.state.codeSize === globals.codeSize){
+              this.setState({codeSize:globals.bigCodeSize})
+            }else{
+              this.setState({codeSize:globals.codeSize})
+            }
+          }}
         >
           <div onMouseLeave={this.compileCallback.bind(this)}>
             <div
               class={headerColor}
+              hidden={this.props.isBlob}
               style={{
                 position: "absolute",
                 top: globals.headerHeight,
@@ -649,9 +669,11 @@ onMouseOver={this.compileCallback.bind(this)}
             </div>
 
             <div class="p-2">
+              <div hidden={this.props.isBlob}>
               {this.renderFunctionName()}
+              </div>
 
-              <div class="row m-0 ">
+              <div class="row m-0">
                 {this.renderEditor()}
 
                 {this.renderIframe()}
