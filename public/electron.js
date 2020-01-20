@@ -140,7 +140,7 @@ function setMenu() {
         accelerator: "Cmd+O"
       },
       {
-        label: "Load example...",
+        label: "Open example...",
         submenu:worldButtons
       },
       { type: "separator" },
