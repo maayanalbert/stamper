@@ -3,7 +3,7 @@ import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
 import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
-import FunctionStamp from "./FunctionStamp.js";
+import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
@@ -46,8 +46,8 @@ export default class View extends Component {
     super(props);
     this.state = {
       compiledBefore: false,
-      fnStampRefs: {},
-      fnStampElems:{},
+      stampRefs: {},
+      stampElems:{},
       scale: 1,
       counter: 0,
       htmlID: -1,
@@ -266,7 +266,7 @@ export default class View extends Component {
 
   recompileIfEnoughStamps(numFns) {
     if (
-      Object.keys(this.state.fnStampRefs).length === numFns
+      Object.keys(this.state.stampRefs).length === numFns
     ) {
       this.requestCompile();
     }
@@ -275,9 +275,9 @@ export default class View extends Component {
   loadStamperObject(stamperObject) {
     this.setState(
       {
-        fnStampRefs: {},
+        stampRefs: {},
     
-        fnStampElems:{},
+        stampElems:{},
   
         counter: 0,
         htmlID: -1,
@@ -298,10 +298,10 @@ export default class View extends Component {
           () => {
             var callback = () =>
               this.recompileIfEnoughStamps(
-                stamperObject.fns.length
+                stamperObject.stamps.length
               );
             this.addConsoleStamp(stamperObject.console);
-            stamperObject.fns.map(data => this.addFnStamp(data, callback));
+            stamperObject.stamps.map(data => this.addStamp(data, callback));
           }
         );
       }
@@ -359,7 +359,7 @@ function logToConsole(message, lineno){
   }
 
   replaceFileStamps(parser) {
-    Object.values(this.state.fnStampRefs).map(item => {
+    Object.values(this.state.stampRefs).map(item => {
       if (item.current.props.isFile) {
         var name = item.current.state.name;
         var code = item.current.state.code;
@@ -381,7 +381,7 @@ function logToConsole(message, lineno){
   }
 
   loadAssets(runnableCode) {
-    Object.values(this.state.fnStampRefs).map(item => {
+    Object.values(this.state.stampRefs).map(item => {
       var name = item.current.state.name;
       var code = item.current.state.code;
       if (item.current.props.isFile || item.current.props.isImg) {
@@ -396,7 +396,7 @@ function logToConsole(message, lineno){
   }
 
   getHTML(id) {
-    if (this.state.htmlID in this.state.fnStampRefs === false) {
+    if (this.state.htmlID in this.state.stampRefs === false) {
       return "";
     }
 
@@ -409,7 +409,7 @@ function logToConsole(message, lineno){
       var ranges = codeData.ranges;
     }
 
-    var htmlStamp = this.state.fnStampRefs[this.state.htmlID];
+    var htmlStamp = this.state.stampRefs[this.state.htmlID];
 
     var html = htmlStamp.current.state.code;
 
@@ -430,7 +430,7 @@ function logToConsole(message, lineno){
       this.state.consoleStamp.ref.current.logToConsole(
         `Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`
       );
-      this.state.fnStampRefs[this.state.htmlID].current.addErrorLine(-1);
+      this.state.stampRefs[this.state.htmlID].current.addErrorLine(-1);
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
       this.setState({ htmlAsksForJs: htmlAsksForJs });
@@ -464,8 +464,8 @@ function logToConsole(message, lineno){
   }
 
   addErrorLine(lineNum, id) {
-    if (id in this.state.fnStampRefs) {
-      this.state.fnStampRefs[id].current.addErrorLine(lineNum);
+    if (id in this.state.stampRefs) {
+      this.state.stampRefs[id].current.addErrorLine(lineNum);
     }
   }
 
@@ -540,7 +540,7 @@ function logToConsole(message, lineno){
     this.setState({ consoleStamp: consoleStamp, consoleId: stampID });
   }
 
-  addFnStamp(
+  addStamp(
     data,
     callback,
     updateName = false,
@@ -579,7 +579,7 @@ function logToConsole(message, lineno){
       data.y += globals.copyOffset * 2 * this.state.scale;
     }
 
-    var newName = data.name + (this.state.counter + 1).toString();
+    var newName = data.name + "Copy"
 
     if (updateName) {
       data.name = newName;
@@ -587,12 +587,12 @@ function logToConsole(message, lineno){
 
     data.iframeDisabled = setIframeDisabled;
 
-    this.createFnStamp(data, callback);
+    this.createStamp(data, callback);
 
-    return newName;
+
   }
 
-  async createFnStamp(data, callback = () => null) {
+  async createStamp(data, callback = () => null) {
     var name = data.name,
       code = data.code,
       args = data.args,
@@ -613,15 +613,14 @@ function logToConsole(message, lineno){
     var counter = this.state.counter;
     this.setState({ counter: counter + 1 }, () => release());
 
-    var fnStampRefs = Object.assign({}, this.state.fnStampRefs);
-    var fnStampElems = Object.assign({}, this.state.fnStampElems);
+    var stampRefs = Object.assign({}, this.state.stampRefs);
+    var stampElems = Object.assign({}, this.state.stampElems);
     var ref = React.createRef();
 
     var stampID = counter.toString();
-    console.log(data.codeSize)
 
     var elem = (
-      <FunctionStamp
+      <Stamp
         ref={ref}
         isHtml={isHtml}
         isFile={isFile}
@@ -642,7 +641,7 @@ function logToConsole(message, lineno){
         initialHidden={hidden}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
-        addStamp={this.addFnStamp.bind(this)}
+        addStamp={this.addStamp.bind(this)}
         onDelete={this.onDelete.bind(this)}
         starterIframeWidth={iframeWidth}
         starterIframeHeight={iframeHeight}
@@ -656,13 +655,13 @@ function logToConsole(message, lineno){
       />
     );
 
-    fnStampRefs[stampID] = ref;
-    fnStampElems[stampID] = elem
+    stampRefs[stampID] = ref;
+    stampElems[stampID] = elem
 
     this.setState(
       {
-        fnStampRefs: fnStampRefs,
-        fnStampElems:fnStampElems
+        stampRefs: stampRefs,
+        stampElems:stampElems
 
       },
           counter => callback(stampID)
@@ -683,11 +682,11 @@ function logToConsole(message, lineno){
 
   checkForSetup() {
     var newSetupExists = false;
-    var fnStampRefs = Object.values(this.state.fnStampRefs);
-    for (var i = 0; i < fnStampRefs.length; i++) {
-      var fnStampRef = fnStampRefs[i].current;
+    var stampRefs = Object.values(this.state.stampRefs);
+    for (var i = 0; i < stampRefs.length; i++) {
+      var stampRef = stampRefs[i].current;
 
-      if (fnStampRef.state.name === "setup") {
+      if (stampRef.state.name === "setup") {
         newSetupExists = true;
       }
     }
@@ -713,7 +712,7 @@ function logToConsole(message, lineno){
 
     fileDict["stamper.js"] = {content:stamperHeader + JSON.stringify(stamperObject), type:"text"}
 
-    Object.values(this.state.fnStampRefs).map(item => {
+    Object.values(this.state.stampRefs).map(item => {
       var code = item.current.state.code
       var name = item.current.state.name
       if(item.current.props.isFile || item.current.props.isHtml){
@@ -748,7 +747,7 @@ function logToConsole(message, lineno){
 
     // this.recursiveCompileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
 
-    Object.values(this.state.fnStampRefs).map(stamp => {
+    Object.values(this.state.stampRefs).map(stamp => {
       var stampRef = stamp.current;
       if (stampRef) {
         var newErrors = [];
@@ -772,8 +771,8 @@ function logToConsole(message, lineno){
       seen[id] = "";
     }
 
-    if (id in this.state.fnStampRefs) {
-      var stampRef = this.state.fnStampRefs[id].current;
+    if (id in this.state.stampRefs) {
+      var stampRef = this.state.stampRefs[id].current;
     } else {
       return;
     }
@@ -814,7 +813,7 @@ function logToConsole(message, lineno){
 
   checkAllNames() {
     var nameDict = {};
-    Object.values(this.state.fnStampRefs).map(stamp => {
+    Object.values(this.state.stampRefs).map(stamp => {
       if(stamp.current.props.isBlob){return}
       if (stamp.current) {
         var name = stamp.current.state.name;
@@ -825,7 +824,7 @@ function logToConsole(message, lineno){
       }
     });
     var duplicateNamedStamps = {};
-    Object.values(this.state.fnStampRefs).map(stamp => {
+    Object.values(this.state.stampRefs).map(stamp => {
       if(stamp.current.props.isBlob){return}
       if (stamp.current) {
         var stampRef = stamp.current;
@@ -850,7 +849,7 @@ function logToConsole(message, lineno){
     var code;
 
 
-    Object.values(this.state.fnStampRefs).map(stamp => {
+    Object.values(this.state.stampRefs).map(stamp => {
       if(stamp.current.props.isFile  ||
         stamp.current.props.isHtml ||
         stamp.current.props.isImg ){
@@ -951,8 +950,8 @@ function logToConsole(message, lineno){
     //   }
     // });
 
-    Object.keys(this.state.fnStampRefs).map(id => {
-      var stampRef = this.state.fnStampRefs[id].current;
+    Object.keys(this.state.stampRefs).map(id => {
+      var stampRef = this.state.stampRefs[id].current;
 
       if (stampRef.state.name === "setup") {
         setupID = id;
@@ -981,7 +980,7 @@ function logToConsole(message, lineno){
       }
     });
 
-    // Object.keys(this.state.fnStampRefs).map(id => {
+    // Object.keys(this.state.stampRefs).map(id => {
     //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
     //     lineData.push([id, setupID]);
     //     if (setupID in traversalGraph === false) {
@@ -993,7 +992,7 @@ function logToConsole(message, lineno){
 
     this.setState({ lineData: lineData }, () => this.setLines());
 
-    // Object.keys(this.state.fnStampRefs).map(id => {
+    // Object.keys(this.state.stampRefs).map(id => {
     //   if (id != this.state.htmlID && id != this.state.cssID) {
     //     if (this.state.htmlID in traversalGraph === false) {
     //       traversalGraph[this.state.htmlID] = [];
@@ -1014,14 +1013,14 @@ function logToConsole(message, lineno){
     var code;
 
 
-    Object.values(this.state.fnStampRefs).map(stamp => {
+    Object.values(this.state.stampRefs).map(stamp => {
       if (
         stamp.current.state.name != "draw" &&
         stamp.current.props.isFile === false &&
         stamp.current.props.isImg === false &&
         stamp.current.props.isHtml === false &&
         (this.isListener(stamp.current.state.name) === false ||
-          this.isListener(this.state.fnStampRefs[id].current.state.name) ===
+          this.isListener(this.state.stampRefs[id].current.state.name) ===
             false)
       ) {
         var state = stamp.current.state;
@@ -1052,19 +1051,19 @@ function logToConsole(message, lineno){
     });
 
     if (
-      id in this.state.fnStampRefs == false ||
-      this.state.fnStampRefs[id].current === null
+      id in this.state.stampRefs == false ||
+      this.state.stampRefs[id].current === null
     ) {
       return runnableCode.join("");
     }
 
-    var fnStampRef = this.state.fnStampRefs[id].current;
-    var state = fnStampRef.state;
+    var stampRef = this.state.stampRefs[id].current;
+    var state = stampRef.state;
     if (state.name === "draw" || this.isListener(state.name)) {
       var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
       curLine = this.addCodeBlock(
         fullFun,
-        fnStampRef.props.id,
+        stampRef.props.id,
         runnableCode,
         ranges,
         curLine,
@@ -1142,12 +1141,12 @@ _stopLooping =setTimeout(() => {
   onDelete(id) {
     ipc && ipc.send("edited");
 
-    if(id in this.state.fnStampRefs){
-      var fnStampRefs = Object.assign({}, this.state.fnStampRefs);
-      var fnStampElems = Object.assign({}, this.state.fnStampElems);
-      delete fnStampRefs[id]
-      fnStampElems[id] = (<span hidden={true}/>)
-      this.setState({fnStampRefs:fnStampRefs, fnStampElems:fnStampElems}, () => 
+    if(id in this.state.stampRefs){
+      var stampRefs = Object.assign({}, this.state.stampRefs);
+      var stampElems = Object.assign({}, this.state.stampElems);
+      delete stampRefs[id]
+      stampElems[id] = (<span hidden={true}/>)
+      this.setState({stampRefs:stampRefs, stampElems:stampElems}, () => 
         this.requestCompile(id))
     }
 
@@ -1160,16 +1159,16 @@ _stopLooping =setTimeout(() => {
 
   getStamperObject(id) {
     var data = {
-      fns: [],
+      stamps: [],
       scale: this.state.scale,
       console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
       originY: this.state.originY
     };
-    Object.keys(this.state.fnStampRefs).map(stampID => {
+    Object.keys(this.state.stampRefs).map(stampID => {
       if (stampID != id) {
-        var stamp = this.state.fnStampRefs[stampID];
-        data.fns.push(stamp.current.getData());
+        var stamp = this.state.stampRefs[stampID];
+        data.stamps.push(stamp.current.getData());
       }
     });
 
@@ -1180,11 +1179,11 @@ _stopLooping =setTimeout(() => {
 
 
   onStartMove() {
-    var fnStampRefs = this.state.fnStampRefs;
-    for (var i in fnStampRefs) {
-      var fnStamp = fnStampRefs[i].current;
+    var stampRefs = this.state.stampRefs;
+    for (var i in stampRefs) {
+      var stamp = stampRefs[i].current;
 
-      fnStamp.setIframeDisabled(true);
+      stamp.setIframeDisabled(true);
     }
 
     this.setState({ lines: [] });
@@ -1192,10 +1191,10 @@ _stopLooping =setTimeout(() => {
 
   onStopMove(s) {
     this.setState({ mouseWheelTimeout: null });
-    var fnStampRefs = this.state.fnStampRefs;
-    for (var i in fnStampRefs) {
-      var fnStamp = fnStampRefs[i].current;
-      fnStamp.setIframeDisabled(false);
+    var stampRefs = this.state.stampRefs;
+    for (var i in stampRefs) {
+      var stamp = stampRefs[i].current;
+      stamp.setIframeDisabled(false);
     }
 
     this.setLines();
@@ -1204,8 +1203,8 @@ _stopLooping =setTimeout(() => {
   centerOnStamp(id, xOff, yOff) {
     var stampRef;
 
-    if (id in this.state.fnStampRefs) {
-      stampRef = this.state.fnStampRefs[id].current;
+    if (id in this.state.stampRefs) {
+      stampRef = this.state.stampRefs[id].current;
     } else if (
       this.state.consoleStamp.ref.current &&
       id === this.state.consoleStamp.ref.current.props.id
@@ -1289,9 +1288,9 @@ _stopLooping =setTimeout(() => {
       });
     }
 
-    Object.keys(this.state.fnStampRefs).map(id => {
-      if (id in this.state.fnStampRefs) {
-        var stampRef = this.state.fnStampRefs[id].current;
+    Object.keys(this.state.stampRefs).map(id => {
+      if (id in this.state.stampRefs) {
+        var stampRef = this.state.stampRefs[id].current;
         if (!stampRef) {
           return;
         }
@@ -1319,7 +1318,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
   getNumStamps() {
     return {
-      fns: Object.keys(this.state.fnStampRefs).length
+      stamps: Object.keys(this.state.stampRefs).length
     };
   }
 
@@ -1345,7 +1344,7 @@ var name = this.getFirstLine(stampRef.state.code);
               transform: "scale(" + this.state.scale + ")"
             }}
           >
-            {Object.values(this.state.fnStampElems)}
+            {Object.values(this.state.stampElems)}
             {consoleElem}
           </div>
         </div>
@@ -1354,7 +1353,7 @@ var name = this.getFirstLine(stampRef.state.code);
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
-          addFnStamp={this.addFnStamp.bind(this)}
+          addStamp={this.addStamp.bind(this)}
           disablePan={this.disablePan.bind(this)}
           disableZoom={this.disableZoom.bind(this)}
           loadStamperObject={this.loadStamperObject.bind(this)}
@@ -1371,7 +1370,7 @@ var name = this.getFirstLine(stampRef.state.code);
           loadStamperObject={this.loadStamperObject.bind(this)}
           getStamperObject={this.getStamperObject.bind(this)}
           getFileDict={this.getFileDict.bind(this)}
-          addFnStamp={this.addFnStamp.bind(this)}
+          addStamp={this.addStamp.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
         />
       </div>

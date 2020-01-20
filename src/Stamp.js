@@ -11,6 +11,7 @@ import HtmlStampIcon from "./icons/layout.svg";
 import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 import ImageStampIcon from "./icons/image.svg";
+import BlobStampIcon from "./icons/code.svg";
 
 import "./theme-p5.js";
 
@@ -504,7 +505,7 @@ onMouseOver={this.compileCallback.bind(this)}
       setIframeDisabled
     );
     if (isOpt) {
-      this.setState({ name: newName }, () => this.checkName());
+      this.setState({ name: this.state.name + "Copy" }, () => this.checkName());
     }
   }
 
@@ -552,6 +553,8 @@ onMouseOver={this.compileCallback.bind(this)}
     var icon = FunctionStampIcon;
     if (this.props.isHtml) {
       icon = HtmlStampIcon;
+    } else if(this.props.isBlob){
+      icon = BlobStampIcon
     } else if (this.props.isFile) {
       icon = FileStampIcon;
     } else if (this.props.isImg) {

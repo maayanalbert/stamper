@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./globals.js";
-import FunctionStamp from "./FunctionStamp.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 
 import { Mutex } from "async-mutex";
@@ -187,12 +186,12 @@ function noiseWave() {
         console.log(curNumStamps);
 
         this.props.recompileIfEnoughStamps(
-          stamps.fns.length + curNumStamps.fns
+          stamps.stamps.length + curNumStamps.stamps
         );
       };
 
-      stamps.fns.map(data => {
-        this.props.addFnStamp(data, callback);
+      stamps.stamps.map(data => {
+        this.props.addStamp(data, callback);
       });
 
 
@@ -515,61 +514,56 @@ function noiseWave() {
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addFnStamp(normalFn, id =>
+              this.props.addStamp(normalFn, id =>
                 this.props.requestCompile(id)
               )
             }
             dropDownData={builtInFns.map(data => ({
               name: data.name,
+              icon: BuiltInStampIcon,
               callback: () =>
-                this.props.addFnStamp(data, id => this.props.requestCompile(id))
-            }))}
+                this.props.addStamp(data, id => this.props.requestCompile(id))
+            })).concat([{}]).concat(listenerFns.map(data => ({
+              name: data.name,
+              icon: ListenerStampIcon,
+              callback: () =>
+                this.props.addStamp(data, id => this.props.requestCompile(id))
+            })))
+
+
+
+          }
             tooltipText="function"
           />
           <span style={{ width: this.spanWidth }} />
 
-          <TopButton
-            iconType={ListenerStampIcon}
-            uniqueClass="listenerFns"
-            iconCallback={null}
-            dropDownData={listenerFns.map(data => ({
-              name: data.name,
-              callback: () =>
-                this.props.addFnStamp(data, id => this.props.requestCompile(id))
-            }))}
-            tooltipText="listener"
-          />
-
-          <span style={{ width: this.spanWidth }} />
-
+          
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addFnStamp(varBlob, id =>
+              this.props.addStamp(varBlob, id =>
                 this.props.requestCompile(id)
               )
             }
-            tooltipText="global variable"
+            dropDownData={[
+              {name: "global variable", icon:BlobStampIcon, 
+              callback: () =>
+                this.props.addStamp(varBlob, id => this.props.requestCompile(id))            
+            },              {name: "comment", icon:BlobStampIcon, 
+              callback: () =>
+                this.props.addStamp(commentBlob, id => this.props.requestCompile(id))            
+            }
+            ]}
+            tooltipText="code block"
           />
           <span style={{ width: this.spanWidth }} />
-          <TopButton
-            iconType={BlobStampIcon}
-            uniqueClass="commentStamp"
-            iconCallback={() =>
-              this.props.addFnStamp(commentBlob, id =>
-                this.props.requestCompile(id)
-              )
-            }
-            tooltipText="comment"
-          />
 
-          <span style={{ width: this.spanWidth }} />
           <TopButton
             iconType={FileStampIcon}
             uniqueClass="fileStamp"
             iconCallback={() =>
-              this.props.addFnStamp(sampleFile, id =>
+              this.props.addStamp(sampleFile, id =>
                 this.props.requestCompile(id)
               )
             }
@@ -634,7 +628,7 @@ class TopButton extends Component {
     document.removeEventListener("mousedown", this.onMouseDown);
   }
 
-  createIcon(iconType, callback, givenUniqueClass, size) {
+  createIcon(iconType, callback, givenUniqueClass, size, dropDownIcon = false) {
     var uniqueClass = givenUniqueClass;
     var mouseOverCallback = () => {
 // $(".tooltip" + givenUniqueClass).addClass("text-black")
@@ -664,9 +658,14 @@ class TopButton extends Component {
       );
     };
 
-    if (!callback) {
+    if (!callback && dropDownIcon === false) {
       callback = () => this.setState({ down: !this.state.down });
       uniqueClass += "expand";
+    }
+
+    if(dropDownIcon){
+      mouseOverCallback = () => null
+      mouseOutCallback = () => null
     }
 
     return React.createElement("img", {
@@ -688,7 +687,7 @@ class TopButton extends Component {
       <div
         class={
           this.props.uniqueClass +
-          data.name +
+          data.name.replace(" ", "_") +
           " picker text-greyText p-2 pl-3 pr-3"
         }
         onMouseOver={() => {
@@ -696,7 +695,7 @@ class TopButton extends Component {
             return;
           }
           this.setState({ mouseOverDropDown: true });
-          $("." + this.props.uniqueClass + data.name).css({
+          $("." + this.props.uniqueClass + data.name.replace(" ", "_")).css({
             background: "rgb(240, 240, 240)"
           });
         }}
@@ -705,7 +704,7 @@ class TopButton extends Component {
             return;
           }
           this.setState({ mouseOverDropDown: false });
-          $("." + this.props.uniqueClass + data.name).css({
+          $("." + this.props.uniqueClass + data.name.replace(" ", "_")).css({
             background: "transparent"
           });
         }}
@@ -717,7 +716,11 @@ class TopButton extends Component {
           this.setState({ down: false });
         }}
       >
+        <a className="mr-2" hidden={!data.name || !data.icon}>
+        {this.createIcon(data.icon, undefined, "dropDown", 12, true)}
+        </a>
         {data.name}
+        
       </div>
     ));
 
@@ -727,7 +730,7 @@ class TopButton extends Component {
     }
     return (
       <div
-        class="bg-white border border-borderGrey rounded mt-2"
+        class="bg-white border border-borderGrey rounded mt-2 justify-content-left"
         style={{ position: "absolute", right: right }}
       >
         {dropDowns}

@@ -40,7 +40,7 @@ export default class ConsoleStamp extends Component {
      if(e.data.type != "error"){
         return
       }
-      console.log(e.data)
+
       this.logToConsole(e.data.message);
 
       var lineNum = e.data.lineno;
