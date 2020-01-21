@@ -275,6 +275,7 @@ export default class View extends Component {
   }
 
   loadStamperObject(stamperObject) {
+
     this.setState(
       {
         stampRefs: {},
@@ -300,16 +301,57 @@ export default class View extends Component {
             originY: stamperObject.originY
           },
           () => {
-            var callback = () =>
+
+
+
+            var callback = () => 
               this.recompileIfEnoughStamps(
                 stamperObject.stamps.length
               );
             this.addConsoleStamp(stamperObject.console);
-            stamperObject.stamps.map(data => this.addStamp(data, callback));
+            this.addManyStamps(stamperObject.stamps, callback)
+
+         
           }
         );
       }
     );
+  }
+
+  addManyStamps(datas, callback){
+            var xPos = this.setInitialPosition("x")
+            var yPos = this.setInitialPosition("y")
+            var xPosBlob = xPos + 700
+            var yPosBlob = yPos
+
+            var xPosFile = xPos + 1200
+            var yPosFile = yPos
+datas.map(data => 
+            {
+
+              if(!data.x && !data.y){
+
+                if(data.isBlob){
+              data.x = xPosBlob
+              data.y = yPosBlob
+              xPosBlob += globals.copyOffset * 3
+              yPosBlob += globals.copyOffset * 3
+                }else if(data.isImg || data.isHtml || data.isFile){
+              data.x = xPosFile
+              data.y = yPosFile
+              xPosFile += globals.copyOffset * 3
+              yPosFile += globals.copyOffset * 3
+                }else{
+              data.x = xPos
+              data.y = yPos
+              xPos += globals.copyOffset * 3
+              yPos += globals.copyOffset * 3
+                }
+              }
+
+              this.addStamp(data, callback)
+            })
+
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -558,6 +600,7 @@ function logToConsole(message, lineno){
     data,
     callback = () => null,
   ) {
+
 
     var defaults = {
       name: "sketch",
@@ -928,7 +971,7 @@ callback(id)
 
 
       if(stamp.current.props.isBlob){
-        var code = stamp.current.state.code;
+        var code = "\n" + stamp.current.state.code + "\n";
             curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
@@ -1453,6 +1496,7 @@ var name = this.getFirstLine(stampRef.state.code);
         </div>
 
         <ControlBar
+        addManyStamps = {this.addManyStamps.bind(this)}
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}

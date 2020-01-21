@@ -10,7 +10,7 @@ export const globals = {
   buttonTextSize: 12,
   bigCodeSize:28,
   fnTitleHeight: 90,
-  copyOffset: 17,
+  copyOffset: 35,
   iconOpacity:.5,
   iconSize:15,
   iconTransition: "all .3s ease",

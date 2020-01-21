@@ -33,25 +33,27 @@ function jsToStamps(rawCode) {
   }
 
   var body = _.cloneDeep(program.body);
-  insertComments(body, program.comments);
-  var stamps = { fns: [], blobs: [] };
-  fillStampArrays(body, stamps.blobs, stamps.fns, rawCode);
 
-  return stamps;
+  insertComments(body, program.comments);
+
+  var stamperObject = { stamps: [] };
+ 
+  fillStampArrays(body, stamperObject.stamps, rawCode);
+
+  return stamperObject;
 }
 
-function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
+function fillStampArrays(body, fnStamps, rawCode) {
   var lastBlobLine = 0;
-  var tempBlobStamps = [];
   for (var i = 0; i < body.length; i++) {
     var item = body[i];
     if (item.type === "FunctionDeclaration") {
       addFn(fnStamps, item, rawCode);
     } else if (item.type === "Block" || item.type === "Line") {
-      lastBlobLine = addBlob(tempBlobStamps, item, rawCode, lastBlobLine, true);
+      lastBlobLine = addBlob(fnStamps, item, rawCode, lastBlobLine, true);
     } else {
       lastBlobLine = addBlob(
-        tempBlobStamps,
+        fnStamps,
         item,
         rawCode,
         lastBlobLine,
@@ -60,12 +62,12 @@ function fillStampArrays(body, blobStamps, fnStamps, rawCode) {
     }
   }
 
-  for (var i = 0; i < tempBlobStamps.length; i++) {
-    var blobStamp = tempBlobStamps[i];
-    if (blobStamp.code != "") {
-      blobStamps.push(blobStamp);
-    }
-  }
+  // for (var i = 0; i < tempBlobStamps.length; i++) {
+  //   var blobStamp = tempBlobStamps[i];
+  //   if (blobStamp.code != "") {
+  //     blobStamps.push(blobStamp);
+  //   }
+  // }
 }
 
 function insertComments(body, comments) {
@@ -92,7 +94,7 @@ function getPos(body, comment) {
   return body.length;
 }
 
-function addBlob(blobStamps, item, rawCode, lastBlobLine, isComment) {
+function addBlob(stamps, item, rawCode, lastBlobLine, isComment) {
   if (isComment) {
     if ((item.type === "Block")) {
       var code = "/*" + item.value + "*/";
@@ -103,20 +105,44 @@ function addBlob(blobStamps, item, rawCode, lastBlobLine, isComment) {
     var code = rawCode.substr(item.range[0], item.range[1] - item.range[0]);
   }
 
-  if (blobStamps.length === 0) {
-    blobStamps.push({ code: "" });
-  }
 
-  var lastStamp = blobStamps[blobStamps.length - 1];
+var lineDiff = item.loc.start.line - lastBlobLine;
 
-  var lineDiff = item.loc.start.line - lastBlobLine;
-  if (lineDiff == 0) {
+  if(stamps.length === 0){
+    stamps.push({ code: code, isBlob:true });    
+  }else if(!stamps[stamps.length - 1].isBlob){
+    stamps.push({ code: code, isBlob:true });   
+  }else if(lineDiff > 1){
+    stamps.push({ code: code, isBlob:true });
+  }else if(lineDiff === 0){
+    var lastStamp = stamps[stamps.length - 1];
     lastStamp.code += code;
-  } else if (lineDiff === 1) {
+  }else if(lineDiff === 1){
+    var lastStamp = stamps[stamps.length - 1];
     lastStamp.code += "\n" + code;
-  } else {
-    blobStamps.push({ code: code });
   }
+
+
+
+
+
+  // if (stamps.length === 0) {
+  //   stamps.push({ code: "", isBlob:true });
+  // }
+
+  // var lastStamp = stamps[stamps.length - 1];
+  // if(lastStamp.isBlob === false){
+
+  // }
+
+  // var lineDiff = item.loc.start.line - lastBlobLine;
+  // if (lineDiff == 0) {
+  //   lastStamp.code += code;
+  // } else if (lineDiff === 1) {
+  //   lastStamp.code += "\n" + code;
+  // } else {
+  //   stamps.push({ code: code, isBlob:true });
+  // }
 
   return item.loc.end.line;
 }

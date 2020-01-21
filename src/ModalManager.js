@@ -452,7 +452,7 @@ export default class ModalManager extends Component {
     }
 
     newStamperObject.console = { hidden: true };
-    newStamperObject.scale = 1;
+    newStamperObject.scale = .7;
     newStamperObject.originX = 0;
     newStamperObject.originY = 0;
     newStamperObject.imgs = [];
@@ -511,6 +511,7 @@ export default class ModalManager extends Component {
         stamperObject
       );
     } catch (e) {
+      console.log(e)
       this.setState({
         modalVisible: true,
         modalHeader:

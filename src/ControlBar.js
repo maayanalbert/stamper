@@ -181,24 +181,25 @@ function noiseWave() {
 
   parseCode() {
     try {
-      var stamps = parser.jsToStamps(this.state.code);
+      var stamperObject = parser.jsToStamps(this.state.code);
       var curNumStamps = this.props.getNumStamps();
 
       var callback = () => {
    
 
         this.props.recompileIfEnoughStamps(
-          stamps.stamps.length + curNumStamps.stamps
+          stamperObject.stamps.length + curNumStamps.stamps
         );
       };
 
-      stamps.stamps.map(data => {
-        this.props.addStamp(data, callback);
-      });
+
+        this.props.addManyStamps(stamperObject.stamps, callback);
+
 
 
       this.setState({ code: "" });
     } catch (e) {
+      console.log(e)
       this.setState({ codeHasError: true });
     }
   }
@@ -751,11 +752,19 @@ class TopButton extends Component {
       return null;
     }
 
-    var dropDowns = this.props.dropDownData.map(data => (
+
+
+    var dropDowns = this.props.dropDownData.map(data => {
+
+          var oneWordName = ""
+    if(data.name){
+      oneWordName = data.name.replace(" ", "-")
+    }
+      return (
       <div
         class={
           this.props.uniqueClass +
-          data.name.replace(" ", "_") +
+          oneWordName +
           " picker text-greyText p-2 pl-3 pr-3"
         }
         onMouseOver={() => {
@@ -763,7 +772,7 @@ class TopButton extends Component {
             return;
           }
           this.setState({ mouseOverDropDown: true });
-          $("." + this.props.uniqueClass + data.name.replace(" ", "_")).css({
+          $("." + this.props.uniqueClass + oneWordName).css({
             background: "rgb(240, 240, 240)"
           });
         }}
@@ -772,7 +781,7 @@ class TopButton extends Component {
             return;
           }
           this.setState({ mouseOverDropDown: false });
-          $("." + this.props.uniqueClass + data.name.replace(" ", "_")).css({
+          $("." + this.props.uniqueClass + oneWordName).css({
             background: "transparent"
           });
         }}
@@ -790,7 +799,10 @@ class TopButton extends Component {
         {data.name}
         
       </div>
-    ));
+    )
+
+
+    });
 
     var right = "default";
     if (this.props.alignRight) {

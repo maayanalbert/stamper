@@ -488,12 +488,19 @@ onMouseOver={this.compileCallback.bind(this)}
     if(isOpt){
             data.iframeDisabled = true
     }else{
-      data.x += globals.copyOffset * 2 * this.state.scale;
-      data.y += globals.copyOffset * 2 * this.state.scale;
+      data.x += globals.copyOffset;
+      data.y += globals.copyOffset;
     }
 
 
     var callback = id => this.props.requestCompile(id);
+    if(isOpt){
+      callback = id => {
+        this.props.requestCompile(id)
+        this.cristalRef.current.changeZIndex();
+
+      }
+    }
 
     var newName = this.props.addStamp(
       data,
