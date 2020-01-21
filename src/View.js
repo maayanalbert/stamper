@@ -121,7 +121,7 @@ export default class View extends Component {
 
   componentDidMount() {
 
-    localStorage.clear()
+
     this.loadInitialStamperObject()
     
 
