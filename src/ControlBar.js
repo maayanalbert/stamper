@@ -39,6 +39,7 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import Modal from "react-bootstrap/Modal";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import pf1, {
   normalFn,

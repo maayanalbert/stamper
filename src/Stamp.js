@@ -477,36 +477,29 @@ onMouseOver={this.compileCallback.bind(this)}
 
     var data = this.getData();
     data.zIndex = undefined;
-
-    var updateName = false,
-      updatePosition = false,
-      setIframeDisabled = false;
-    if (isOpt) {
-      setIframeDisabled = true;
-    } else {
-      updateName = true;
-      updatePosition = true;
+    if(!this.props.isBlob){
+      if(isOpt){
+        this.setState({ name: this.state.name + "Copy" }, () => this.checkName());
+      }else{
+        data.name += "Copy"
+      }
     }
+
+    if(isOpt){
+            data.iframeDisabled = true
+    }else{
+      data.x += globals.copyOffset * 2 * this.state.scale;
+      data.y += globals.copyOffset * 2 * this.state.scale;
+    }
+
 
     var callback = id => this.props.requestCompile(id);
-    if (isOpt) {
-      callback = id => {
-        this.props.requestCompile(id);
-
-        this.cristalRef.current.changeZIndex();
-      };
-    }
 
     var newName = this.props.addStamp(
       data,
-      callback,
-      updateName,
-      updatePosition,
-      setIframeDisabled
+      callback
     );
-    if (isOpt) {
-      this.setState({ name: this.state.name + "Copy" }, () => this.checkName());
-    }
+
   }
 
   getData() {
