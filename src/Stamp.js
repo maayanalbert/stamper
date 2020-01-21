@@ -75,7 +75,7 @@ export default class FunctionStamp extends Component {
       x: this.props.initialPosition.x,
       y: this.props.initialPosition.y,
       hidden: this.props.initialHidden,
-      looping: false,
+      looping: true,
       loopingTransition: "",
       zIndex: -1,
       exportableCode:"",
@@ -101,6 +101,7 @@ export default class FunctionStamp extends Component {
   }
 
   updateLooping(e) {
+
     if (
       e.data.type != "loop" ||
       e.data.id != this.props.id ||
@@ -109,6 +110,8 @@ export default class FunctionStamp extends Component {
     ) {
       return;
     }
+
+
     if (e.data.message === "start") {
       this.setState({ looping: true, loopingTransition: "" });
     } else if (e.data.message === "stop") {

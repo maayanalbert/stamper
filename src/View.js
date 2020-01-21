@@ -94,30 +94,36 @@ export default class View extends Component {
 
   }
 
-  getInitialStamper(){
+  loadInitialStamperObject(){
     if(ipc){
-      return starter
+      this.loadStamperObject(starter)
+      return
     }
 
     var stored = localStorage.getItem('storedStamper')
 
     if(stored === null){
-      return starter
+      this.loadStamperObject(starter)
+      return
     }
 
     try{
       var stamperObject = JSON.parse(LZUTF8.decompress(stored, {
         inputEncoding: "StorageBinaryString"
       }))
-      return stamperObject
+      this.loadStamperObject(stamperObject)
+      return
     }catch(error){
-      return starter
+      this.loadStamperObject(starter)
+      return
     }
   }
 
   componentDidMount() {
-    // localStorage.clear()
-    this.loadStamperObject(this.getInitialStamper())
+
+    localStorage.clear()
+    this.loadInitialStamperObject()
+    
 
     document.addEventListener("wheel", this.onWheel);
     document.addEventListener("keydown", this.onKeyDown);
