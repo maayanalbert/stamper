@@ -134,7 +134,7 @@ export default class FunctionStamp extends Component {
   addErrorLine(lineNum) {
     var errorLines = this.state.errorLines;
     errorLines[lineNum] = "";
-    this.setState({ errorLines: errorLines });
+    this.setState({ errorLines: errorLines }, () => this.props.setLayerPicker());
   }
 
   clearErrorsAndUpdate(newErrors = []) {

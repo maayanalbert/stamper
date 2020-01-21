@@ -39,7 +39,7 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import Modal from "react-bootstrap/Modal";
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import ConsoleStampIcon from "./icons/message-circle.svg";
 
 import pf1, {
@@ -75,7 +75,7 @@ export default class ControlBar extends Component {
     this.minNonSideBarWidth = 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
-    this.spanWidth = 35
+    this.spanWidth = 35;
     this.state = {
       jsImporterHeight: 110,
       sideBarWidth: 200,
@@ -185,21 +185,16 @@ function noiseWave() {
       var curNumStamps = this.props.getNumStamps();
 
       var callback = () => {
-   
-
         this.props.recompileIfEnoughStamps(
           stamperObject.stamps.length + curNumStamps.stamps
         );
       };
 
-
-        this.props.addManyStamps(stamperObject.stamps, callback);
-
-
+      this.props.addManyStamps(stamperObject.stamps, callback);
 
       this.setState({ code: "" });
     } catch (e) {
-      console.log(e)
+      console.log(e);
       this.setState({ codeHasError: true });
     }
   }
@@ -277,128 +272,143 @@ function noiseWave() {
     );
   }
 
-  getDraggableClass(snapshot, isConsole){
-    if(snapshot.isDragging && isConsole){
-      return "border-bottom border-borderGrey bg-warningOrange"
-    }else if(snapshot.isDragging){
-      return "border border-greyText bg-white"
-    }else{
-       return "border-bottom border-borderGrey"     
+  getDraggableClass(snapshot, hasError) {
+    var className
+    if (snapshot.isDragging) {
+      className = "border border-lightGreyText";
+    } else {
+      className = "border-bottom border-borderGrey";
     }
+
+    if(hasError){
+      if(snapshot.isDragging){
+      className += " bg-warningOrange"
+      }else{
+      className = "border-bottom border-white bg-warningOrange"
+      }
+    }else{
+      className += " bg-white"
+    }
+
+    return className
   }
 
+  renderPicker(item) {
+    if (item.status) {
+      var iconType = VisibilityIcon;
+      var iconNameCallback = () =>
+        centerCallback(this.state.sideBarWidth, this.topBarHeight);
+    } else {
+      var iconType = VisibilityOffIcon;
+      var iconNameCallback = null;
+    }
 
+    var overalOpacity = 1;
+    var centerCallback = item.centerCallback;
 
+    if (item.status === false) {
+      overalOpacity = 0.5;
+      centerCallback = () => null;
+    }
 
-  renderPickers(provided, snapshot){
+    return (
+      <div
+        style={{ opacity: overalOpacity }}
+        class="d-flex justify-content-between p-1 pl-2 pr-3"
+      >
+        <div
+          clas="row border-bottom"
+          style={{ overflow: "hidden", cursor: "auto" }}
+          onClick={() =>
+            centerCallback(this.state.sideBarWidth, this.topBarHeight)
+          }
+        >
+          {this.createIcon(
+            "type" + item.id.toString(),
+            item.icon,
+            iconNameCallback,
+            item.name
+          )}
+        </div>
+        <div style={{ cursor: "auto" }}>
+          {this.createIcon(
+            "hide" + item.id.toString(),
+            iconType,
+            item.hideCallback
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderPickers(provided, snapshot) {
     var pickers = [];
     var overflowY = "hidden";
     if (this.state.pickerScrollEnabled) {
       overflowY = "scroll";
     }
 
+    this.props.pickerData.map((item, index) => {
 
+      if(item.isConsole){
+      pickers.push(
 
-
-    this.props.pickerData.map( (item, index) => {
-   
-    
-
-      if (item.status) {
-        var iconType = VisibilityIcon;
-        var iconNameCallback = () =>
-          centerCallback(this.state.sideBarWidth, this.topBarHeight);
-      } else {
-        var iconType = VisibilityOffIcon;
-        var iconNameCallback = null;
-      }
-
-      var overalOpacity = 1;
-      var centerCallback = item.centerCallback;
-
-      if (item.status === false) {
-        overalOpacity = 0.5;
-        centerCallback = () => null;
-      }
-
-      var id = item.id
-      var name = item.name
-      var icon = item.icon
-      var hideCallback = item.hideCallback
-      var isConsole = item.isConsole
-
-
-        pickers.push(
-          <Draggable draggableId={id.toString()} index={ index} >
-            {(provided, snapshot) =>( 
-
-
-              <div class={this.getDraggableClass(snapshot, isConsole)}
-            style={{transition: "border .3s ease-out"}}
-              ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-
-              >
 
             <div
-              style={{ opacity: overalOpacity }}
-              class="d-flex justify-content-between p-1 pl-2 pr-3"
+              class="border-bottom border-borderGrey bg-grey"
             >
-              <div
-                clas="row border-bottom"
-                style={{ overflow: "hidden", cursor:"auto" }}
-                onClick={() =>
-                  centerCallback(this.state.sideBarWidth, this.topBarHeight)
-                }
-              >
-                {this.createIcon(
-                  "type" + id.toString(),
-                  icon,
-                  iconNameCallback,
-                  name
-                )}
-              </div>
-              <div style={{cursor:"auto" }}>
+              {this.renderPicker(item)}
 
-              {this.createIcon(
-                "hide" + id.toString(),
-                iconType,
-                hideCallback
-              )}
-              </div>
             </div>
-       
-          </div>) }
-          </Draggable>
-        );
-
-    })
 
 
+ 
 
-    return (
-<div             className=" bg-white"
-            style={{
-              overflow: "hidden",
-              "overflow-y": overflowY,
-              width: this.state.sideBarWidth,
-              height: this.state.pickerHeight
-            }}
-ref={provided.innerRef}
- {...provided.droppableProps}>
- {pickers}
- {provided.placeholder}
-            <br />
-            <br />
- </div>
       )
 
+      }else{
+      pickers.push(
+        <Draggable draggableId={item.id.toString()} index={index}>
+          {(provided, snapshot) => (
+            <div
+              class={this.getDraggableClass(snapshot, item.hasError)}
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+            >
+              {this.renderPicker(item)}
+            </div>
+          )}
+        </Draggable>
+      )
+    }
+    
+
+
+
+    });
+
+    return (
+      <div
+        className=" bg-white"
+        style={{
+          overflow: "hidden",
+          "overflow-y": overflowY,
+          width: this.state.sideBarWidth,
+          height: this.state.pickerHeight
+        }}
+        ref={provided.innerRef}
+        {...provided.droppableProps}
+      >
+        {pickers}
+        {provided.placeholder}
+        <br />
+        <br />
+      </div>
+    );
   }
 
   renderLayerPicker() {
-
-
     return (
       <Resizable
         width={this.state.sideBarWidth}
@@ -427,24 +437,13 @@ ref={provided.innerRef}
         axis="y"
         handle={this.renderPickerResizeHandle()}
       >
-              
-          <div
-
-          >
-          <DragDropContext onDragEnd={this.props.onDragEnd}
-          >
-
-                 <Droppable droppableId="droppable"
-
-                 >
-             
-            {this.renderPickers.bind(this)}
-
-                   </Droppable>
-                      </DragDropContext>
- 
-          </div>
-
+        <div>
+          <DragDropContext onDragEnd={this.props.onDragEnd}>
+            <Droppable droppableId="droppable">
+              {this.renderPickers.bind(this)}
+            </Droppable>
+          </DragDropContext>
+        </div>
       </Resizable>
     );
   }
@@ -522,7 +521,7 @@ ref={provided.innerRef}
 
   renderPickerResizeHandle() {
     return (
-      <div
+      <span
         className="border-bottom border-borderGrey border-top bg-grey"
         style={{
           width: "100%",
@@ -531,12 +530,9 @@ ref={provided.innerRef}
           right: 0,
           bottom: 0,
           position: "absolute",
-          background: "transparent",
-          color: "transparent"
+          background: "transparent"
         }}
-      >
-        hi
-      </div>
+      />
     );
   }
 
@@ -553,11 +549,9 @@ ref={provided.innerRef}
           zIndex: 1000000000000000001
         }}
       >
-
-        <span hidden={!ipc}/>
+        <span hidden={!ipc} />
         <div class="row ml-1" hidden={ipc}>
           <TopButton
-  
             iconType={UploadIcon}
             uniqueClass="upload"
             iconCallback={() => {
@@ -568,7 +562,6 @@ ref={provided.innerRef}
           />
           <span style={{ width: 100 }} />
           <TopButton
-
             iconType={DownloadIcon}
             uniqueClass="download"
             iconCallback={() => {
@@ -583,46 +576,53 @@ ref={provided.innerRef}
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addStamp(normalFn, id =>
-                this.props.requestCompile(id)
-              )
+              this.props.addStamp(normalFn, id => this.props.requestCompile(id))
             }
-            dropDownData={builtInFns.map(data => ({
-              name: data.name,
-              icon: BuiltInStampIcon,
-              callback: () =>
-                this.props.addStamp(data, id => this.props.requestCompile(id))
-            })).concat([{}]).concat(listenerFns.map(data => ({
-              name: data.name,
-              icon: ListenerStampIcon,
-              callback: () =>
-                this.props.addStamp(data, id => this.props.requestCompile(id))
-            })))
-
-
-
-          }
+            dropDownData={builtInFns
+              .map(data => ({
+                name: data.name,
+                icon: BuiltInStampIcon,
+                callback: () =>
+                  this.props.addStamp(data, id => this.props.requestCompile(id))
+              }))
+              .concat([{}])
+              .concat(
+                listenerFns.map(data => ({
+                  name: data.name,
+                  icon: ListenerStampIcon,
+                  callback: () =>
+                    this.props.addStamp(data, id =>
+                      this.props.requestCompile(id)
+                    )
+                }))
+              )}
             tooltipText="function"
           />
           <span style={{ width: this.spanWidth }} />
 
-          
           <TopButton
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addStamp(varBlob, id =>
-                this.props.requestCompile(id)
-              )
+              this.props.addStamp(varBlob, id => this.props.requestCompile(id))
             }
             dropDownData={[
-              {name: "global variable", icon:BlobStampIcon, 
-              callback: () =>
-                this.props.addStamp(varBlob, id => this.props.requestCompile(id))            
-            },              {name: "comment", icon:BlobStampIcon, 
-              callback: () =>
-                this.props.addStamp(commentBlob, id => this.props.requestCompile(id))            
-            }
+              {
+                name: "global variable",
+                icon: BlobStampIcon,
+                callback: () =>
+                  this.props.addStamp(varBlob, id =>
+                    this.props.requestCompile(id)
+                  )
+              },
+              {
+                name: "comment",
+                icon: BlobStampIcon,
+                callback: () =>
+                  this.props.addStamp(commentBlob, id =>
+                    this.props.requestCompile(id)
+                  )
+              }
             ]}
             tooltipText="code block"
           />
@@ -650,20 +650,20 @@ ref={provided.innerRef}
           />
         </div>
 
-                <span hidden={!ipc}/>
-       <div hidden={ipc}>
-        <TopButton 
-          iconType={WorldsIcon}
-          uniqueClass="worlds"
-          iconCallback={null}
-          dropDownData={worlds.map(world => ({
-            name: world.name,
-            callback: () =>
-              this.props.modalManagerRef.current.requestWorldLoad(world.data)
-          }))}
-          tooltipText="overwrite with example"
-          alignRight
-        />
+        <span hidden={!ipc} />
+        <div hidden={ipc}>
+          <TopButton
+            iconType={WorldsIcon}
+            uniqueClass="worlds"
+            iconCallback={null}
+            dropDownData={worlds.map(world => ({
+              name: world.name,
+              callback: () =>
+                this.props.modalManagerRef.current.requestWorldLoad(world.data)
+            }))}
+            tooltipText="overwrite with example"
+            alignRight
+          />
         </div>
       </div>
     );
@@ -700,8 +700,8 @@ class TopButton extends Component {
   createIcon(iconType, callback, givenUniqueClass, size, dropDownIcon = false) {
     var uniqueClass = givenUniqueClass;
     var mouseOverCallback = () => {
-// $(".tooltip" + givenUniqueClass).addClass("text-black")
-//         .removeClass("text-greyText");
+      // $(".tooltip" + givenUniqueClass).addClass("text-black")
+      //         .removeClass("text-greyText");
 
       this.setState({ mouseOverDropDown: true }, () =>
         $("." + uniqueClass).css({ opacity: "1" })
@@ -709,9 +709,8 @@ class TopButton extends Component {
     };
 
     var mouseOutCallback = () => {
-
-// $(".tooltip" + givenUniqueClass).addClass("text-greyText")
-//         .removeClass("text-black");
+      // $(".tooltip" + givenUniqueClass).addClass("text-greyText")
+      //         .removeClass("text-black");
 
       this.setState(
         { mouseOverDropDown: false },
@@ -732,9 +731,9 @@ class TopButton extends Component {
       uniqueClass += "expand";
     }
 
-    if(dropDownIcon){
-      mouseOverCallback = () => null
-      mouseOutCallback = () => null
+    if (dropDownIcon) {
+      mouseOverCallback = () => null;
+      mouseOutCallback = () => null;
     }
 
     return React.createElement("img", {
@@ -752,56 +751,50 @@ class TopButton extends Component {
       return null;
     }
 
-
-
     var dropDowns = this.props.dropDownData.map(data => {
-
-          var oneWordName = ""
-    if(data.name){
-      oneWordName = data.name.replace(" ", "-")
-    }
+      var oneWordName = "";
+      if (data.name) {
+        oneWordName = data.name.replace(" ", "-");
+      }
       return (
-      <div
-        class={
-          this.props.uniqueClass +
-          oneWordName +
-          " picker text-greyText p-2 pl-3 pr-3"
-        }
-        onMouseOver={() => {
-          if (!data.name) {
-            return;
+        <div
+          class={
+            this.props.uniqueClass +
+            oneWordName +
+            " picker text-greyText p-2 pl-3 pr-3"
           }
-          this.setState({ mouseOverDropDown: true });
-          $("." + this.props.uniqueClass + oneWordName).css({
-            background: "rgb(240, 240, 240)"
-          });
-        }}
-        onMouseOut={() => {
-          if (!data.name) {
-            return;
-          }
-          this.setState({ mouseOverDropDown: false });
-          $("." + this.props.uniqueClass + oneWordName).css({
-            background: "transparent"
-          });
-        }}
-        onClick={() => {
-          if (!data.name) {
-            return;
-          }
-          data.callback();
-          this.setState({ down: false });
-        }}
-      >
-        <a className="mr-2" hidden={!data.name || !data.icon}>
-        {this.createIcon(data.icon, undefined, "dropDown", 12, true)}
-        </a>
-        {data.name}
-        
-      </div>
-    )
-
-
+          onMouseOver={() => {
+            if (!data.name) {
+              return;
+            }
+            this.setState({ mouseOverDropDown: true });
+            $("." + this.props.uniqueClass + oneWordName).css({
+              background: "rgb(240, 240, 240)"
+            });
+          }}
+          onMouseOut={() => {
+            if (!data.name) {
+              return;
+            }
+            this.setState({ mouseOverDropDown: false });
+            $("." + this.props.uniqueClass + oneWordName).css({
+              background: "transparent"
+            });
+          }}
+          onClick={() => {
+            if (!data.name) {
+              return;
+            }
+            data.callback();
+            this.setState({ down: false });
+          }}
+        >
+          <a className="mr-2" hidden={!data.name || !data.icon}>
+            {this.createIcon(data.icon, undefined, "dropDown", 12, true)}
+          </a>
+          {data.name}
+        </div>
+      );
     });
 
     var right = "default";
@@ -892,7 +885,6 @@ class TopButton extends Component {
         16
       );
     }
-
 
     return (
       <div class="m-3 mt-4">

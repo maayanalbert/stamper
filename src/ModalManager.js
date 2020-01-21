@@ -263,7 +263,7 @@ export default class ModalManager extends Component {
     var reader = new FileReader();
 
     var callback = imgData =>
-      this.props.addFnStamp(imgData, id => this.props.requestCompile(id));
+      this.props.addStamp(imgData, id => this.props.requestCompile(id));
 
     reader.onload = function(e) {
       var imgData = { code: e.target.result, name: file.name, isImg: true };
@@ -553,20 +553,20 @@ export default class ModalManager extends Component {
           isHtml: true,
           hidden: true
         });
-      } else if (fileDict[name].type === "text") {
-        fnData.push({
-          name: name,
-          args: " ",
-          code: fileDict[name].content,
-          isFile: true,
-          hidden: true
-        });
       } else if (fileDict[name].type === "image") {
         fnData.push({
           name: name,
           args: " ",
           code: fileDict[name].content,
           isImg: true,
+          hidden: true
+        });
+      } else {
+        fnData.push({
+          name: name,
+          args: " ",
+          code: fileDict[name].content,
+          isFile: true,
           hidden: true
         });
       }

@@ -584,6 +584,7 @@ function logToConsole(message, lineno){
         initialHidden={data.hidden}
         getScale={this.getScale.bind(this)}
         starterZIndex={data.zIndex}
+
       />
     );
 
@@ -651,6 +652,7 @@ function logToConsole(message, lineno){
         initialPosition={{ x: data.x, y: data.y }}
         starterCodeSize={data.codeSize}
         id={stampID}
+                setLayerPicker={this.setLayerPicker.bind(this)}
         deleteFrame={this.deleteFrame}
         initialHidden={data.hidden}
         onStartMove={this.onStartMove.bind(this)}
@@ -1455,7 +1457,8 @@ var name = this.getFirstLine(stampRef.state.code);
           this.centerOnStamp(stampRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(stampRef),
         id: stampRef.props.id,
-        isConsole:false
+        isConsole:false,
+        hasError:Object.keys(stampRef.state.errorLines).length > 0
       });
     });
 
