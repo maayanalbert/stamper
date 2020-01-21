@@ -40,6 +40,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import Modal from "react-bootstrap/Modal";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import ConsoleStampIcon from "./icons/message-circle.svg";
 
 import pf1, {
   normalFn,
@@ -184,7 +185,7 @@ function noiseWave() {
       var curNumStamps = this.props.getNumStamps();
 
       var callback = () => {
-        console.log(curNumStamps);
+   
 
         this.props.recompileIfEnoughStamps(
           stamps.stamps.length + curNumStamps.stamps
@@ -275,10 +276,33 @@ function noiseWave() {
     );
   }
 
-  renderLayerPicker() {
-    var pickers = [];
+  getDraggableClass(snapshot, isConsole){
+    if(snapshot.isDragging && isConsole){
+      return "border-bottom border-borderGrey bg-warningOrange"
+    }else if(snapshot.isDragging){
+      return "border border-greyText bg-white"
+    }else{
+       return "border-bottom border-borderGrey"     
+    }
+  }
 
-    this.props.pickerData.map(item => {
+
+
+
+  renderPickers(provided, snapshot){
+    var pickers = [];
+    var overflowY = "hidden";
+    if (this.state.pickerScrollEnabled) {
+      overflowY = "scroll";
+    }
+
+
+
+
+    this.props.pickerData.map( (item, index) => {
+   
+    
+
       if (item.status) {
         var iconType = VisibilityIcon;
         var iconNameCallback = () =>
@@ -295,45 +319,85 @@ function noiseWave() {
         overalOpacity = 0.5;
         centerCallback = () => null;
       }
-      if (item.name) {
+
+      var id = item.id
+      var name = item.name
+      var icon = item.icon
+      var hideCallback = item.hideCallback
+      var isConsole = item.isConsole
+
+
         pickers.push(
-          <div class="border-bottom border-borderGrey">
+          <Draggable draggableId={id.toString()} index={ index} >
+            {(provided, snapshot) =>( 
+
+
+              <div class={this.getDraggableClass(snapshot, isConsole)}
+            style={{transition: "border .3s ease-out"}}
+              ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+
+              >
+
             <div
               style={{ opacity: overalOpacity }}
               class="d-flex justify-content-between p-1 pl-2 pr-3"
             >
               <div
                 clas="row border-bottom"
-                style={{ overflow: "hidden" }}
+                style={{ overflow: "hidden", cursor:"auto" }}
                 onClick={() =>
                   centerCallback(this.state.sideBarWidth, this.topBarHeight)
                 }
               >
                 {this.createIcon(
-                  "type" + item.id.toString(),
-                  item.icon,
+                  "type" + id.toString(),
+                  icon,
                   iconNameCallback,
-                  item.name
+                  name
                 )}
               </div>
+              <div style={{cursor:"auto" }}>
 
               {this.createIcon(
-                "hide" + item.id.toString(),
+                "hide" + id.toString(),
                 iconType,
-                item.hideCallback
+                hideCallback
               )}
+              </div>
             </div>
-          </div>
+       
+          </div>) }
+          </Draggable>
         );
-      } else {
-        pickers.push(<br />);
-      }
-    });
 
-    var overflowY = "hidden";
-    if (this.state.pickerScrollEnabled) {
-      overflowY = "scroll";
-    }
+    })
+
+
+
+    return (
+<div             className=" bg-white"
+            style={{
+              overflow: "hidden",
+              "overflow-y": overflowY,
+              width: this.state.sideBarWidth,
+              height: this.state.pickerHeight
+            }}
+ref={provided.innerRef}
+ {...provided.droppableProps}>
+ {pickers}
+ {provided.placeholder}
+            <br />
+            <br />
+ </div>
+      )
+
+  }
+
+  renderLayerPicker() {
+
+
     return (
       <Resizable
         width={this.state.sideBarWidth}
@@ -362,21 +426,24 @@ function noiseWave() {
         axis="y"
         handle={this.renderPickerResizeHandle()}
       >
-        <div>
+              
           <div
-            className=" bg-white"
-            style={{
-              overflow: "hidden",
-              "overflow-y": overflowY,
-              width: this.state.sideBarWidth,
-              height: this.state.pickerHeight
-            }}
+
           >
-            {pickers}
-            <br />
-            <br />
+          <DragDropContext onDragEnd={this.props.onDragEnd}
+          >
+
+                 <Droppable droppableId="droppable"
+
+                 >
+             
+            {this.renderPickers.bind(this)}
+
+                   </Droppable>
+                      </DragDropContext>
+ 
           </div>
-        </div>
+
       </Resizable>
     );
   }

@@ -102,7 +102,8 @@ warningOrangeDark: rgba(255, 184, 0, 1),
   htmlCssArea:    rgb(252,249,245),
   htmlCssName:   rgb(86,162, 155),
   borderDarkGrey: rgb(175, 175, 175),
-  debug:        rgba(0, 0, 0, .1)
+  debug:        rgba(0, 0, 0, .1),
+  seeThroughWhite:        rgba(255, 255, 255, .7),
 
 
 
@@ -116,14 +117,13 @@ warningOrangeDark: rgba(255, 184, 0, 1),
   htmlArea:rgb(145, 155, 158)*/
 );
 
-html {
-overflow: hidden;
-overscroll-behavior: none;
-}
 
-body {
+
+html, body {
 overflow: hidden;
 overscroll-behavior: none;
+
+
 
 }
 

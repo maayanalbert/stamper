@@ -908,6 +908,9 @@ callback(id)
     return duplicateNamedStamps;
   }
 
+
+
+
   getExportableCode() {
     var runnableCode = [];
     var ranges = [];
@@ -926,7 +929,7 @@ callback(id)
 
       if(stamp.current.props.isBlob){
         var code = stamp.current.state.code;
-                curLine = this.addCodeBlock(
+            curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
           runnableCode,
@@ -936,7 +939,9 @@ callback(id)
         );
       }else {
         var state = stamp.current.state;
-        var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        var contents = state.code.split("\n").join("\n  ")
+
+        var code = `function ${state.name}(${state.args}){\n  ${contents}\n}`;
                 curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
@@ -1342,7 +1347,32 @@ _stopLooping =setTimeout(() => {
     return this.state.scale;
   }
 
+  onDragEnd(result){
+
+    if(!result.destination){
+      return
+    }
+
+
+    if(result.source.index === 0 || result.destination.index === 0){return}
+    var stampOrder = Object.assign([], this.state.stampOrder)
+
+    const [removed] = stampOrder.splice(result.source.index-1, 1);
+    stampOrder.splice(result.destination.index-1, 0, removed);
+
+
+
+    this.setState({stampOrder:[]}, 
+      () => {
+        this.setLayerPicker()
+        this.setState({stampOrder:stampOrder}, () => this.setLayerPicker())
+      }
+    )
+
+  }
+
   setLayerPicker() {
+
 
     var pickerData = [];
 
@@ -1355,7 +1385,8 @@ _stopLooping =setTimeout(() => {
         centerCallback: (xOff, yOff) =>
           this.centerOnStamp(consoleRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(consoleRef),
-        id: consoleRef.props.id
+        id: consoleRef.props.id,
+        isConsole:true
       });
     }
 
@@ -1380,7 +1411,8 @@ var name = this.getFirstLine(stampRef.state.code);
         centerCallback: (xOff, yOff) =>
           this.centerOnStamp(stampRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(stampRef),
-        id: stampRef.props.id
+        id: stampRef.props.id,
+        isConsole:false
       });
     });
 
@@ -1432,6 +1464,7 @@ var name = this.getFirstLine(stampRef.state.code);
             this
           )}
           modalManagerRef={this.modalManagerRef}
+          onDragEnd={this.onDragEnd.bind(this)}
           recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
         />
 

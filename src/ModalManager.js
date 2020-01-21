@@ -526,7 +526,7 @@ export default class ModalManager extends Component {
 
     var fnData = [];
 
-    stamperObject.fns.map(singleFnData => {
+    stamperObject.stamps.map(singleFnData => {
       if (!singleFnData.isFile && !singleFnData.isImg && !singleFnData.isHtml) {
         fnData.push(singleFnData);
       } else if (singleFnData.name in fileDict) {
@@ -571,7 +571,7 @@ export default class ModalManager extends Component {
       }
     });
 
-    stamperObject.fns = fnData;
+    stamperObject.stamps = fnData;
 
     var projectPath = "";
     var projectName = "";
