@@ -528,7 +528,9 @@ export default class ModalManager extends Component {
     var fnData = [];
 
     stamperObject.stamps.map(singleFnData => {
-      if (!singleFnData.isFile && !singleFnData.isImg && !singleFnData.isHtml) {
+      if(this.state.cdnLibs && singleFnData.name in this.libs){
+        // pass
+      }else if (!singleFnData.isFile && !singleFnData.isImg && !singleFnData.isHtml) {
         fnData.push(singleFnData);
       } else if (singleFnData.name in fileDict) {
         singleFnData.code = fileDict[singleFnData.name].content;
@@ -538,7 +540,9 @@ export default class ModalManager extends Component {
     });
 
     Object.keys(fileDict).map(name => {
-      if (
+      if(this.state.cdnLibs && name in this.libs){
+        // pass
+      }else if (
         name === "sketch.js" ||
         name === "stamper.js" ||
         fileDict[name].transferred ||
