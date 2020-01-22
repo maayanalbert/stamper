@@ -220,8 +220,8 @@ export default class ModalManager extends Component {
 
     if (file.type.startsWith("text")) {
       var fileType = "text";
-    } else if (file.type.startsWith("image")) {
-      var fileType = "image";
+    } else {
+      var fileType = "media";
     }
 
     reader.onload = function(e) {
@@ -236,7 +236,7 @@ export default class ModalManager extends Component {
     try {
       if (file.type.startsWith("text")) {
         reader.readAsText(file);
-      } else if (file.type.startsWith("image")) {
+      } else{
         reader.readAsDataURL(file);
       }
     } catch {
@@ -266,7 +266,7 @@ export default class ModalManager extends Component {
       this.props.addStamp(imgData, id => this.props.requestCompile(id));
 
     reader.onload = function(e) {
-      var imgData = { code: e.target.result, name: file.name, isImg: true };
+      var imgData = { code: e.target.result, name: file.name, isMediaFile: true };
       callback(imgData);
     };
 
@@ -415,7 +415,7 @@ export default class ModalManager extends Component {
 
     var zip = new JSZip();
     Object.keys(fileDict).map(name => {
-      if (fileDict[name].type === "image") {
+      if (fileDict[name].type === "media") {
         var uri = fileDict[name].content;
 
         var idx = uri.indexOf("base64,") + "base64,".length;
@@ -530,7 +530,7 @@ export default class ModalManager extends Component {
     stamperObject.stamps.map(singleFnData => {
       if(this.state.cdnLibs && singleFnData.name in this.libs){
         // pass
-      }else if (!singleFnData.isFile && !singleFnData.isImg && !singleFnData.isHtml) {
+      }else if (!singleFnData.isTxtFile && !singleFnData.isMediaFile && !singleFnData.isIndex) {
         fnData.push(singleFnData);
       } else if (singleFnData.name in fileDict) {
         singleFnData.code = fileDict[singleFnData.name].content;
@@ -554,15 +554,15 @@ export default class ModalManager extends Component {
           name: name,
           args: " ",
           code: fileDict[name].content,
-          isHtml: true,
+          isIndex: true,
           hidden: true
         });
-      } else if (fileDict[name].type === "image") {
+      } else if (fileDict[name].type === "media") {
         fnData.push({
           name: name,
           args: " ",
           code: fileDict[name].content,
-          isImg: true,
+          isMediaFile: true,
           hidden: true
         });
       } else {
@@ -570,7 +570,7 @@ export default class ModalManager extends Component {
           name: name,
           args: " ",
           code: fileDict[name].content,
-          isFile: true,
+          isTxtFile: true,
           hidden: true
         });
       }

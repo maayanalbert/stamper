@@ -63,7 +63,7 @@ module.exports = class FileManager {
     var file = this.fileDict[fileName]
     if(file){
       var existingContent = file.content
-      if(file.type === "image"){
+      if(file.type === "media"){
         existingContent = this.uriToText(existingContent)
       }
     }else{
@@ -198,7 +198,7 @@ module.exports = class FileManager {
       }
 
       if (oldContent != newContent) {
-        if (newFileDict[name].type === "image") {
+        if (newFileDict[name].type === "media") {
           var uri = newFileDict[name].content;
 
           jetpack.writeAsync(this.path + name, this.uriToText(uri));

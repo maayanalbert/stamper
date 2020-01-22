@@ -36,11 +36,11 @@ export default class FunctionStamp extends Component {
   constructor(props) {
     super(props);
     var starterEditorWidth = this.props.starterEditorWidth;
-    if (this.props.isImg) {
+    if (this.props.isMediaFile) {
       starterEditorWidth = 0;
     }
     var starterArgs = this.props.starterArgs;
-    if (this.props.isHtml || this.props.isFile || this.props.isImg || this.props.isBlob) {
+    if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile || this.props.isBlob) {
       starterArgs = " ";
     }
 
@@ -51,7 +51,7 @@ export default class FunctionStamp extends Component {
 
     var starterIframeWidth = this.props.starterIframeWidth
     var starterIframeHeight = this.props.starterIframeHeight
-    if(this.props.isFile || this.props.isBlob){
+    if(this.props.isTxtFile || this.props.isBlob){
       starterIframeWidth = 0
       starterIframeHeight = 0
     }
@@ -105,8 +105,8 @@ export default class FunctionStamp extends Component {
     if (
       e.data.type != "loop" ||
       e.data.id != this.props.id ||
-      this.props.isHtml ||
-      this.props.isImg || this.props.isBlob
+      this.props.isIndex ||
+      this.props.isMediaFile || this.props.isBlob
     ) {
       return;
     }
@@ -152,7 +152,7 @@ export default class FunctionStamp extends Component {
 
       if(this.props.isBlob){
         exportableCode = this.props.getExportableCode()
-      }else if(this.props.isFile === false && this.props.isImg === false){
+      }else if(this.props.isTxtFile === false && this.props.isMediaFile === false){
         iframeCode = this.props.getHTML(this.props.id);
 
       }
@@ -201,7 +201,7 @@ export default class FunctionStamp extends Component {
 
     this.setState({ iframeWidth: width, iframeHeight: height });
 
-    if (this.props.isImg === false) {
+    if (this.props.isMediaFile === false) {
       movementY = 0;
     }
 
@@ -233,18 +233,18 @@ export default class FunctionStamp extends Component {
 
     var theme = "p5";
     var mode = "javascript";
-    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
+    if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile) {
       theme = "solarized_light";
     }
 
-    if (this.props.isFile) {
+    if (this.props.isTxtFile) {
       var nameArr = this.state.name.split(".");
       if (nameArr.length > 0) {
         mode = nameArr[nameArr.length - 1];
       } else {
         mode = "";
       }
-    } else if (this.props.isHtml) {
+    } else if (this.props.isIndex) {
       mode = "html";
     }
 
@@ -312,22 +312,22 @@ export default class FunctionStamp extends Component {
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
-    } else if (this.props.isHtml || this.props.isFile || this.props.isImg) {
+    } else if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile) {
       nameColor = "htmlCssName";
     }
 
     var argsColor = "greyText";
     var namePlaceholder = "function name...";
-    if (this.props.isFile) {
+    if (this.props.isTxtFile) {
       namePlaceholder = "file name...";
-    } else if (this.props.isImg) {
+    } else if (this.props.isMediaFile) {
       namePlaceholder = "image name...";
     }
     return (
       <div>
         <input
           placeholder={namePlaceholder}
-          disabled={this.props.isHtml}
+          disabled={this.props.isIndex}
           onChange={event => {
             this.setState({ name: event.target.value, editsMade: true }, () =>
               this.checkName()
@@ -345,7 +345,7 @@ export default class FunctionStamp extends Component {
         <input
           // @cameron styling for arguments field
           placeholder="arguments..."
-          disabled={this.props.isHtml || this.props.isFile || this.props.isImg}
+          disabled={this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile}
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
             ipc && ipc.send("edited");
@@ -438,10 +438,10 @@ onMouseOver={this.compileCallback.bind(this)}
                 width: this.state.iframeWidth
               }}
             >
-              <img src={this.state.code} hidden={!this.props.isImg} />
+              <img src={this.state.code} hidden={!this.props.isMediaFile} />
           
             <iframe
-              hidden={this.props.isImg}
+              hidden={this.props.isMediaFile}
               ref={iframeElem => {
                 if (iframeElem) {
                   this.props.addNewIframeConsole(
@@ -474,7 +474,7 @@ onMouseOver={this.compileCallback.bind(this)}
   }
 
   copyAndOpt(isOpt = false) {
-    if (this.props.isHtml) {
+    if (this.props.isIndex) {
       return;
     }
 
@@ -523,9 +523,9 @@ onMouseOver={this.compileCallback.bind(this)}
       editorHeight: this.state.editorHeight,
       iframeWidth: this.state.iframeWidth,
       iframeHeight: this.state.iframeHeight,
-      isHtml: this.props.isHtml,
-      isFile: this.props.isFile,
-      isImg: this.props.isImg,
+      isIndex: this.props.isIndex,
+      isTxtFile: this.props.isTxtFile,
+      isMediaFile: this.props.isMediaFile,
       hidden: this.state.hidden,
       exported: true,
       zIndex: this.state.zIndex,
@@ -554,13 +554,13 @@ onMouseOver={this.compileCallback.bind(this)}
 
   getIcon() {
     var icon = FunctionStampIcon;
-    if (this.props.isHtml) {
+    if (this.props.isIndex) {
       icon = HtmlStampIcon;
     } else if(this.props.isBlob){
       icon = BlobStampIcon
-    } else if (this.props.isFile) {
+    } else if (this.props.isTxtFile) {
       icon = FileStampIcon;
-    } else if (this.props.isImg) {
+    } else if (this.props.isMediaFile) {
       icon = ImageStampIcon;
     } else if (this.state.isSpecialFn) {
       if (globals.specialFns[this.state.name]) {
@@ -591,7 +591,7 @@ onMouseOver={this.compileCallback.bind(this)}
     // <!-- @cameron little white div thing --> scroll down to style
 
     var bgColor = "bg-jsArea";
-    if (this.props.isHtml || this.props.isFile || this.props.isImg) {
+    if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile) {
       bgColor = "bg-htmlCssArea";
     }
 
@@ -600,12 +600,12 @@ onMouseOver={this.compileCallback.bind(this)}
     }
 
     var iframeWidth = this.state.iframeWidth;
-    if (this.props.isFile) {
+    if (this.props.isTxtFile) {
       iframeWidth = 0;
     }
 
     var initialHeight = this.state.editorHeight + globals.fnTitleHeight + 60;
-    if (this.props.isImg) {
+    if (this.props.isMediaFile) {
       initialHeight = this.state.iframeHeight + globals.fnTitleHeight + 35;
     }else if(this.props.isBlob){
       initialHeight = this.state.editorHeight + 60
@@ -622,7 +622,7 @@ onMouseOver={this.compileCallback.bind(this)}
             height: initialHeight
           }}
           ref={this.cristalRef}
-          isResizable={!this.props.isImg}
+          isResizable={!this.props.isMediaFile}
           onStartResize={this.props.onStartMove.bind(this)}
           onStopResize={this.props.onStopMove.bind(this)}
           onStartMove={this.props.onStartMove}
@@ -630,8 +630,8 @@ onMouseOver={this.compileCallback.bind(this)}
           onClose={() => this.props.onDelete(this.props.id)}
           onCopy={() => this.copyAndOpt()}
           onOptMove={() => this.copyAndOpt(true)}
-          closeHidden={this.props.isHtml}
-          copyHidden={this.props.isHtml}
+          closeHidden={this.props.isIndex}
+          copyHidden={this.props.isIndex}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           className={
             "stamp shadow-sm " +

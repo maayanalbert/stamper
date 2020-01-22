@@ -342,7 +342,7 @@ datas.map(data =>
               data.y = yPosBlob
               xPosBlob += globals.copyOffset * 3
               yPosBlob += globals.copyOffset * 3
-                }else if(data.isImg || data.isHtml || data.isFile){
+                }else if(data.isMediaFile || data.isIndex || data.isTxtFile){
               data.x = xPosFile
               data.y = yPosFile
               xPosFile += globals.copyOffset * 3
@@ -414,7 +414,7 @@ function logToConsole(message, lineno){
   replaceFileStamps(parser) {
     this.state.stampOrder.map(id => {
       var item = this.state.stampRefs[id]
-      if (item.current.props.isFile) {
+      if (item.current.props.isTxtFile) {
         var name = item.current.state.name;
         var code = item.current.state.code;
 
@@ -439,7 +439,7 @@ function logToConsole(message, lineno){
       var item = this.state.stampRefs[id]
       var name = item.current.state.name;
       var code = item.current.state.code;
-      if (item.current.props.isFile || item.current.props.isImg) {
+      if (item.current.props.isTxtFile || item.current.props.isMediaFile) {
         runnableCode = runnableCode
           .replace(`'${name}'`, `"${code}"`)
           .replace("`" + name + "`", `"${code}"`)
@@ -620,9 +620,9 @@ function logToConsole(message, lineno){
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
       iframeWidth: globals.defaultIframeWidth,
       iframeHeight: globals.defaultEditorHeight,
-      isHtml: false,
-      isFile: false,
-      isImg: false,
+      isIndex: false,
+      isTxtFile: false,
+      isMediaFile: false,
       isBlob:false,
       hidden: false,
       zIndex: undefined,
@@ -643,9 +643,9 @@ function logToConsole(message, lineno){
     var elem = (
       <Stamp
         ref={ref}
-        isHtml={data.isHtml}
-        isFile={data.isFile}
-        isImg={data.isImg}
+        isIndex={data.isIndex}
+        isTxtFile={data.isTxtFile}
+        isMediaFile={data.isMediaFile}
         isBlob={data.isBlob}
         getExportableCode={this.getExportableCode.bind(this)}
         starterZIndex={data.zIndex}
@@ -677,7 +677,7 @@ function logToConsole(message, lineno){
       />
     );
 
-        if (data.isHtml) {
+        if (data.isIndex) {
       this.setState({ htmlID: stampID });
     }
 
@@ -713,78 +713,7 @@ callback(id)
 
   )
   }
-//   async createStamp(data, callback = () => null) {
 
-
-
-//     var stampRefs = Object.assign({}, this.state.stampRefs);
-//     var stampElems = Object.assign({}, this.state.stampElems);
-//     var ref = React.createRef();
-
-//     var stampID = counter.toString();
-
-//     var elem = (
-//       <Stamp
-//         ref={ref}
-//         isHtml={isHtml}
-//         isFile={isFile}
-//         isImg={isImg}
-//         isBlob={data.isBlob}
-//         getExportableCode={this.getExportableCode.bind(this)}
-//         starterZIndex={data.zIndex}
-//         starterCode={code}
-//         starterArgs={args}
-//         starterName={name}
-//         errorLines={{}}
-//         starterEditorWidth={editorWidth}
-//         starterEditorHeight={editorHeight}
-//         initialPosition={{ x: x, y: y }}
-//         starterCodeSize={data.codeSize}
-//         id={stampID}
-//         deleteFrame={this.deleteFrame}
-//         initialHidden={hidden}
-//         onStartMove={this.onStartMove.bind(this)}
-//         onStopMove={this.onStopMove.bind(this)}
-//         addStamp={this.addStamp.bind(this)}
-//         onDelete={this.onDelete.bind(this)}
-//         starterIframeWidth={iframeWidth}
-//         starterIframeHeight={iframeHeight}
-//         checkAllNames={this.checkAllNames.bind(this)}
-//         disablePan={this.disablePan.bind(this)}
-//         iframeDisabled={iframeDisabled}
-//         requestCompile={this.requestCompile.bind(this)}
-//         getHTML={this.getHTML.bind(this)}
-//         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
-//         getScale={this.getScale.bind(this)}
-//       />
-//     );
-
-//     stampRefs[stampID] = ref;
-//     stampElems[stampID] = elem
-
-//     if (isHtml) {
-//       this.setState({ htmlID: stampID });
-//     }
-
-//     this.setState(
-//       {
-//         stampRefs: stampRefs,
-//         stampElems:stampElems, 
-//         counter: counter+1,
-//         stampOrder:stampOrder
-
-//       },
-//           () => {
-// callback(stampID)
-// release()
-//           }
-
-          
-  
-//     );
-
-
-//   }
 
   addNewIframeConsole(newConsole) {
     if (this.state.consoleStamp === null) {
@@ -829,10 +758,10 @@ callback(id)
       var item = this.state.stampRefs[id]
       var code = item.current.state.code
       var name = item.current.state.name
-      if(item.current.props.isFile || item.current.props.isHtml){
+      if(item.current.props.isTxtFile || item.current.props.isIndex){
         fileDict[name] = {content:code, type:'text'}
-      }else if(item.current.props.isImg){
-        fileDict[name] = {content:code, type:"image"}
+      }else if(item.current.props.isMediaFile){
+        fileDict[name] = {content:code, type:"media"}
       }
     })
     return fileDict
@@ -868,7 +797,7 @@ callback(id)
         var newErrors = [];
         if (
           stampRef.props.id in duplicateNamedStamps &&
-          stampRef.props.isHtml === false
+          stampRef.props.isIndex === false
         ) {
           newErrors.push(0);
         }
@@ -897,7 +826,7 @@ callback(id)
 
       if (
         stampRef.props.id in duplicateNamedStamps &&
-        stampRef.props.isHtml === false
+        stampRef.props.isIndex === false
       ) {
         newErrors.push(0);
       }
@@ -971,9 +900,9 @@ callback(id)
 
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id]
-      if(stamp.current.props.isFile  ||
-        stamp.current.props.isHtml ||
-        stamp.current.props.isImg ){
+      if(stamp.current.props.isTxtFile  ||
+        stamp.current.props.isIndex ||
+        stamp.current.props.isMediaFile ){
         return
       }
 
@@ -1140,9 +1069,9 @@ callback(id)
       var stamp = this.state.stampRefs[id]
       if (
         stamp.current.state.name != "draw" &&
-        stamp.current.props.isFile === false &&
-        stamp.current.props.isImg === false &&
-        stamp.current.props.isHtml === false &&
+        stamp.current.props.isTxtFile === false &&
+        stamp.current.props.isMediaFile === false &&
+        stamp.current.props.isIndex === false &&
         (this.isListener(stamp.current.state.name) === false ||
           this.isListener(this.state.stampRefs[id].current.state.name) ===
             false)
