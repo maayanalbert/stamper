@@ -170,7 +170,6 @@ export default class ModalManager extends Component {
         type="file"
         hidden={true}
         id="imageInput"
-        accept="image/*"
         onChange={e => this.uploadImage(e)}
       />
     );
@@ -255,6 +254,7 @@ export default class ModalManager extends Component {
   }
 
   uploadImage(e) {
+
     if (e.target.files.length === 0) {
       this.createImageInputElem();
       return;
@@ -291,7 +291,7 @@ export default class ModalManager extends Component {
   }
 
   checkFiles(e) {
-    console.log(e)
+    console.log(e.target.files)
     var askedAboutCdn = false;
     this.setState({ askedAboutCdn: askedAboutCdn });
 

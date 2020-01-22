@@ -8,6 +8,7 @@ import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
 
+
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
 import cheerio from "cheerio";
@@ -30,6 +31,7 @@ import "ace-builds/src-noconflict/snippets/javascript";
 import pf1, { starter, stamperHeader } from "./starterStamps.js";
 
 var _ = require("lodash");
+var mime = require('mime-types')
 
 var esprima = require("esprima");
 
@@ -411,43 +413,48 @@ function logToConsole(message, lineno){
     }`;
   }
 
-  replaceFileStamps(parser) {
-    this.state.stampOrder.map(id => {
-      var item = this.state.stampRefs[id]
-      if (item.current.props.isTxtFile) {
-        var name = item.current.state.name;
-        var code = item.current.state.code;
+  // replaceFileStamps(parser) {
+  //   this.state.stampOrder.map(id => {
+  //     var item = this.state.stampRefs[id]
+  //     if (item.current.props.isTxtFile) {
+  //       var name = item.current.state.name;
+  //       var code = item.current.state.code;
 
-        var srcNodes = parser(`[src="${name}"]`);
-        for (var i = 0; i < srcNodes.length; i++) {
-          var singleNode = srcNodes.eq(i);
-          var tagName = srcNodes.get(i).tagName;
-          singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`);
-        }
+  //       var srcNodes = parser(`[src="${name}"]`);
+  //       for (var i = 0; i < srcNodes.length; i++) {
+  //         var singleNode = srcNodes.eq(i);
+  //         var tagName = srcNodes.get(i).tagName;
+  //         singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`);
+  //       }
 
-        if (name.endsWith(".js")) {
-          parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`);
-        } else if (name.endsWith(".css")) {
-          parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`);
-        }
-      }
-    });
-  }
+  //       if (name.endsWith(".js")) {
+  //         parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`);
+  //       } else if (name.endsWith(".css")) {
+  //         parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`);
+  //       }
+  //     }
+  //   });
+  // }
 
-  loadAssets(runnableCode) {
+  loadAssets(htmlCode) {
     this.state.stampOrder.map(id => {
       var item = this.state.stampRefs[id]
       var name = item.current.state.name;
       var code = item.current.state.code;
+      if(item.current.props.isTxtFile){
+        code = item.current.state.dataUri
+
+      }
       if (item.current.props.isTxtFile || item.current.props.isMediaFile) {
-        runnableCode = runnableCode
+        htmlCode = htmlCode
           .replace(`'${name}'`, `"${code}"`)
           .replace("`" + name + "`", `"${code}"`)
           .replace(`"${name}"`, `"${code}"`);
+
       }
     });
 
-    return runnableCode;
+    return htmlCode;
   }
 
   getHTML(id) {
@@ -460,7 +467,8 @@ function logToConsole(message, lineno){
       var ranges = [];
     } else {
       var codeData = this.getRunnableCode(id);
-      var runnableCode = this.loadAssets(codeData.runnableCode);
+      var runnableCode  = codeData.runnableCode
+
       var ranges = codeData.ranges;
     }
 
@@ -469,7 +477,6 @@ function logToConsole(message, lineno){
     var html = htmlStamp.current.state.code;
 
     const parser = cheerio.load(html, { withStartIndices: true });
-    this.replaceFileStamps(parser);
 
     var jsBlockStr =
       "<script type='text/javascript'>" + runnableCode + "</script>";
@@ -516,8 +523,10 @@ function logToConsole(message, lineno){
     parser(jsSelector).replaceWith(jsBlock);
 
 
+    var html = parser.html()
+    html = this.loadAssets(html)
 
-    return parser.html();
+    return html
   }
 
   addErrorLine(lineNum, id) {
@@ -686,6 +695,7 @@ function logToConsole(message, lineno){
 }
 
 
+
   async addStampToState(ref, elem, id, callback){
      const release = await this.counterMutex.acquire();
     var stampRefs = Object.assign({}, this.state.stampRefs);
@@ -768,6 +778,7 @@ callback(id)
   }
 
   requestCompile(id) {
+
 
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
@@ -872,6 +883,17 @@ callback(id)
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id]
       if(stamp.current.props.isBlob){return}
+
+
+      if(stamp.current.props.isTxtFile || stamp.current.props.isMediaFile){
+        var mimeType = mime.lookup(stamp.current.state.name)
+        if(!mimeType){
+          duplicateNamedStamps[stamp.current.props.id] = ""
+          this.state.consoleStamp.ref.current.logToConsole(
+            `Stamper Error: The file extension '.${stamp.current.state.name.split(".")[stamp.current.state.name.split(".").length -1]}' is invalid.`
+          );
+        }
+      }
       if (stamp.current) {
         var stampRef = stamp.current;
         var name = stamp.current.state.name;

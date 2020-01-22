@@ -24,6 +24,8 @@ import "ace-builds/src-noconflict/snippets/javascript";
 
 import { Resizable, ResizableBox } from "react-resizable";
 
+var mime = require('mime-types')
+
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
   const electron = window.require("electron");
@@ -79,7 +81,8 @@ export default class FunctionStamp extends Component {
       loopingTransition: "",
       zIndex: -1,
       exportableCode:"",
-      codeSize:this.props.starterCodeSize
+      codeSize:this.props.starterCodeSize,
+      dataUri:""
     };
 
     this.cristalRef = React.createRef();
@@ -119,14 +122,45 @@ export default class FunctionStamp extends Component {
     }
   }
 
+
   componentDidMount() {
     // this.loadp5Lib()
     this.checkName();
+    this.setDataUri(() => this.props.requestCompile(this.props.id))
     window.addEventListener("message", this.updateLooping);
   }
 
   componentWillUnmount() {
     window.removeEventListener("message", this.updateLooping);
+  }
+
+  setDataUri(callback = () => null){
+    if(this.props.isTxtFile === false){
+      return
+    }
+    var mimeType = mime.lookup(this.state.name)
+
+    if(!mimeType || mimeType.split("/").length === 0){
+      // throw error
+      return
+    }
+    var mimeTypeArr = mimeType.split("/")
+    mimeTypeArr[0] = "text"
+    mimeType = mimeTypeArr.join("/")
+
+    var fileObj = new File([this.state.code], this.state.name, {type:mimeType})
+
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+
+      this.setState({dataUri:e.target.result}, callback)
+    };
+
+    reader.onload = reader.onload.bind(this)
+
+    reader.readAsDataURL(fileObj);
+
   }
 
   checkName() {
@@ -232,21 +266,23 @@ export default class FunctionStamp extends Component {
     }
 
     var theme = "p5";
-    var mode = "javascript";
+
     if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile) {
       theme = "solarized_light";
     }
 
-    if (this.props.isTxtFile) {
-      var nameArr = this.state.name.split(".");
-      if (nameArr.length > 0) {
-        mode = nameArr[nameArr.length - 1];
-      } else {
-        mode = "";
-      }
-    } else if (this.props.isIndex) {
-      mode = "html";
+    if(this.props.isTxtFile || this.props.isIndex){
+    var mimeType = mime.lookup(this.state.name)
+    if(!mimeType || mimeType.split("/").length === 0){
+      return
     }
+    var mimeTypeArr = mimeType.split("/")
+    var mode = mimeTypeArr[mimeTypeArr.length -1]
+    }else{
+      var mode = "javascript"
+    }
+
+
 
     return (
       <div
@@ -293,12 +329,21 @@ export default class FunctionStamp extends Component {
 
   compileCallback() {
     if (this.state.editsMade) {
+      var compileActions = () => {
       this.props.requestCompile(this.props.id);
       this.setState({ editsMade: false, runningBorder: true }, () =>
         setTimeout(() => {
           this.setState({ runningBorder: false });
         }, 300)
       );
+      }
+
+
+      if(this.props.isTxtFile){
+        this.setDataUri(compileActions)
+      }else{
+        compileActions()
+      }
     }
   }
 
@@ -473,6 +518,19 @@ onMouseOver={this.compileCallback.bind(this)}
     this.setState({ iframeDisabled: status });
   }
 
+  getCopyStampName(name, isTxtFile){
+  if(!isTxtFile){
+    return name + "Copy"
+  }else{
+    var nameArr = name.split(".")
+    if(nameArr.length === 0){
+      return ""
+    }
+    nameArr[0] = nameArr[0] + "Copy"
+    return nameArr.join(".")
+  }
+}
+
   copyAndOpt(isOpt = false) {
     if (this.props.isIndex) {
       return;
@@ -480,11 +538,15 @@ onMouseOver={this.compileCallback.bind(this)}
 
     var data = this.getData();
     data.zIndex = undefined;
+
+
+    var newName = this.getCopyStampName(this.state.name, this.props.isTxtFile)
+
     if(!this.props.isBlob){
       if(isOpt){
-        this.setState({ name: this.state.name + "Copy" }, () => this.checkName());
+        this.setState({ name: newName}, () => this.checkName());
       }else{
-        data.name += "Copy"
+        data.name = newName
       }
     }
 
@@ -649,8 +711,7 @@ onMouseOver={this.compileCallback.bind(this)}
           parentID={this.props.id}
           showCodeSize={this.props.isBlob}
           onCodeSize ={() => {
-            console.log(this.state.codeSize)
-            console.log(globals.codeSize)
+
             if(this.state.codeSize === globals.codeSize){
               this.setState({codeSize:globals.bigCodeSize})
             }else{
