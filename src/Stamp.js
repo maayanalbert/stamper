@@ -629,7 +629,8 @@ onMouseOver={this.compileCallback.bind(this)}
     return data;
   }
 
-  resizeEditor(widthDiff, heightDiff, x) {
+  resizeEditor(widthDiff, heightDiff, x, change = true) {
+
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
 
@@ -637,12 +638,15 @@ onMouseOver={this.compileCallback.bind(this)}
       return true;
     }
 
+    if(change){
     this.setState({
       editorHeight: height,
       editorWidth: width,
       x: x
     });
     this.editorRef.current.editor.resize();
+    }
+
   }
 
   getIcon() {
@@ -710,6 +714,7 @@ onMouseOver={this.compileCallback.bind(this)}
           zIndex={this.props.starterZIndex}
           onZChange={s => this.setState({ zIndex: s.zIndex })}
           getScale={this.props.getScale}
+          getSnapToGrid={this.props.getSnapToGrid}
           initialSize={{
             width: iframeWidth + this.state.editorWidth + 42,
             height: initialHeight

@@ -73,7 +73,8 @@ export default class View extends Component {
       mouseIsDown: false,
       downKey: -1,
       panDisabled: false,
-      stampOrder:[]
+      stampOrder:[],
+      snapToGrid:true
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -599,6 +600,7 @@ function logToConsole(message, lineno){
         initialHidden={data.hidden}
         getScale={this.getScale.bind(this)}
         starterZIndex={data.zIndex}
+        getSnapToGrid={this.getSnapToGrid.bind(this)}
 
       />
     );
@@ -683,6 +685,7 @@ function logToConsole(message, lineno){
         getHTML={this.getHTML.bind(this)}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
         getScale={this.getScale.bind(this)}
+        getSnapToGrid={this.getSnapToGrid.bind(this)}
       />
     );
 
@@ -1347,6 +1350,10 @@ _stopLooping =setTimeout(() => {
 
   getScale() {
     return this.state.scale;
+  }
+
+  getSnapToGrid(){
+    return this.state.snapToGrid
   }
 
   onDragEnd(result){

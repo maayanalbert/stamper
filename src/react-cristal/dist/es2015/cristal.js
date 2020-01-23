@@ -91,6 +91,8 @@ var Cristal = (function(_super) {
       downKey: -1,
       isMoving: false,
       originalHeight: null,
+      ghostX:0,
+      ghostY:0
     };
 
 
@@ -213,6 +215,63 @@ var Cristal = (function(_super) {
     }
   }
 
+  _this.getPosition = function(movementX, movementY){
+
+        var scale = _this.props.getScale()
+      var newX = _this.state.ghostX + movementX;
+      var newY = _this.state.ghostY + movementY;    
+      this.setState({ghostX: newX, ghostY: newY})
+      var roundX = Math.round(newX / 50) * 50
+      var roundY = Math.round(newY /50) * 50
+      if(_this.props.getSnapToGrid()){
+      return {x:roundX, y:roundY}
+      }else{
+        return {x:newX, y:newY}
+      }
+
+  }
+
+  _this.getDimensions = function(widthDiff, heightDiff, changeX){
+    var newWidth = _this.state.ghostX + widthDiff
+    var newHeight = _this.state.ghostY + heightDiff
+    var newAbsX = Math.round(_this.state.x + newWidth)
+    var newAbsY = Math.round(_this.state.y + newHeight)
+
+    if(changeX){
+      newAbsX -= Math.round(_this.state.x + widthDiff)
+    }
+
+    var roundAbsX = Math.round(newAbsX / 50) * 50
+    var roundAbsY = Math.round(newAbsY /50) * 50
+
+
+
+    var ghostX = Math.max(newWidth, minWidth)
+    var ghostY = Math.max(newHeight, minHeight)
+
+      this.setState({ghostX:ghostX, 
+      ghostY:ghostY})
+
+        if(_this.props.getSnapToGrid()){
+      var sendingWidthDiff = 0
+      var sendingHeightDiff = 0
+      if(newAbsX === roundAbsX){
+        sendingWidthDiff = ghostX - _this.state.width
+      }
+      if(newAbsY === roundAbsY){
+        sendingHeightDiff =  ghostY- _this.state.height
+      }
+
+      return {widthDiff:sendingWidthDiff, heightDiff:sendingHeightDiff}
+
+    }else{
+      return {widthDiff:widthDiff, heightDiff:heightDiff}
+    }
+
+
+
+  }
+
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
      var scale = _this.props.getScale()
@@ -226,8 +285,7 @@ var Cristal = (function(_super) {
         movementY = e.movementY;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
-      var newX = currentX + movementX/scale;
-      var newY = currentY + movementY/scale;
+
  
 
       if (isDragging) {
@@ -239,7 +297,17 @@ var Cristal = (function(_super) {
         var _b = getBoundaryCoords({ x: newX, y: newY }, size),
           x = _b.x,
           y = _b.y;
-        _this.setState({ x: newX, y: newY }, _this.onStartMove);
+      var newPosition = _this.getPosition(movementX/scale, movementY/scale)
+      var newX = newPosition.x
+      var newY = newPosition.y
+      _this.onStartMove(() => 
+
+{
+
+         _this.setState({x:newX, y:newY})
+})
+
+        // _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
       } else if (isResizing) {
         ipc && ipc.send("edited");
@@ -271,21 +339,28 @@ var Cristal = (function(_super) {
       var width = currentWidth;
       var x = currentX;
 
+      var widthDiff = 0
+      var heightDiff = 0
+      var changeX = false
+
       if (isResizingX) {
-        var newWidth = (currentWidth || 0) + movementX;
-        var width = Math.max(newWidth, minWidth);
+
+        widthDiff = movementX
+        // var width = Math.max(newWidth, minWidth);
       }
       if (isResizingXLeft) {
-        var newWidth = (currentWidth || 0) - movementX;
-        var width = Math.max(newWidth, minWidth);
-        var x = currentX + movementX;
+        widthDiff = -movementX
+        changeX = true
+    
+        // var width = Math.max(newWidth, minWidth);
+        // var x = currentX + movementX;
       }
       if (isResizingY) {
-        var newHeight = (currentHeight || 0) + movementY;
-        var height = Math.max(newHeight, minHeight);
+        heightDiff = movementY
+        // var height = Math.max(newHeight, minHeight);
       }
 
-      _this.notifyResize(width, height, x);
+      _this.notifyResize(widthDiff, heightDiff, changeX);
     };
 
     _this.onStoppedMove = function() {
@@ -296,15 +371,24 @@ var Cristal = (function(_super) {
       _this.setState({ isMoving: false });
     };
 
-    _this.onStartMove = function() {
+    _this.onStartMove = function(callBack) {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
+
+        _this.setState({ghostX:_this.state.x, ghostY:_this.state.y}, () => {
+
+      _this.setState({ isMoving: true }, () => callBack());
+
+        })
+        _this.notifyStartMove()
         if (_this.state.downKey === _this.opt) {
         
           _this.notifyOptMove();
         }
+      }else{
+        callBack()
       }
-      _this.setState({ isMoving: true });
+
     };
     _this.notifyMove = function() {
       var onMove = _this.props.onMove;
@@ -315,20 +399,33 @@ var Cristal = (function(_super) {
       var onZChange = _this.props.onZChange;
       onZChange && onZChange(_this.state);
     };
-    _this.notifyResize = function(newWidth, newHeight, newX) {
+    _this.notifyResize = function(widthDiff, heightDiff, changeX) {
+
       var onResize = _this.props.onResize;
-      var heightDiff = newHeight - _this.state.height;
-      var widthDiff = newWidth - _this.state.width;
+      // var heightDiff = newHeight - _this.state.height;
+      // var widthDiff = newWidth - _this.state.width;
       var resizeBlocked = false;
       if (onResize) {
-        var resizeBlocked = onResize(widthDiff, heightDiff, _this.state.x);
+        var resizeBlocked = onResize(widthDiff, heightDiff, _this.state.x, false);
       }
       if (!resizeBlocked) {
+        var dimensions = this.getDimensions(widthDiff, heightDiff, changeX)
+
+        widthDiff = dimensions.widthDiff
+        heightDiff = dimensions.heightDiff
+        var newHeight =Math.max(_this.state.height + heightDiff, minHeight)
+        var newWidth =Math.max(_this.state.width + widthDiff, minWidth)
+        var newX = _this.state.x
+        if(changeX){
+          newX -= widthDiff
+        } 
+onResize(widthDiff, heightDiff, _this.state.x, true);
         _this.setState({ height: newHeight, width: newWidth, x: newX });
       }
     };
 
     _this.notifyStartMove = function() {
+
       var onStartMove = _this.props.onStartMove;
       onStartMove && onStartMove(_this.state);
     };
@@ -367,6 +464,7 @@ var Cristal = (function(_super) {
       });
     };
     _this.startFullResize = function() {
+      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
       _this.notifyStartResize();
       _this.setState({
         isResizingX: true,
@@ -374,6 +472,7 @@ var Cristal = (function(_super) {
       });
     };
     _this.startFullLeftResize = function() {
+      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
       _this.notifyStartResize();
       _this.setState({
         isResizingXLeft: true,
@@ -381,14 +480,17 @@ var Cristal = (function(_super) {
       });
     };
     _this.startXResize = function() {
+      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
       _this.notifyStartResize();
       return _this.setState({ isResizingX: true });
     };
     _this.startXLeftResize = function() {
+      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
       _this.notifyStartResize();
       return _this.setState({ isResizingXLeft: true });
     };
     _this.startYResize = function() {
+      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
       _this.notifyStartResize();
       return _this.setState({ isResizingY: true });
     };
