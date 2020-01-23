@@ -9,7 +9,7 @@ export const globals = {
   codeSize: 14,
   buttonTextSize: 12,
   bigCodeSize:28,
-  fnTitleHeight: 90,
+  fnTitleHeight: 100,
   copyOffset: 35,
   iconOpacity:.5,
   iconSize:15,

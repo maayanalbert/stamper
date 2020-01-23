@@ -399,6 +399,7 @@ export default class FunctionStamp extends Component {
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />
+
       </div>
     );
   }
@@ -446,7 +447,7 @@ export default class FunctionStamp extends Component {
             position: "absolute",
             fontSize: globals.codeSize,
             opacity: 0.5,
-            top: 80,
+            top: globals.fnTitleHeight - 5,
             right: 25
           }}
           class="text-greyText "
@@ -462,7 +463,7 @@ export default class FunctionStamp extends Component {
             position: "absolute",
             fontSize: globals.codeSize,
             opacity: loopingOpacity,
-            top: 80,
+            top: globals.fnTitleHeight - 5,
             left: 25 + this.state.editorWidth
           }}
           class="text-greyText "
@@ -770,7 +771,8 @@ onMouseOver={this.compileCallback.bind(this)}
               {this.renderFunctionName()}
               </div>
 
-              <div class="row m-0">
+
+              <div class="row m-0 mt-2">
                 {this.renderEditor()}
 
                 {this.renderIframe()}
