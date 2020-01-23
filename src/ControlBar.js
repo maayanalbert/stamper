@@ -559,7 +559,7 @@ function noiseWave() {
             tooltipText="upload p5 sketch"
             
           />
-          <span style={{ width: 100 }} />
+          <span style={{ width: this.spanWidth*2 }} />
           <TopButton
             iconType={DownloadIcon}
             uniqueClass="download p5 sketch"
