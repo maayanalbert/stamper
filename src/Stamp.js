@@ -403,6 +403,35 @@ export default class FunctionStamp extends Component {
     );
   }
 
+
+  renderMediaAsset(){
+    if(!this.props.isMediaFile){
+      return null
+    }
+
+    var mimeType = mime.lookup(this.state.name)
+    if(!mimeType){
+      return
+    }
+    if(mimeType.startsWith("image")){
+      return (<img src={this.state.code}/>)
+    }else if(mimeType.startsWith("audio")){
+      return (
+            <audio controls>
+            <source src={this.state.code} type={mimeType}/>
+            </audio>
+
+        ) 
+    }else if(mimeType.startsWith("video")){
+      return (
+                  <video controls>
+            <source src={this.state.code} type={mimeType}/>
+            </video>
+        )
+    }
+
+  }
+
   renderIframe() {
     var loopingOpacity = 0.0;
     if (this.state.looping === false) {
@@ -483,7 +512,8 @@ onMouseOver={this.compileCallback.bind(this)}
                 width: this.state.iframeWidth
               }}
             >
-              <img src={this.state.code} hidden={!this.props.isMediaFile} />
+            {this.renderMediaAsset()}
+
           
             <iframe
               hidden={this.props.isMediaFile}
@@ -518,8 +548,8 @@ onMouseOver={this.compileCallback.bind(this)}
     this.setState({ iframeDisabled: status });
   }
 
-  getCopyStampName(name, isTxtFile){
-  if(!isTxtFile){
+  getCopyStampName(name, isFile){
+  if(!isFile){
     return name + "Copy"
   }else{
     var nameArr = name.split(".")
@@ -540,7 +570,7 @@ onMouseOver={this.compileCallback.bind(this)}
     data.zIndex = undefined;
 
 
-    var newName = this.getCopyStampName(this.state.name, this.props.isTxtFile)
+    var newName = this.getCopyStampName(this.state.name, this.props.isTxtFile || this.props.isMediaFile)
 
     if(!this.props.isBlob){
       if(isOpt){

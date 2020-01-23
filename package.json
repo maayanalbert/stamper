@@ -1,6 +1,6 @@
 {
   "name": "Stamper",
-  "repository": "https://github.com/maayanalbert/post-chi-stamper.git",
+  "repository": "https://github.com/maayanalbert/p5stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
   "version": "0.2.1",
@@ -81,7 +81,7 @@
   },
   "main": "public/electron.js",
   "homepage1": "./",
-  "homepage": "http://maayanalbert.github.io/post-chi-stamper",
+  "homepage": "http://maayanalbert.github.io/p5stamper",
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",

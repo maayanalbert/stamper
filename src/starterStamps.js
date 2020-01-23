@@ -139,11 +139,38 @@ fill('lightblue')
 ellipse(posX, posY, 30, 30)`
 };
 
-export const commentBlob = {
+export const starterBlobs = [
+{
+  name:"global variable", data:
+{ code: "var global1 = 1", isBlob:true }
+}
+,{
+  name:"comment", data:
+{
   code: `/*\n  comment here\n*/`,
   codeSize: globals.bigCodeSize,
   isBlob:true
-};
+}},
+{
+  name:"class", data:
+{ code: `class Jitter {
+  constructor() {
+    this.x = random(width);
+    this.y = random(height);
+    this.diameter = random(10, 30);
+    this.speed = 1;
+  }
+
+  move() {
+    this.x += random(-this.speed, this.speed);
+    this.y += random(-this.speed, this.speed);
+  }
+
+  display() {
+    ellipse(this.x, this.y, this.diameter, this.diameter);
+  }
+}`, isBlob:true }
+}]
 
 export const sampleFile = {
   name: "sample.js",

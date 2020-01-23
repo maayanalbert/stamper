@@ -44,8 +44,7 @@ import ConsoleStampIcon from "./icons/message-circle.svg";
 
 import pf1, {
   normalFn,
-  commentBlob,
-  varBlob,
+  starterBlobs,
   listenerFns,
   builtInFns,
   worlds,
@@ -557,13 +556,13 @@ function noiseWave() {
             iconCallback={() => {
               this.props.modalManagerRef.current.requestUpload();
             }}
-            tooltipText="upload project"
+            tooltipText="upload p5 sketch"
             alignLeft
           />
           <span style={{ width: 100 }} />
           <TopButton
             iconType={DownloadIcon}
-            uniqueClass="download"
+            uniqueClass="download p5 sketch"
             iconCallback={() => {
               this.props.modalManagerRef.current.requestDownload();
             }}
@@ -604,27 +603,18 @@ function noiseWave() {
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addStamp(varBlob, id => this.props.requestCompile(id))
+              this.props.addStamp(starterBlobs[0].data, id => this.props.requestCompile(id))
             }
-            dropDownData={[
-              {
-                name: "global variable",
-                icon: BlobStampIcon,
-                callback: () =>
-                  this.props.addStamp(varBlob, id =>
-                    this.props.requestCompile(id)
-                  )
-              },
-              {
-                name: "comment",
-                icon: BlobStampIcon,
-                callback: () =>
-                  this.props.addStamp(commentBlob, id =>
-                    this.props.requestCompile(id)
-                  )
-              }
-            ]}
-            tooltipText="code block"
+            dropDownData={starterBlobs.map(starterBlob => ({
+              name:starterBlob.name,
+              icon:BlobStampIcon,
+              callback:() => 
+                      this.props.addStamp(starterBlob.data, id =>
+                      this.props.requestCompile(id)
+                    )
+            }))
+          }
+            tooltipText="global"
           />
           <span style={{ width: this.spanWidth }} />
 
@@ -632,11 +622,17 @@ function noiseWave() {
             iconType={FileStampIcon}
             uniqueClass="fileStamp"
             iconCallback={() =>
-              this.props.addStamp(sampleFile, id =>
-                this.props.requestCompile(id)
-              )
+ this.props.modalManagerRef.current.requestFileUpload("text")
             }
             tooltipText="file"
+            dropDownData={
+              [{name:"upload files", icon:FileStampIcon, callback:() =>
+              this.props.modalManagerRef.current.requestFileUpload("text") },
+              {name:"new file", icon:FileStampIcon, callback:() =>
+              this.props.addStamp(sampleFile, id =>
+                this.props.requestCompile(id)
+              ) } ]
+          }
           />
 
           <span style={{ width: this.spanWidth }} />
@@ -644,9 +640,9 @@ function noiseWave() {
             iconType={ImageStampIcon}
             uniqueClass="imageStamp"
             iconCallback={() =>
-              this.props.modalManagerRef.current.requestImageUpload()
+              this.props.modalManagerRef.current.requestFileUpload()
             }
-            tooltipText="image"
+            tooltipText="media"
           />
         </div>
 

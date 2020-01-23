@@ -44,8 +44,7 @@ export default class ModalManager extends Component {
       cdnLibs: false,
       askedAboutCdn: false,
       inputElem: null,
-      imageInputElem: null,
-
+      miniInputElem: null
     };
 
     this.checkFiles = this.checkFiles.bind(this);
@@ -70,7 +69,6 @@ export default class ModalManager extends Component {
   }
 
   componentDidMount() {
-
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({ saveInterval: saveInterval });
     ipc &&
@@ -80,7 +78,6 @@ export default class ModalManager extends Component {
 
     ipc &&
       ipc.on("exteriorChanges", event => {
-   
         var buttons = [];
 
         buttons.push({
@@ -93,7 +90,8 @@ export default class ModalManager extends Component {
 
         this.setState({
           modalVisible: true,
-          modalHeader: "The directory that your project was saved in has changed.",
+          modalHeader:
+            "The directory that your project was saved in has changed.",
           modalContent:
             "Please re-specify where you want your project to be saved.",
           modalButtons: buttons
@@ -105,19 +103,18 @@ export default class ModalManager extends Component {
         this.sendSaveData();
       });
 
-    ipc && ipc.on("resetView", (event, data) => {
-      for(var i = 0; i< worlds.length; i++){
-        if(data.exampleName === worlds[i].name){
-          this.props.loadStamperObject(worlds[i].data)
-          return
+    ipc &&
+      ipc.on("resetView", (event, data) => {
+        for (var i = 0; i < worlds.length; i++) {
+          if (data.exampleName === worlds[i].name) {
+            this.props.loadStamperObject(worlds[i].data);
+            return;
+          }
         }
-      }
-      this.props.loadStamperObject(starter)
-    })
-
+        this.props.loadStamperObject(starter);
+      });
 
     this.createInputElement();
-    this.createImageInputElem();
 
     window.addEventListener("beforeunload", this.sendSaveData);
   }
@@ -126,8 +123,6 @@ export default class ModalManager extends Component {
     this.state.inputElem.removeEventListener("change", this.checkFiles);
     document.getElementById("root").removeChild(this.state.inputElem);
   }
-
-
 
   createInputElement() {
     var inputElem = document.createElement("input", {
@@ -160,26 +155,32 @@ export default class ModalManager extends Component {
 
     document.getElementById("root").appendChild(inputElem);
 
-
     this.setState({ inputElem: inputElem });
   }
 
-  createImageInputElem() {
-    var imageInputElem = (
+  createMiniImputElem(fileType, callback) {
+    console.log(fileType);
+    if (fileType === "text") {
+      var accept = "text/*";
+    } else {
+      var accept = "";
+    }
+
+    var miniInputElem = (
       <input
         type="file"
         hidden={true}
-        id="imageInput"
-        onChange={e => this.uploadImage(e)}
+        id="miniInput"
+        accept={accept}
+        multiple
+        onChange={e => this.uploadMini(e, fileType)}
       />
     );
 
-    this.setState({ imageInputElem: null }, () =>
-      this.setState({ imageInputElem: imageInputElem })
+    this.setState({ miniInputElem: null }, () =>
+      this.setState({ miniInputElem: miniInputElem }, () => callback())
     );
   }
-
-
 
   componentWillUnmout() {
     window.removeEventListener("beforeunload", this.sendSaveData);
@@ -188,8 +189,10 @@ export default class ModalManager extends Component {
     this.setState({ saveInterval: null });
   }
 
-  requestImageUpload() {
-    document.getElementById("imageInput").click();
+  requestFileUpload(type) {
+    this.createMiniImputElem(type, () =>
+      document.getElementById("miniInput").click()
+    );
   }
 
   requestUpload() {
@@ -197,11 +200,9 @@ export default class ModalManager extends Component {
       .getElementById("projectInput")
       .dispatchEvent(new MouseEvent("click"));
     document.body.onfocus = () => {
-      document.body.onfocus = null
-      this.hideModal()
-
-    }
-
+      document.body.onfocus = null;
+      this.hideModal();
+    };
   }
 
   readFile(file, fileDict, callback) {
@@ -235,7 +236,7 @@ export default class ModalManager extends Component {
     try {
       if (file.type.startsWith("text")) {
         reader.readAsText(file);
-      } else{
+      } else {
         reader.readAsDataURL(file);
       }
     } catch {
@@ -253,25 +254,65 @@ export default class ModalManager extends Component {
     }
   }
 
-  uploadImage(e) {
 
-    if (e.target.files.length === 0) {
-      this.createImageInputElem();
-      return;
-    }
-    var file = e.target.files[0];
-    var reader = new FileReader();
 
-    var callback = imgData =>
-      this.props.addStamp(imgData, id => this.props.requestCompile(id));
 
-    reader.onload = function(e) {
-      var imgData = { code: e.target.result, name: file.name, isMediaFile: true };
-      callback(imgData);
+
+  uploadMini(e, fileType) {
+    var files = Object.assign([], e.target.files)
+
+    files.map(file => {
+
+
+      var reader = new FileReader();
+
+
+
+      var callback = imgData =>
+        this.props.addStamp(imgData, id => this.props.requestCompile(id));
+      console.log(reader);
+      console.log(file.name)
+      reader.onload = (e) => {
+
+    var data = {
+      code: e.target.result,
+      name: file.name,
+      isMediaFile: fileType != "text",
+      isTxtFile: fileType === "text"
     };
+    callback(data);
 
-    reader.readAsDataURL(file);
-    this.createImageInputElem();
+
+      }
+
+      reader.onload.bind(this)
+
+      if (file.type.startsWith("text")) {
+        if (!fileType) {
+          this.setState({
+            modalVisible: true,
+            modalHeader: `${file.name} failed to upload.`,
+            modalContent: "You can't upload text files as a media asset",
+            modalButtons: [
+              {
+                text: "ok",
+                color: "outline-secondary",
+                callback: this.hideModal
+              }
+            ]
+          });
+        } else {
+          reader.readAsText(file);
+        }
+      } else {
+        reader.readAsDataURL(file);
+      }
+
+
+    })
+
+
+    
   }
 
   readFiles(files) {
@@ -291,7 +332,7 @@ export default class ModalManager extends Component {
   }
 
   checkFiles(e) {
-    console.log(e.target.files)
+    console.log(e.target.files);
     var askedAboutCdn = false;
     this.setState({ askedAboutCdn: askedAboutCdn });
 
@@ -452,7 +493,7 @@ export default class ModalManager extends Component {
     }
 
     newStamperObject.console = { hidden: true };
-    newStamperObject.scale = .7;
+    newStamperObject.scale = 0.7;
     newStamperObject.originX = 0;
     newStamperObject.originY = 0;
     newStamperObject.imgs = [];
@@ -511,7 +552,7 @@ export default class ModalManager extends Component {
         stamperObject
       );
     } catch (e) {
-      console.log(e)
+      console.log(e);
       this.setState({
         modalVisible: true,
         modalHeader:
@@ -528,9 +569,13 @@ export default class ModalManager extends Component {
     var fnData = [];
 
     stamperObject.stamps.map(singleFnData => {
-      if(this.state.cdnLibs && singleFnData.name in this.libs){
+      if (this.state.cdnLibs && singleFnData.name in this.libs) {
         // pass
-      }else if (!singleFnData.isTxtFile && !singleFnData.isMediaFile && !singleFnData.isIndex) {
+      } else if (
+        !singleFnData.isTxtFile &&
+        !singleFnData.isMediaFile &&
+        !singleFnData.isIndex
+      ) {
         fnData.push(singleFnData);
       } else if (singleFnData.name in fileDict) {
         singleFnData.code = fileDict[singleFnData.name].content;
@@ -540,9 +585,9 @@ export default class ModalManager extends Component {
     });
 
     Object.keys(fileDict).map(name => {
-      if(this.state.cdnLibs && name in this.libs){
+      if (this.state.cdnLibs && name in this.libs) {
         // pass
-      }else if (
+      } else if (
         name === "sketch.js" ||
         name === "stamper.js" ||
         fileDict[name].transferred ||
@@ -609,7 +654,7 @@ export default class ModalManager extends Component {
     ));
     return (
       <div>
-        {this.state.imageInputElem}
+        {this.state.miniInputElem}
         <Modal
           show={this.state.modalVisible}
           style={{ zIndex: 2000000000000000001 }}
