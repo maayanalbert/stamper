@@ -549,7 +549,7 @@ function noiseWave() {
         }}
       >
         <span hidden={!ipc} />
-        <div class="row ml-1" hidden={ipc}>
+        <div class="row ml-5" hidden={ipc}>
           <TopButton
             iconType={UploadIcon}
             uniqueClass="upload"
@@ -557,9 +557,9 @@ function noiseWave() {
               this.props.modalManagerRef.current.requestUpload();
             }}
             tooltipText="upload p5 sketch"
-            alignLeft
+            
           />
-          <span style={{ width: 120 }} />
+          <span style={{ width: 100 }} />
           <TopButton
             iconType={DownloadIcon}
             uniqueClass="download p5 sketch"
@@ -647,7 +647,7 @@ function noiseWave() {
         </div>
 
         <span hidden={!ipc} />
-        <div hidden={ipc}>
+        <div hidden={ipc} className="mr-5">
           <TopButton
             iconType={WorldsIcon}
             uniqueClass="worlds"
@@ -658,7 +658,7 @@ function noiseWave() {
                 this.props.modalManagerRef.current.requestWorldLoad(world.data)
             }))}
             tooltipText="examples..."
-            alignRight
+            
           />
         </div>
       </div>
