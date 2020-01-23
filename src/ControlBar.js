@@ -559,14 +559,14 @@ function noiseWave() {
             tooltipText="upload p5 sketch"
             alignLeft
           />
-          <span style={{ width: 100 }} />
+          <span style={{ width: 120 }} />
           <TopButton
             iconType={DownloadIcon}
             uniqueClass="download p5 sketch"
             iconCallback={() => {
               this.props.modalManagerRef.current.requestDownload();
             }}
-            tooltipText="download project"
+            tooltipText="download p5 sketch"
           />
         </div>
 
@@ -657,7 +657,7 @@ function noiseWave() {
               callback: () =>
                 this.props.modalManagerRef.current.requestWorldLoad(world.data)
             }))}
-            tooltipText="overwrite with example"
+            tooltipText="examples..."
             alignRight
           />
         </div>
@@ -815,7 +815,7 @@ class TopButton extends Component {
           style={{
             opacity: "1",
             position: "absolute",
-            right: 15,
+            right: 20,
             top: 5,
             transition: "all .2s ease-out"
           }}
@@ -832,7 +832,7 @@ class TopButton extends Component {
           style={{
             opacity: "1",
             position: "absolute",
-            left: 15,
+            left: 20,
             top: 5
           }}
         >
