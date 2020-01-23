@@ -35,7 +35,6 @@ import pf, { globals, p5Lib } from "./../../../globals.js";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 
-
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
   const electron = window.require("electron");
@@ -73,11 +72,11 @@ var Cristal = (function(_super) {
   function Cristal() {
     var _this = (_super !== null && _super.apply(this, arguments)) || this;
 
-    if(_this.props.zIndex){
-      var zIndex = _this.props.zIndex
-      Stacker.updateMaxIndex(zIndex)
-    }else{
-    var zIndex = Stacker.getNextIndex()
+    if (_this.props.zIndex) {
+      var zIndex = _this.props.zIndex;
+      Stacker.updateMaxIndex(zIndex);
+    } else {
+      var zIndex = Stacker.getNextIndex();
     }
 
     _this.state = {
@@ -91,17 +90,16 @@ var Cristal = (function(_super) {
       downKey: -1,
       isMoving: false,
       originalHeight: null,
-      ghostX:0,
-      ghostY:0
+      ghostX: 0,
+      ghostY: 0
     };
 
-
     _this.opt = 18;
-    _this.cmd = 91
-    _this.ctrl = 17
-    _this.plus = 187
-    _this.minus = 189
-    _this.zero = 48
+    _this.cmd = 91;
+    _this.ctrl = 17;
+    _this.plus = 187;
+    _this.minus = 189;
+    _this.zero = 48;
     _this.onWindowResize = function() {
       var _a = _this.state,
         x = _a.x,
@@ -124,14 +122,14 @@ var Cristal = (function(_super) {
       var width, height;
       if (initialSize) {
         var rect = _this.childrenElement.getBoundingClientRect();
-        if(initialSize.width){
-          width = initialSize.width
-        }else{
+        if (initialSize.width) {
+          width = initialSize.width;
+        } else {
           width = rect.width;
         }
-        if(initialSize.height){
-          height = initialSize.height
-        }else{
+        if (initialSize.height) {
+          height = initialSize.height;
+        } else {
           height = rect.height;
         }
       } else {
@@ -162,31 +160,26 @@ var Cristal = (function(_super) {
       _this.headerElement = el;
     };
 
-
     _this.onKeyDown = function(e) {
-
-
-      if(_this.state.downKey === _this.cmd || _this.state.downKey === _this.ctrl){
-  
-        if(e.keyCode === _this.zero){
-           e.preventDefault()
-        }else if(e.keyCode === _this.plus){
-           e.preventDefault()
-        }else if(e.keyCode === _this.minus){
-           e.preventDefault()
+      if (
+        _this.state.downKey === _this.cmd ||
+        _this.state.downKey === _this.ctrl
+      ) {
+        if (e.keyCode === _this.zero) {
+          e.preventDefault();
+        } else if (e.keyCode === _this.plus) {
+          e.preventDefault();
+        } else if (e.keyCode === _this.minus) {
+          e.preventDefault();
         }
-      }else{
+      } else {
         _this.setState({ downKey: e.keyCode });
-
       }
- 
     };
 
-
-
     _this.onKeyUp = function(e) {
-      if(e.keyCode === _this.state.downKey){
-      _this.setState({ downKey: -1 });
+      if (e.keyCode === _this.state.downKey) {
+        _this.setState({ downKey: -1 });
       }
     };
 
@@ -199,82 +192,93 @@ var Cristal = (function(_super) {
       });
     };
 
-    _this.manualResize = function(widthDiff, heightDiff){
+    _this.manualResize = function(widthDiff, heightDiff) {
+      var width = _this.state.width,
+        height = _this.state.height;
 
- 
-        var width = _this.state.width, 
-        height = _this.state.height
+      _this.setState({ width: width + widthDiff, height: height + heightDiff });
+    };
 
-        _this.setState({width:width+widthDiff, height:height + heightDiff})
-    }
+    _this.onWheel = function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
 
-  _this.onWheel = function(e){
-
-    if(e.ctrlKey){
-      e.preventDefault()
-    }
-  }
-
-  _this.getPosition = function(movementX, movementY){
-
-        var scale = _this.props.getScale()
+    _this.getPosition = function(movementX, movementY) {
+      var scale = _this.props.getScale();
       var newX = _this.state.ghostX + movementX;
-      var newY = _this.state.ghostY + movementY;    
-      this.setState({ghostX: newX, ghostY: newY})
-      var roundX = Math.round(newX / 50) * 50
-      var roundY = Math.round(newY /50) * 50
-      if(_this.props.getSnapToGrid()){
-      return {x:roundX, y:roundY}
-      }else{
-        return {x:newX, y:newY}
+      var newY = _this.state.ghostY + movementY;
+      this.setState({ ghostX: newX, ghostY: newY });
+      var snapMargin = _this.props.getSnapMargin();
+      if (snapMargin === 0) {
+        return { x: newX, y: newY };
+      } else {
+        var roundX = Math.round(newX / snapMargin) * snapMargin;
+        var roundY = Math.round(newY / snapMargin) * snapMargin;
+        return { x: roundX, y: roundY };
+      }
+    };
+
+    _this.getDimensions = function(widthDiff, heightDiff, changeX) {
+      var newWidth = _this.state.ghostX + widthDiff;
+      var newHeight = _this.state.ghostY + heightDiff;
+      var newAbsX = Math.round(_this.state.x + newWidth);
+      var newAbsY = Math.round(_this.state.y + newHeight);
+
+      if (changeX) {
+        newAbsX -= Math.round(_this.state.x + widthDiff);
       }
 
-  }
+      var ghostX = Math.max(newWidth, minWidth);
+      var ghostY = Math.max(newHeight, minHeight);
+      var onResize = _this.props.onResize;
 
-  _this.getDimensions = function(widthDiff, heightDiff, changeX){
-    var newWidth = _this.state.ghostX + widthDiff
-    var newHeight = _this.state.ghostY + heightDiff
-    var newAbsX = Math.round(_this.state.x + newWidth)
-    var newAbsY = Math.round(_this.state.y + newHeight)
+      var snapMargin = _this.props.getSnapMargin();
+      if (snapMargin === 0) {
+        var resizeBlocked = onResize(
+          widthDiff,
+          heightDiff,
+          _this.state.x,
+          false
+        );
+        if (!resizeBlocked) {
+          this.setState({ ghostX: ghostX, ghostY: ghostY });
+          return { widthDiff: widthDiff, heightDiff: heightDiff };
+        }
+      } else {
+        var roundAbsX = Math.round(newAbsX / snapMargin) * snapMargin;
+        var roundAbsY = Math.round(newAbsY / snapMargin) * snapMargin;
 
-    if(changeX){
-      newAbsX -= Math.round(_this.state.x + widthDiff)
-    }
+        var sendingWidthDiff = 0;
+        var sendingHeightDiff = 0;
+        if (newAbsX === roundAbsX) {
+          sendingWidthDiff = ghostX - _this.state.width;
+        }
+        if (newAbsY === roundAbsY) {
+          sendingHeightDiff = ghostY - _this.state.height;
+        }
 
-    var roundAbsX = Math.round(newAbsX / 50) * 50
-    var roundAbsY = Math.round(newAbsY /50) * 50
+        var resizeBlocked = onResize(
+          sendingWidthDiff,
+          sendingWidthDiff,
+          _this.state.x,
+          false
+        );
 
-
-
-    var ghostX = Math.max(newWidth, minWidth)
-    var ghostY = Math.max(newHeight, minHeight)
-
-      this.setState({ghostX:ghostX, 
-      ghostY:ghostY})
-
-        if(_this.props.getSnapToGrid()){
-      var sendingWidthDiff = 0
-      var sendingHeightDiff = 0
-      if(newAbsX === roundAbsX){
-        sendingWidthDiff = ghostX - _this.state.width
+        console.log(!resizeBlocked)
+        if (!resizeBlocked) {
+          this.setState({ ghostX: ghostX, ghostY: ghostY });
+          return { widthDiff: sendingWidthDiff, heightDiff: sendingHeightDiff };
+        }
       }
-      if(newAbsY === roundAbsY){
-        sendingHeightDiff =  ghostY- _this.state.height
-      }
 
-      return {widthDiff:sendingWidthDiff, heightDiff:sendingHeightDiff}
-
-    }else{
-      return {widthDiff:widthDiff, heightDiff:heightDiff}
-    }
-
-
-
-  }
+      return { widthDiff: 0, heightDiff: 0 };
+    };
 
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
-     var scale = _this.props.getScale()
+      var scale = _this.props.getScale();
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
@@ -286,8 +290,6 @@ var Cristal = (function(_super) {
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
 
- 
-
       if (isDragging) {
         ipc && ipc.send("edited");
         var size =
@@ -297,15 +299,15 @@ var Cristal = (function(_super) {
         var _b = getBoundaryCoords({ x: newX, y: newY }, size),
           x = _b.x,
           y = _b.y;
-      var newPosition = _this.getPosition(movementX/scale, movementY/scale)
-      var newX = newPosition.x
-      var newY = newPosition.y
-      _this.onStartMove(() => 
-
-{
-
-         _this.setState({x:newX, y:newY})
-})
+        var newPosition = _this.getPosition(
+          movementX / scale,
+          movementY / scale
+        );
+        var newX = newPosition.x;
+        var newY = newPosition.y;
+        _this.onStartMove(() => {
+          _this.setState({ x: newX, y: newY });
+        });
 
         // _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
@@ -317,15 +319,15 @@ var Cristal = (function(_super) {
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
-        var scale = _this.props.getScale()
+      var scale = _this.props.getScale();
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
         currentY = _a.y,
         currentWidth = _a.width,
         currentHeight = _a.height;
-      var movementX = e.movementX/scale,
-        movementY = e.movementY/scale;
+      var movementX = e.movementX / scale,
+        movementY = e.movementY / scale;
       var innerWidth = window.innerWidth,
         innerHeight = window.innerHeight;
       var newX = currentX + movementX;
@@ -339,24 +341,23 @@ var Cristal = (function(_super) {
       var width = currentWidth;
       var x = currentX;
 
-      var widthDiff = 0
-      var heightDiff = 0
-      var changeX = false
+      var widthDiff = 0;
+      var heightDiff = 0;
+      var changeX = false;
 
       if (isResizingX) {
-
-        widthDiff = movementX
+        widthDiff = movementX;
         // var width = Math.max(newWidth, minWidth);
       }
       if (isResizingXLeft) {
-        widthDiff = -movementX
-        changeX = true
-    
+        widthDiff = -movementX;
+        changeX = true;
+
         // var width = Math.max(newWidth, minWidth);
         // var x = currentX + movementX;
       }
       if (isResizingY) {
-        heightDiff = movementY
+        heightDiff = movementY;
         // var height = Math.max(newHeight, minHeight);
       }
 
@@ -374,58 +375,46 @@ var Cristal = (function(_super) {
     _this.onStartMove = function(callBack) {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
-
-        _this.setState({ghostX:_this.state.x, ghostY:_this.state.y}, () => {
-
-      _this.setState({ isMoving: true }, () => callBack());
-
-        })
-        _this.notifyStartMove()
+        _this.setState({ ghostX: _this.state.x, ghostY: _this.state.y }, () => {
+          _this.setState({ isMoving: true }, () => callBack());
+        });
+        _this.notifyStartMove();
         if (_this.state.downKey === _this.opt) {
-        
           _this.notifyOptMove();
         }
-      }else{
-        callBack()
+      } else {
+        callBack();
       }
-
     };
     _this.notifyMove = function() {
       var onMove = _this.props.onMove;
       onMove && onMove(_this.state);
     };
     _this.notifyZChange = function() {
-
       var onZChange = _this.props.onZChange;
       onZChange && onZChange(_this.state);
     };
     _this.notifyResize = function(widthDiff, heightDiff, changeX) {
-
       var onResize = _this.props.onResize;
       // var heightDiff = newHeight - _this.state.height;
       // var widthDiff = newWidth - _this.state.width;
       var resizeBlocked = false;
-      if (onResize) {
-        var resizeBlocked = onResize(widthDiff, heightDiff, _this.state.x, false);
-      }
-      if (!resizeBlocked) {
-        var dimensions = this.getDimensions(widthDiff, heightDiff, changeX)
 
-        widthDiff = dimensions.widthDiff
-        heightDiff = dimensions.heightDiff
-        var newHeight =Math.max(_this.state.height + heightDiff, minHeight)
-        var newWidth =Math.max(_this.state.width + widthDiff, minWidth)
-        var newX = _this.state.x
-        if(changeX){
-          newX -= widthDiff
-        } 
-onResize(widthDiff, heightDiff, _this.state.x, true);
-        _this.setState({ height: newHeight, width: newWidth, x: newX });
+      var dimensions = this.getDimensions(widthDiff, heightDiff, changeX);
+
+      widthDiff = dimensions.widthDiff;
+      heightDiff = dimensions.heightDiff;
+      var newHeight = Math.max(_this.state.height + heightDiff, minHeight);
+      var newWidth = Math.max(_this.state.width + widthDiff, minWidth);
+      var newX = _this.state.x;
+      if (changeX) {
+        newX -= widthDiff;
       }
+      onResize(widthDiff, heightDiff, _this.state.x, true);
+      _this.setState({ height: newHeight, width: newWidth, x: newX });
     };
 
     _this.notifyStartMove = function() {
-
       var onStartMove = _this.props.onStartMove;
       onStartMove && onStartMove(_this.state);
     };
@@ -464,7 +453,7 @@ onResize(widthDiff, heightDiff, _this.state.x, true);
       });
     };
     _this.startFullResize = function() {
-      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
+      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
       _this.notifyStartResize();
       _this.setState({
         isResizingX: true,
@@ -472,7 +461,7 @@ onResize(widthDiff, heightDiff, _this.state.x, true);
       });
     };
     _this.startFullLeftResize = function() {
-      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
+      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
       _this.notifyStartResize();
       _this.setState({
         isResizingXLeft: true,
@@ -480,17 +469,17 @@ onResize(widthDiff, heightDiff, _this.state.x, true);
       });
     };
     _this.startXResize = function() {
-      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
+      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
       _this.notifyStartResize();
       return _this.setState({ isResizingX: true });
     };
     _this.startXLeftResize = function() {
-      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
+      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
       _this.notifyStartResize();
       return _this.setState({ isResizingXLeft: true });
     };
     _this.startYResize = function() {
-      _this.setState({ghostX:_this.state.width, ghostY:_this.state.height})
+      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
       _this.notifyStartResize();
       return _this.setState({ isResizingY: true });
     };
@@ -502,15 +491,15 @@ onResize(widthDiff, heightDiff, _this.state.x, true);
       var scale = _this.props.getScale();
       var height = _this.state.height;
       var width = _this.state.width;
-      var thickness = 5
-      var color = "transparent"
+      var thickness = 5;
+      var color = "transparent";
       return [
-React.createElement(RightResizeHandle, {
+        React.createElement(RightResizeHandle, {
           key: "right-resize",
           onMouseDown: _this.startXResize,
           style: {
-            background:color,
-            right:-thickness/2,
+            background: color,
+            right: -thickness / 2,
             width: thickness / scale,
             bottom: thickness / scale,
             height: height - 30 - thickness / scale
@@ -520,8 +509,8 @@ React.createElement(RightResizeHandle, {
           key: "left-resize",
           onMouseDown: _this.startXLeftResize,
           style: {
-                        background:color,
-            left:-thickness/2,
+            background: color,
+            left: -thickness / 2,
             width: thickness / scale,
             bottom: thickness / scale,
             height: height - 30 - thickness / scale
@@ -530,28 +519,31 @@ React.createElement(RightResizeHandle, {
         React.createElement(BottomRightResizeHandle, {
           key: "bottom-right-resize",
           onMouseDown: _this.startFullResize,
-          style: { 
-background:color,
-   right:-thickness/2,
-   bottom:-thickness/2,
-            width: thickness / scale, 
-            height: thickness / scale }
+          style: {
+            background: color,
+            right: -thickness / 2,
+            bottom: -thickness / 2,
+            width: thickness / scale,
+            height: thickness / scale
+          }
         }),
         React.createElement(BottomLeftResizeHandle, {
           key: "bottom-left-resize",
           onMouseDown: _this.startFullLeftResize,
-          style: { 
-background:color,
-   left:-thickness/2,
-   bottom:-thickness/2,
-            width: thickness / scale, height: thickness / scale }
+          style: {
+            background: color,
+            left: -thickness / 2,
+            bottom: -thickness / 2,
+            width: thickness / scale,
+            height: thickness / scale
+          }
         }),
         React.createElement(BottomResizeHandle, {
           key: "bottom-resize",
           onMouseDown: _this.startYResize,
           style: {
-                        background:color,
-            bottom:-thickness/2,
+            background: color,
+            bottom: -thickness / 2,
             height: thickness / scale,
             left: thickness / scale,
             width: width - (2 * thickness) / scale
@@ -562,10 +554,12 @@ background:color,
 
     _this.changeZIndex = function() {
       var zIndex = _this.state.zIndex;
-      _this.setState({
-        zIndex: Stacker.getNextIndex(zIndex)
-      }, _this.notifyZChange);
-
+      _this.setState(
+        {
+          zIndex: Stacker.getNextIndex(zIndex)
+        },
+        _this.notifyZChange
+      );
     };
 
     return _this;
@@ -577,16 +571,13 @@ background:color,
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
-    var iframeElem = document.getElementById("iframe" + this.props.parentID)
+    var iframeElem = document.getElementById("iframe" + this.props.parentID);
 
-    if(iframeElem){
+    if (iframeElem) {
+      iframeElem.addEventListener("wheel", e => console.log(e));
+    }
 
-
-      iframeElem.addEventListener("wheel", (e) => console.log(e))
-
-    } 
-
-    this.notifyZChange()
+    this.notifyZChange();
     // window.addEventListener('resize', this.onWindowResize);
   };
   Cristal.prototype.componentWillUnmount = function() {
@@ -599,7 +590,6 @@ background:color,
 
     // window.removeEventListener('resize', this.onWindowResize);
   };
-
 
   Object.defineProperty(Cristal.prototype, "isResizing", {
     get: function() {
@@ -625,53 +615,52 @@ background:color,
       return null;
     }
 
-    var uniqueClass = classVal +  _this.props.parentID.toString()
+    var uniqueClass = classVal + _this.props.parentID.toString();
     var mouseOverCallback = () => {
-      $("." + uniqueClass).css({opacity: "1"})
+      $("." + uniqueClass).css({ opacity: "1" });
     };
 
     var mouseOutCallback = () => {
-      $("." + uniqueClass).css({opacity: globals.iconOpacity})
+      $("." + uniqueClass).css({ opacity: globals.iconOpacity });
     };
-    var opacity = globals.iconOpacity
+    var opacity = globals.iconOpacity;
     if (!callBack) {
       mouseOverCallback = () => {};
       mouseOutCallback = () => {};
-      opacity = opacity * .5
+      opacity = opacity * 0.5;
     }
-
 
     var icon = React.createElement("img", {
       onClick: callBack,
-      style: { opacity: opacity, height: globals.iconSize, width: globals.iconSize },
-      className: "text-greyIcon m-1 " + uniqueClass ,
+      style: {
+        opacity: opacity,
+        height: globals.iconSize,
+        width: globals.iconSize
+      },
+      className: "text-greyIcon m-1 " + uniqueClass,
       onMouseOver: mouseOverCallback,
-      onMouseOut: mouseOutCallback, 
-      src:iconType
+      onMouseOut: mouseOutCallback,
+      src: iconType
     });
 
-    if(!tooltipText){
-      return icon
+    if (!tooltipText) {
+      return icon;
     }
-        return (
-        <div     onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}     >
-        <OverlayTrigger 
+    return (
+      <div onMouseOver={mouseOverCallback} onMouseOut={mouseOutCallback}>
+        <OverlayTrigger
           trigger="hover"
           placement="top"
-
           overlay={
-            <Tooltip id="alert" className="picker" style={{fontSize:12}}
-                     >
+            <Tooltip id="alert" className="picker" style={{ fontSize: 12 }}>
               {tooltipText}
             </Tooltip>
-            
           }
         >
           {icon}
-        </OverlayTrigger></div>)
-   
-
-
+        </OverlayTrigger>
+      </div>
+    );
   }
 
   Object.defineProperty(Cristal.prototype, "header", {
@@ -709,14 +698,14 @@ background:color,
         "clear console"
       );
 
-      if(_a.onMinimize){
-      var minimizeBtn = createIcon(
-        this,
-        MinimzeIcon,
-        _a.onMinimize === null,
-        "mouseOnMinimize",
-        _a.onMinimize
-      );        
+      if (_a.onMinimize) {
+        var minimizeBtn = createIcon(
+          this,
+          MinimzeIcon,
+          _a.onMinimize === null,
+          "mouseOnMinimize",
+          _a.onMinimize
+        );
       }
 
       var titleIcon = null;
@@ -724,11 +713,14 @@ background:color,
         var titleIcon = createIcon(this, this.props.icon);
       }
 
-      var makeBigIcon = createIcon(this, 
-        CodeSizeIcon, 
-        !_a.showCodeSize, "mouseOnBig",
-         _a.onCodeSize,
-         "toggle text size" )
+      var makeBigIcon = createIcon(
+        this,
+        CodeSizeIcon,
+        !_a.showCodeSize,
+        "mouseOnBig",
+        _a.onCodeSize,
+        "toggle text size"
+      );
 
       var sideButtons = (
         <div
@@ -774,7 +766,7 @@ background:color,
       width = _a.width,
       height = _a.height,
       isDragging = _a.isDragging,
-      zIndex = _a.zIndex
+      zIndex = _a.zIndex;
     var className = this.props.className;
     var isActive = isDragging || isResizing;
     var style = {
@@ -795,18 +787,18 @@ background:color,
     }
 
     return React.createElement(
-        Wrapper,
-        {
-          style: style,
-          ref: this.saveWrapperRef,
-          isActive: isActive,
-          className: className + " rounded " + this.props.wrapperName,
-          onMouseDown: this.changeZIndex
-        },
-        <div>{HeaderComponent}</div>,
-        ContentComponent,
-        this.renderResizeHandles()
-      )
+      Wrapper,
+      {
+        style: style,
+        ref: this.saveWrapperRef,
+        isActive: isActive,
+        className: className + " rounded " + this.props.wrapperName,
+        onMouseDown: this.changeZIndex
+      },
+      <div>{HeaderComponent}</div>,
+      ContentComponent,
+      this.renderResizeHandles()
+    );
   };
   Cristal.defaultProps = {
     children: null,

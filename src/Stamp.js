@@ -714,7 +714,7 @@ onMouseOver={this.compileCallback.bind(this)}
           zIndex={this.props.starterZIndex}
           onZChange={s => this.setState({ zIndex: s.zIndex })}
           getScale={this.props.getScale}
-          getSnapToGrid={this.props.getSnapToGrid}
+          getSnapMargin={this.props.getSnapMargin}
           initialSize={{
             width: iframeWidth + this.state.editorWidth + 42,
             height: initialHeight

@@ -84,7 +84,7 @@ export default class View extends Component {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
-
+    this.gridSize = 50
     this.newStampMarginVariance = 100;
     this.newStampMargin = 20;
     this.space = 32;
@@ -600,7 +600,7 @@ function logToConsole(message, lineno){
         initialHidden={data.hidden}
         getScale={this.getScale.bind(this)}
         starterZIndex={data.zIndex}
-        getSnapToGrid={this.getSnapToGrid.bind(this)}
+        getSnapMargin={this.getSnapMargin.bind(this)}
 
       />
     );
@@ -685,7 +685,7 @@ function logToConsole(message, lineno){
         getHTML={this.getHTML.bind(this)}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
         getScale={this.getScale.bind(this)}
-        getSnapToGrid={this.getSnapToGrid.bind(this)}
+        getSnapMargin={this.getSnapMargin.bind(this)}
       />
     );
 
@@ -1352,8 +1352,13 @@ _stopLooping =setTimeout(() => {
     return this.state.scale;
   }
 
-  getSnapToGrid(){
-    return this.state.snapToGrid
+  getSnapMargin(){
+    if(this.state.snapToGrid){
+      return this.gridSize
+    }else{
+      return 0
+    }
+
   }
 
   onDragEnd(result){
@@ -1379,6 +1384,34 @@ _stopLooping =setTimeout(() => {
     )
 
   }
+
+
+  renderGridLines(){
+    if(this.state.snapToGrid === false){
+      return null
+    }
+
+    var gridLines = []
+
+    var x = 0
+    while(x < window.innerWidth){
+      gridLines.push(<span className="border-left border-greyBorder"
+        style={{position:"absolute", top:0, height:window.innerHeight, 
+        width:10, left:x, background:"transparent"}} />)
+      x += this.gridSize
+    }
+
+    var y = 0
+    while(y < window.innerHeight){
+      gridLines.push(<span className="border-top border-greyBorder"
+        style={{position:"absolute", top:y, height:10, 
+        width:window.innerWidth, left:0, background:"transparent"}} />)
+      y += this.gridSize
+    }
+
+    return gridLines
+  }
+
 
   setLayerPicker() {
 
@@ -1457,6 +1490,7 @@ var name = this.getFirstLine(stampRef.state.code);
               transform: "scale(" + this.state.scale + ")"
             }}
           >
+            {this.renderGridLines()}
             {Object.values(this.state.stampElems)}
             {consoleElem}
           </div>
