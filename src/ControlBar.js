@@ -652,11 +652,19 @@ function noiseWave() {
             iconType={WorldsIcon}
             uniqueClass="worlds"
             iconCallback={null}
-            dropDownData={worlds.map(world => ({
+            dropDownData={
+              [{
+                name:"publish current sketch",
+                callback:() => this.props.modalManagerRef.current.requestPublish()
+              }].concat(
+
+
+              worlds.map(world => ({
               name: world.name,
               callback: () =>
                 this.props.modalManagerRef.current.requestWorldLoad(world.data)
-            }))}
+            })))
+            }
             tooltipText="examples..."
             
           />
@@ -750,7 +758,9 @@ class TopButton extends Component {
     var dropDowns = this.props.dropDownData.map(data => {
       var oneWordName = "";
       if (data.name) {
-        oneWordName = data.name.replace(" ", "-");
+
+        oneWordName = data.name.replace(new RegExp(' ', 'g'), "-");
+
       }
       return (
         <div

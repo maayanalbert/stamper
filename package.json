@@ -24,6 +24,7 @@
     "electron-updater": "^4.2.0",
     "esprima": "^4.0.1",
     "fs-jetpack": "^2.2.3",
+    "github-api": "^3.3.0",
     "htmlparser": "^1.7.7",
     "jszip": "^3.2.2",
     "lodash": "^4.17.15",

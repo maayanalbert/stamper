@@ -18,7 +18,7 @@ import pf1, {
   starter,
   stamperHeader
 } from "./starterStamps.js";
-
+var GitHub = require("github-api");
 const { detect } = require("detect-browser");
 var deepEqual = require("deep-equal");
 const browser = detect();
@@ -44,11 +44,20 @@ export default class ModalManager extends Component {
       cdnLibs: false,
       askedAboutCdn: false,
       inputElem: null,
-      miniInputElem: null
+      miniInputElem: null,
+      publishVisible: false,
+      publishModalName: undefined,
+      publishModalAuthor: undefined,
+      publishModalSuccess:false,
+      publishModalLink:""
     };
 
+    this.domain = "maayanalbert.github.io/p5stamper"
+    this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
+    this.githubUsername = "p5stamper";
     this.checkFiles = this.checkFiles.bind(this);
     this.hideModal = this.hideModal.bind(this);
+    this.hidePublishModal = this.hidePublishModal.bind(this);
     this.sendSaveData = this.sendSaveData.bind(this);
     this.libs = {
       "p5.js": "https://cdn.jsdelivr.net/npm/p5",
@@ -68,13 +77,41 @@ export default class ModalManager extends Component {
     };
   }
 
+  loadInitialStamperObject() {
+    if (ipc) {
+      this.props.loadStamperObject(starter);
+      return;
+    }
+
+    var stored = localStorage.getItem("storedStamper");
+
+    if (stored === null) {
+      this.props.loadStamperObject(starter);
+      return;
+    }
+
+    try {
+      var stamperObject = JSON.parse(
+        LZUTF8.decompress(stored, {
+          inputEncoding: "StorageBinaryString"
+        })
+      );
+      this.props.loadStamperObject(stamperObject);
+      return;
+    } catch (error) {
+      this.props.loadStamperObject(starter);
+      return;
+    }
+  }
+
   componentDidMount() {
+    this.loadInitialStamperObject();
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({ saveInterval: saveInterval });
     ipc &&
       ipc.on("requestUpload", event => {
         this.requestUpload();
-        var buttons = []
+        var buttons = [];
         buttons.push({
           text: "open",
           color: "outline-primary",
@@ -85,14 +122,11 @@ export default class ModalManager extends Component {
 
         this.setState({
           modalVisible: true,
-          modalHeader:
-            "Please select a p5.js sketch folder.",
+          modalHeader: "Please select a p5.js sketch folder.",
           modalContent:
             "It must have an index.html and sketch.js in the root. It doesn't need to have been created in Stamper.",
           modalButtons: buttons
         });
-
-
       });
 
     ipc &&
@@ -273,37 +307,26 @@ export default class ModalManager extends Component {
     }
   }
 
-
-
-
-
   uploadMini(e, fileType) {
-    var files = Object.assign([], e.target.files)
+    var files = Object.assign([], e.target.files);
 
     files.map(file => {
-
-
       var reader = new FileReader();
-
-
 
       var callback = imgData =>
         this.props.addStamp(imgData, id => this.props.requestCompile(id));
 
-      reader.onload = (e) => {
+      reader.onload = e => {
+        var data = {
+          code: e.target.result,
+          name: file.name,
+          isMediaFile: fileType != "text",
+          isTxtFile: fileType === "text"
+        };
+        callback(data);
+      };
 
-    var data = {
-      code: e.target.result,
-      name: file.name,
-      isMediaFile: fileType != "text",
-      isTxtFile: fileType === "text"
-    };
-    callback(data);
-
-
-      }
-
-      reader.onload.bind(this)
+      reader.onload.bind(this);
 
       if (file.type.startsWith("text")) {
         if (!fileType) {
@@ -325,12 +348,7 @@ export default class ModalManager extends Component {
       } else {
         reader.readAsDataURL(file);
       }
-
-
-    })
-
-
-    
+    });
   }
 
   readFiles(files) {
@@ -664,6 +682,113 @@ export default class ModalManager extends Component {
     this.setState({ modalVisible: false });
   }
 
+  hidePublishModal() {
+    this.setState({ publishVisible: false });
+  }
+
+  requestPublish() {
+    var worldData = this.props.getWorldData();
+    var localWorldAuthor = localStorage.getItem("localWorldAuthor");
+
+    var publishModalName = "";
+    if (worldData.worldName) {
+      publishModalName = worldData.worldName;
+    }
+
+    var publishModalAuthor = "";
+    if (localWorldAuthor) {
+      publishModalAuthor = localWorldAuthor;
+    }
+
+    this.setState(
+      {
+        publishModalName: publishModalName,
+        publishModalAuthor: publishModalAuthor
+      },
+      () => {
+        this.setState({ publishVisible: true, publishSubmitted:false });
+      }
+    );
+
+    // console.log("hi")
+    // var gh = new GitHub({token:this.oauthToken})
+
+    // var repo = gh.getRepo("p5stamper", "worlds")
+
+    // repo.writeFile("master", "test.json", "Hello World", "testing", {})
+  }
+
+  renderPublishModal() {
+    return (
+      <Modal
+        show={this.state.publishVisible}
+        style={{ zIndex: 2000000000000000001 }}
+        centered
+        onHide={this.hidePublishModal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="name">{"Publish current sketch"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div class="picker ">
+            {
+              "This will add your sketch to the examples list and give you a link to share it with."
+            }
+            <div class="row picker p-2">
+              <input
+                placeholder="name"
+                class="picker m-1"
+                style={{ width: 150 }}
+                value={this.state.publishModalName}
+                onChange={e =>
+                  this.setState({
+                    publishModalName: e.target.value.split("%").join("_")
+                  })
+                }
+              />
+              <div class="picker m-2">{"by"}</div>
+              <input
+                placeholder="author (you)"
+                class="picker m-1"
+                style={{ width: 150 }}
+                value={this.state.publishModalAuthor}
+                onChange={e =>
+                  this.setState({
+                    publishModalAuthor: e.target.value.split("%").join("_")
+                  })
+                }
+              />
+            </div>
+            <div hidden={!this.state.publishModalSuccess}>
+            <div class="picker">Yay! Your sketch was successfully published. Use this link to access it:</div> 
+            <u class="picker">{this.state.publishModalLink}</u>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant={"outline-secondary"}
+            size="sm"
+            onClick={this.hidePublishModal}
+          >
+            {"cancel"}
+          </Button>
+          <Button
+            variant={"outline-primary"}
+            size="sm"
+            onClick={this.publishWorld.bind()}
+          >
+            {"publish"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+
+  publishWorld(){
+
+  }
+
   render() {
     var buttonElems = this.state.modalButtons.map(btnData => (
       <Button variant={btnData.color} size="sm" onClick={btnData.callback}>
@@ -687,6 +812,8 @@ export default class ModalManager extends Component {
             {buttonElems}
           </Modal.Footer>
         </Modal>
+
+        {this.renderPublishModal()}
       </div>
     );
   }

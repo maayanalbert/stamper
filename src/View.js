@@ -74,7 +74,11 @@ export default class View extends Component {
       downKey: -1,
       panDisabled: false,
       stampOrder:[],
-      snapToGrid:false
+      snapToGrid:false,
+      worldName:undefined,
+      worldAuthor:undefined,
+      worldKey:undefined,
+      worldPublishTime:undefined
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -99,35 +103,10 @@ export default class View extends Component {
 
   }
 
-  loadInitialStamperObject(){
-    if(ipc){
-      this.loadStamperObject(starter)
-      return
-    }
-
-    var stored = localStorage.getItem('storedStamper')
-
-    if(stored === null){
-      this.loadStamperObject(starter)
-      return
-    }
-
-    try{
-      var stamperObject = JSON.parse(LZUTF8.decompress(stored, {
-        inputEncoding: "StorageBinaryString"
-      }))
-      this.loadStamperObject(stamperObject)
-      return
-    }catch(error){
-      this.loadStamperObject(starter)
-      return
-    }
-  }
 
   componentDidMount() {
 
 
-    this.loadInitialStamperObject()
     
 
     document.addEventListener("wheel", this.onWheel);
@@ -170,6 +149,7 @@ export default class View extends Component {
     if (e.keyCode === this.space) {
       document.body.style.cursor = "grab";
     }
+  
 
     var centerX = window.innerWidth / 2 + this.state.topBarHeight;
     var centerY = window.innerHeight / 2 + this.state.sideBarWidth;
@@ -186,6 +166,7 @@ export default class View extends Component {
       }
     } else if(this.state.downKey === this.shft){
       if(e.keyCode === this.g){
+
         var snapToGrid = this.state.snapToGrid
         this.setState({snapToGrid:!snapToGrid})
       }
@@ -308,7 +289,11 @@ export default class View extends Component {
         originX: 0,
         originY: 0,
         compiledBefore: false,
-        stampOrder:[]
+        stampOrder:[],      
+        worldName:undefined,
+      worldAuthor:undefined,
+      worldKey:undefined,
+      worldPublishTime:undefined
       },
       () => {
 
@@ -316,7 +301,11 @@ export default class View extends Component {
           {
             scale: stamperObject.scale,
             originX: stamperObject.originX,
-            originY: stamperObject.originY
+            originY: stamperObject.originY,
+            worldName:stamperObject.worldName,
+            worldAuthor:stamperObject.worldAuthor,
+            worldKey:stamperObject.worldKey,
+            worldPublishTime:stamperObject.worldPublishTime
           },
           () => {
 
@@ -457,9 +446,9 @@ function logToConsole(message, lineno){
       }
       if (item.current.props.isTxtFile || item.current.props.isMediaFile) {
         htmlCode = htmlCode
-          .replace(`'${name}'`, `"${code}"`)
-          .replace("`" + name + "`", `"${code}"`)
-          .replace(`"${name}"`, `"${code}"`);
+          .split(`'${name}'`).join(`"${code}"`) 
+          .split("`" + name + "`").join(`"${code}"`)
+          .split(`"${name}"`).join(`"${code}"`)
 
       }
     });
@@ -1211,12 +1200,14 @@ _stopLooping =setTimeout(() => {
 
 `;
 
-    runnableCode = runnableCode.replace(
-      "noLoop()",
-      `noLoop(); _isLooping = false`
-    );
-    runnableCode = runnableCode.replace("loop()", `loop(); _isLooping = true`);
+    runnableCode = runnableCode.split("noLoop()").join(`noLoop(); _isLooping = false`)
+
+
+    runnableCode = runnableCode.split("loop()").join(`loop(); _isLooping = true`)
+
+
     runnableCode = runnableCode + loopingCallbacks;
+
 
     return runnableCode;
   }
@@ -1253,7 +1244,11 @@ _stopLooping =setTimeout(() => {
       scale: this.state.scale,
       console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
-      originY: this.state.originY
+      originY: this.state.originY,
+      worldName:this.state.worldName,
+      worldAuthor:this.state.worldAuthor,
+      worldKey:this.state.worldKey,
+      worldPublishTime:this.state.worldPublishTime
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1557,6 +1552,8 @@ var name = this.getFirstLine(stampRef.state.code);
           getFileDict={this.getFileDict.bind(this)}
           addStamp={this.addStamp.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
+          getWorldData={() => {return {worldName:this.state.worldName, worldAuthor:this.state.worldAuthor, 
+            worldKey:this.state.worldKey, worldPublishTime:this.state.worldPublishTime}} }
         />
       </div>
     );

@@ -77,7 +77,9 @@ var Cristal = (function(_super) {
       Stacker.updateMaxIndex(zIndex);
     } else {
       var zIndex = Stacker.getNextIndex();
+  
     }
+
 
     _this.state = {
       x: padding,
