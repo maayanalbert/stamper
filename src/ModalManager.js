@@ -74,14 +74,9 @@ export default class ModalManager extends Component {
     ipc &&
       ipc.on("requestUpload", event => {
         this.requestUpload();
-      });
-
-    ipc &&
-      ipc.on("exteriorChanges", event => {
-        var buttons = [];
-
+        var buttons = []
         buttons.push({
-          text: "re-open project",
+          text: "open",
           color: "outline-primary",
           callback: () => {
             this.requestUpload();
@@ -91,9 +86,33 @@ export default class ModalManager extends Component {
         this.setState({
           modalVisible: true,
           modalHeader:
-            "The directory that your project was saved in has changed.",
+            "Please select a p5.js sketch folder.",
           modalContent:
-            "Please re-specify where you want your project to be saved.",
+            "It must have an index.html and sketch.js in the root. It doesn't need to have been created in Stamper.",
+          modalButtons: buttons
+        });
+
+
+      });
+
+    ipc &&
+      ipc.on("exteriorChanges", event => {
+        var buttons = [];
+
+        buttons.push({
+          text: "re-open sketch",
+          color: "outline-primary",
+          callback: () => {
+            this.requestUpload();
+          }
+        });
+
+        this.setState({
+          modalVisible: true,
+          modalHeader:
+            "The directory that your sketch was saved in has changed.",
+          modalContent:
+            "Please re-specify where you want your sketch to be saved.",
           modalButtons: buttons
         });
       });
@@ -126,13 +145,13 @@ export default class ModalManager extends Component {
 
   createInputElement() {
     var inputElem = document.createElement("input", {
-      id: "projectInput",
+      id: "sketchInput",
       type: "file",
       webkitdirectory: "true",
       multiple: "true"
     });
     var idAttr = document.createAttribute("id");
-    idAttr.value = "projectInput";
+    idAttr.value = "sketchInput";
     inputElem.setAttributeNode(idAttr);
 
     var typeAttr = document.createAttribute("type");
@@ -197,7 +216,7 @@ export default class ModalManager extends Component {
 
   requestUpload() {
     document
-      .getElementById("projectInput")
+      .getElementById("sketchInput")
       .dispatchEvent(new MouseEvent("click"));
     document.body.onfocus = () => {
       document.body.onfocus = null;
@@ -373,7 +392,7 @@ export default class ModalManager extends Component {
         modalVisible: true,
         modalHeader: "Would you like to import p5's core libraries via CDN?",
         modalContent:
-          "The libraries are currently stored in large files in your project. This may cause Stamper to run slowly. Importing them via CDN won't cause them to behave differently but will speed up Stamper.",
+          "The libraries are currently stored in large files in your sketch. This may cause Stamper to run slowly. Importing them via CDN won't cause them to behave differently but will speed up Stamper.",
         modalButtons: buttons
       });
     } else {
@@ -416,7 +435,7 @@ export default class ModalManager extends Component {
     });
     if (!ipc) {
       buttons.push({
-        text: "yes, but download my current project first",
+        text: "yes, but download my current sketch first",
         color: "outline-primary",
         callback: () => {
           this.requestDownload();
@@ -469,7 +488,7 @@ export default class ModalManager extends Component {
     });
 
     zip.generateAsync({ type: "blob" }).then(function(content) {
-      saveAs(content, "stamper_project.zip");
+      saveAs(content, "stamper_sketch.zip");
     });
   }
 
@@ -521,7 +540,7 @@ export default class ModalManager extends Component {
         modalVisible: true,
         modalHeader: "Oh no! It looks like you're missing some files.",
         modalContent:
-          "Stamper projects must have an 'index.html' file and a 'sketch.js' file.",
+          "Stamper sketchs must have an 'index.html' file and a 'sketch.js' file.",
         modalButtons: [
           { text: "ok", color: "outline-secondary", callback: this.hideModal }
         ]
@@ -623,21 +642,21 @@ export default class ModalManager extends Component {
 
     stamperObject.stamps = fnData;
 
-    var projectPath = "";
-    var projectName = "";
+    var sketchPath = "";
+    var sketchName = "";
     if (ipc) {
-      var projectPathArr = fileDict["index.html"].path.split("/");
-      projectPathArr.pop();
+      var sketchPathArr = fileDict["index.html"].path.split("/");
+      sketchPathArr.pop();
 
-      projectPath = projectPathArr.join("/") + "/";
-      projectName = projectPathArr.pop();
+      sketchPath = sketchPathArr.join("/") + "/";
+      sketchName = sketchPathArr.pop();
     }
 
     this.props.loadStamperObject(stamperObject);
     ipc &&
       ipc.send("updatePath", {
-        path: projectPath,
-        name: projectName,
+        path: sketchPath,
+        name: sketchName,
         fileDict: fileDict
       });
   }

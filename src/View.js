@@ -166,6 +166,7 @@ export default class View extends Component {
   }
 
   onKeyDown(e) {
+
     if (e.keyCode === this.space) {
       document.body.style.cursor = "grab";
     }
@@ -802,11 +803,11 @@ callback(id)
 
     this.checkForSetup();
 
-    if (this.state.compiledBefore === false) {
-      this.setState({ compiledBefore: true });
-    } else {
-      ipc && ipc.send("edited");
-    }
+    // if (this.state.compiledBefore === false) {
+    //   this.setState({ compiledBefore: true });
+    // } else {
+    //   ipc && ipc.send("edited");
+    // }
 
     // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
 

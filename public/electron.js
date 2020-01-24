@@ -125,7 +125,7 @@ function setMenu() {
     label: "File",
     submenu: [
       {
-        label: "New Project",
+        label: "New",
         click() {
           fileManager.onNewProject();
         },

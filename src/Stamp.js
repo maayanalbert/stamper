@@ -24,7 +24,7 @@ import "ace-builds/src-noconflict/snippets/javascript";
 
 import { Resizable, ResizableBox } from "react-resizable";
 
-var mime = require('mime-types')
+var mime = require("mime-types");
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -42,20 +42,25 @@ export default class FunctionStamp extends Component {
       starterEditorWidth = 0;
     }
     var starterArgs = this.props.starterArgs;
-    if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile || this.props.isBlob) {
+    if (
+      this.props.isIndex ||
+      this.props.isTxtFile ||
+      this.props.isMediaFile ||
+      this.props.isBlob
+    ) {
       starterArgs = " ";
     }
 
-    var starterName = this.props.starterName
-    if(this.props.isBlob){
-      starterName = ""
+    var starterName = this.props.starterName;
+    if (this.props.isBlob) {
+      starterName = "";
     }
 
-    var starterIframeWidth = this.props.starterIframeWidth
-    var starterIframeHeight = this.props.starterIframeHeight
-    if(this.props.isTxtFile || this.props.isBlob){
-      starterIframeWidth = 0
-      starterIframeHeight = 0
+    var starterIframeWidth = this.props.starterIframeWidth;
+    var starterIframeHeight = this.props.starterIframeHeight;
+    if (this.props.isTxtFile || this.props.isBlob) {
+      starterIframeWidth = 0;
+      starterIframeHeight = 0;
     }
 
     this.state = {
@@ -80,9 +85,9 @@ export default class FunctionStamp extends Component {
       looping: true,
       loopingTransition: "",
       zIndex: -1,
-      exportableCode:"",
-      codeSize:this.props.starterCodeSize,
-      dataUri:""
+      exportableCode: "",
+      codeSize: this.props.starterCodeSize,
+      dataUri: ""
     };
 
     this.cristalRef = React.createRef();
@@ -104,29 +109,30 @@ export default class FunctionStamp extends Component {
   }
 
   updateLooping(e) {
-
     if (
       e.data.type != "loop" ||
       e.data.id != this.props.id ||
       this.props.isIndex ||
-      this.props.isMediaFile || this.props.isBlob
+      this.props.isMediaFile ||
+      this.props.isBlob
     ) {
       return;
     }
 
-
     if (e.data.message === "start") {
       this.setState({ looping: true, loopingTransition: "" });
     } else if (e.data.message === "stop") {
-      this.setState({ looping: false, loopingTransition: "all 1s ease-in" });
+      this.setState({
+        looping: false,
+        loopingTransition: "opacity 1s ease-in"
+      });
     }
   }
-
 
   componentDidMount() {
     // this.loadp5Lib()
     this.checkName();
-    this.setDataUri(() => this.props.requestCompile(this.props.id))
+    this.setDataUri(() => this.props.requestCompile(this.props.id));
     window.addEventListener("message", this.updateLooping);
   }
 
@@ -134,33 +140,33 @@ export default class FunctionStamp extends Component {
     window.removeEventListener("message", this.updateLooping);
   }
 
-  setDataUri(callback = () => null){
-    if(this.props.isTxtFile === false){
-      return
+  setDataUri(callback = () => null) {
+    if (this.props.isTxtFile === false) {
+      return;
     }
-    var mimeType = mime.lookup(this.state.name)
+    var mimeType = mime.lookup(this.state.name);
 
-    if(!mimeType || mimeType.split("/").length === 0){
+    if (!mimeType || mimeType.split("/").length === 0) {
       // throw error
-      return
+      return;
     }
-    var mimeTypeArr = mimeType.split("/")
-    mimeTypeArr[0] = "text"
-    mimeType = mimeTypeArr.join("/")
+    var mimeTypeArr = mimeType.split("/");
+    mimeTypeArr[0] = "text";
+    mimeType = mimeTypeArr.join("/");
 
-    var fileObj = new File([this.state.code], this.state.name, {type:mimeType})
+    var fileObj = new File([this.state.code], this.state.name, {
+      type: mimeType
+    });
 
     var reader = new FileReader();
 
     reader.onload = function(e) {
-
-      this.setState({dataUri:e.target.result}, callback)
+      this.setState({ dataUri: e.target.result }, callback);
     };
 
-    reader.onload = reader.onload.bind(this)
+    reader.onload = reader.onload.bind(this);
 
     reader.readAsDataURL(fileObj);
-
   }
 
   checkName() {
@@ -171,29 +177,31 @@ export default class FunctionStamp extends Component {
   addErrorLine(lineNum) {
     var errorLines = this.state.errorLines;
     errorLines[lineNum] = "";
-    this.setState({ errorLines: errorLines }, () => this.props.setLayerPicker());
+    this.setState({ errorLines: errorLines }, () =>
+      this.props.setLayerPicker()
+    );
   }
 
   clearErrorsAndUpdate(newErrors = []) {
-
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 
     this.setState({ errorLines: newErrorLines }, () => {
-      var iframeCode = ""
-      var exportableCode = ""
+      var iframeCode = "";
+      var exportableCode = "";
 
-
-      if(this.props.isBlob){
-        exportableCode = this.props.getExportableCode()
-      }else if(this.props.isTxtFile === false && this.props.isMediaFile === false){
+      if (this.props.isBlob) {
+        exportableCode = this.props.getExportableCode();
+      } else if (
+        this.props.isTxtFile === false &&
+        this.props.isMediaFile === false
+      ) {
         iframeCode = this.props.getHTML(this.props.id);
-
       }
 
       this.setState({
         iframeCode: iframeCode,
-        exportableCode:exportableCode,
+        exportableCode: exportableCode,
         looping: true,
         loopingTransition: ""
       });
@@ -271,18 +279,16 @@ export default class FunctionStamp extends Component {
       theme = "solarized_light";
     }
 
-    if(this.props.isTxtFile || this.props.isIndex){
-    var mimeType = mime.lookup(this.state.name)
-    if(!mimeType || mimeType.split("/").length === 0){
-      return
+    if (this.props.isTxtFile || this.props.isIndex) {
+      var mimeType = mime.lookup(this.state.name);
+      if (!mimeType || mimeType.split("/").length === 0) {
+        return;
+      }
+      var mimeTypeArr = mimeType.split("/");
+      var mode = mimeTypeArr[mimeTypeArr.length - 1];
+    } else {
+      var mode = "javascript";
     }
-    var mimeTypeArr = mimeType.split("/")
-    var mode = mimeTypeArr[mimeTypeArr.length -1]
-    }else{
-      var mode = "javascript"
-    }
-
-
 
     return (
       <div
@@ -290,7 +296,7 @@ export default class FunctionStamp extends Component {
           this.setEditorScrolling(false);
         }}
       >
-        <br hidden={this.props.isBlob}/>
+        <br hidden={this.props.isBlob} />
         <AceEditor
           markers={markers}
           style={{
@@ -327,28 +333,47 @@ export default class FunctionStamp extends Component {
     );
   }
 
+  stripExtension(name){
+    var nameArr = name.split(".")
+    if(nameArr.length < 2){
+      return name
+    }else{
+      nameArr.pop()
+      return nameArr.join(".")
+    }
+  }
+
+  addExtension(name, nameWithExtension){
+    var nameArr = nameWithExtension.split(".")
+    if(nameArr.length < 2){
+      return name
+    }else{
+      var ext = nameArr.pop()
+      return name + "." + ext
+    }
+  }
+
   compileCallback() {
     if (this.state.editsMade) {
       var compileActions = () => {
-      this.props.requestCompile(this.props.id);
-      this.setState({ editsMade: false, runningBorder: true }, () =>
-        setTimeout(() => {
-          this.setState({ runningBorder: false });
-        }, 300)
-      );
-      }
+        this.props.requestCompile(this.props.id);
+        ipc && ipc.send("edited");
+        this.setState({ editsMade: false, runningBorder: true }, () =>
+          setTimeout(() => {
+            this.setState({ runningBorder: false });
+          }, 300)
+        );
+      };
 
-
-      if(this.props.isTxtFile){
-        this.setDataUri(compileActions)
-      }else{
-        compileActions()
+      if (this.props.isTxtFile) {
+        this.setDataUri(compileActions);
+      } else {
+        compileActions();
       }
     }
   }
 
   renderFunctionName() {
-
     var displayName = "";
     if (this.state.name != this.props.starterName) {
       var displayName = this.state.Name;
@@ -357,7 +382,11 @@ export default class FunctionStamp extends Component {
     var nameColor = "blue";
     if (this.state.isSpecialFn) {
       nameColor = "pink";
-    } else if (this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile) {
+    } else if (
+      this.props.isIndex ||
+      this.props.isTxtFile ||
+      this.props.isMediaFile
+    ) {
       nameColor = "htmlCssName";
     }
 
@@ -366,31 +395,43 @@ export default class FunctionStamp extends Component {
     if (this.props.isTxtFile) {
       namePlaceholder = "file name...";
     } else if (this.props.isMediaFile) {
-      namePlaceholder = "image name...";
+      namePlaceholder = "";
+    }
+
+    var displayName = this.state.name
+    if(this.props.isMediaFile){
+      displayName = this.stripExtension(displayName)
     }
     return (
       <div>
+         <p hidden={!this.props.isMediaFile}
+         className={"text-lightGreyText name"} style={{position:"absolute", top:49, left:19}}>{this.state.name}</p>
         <input
           placeholder={namePlaceholder}
           disabled={this.props.isIndex}
           onChange={event => {
-            this.setState({ name: event.target.value, editsMade: true }, () =>
-              this.checkName()
-            );
+            var newName = event.target.value;
 
+            if(this.props.isMediaFile){
+              newName = this.addExtension(newName, this.state.name)
+            }
+            this.setState({name:newName})
             ipc && ipc.send("edited");
           }}
           style={{ background: "transparent" }}
-          value={this.state.name}
+          value={displayName}
           class={"text-" + nameColor + " name"}
         />
+
 
         <br />
 
         <input
           // @cameron styling for arguments field
           placeholder="arguments..."
-          disabled={this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile}
+          disabled={
+            this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile
+          }
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
             ipc && ipc.send("edited");
@@ -399,38 +440,34 @@ export default class FunctionStamp extends Component {
           value={this.state.args}
           class={"text-" + argsColor + " args"}
         />
-
       </div>
     );
   }
 
-
-  renderMediaAsset(){
-    if(!this.props.isMediaFile){
-      return null
+  renderMediaAsset() {
+    if (!this.props.isMediaFile) {
+      return null;
     }
 
-    var mimeType = mime.lookup(this.state.name)
-    if(!mimeType){
-      return
+    var mimeType = mime.lookup(this.state.name);
+    if (!mimeType) {
+      return;
     }
-    if(mimeType.startsWith("image")){
-      return (<img src={this.state.code}/>)
-    }else if(mimeType.startsWith("audio")){
+    if (mimeType.startsWith("image")) {
+      return <img src={this.state.code} />;
+    } else if (mimeType.startsWith("audio")) {
       return (
-            <audio controls>
-            <source src={this.state.code} type={mimeType}/>
-            </audio>
-
-        ) 
-    }else if(mimeType.startsWith("video")){
+        <audio controls>
+          <source src={this.state.code} type={mimeType} />
+        </audio>
+      );
+    } else if (mimeType.startsWith("video")) {
       return (
-                  <video controls>
-            <source src={this.state.code} type={mimeType}/>
-            </video>
-        )
+        <video controls>
+          <source src={this.state.code} type={mimeType} />
+        </video>
+      );
     }
-
   }
 
   renderIframe() {
@@ -486,16 +523,14 @@ export default class FunctionStamp extends Component {
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
           }}
-onMouseOver={this.compileCallback.bind(this)}
-
-   
+          onMouseOver={this.compileCallback.bind(this)}
           style={{
             overflow: "hidden",
             zIndex: 5,
-            border:"none"
+            border: "none"
           }}
         >
-          <div >
+          <div>
             <div
               style={{
                 position: "absolute",
@@ -513,32 +548,31 @@ onMouseOver={this.compileCallback.bind(this)}
                 width: this.state.iframeWidth
               }}
             >
-            {this.renderMediaAsset()}
+              {this.renderMediaAsset()}
 
-          
-            <iframe
-              hidden={this.props.isMediaFile}
-              ref={iframeElem => {
-                if (iframeElem) {
-                  this.props.addNewIframeConsole(
-                    iframeElem.contentWindow.console
-                  );
-                }
-              }}
-              id={"iframe" + this.props.id}
-              scrolling="no"
-              style={{
-                border: "none",
-             
-                height: this.state.iframeHeight,
-                width: this.state.iframeWidth,
-                // pointerEvents:"none"
-              }}
-              srcdoc={this.state.iframeCode}
-              sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
-              allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
-            />
-              </div>
+              <iframe
+                hidden={this.props.isMediaFile}
+                ref={iframeElem => {
+                  if (iframeElem) {
+                    this.props.addNewIframeConsole(
+                      iframeElem.contentWindow.console
+                    );
+                  }
+                }}
+                id={"iframe" + this.props.id}
+                scrolling="no"
+                style={{
+                  border: "none",
+
+                  height: this.state.iframeHeight,
+                  width: this.state.iframeWidth
+                  // pointerEvents:"none"
+                }}
+                srcdoc={this.state.iframeCode}
+                sandbox="allow-forms allow-modals allow-pointer-lock allow-popups  allow-same-origin allow-scripts"
+                allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
+              />
+            </div>
           </div>
         </Resizable>
       </div>
@@ -549,18 +583,18 @@ onMouseOver={this.compileCallback.bind(this)}
     this.setState({ iframeDisabled: status });
   }
 
-  getCopyStampName(name, isFile){
-  if(!isFile){
-    return name + "Copy"
-  }else{
-    var nameArr = name.split(".")
-    if(nameArr.length === 0){
-      return ""
+  getCopyStampName(name, isFile) {
+    if (!isFile) {
+      return name + "Copy";
+    } else {
+      var nameArr = name.split(".");
+      if (nameArr.length === 0) {
+        return "";
+      }
+      nameArr[0] = nameArr[0] + "Copy";
+      return nameArr.join(".");
     }
-    nameArr[0] = nameArr[0] + "Copy"
-    return nameArr.join(".")
   }
-}
 
   copyAndOpt(isOpt = false) {
     if (this.props.isIndex) {
@@ -570,39 +604,35 @@ onMouseOver={this.compileCallback.bind(this)}
     var data = this.getData();
     data.zIndex = undefined;
 
+    var newName = this.getCopyStampName(
+      this.state.name,
+      this.props.isTxtFile || this.props.isMediaFile
+    );
 
-    var newName = this.getCopyStampName(this.state.name, this.props.isTxtFile || this.props.isMediaFile)
-
-    if(!this.props.isBlob){
-      if(isOpt){
-        this.setState({ name: newName}, () => this.checkName());
-      }else{
-        data.name = newName
+    if (!this.props.isBlob) {
+      if (isOpt) {
+        this.setState({ name: newName }, () => this.checkName());
+      } else {
+        data.name = newName;
       }
     }
 
-    if(isOpt){
-            data.iframeDisabled = true
-    }else{
+    if (isOpt) {
+      data.iframeDisabled = true;
+    } else {
       data.x += globals.copyOffset;
       data.y += globals.copyOffset;
     }
 
-
     var callback = id => this.props.requestCompile(id);
-    if(isOpt){
+    if (isOpt) {
       callback = id => {
-        this.props.requestCompile(id)
+        this.props.requestCompile(id);
         this.cristalRef.current.changeZIndex();
-
-      }
+      };
     }
 
-    var newName = this.props.addStamp(
-      data,
-      callback
-    );
-
+    var newName = this.props.addStamp(data, callback);
   }
 
   getData() {
@@ -622,41 +652,37 @@ onMouseOver={this.compileCallback.bind(this)}
       hidden: this.state.hidden,
       exported: true,
       zIndex: this.state.zIndex,
-      isBlob:this.props.isBlob,
-      codeSize:this.state.codeSize
+      isBlob: this.props.isBlob,
+      codeSize: this.state.codeSize
     };
 
     return data;
   }
 
   resizeEditor(widthDiff, heightDiff, x, change = true) {
-
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
-
-
 
     if (height < 0 || width < 0) {
       return true;
     }
 
-    if(change){
-    this.setState({
-      editorHeight: height,
-      editorWidth: width,
-      x: x
-    });
-    this.editorRef.current.editor.resize();
+    if (change) {
+      this.setState({
+        editorHeight: height,
+        editorWidth: width,
+        x: x
+      });
+      this.editorRef.current.editor.resize();
     }
-
   }
 
   getIcon() {
     var icon = FunctionStampIcon;
     if (this.props.isIndex) {
       icon = HtmlStampIcon;
-    } else if(this.props.isBlob){
-      icon = BlobStampIcon
+    } else if (this.props.isBlob) {
+      icon = BlobStampIcon;
     } else if (this.props.isTxtFile) {
       icon = FileStampIcon;
     } else if (this.props.isMediaFile) {
@@ -706,8 +732,8 @@ onMouseOver={this.compileCallback.bind(this)}
     var initialHeight = this.state.editorHeight + globals.fnTitleHeight + 60;
     if (this.props.isMediaFile) {
       initialHeight = this.state.iframeHeight + globals.fnTitleHeight + 35;
-    }else if(this.props.isBlob){
-      initialHeight = this.state.editorHeight + 60
+    } else if (this.props.isBlob) {
+      initialHeight = this.state.editorHeight + 60;
     }
 
     return (
@@ -748,12 +774,11 @@ onMouseOver={this.compileCallback.bind(this)}
           icon={this.getIcon()}
           parentID={this.props.id}
           showCodeSize={this.props.isBlob}
-          onCodeSize ={() => {
-
-            if(this.state.codeSize === globals.codeSize){
-              this.setState({codeSize:globals.bigCodeSize})
-            }else{
-              this.setState({codeSize:globals.codeSize})
+          onCodeSize={() => {
+            if (this.state.codeSize === globals.codeSize) {
+              this.setState({ codeSize: globals.bigCodeSize });
+            } else {
+              this.setState({ codeSize: globals.codeSize });
             }
           }}
         >
@@ -774,10 +799,7 @@ onMouseOver={this.compileCallback.bind(this)}
             </div>
 
             <div class="p-2">
-              <div hidden={this.props.isBlob}>
-              {this.renderFunctionName()}
-              </div>
-
+              <div hidden={this.props.isBlob}>{this.renderFunctionName()}</div>
 
               <div class="row m-0 mt-2">
                 {this.renderEditor()}
