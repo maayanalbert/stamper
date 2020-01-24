@@ -100,6 +100,7 @@ var Cristal = (function(_super) {
     _this.plus = 187;
     _this.minus = 189;
     _this.zero = 48;
+    _this.space = 32
     _this.onWindowResize = function() {
       var _a = _this.state,
         x = _a.x,
@@ -198,6 +199,10 @@ var Cristal = (function(_super) {
 
       _this.setState({ width: width + widthDiff, height: height + heightDiff });
     };
+
+    _this.manualSetSize = function(width, height){
+      _this.setState({width:width, height:height})
+    }
 
     _this.onWheel = function(e) {
       if (e.ctrlKey) {
@@ -313,12 +318,16 @@ var Cristal = (function(_super) {
 
  
         _this.onStartMove(() => {
+          if(_this.state.downKey === _this.space){
+            return
+          }
         var newPosition = _this.getPosition(
           movementX / scale,
           movementY / scale
         );
         var newX = newPosition.x;
         var newY = newPosition.y;
+
 
 
           _this.setState({ x: newX, y: newY });

@@ -522,6 +522,8 @@ export default class FunctionStamp extends Component {
           onResizeStop={e => {
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
+            var newSize = this.getSize()
+            this.cristalRef.current.manualSetSize(newSize.width, newSize.height)
           }}
           onMouseOver={this.compileCallback.bind(this)}
           style={{
@@ -698,6 +700,23 @@ export default class FunctionStamp extends Component {
     return icon;
   }
 
+  getSize(){
+        var iframeWidth = this.state.iframeWidth;
+    if (this.props.isTxtFile) {
+      iframeWidth = 0;
+    }
+
+    var initialHeight = this.state.editorHeight + globals.fnTitleHeight + 60;
+    if (this.props.isMediaFile) {
+      initialHeight = this.state.iframeHeight + globals.fnTitleHeight + 35;
+    } else if (this.props.isBlob) {
+      initialHeight = this.state.editorHeight + 60;
+    }
+
+    return {width: iframeWidth + this.state.editorWidth + 42, height:initialHeight}
+
+  }
+
   render() {
     var headerColor = "bg-white";
     if (0 in this.state.errorLines) {
@@ -743,10 +762,7 @@ export default class FunctionStamp extends Component {
           onZChange={s => this.setState({ zIndex: s.zIndex })}
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}
-          initialSize={{
-            width: iframeWidth + this.state.editorWidth + 42,
-            height: initialHeight
-          }}
+          initialSize={this.getSize()}
           ref={this.cristalRef}
           isResizable={!this.props.isMediaFile}
           onStartResize={this.props.onStartMove.bind(this)}
@@ -768,8 +784,7 @@ export default class FunctionStamp extends Component {
             this.props.id
           }
           onResize={this.resizeEditor.bind(this)}
-          onStartResize={this.props.onStartMove}
-          onStopResize={this.props.onStopMove}
+
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
           parentID={this.props.id}
