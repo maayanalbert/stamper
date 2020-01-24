@@ -209,6 +209,8 @@ var Cristal = (function(_super) {
       var scale = _this.props.getScale();
       var newX = _this.state.ghostX + movementX;
       var newY = _this.state.ghostY + movementY;
+
+
       this.setState({ ghostX: newX, ghostY: newY });
       var snapMargin = _this.props.getSnapMargin();
       if (snapMargin === 0) {
@@ -298,16 +300,17 @@ var Cristal = (function(_super) {
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
             : undefined;
-        var _b = getBoundaryCoords({ x: newX, y: newY }, size),
-          x = _b.x,
-          y = _b.y;
+
+ 
+        _this.onStartMove(() => {
         var newPosition = _this.getPosition(
           movementX / scale,
           movementY / scale
         );
         var newX = newPosition.x;
         var newY = newPosition.y;
-        _this.onStartMove(() => {
+
+
           _this.setState({ x: newX, y: newY });
         });
 
@@ -377,6 +380,7 @@ var Cristal = (function(_super) {
     _this.onStartMove = function(callBack) {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
+
         _this.setState({ ghostX: _this.state.x, ghostY: _this.state.y }, () => {
           _this.setState({ isMoving: true }, () => callBack());
         });

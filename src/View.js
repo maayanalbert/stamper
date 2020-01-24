@@ -74,7 +74,7 @@ export default class View extends Component {
       downKey: -1,
       panDisabled: false,
       stampOrder:[],
-      snapToGrid:true
+      snapToGrid:false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -93,6 +93,8 @@ export default class View extends Component {
     this.plus = 187;
     this.minus = 189;
     this.zero = 48;
+    this.g = 71
+    this.shft = 16
 
 
   }
@@ -181,7 +183,13 @@ export default class View extends Component {
         e.preventDefault();
         this.zoom(this.state.scale * 0.5, centerX, centerY, true);
       }
-    } else {
+    } else if(this.state.downKey === this.shft){
+      if(e.keyCode === this.g){
+        var snapToGrid = this.state.snapToGrid
+        this.setState({snapToGrid:!snapToGrid})
+      }
+
+    }else {
       this.setState({ downKey: e.keyCode });
     }
   }
