@@ -289,8 +289,7 @@ export default class ModalManager extends Component {
 
       var callback = imgData =>
         this.props.addStamp(imgData, id => this.props.requestCompile(id));
-      console.log(reader);
-      console.log(file.name)
+
       reader.onload = (e) => {
 
     var data = {

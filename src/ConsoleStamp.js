@@ -217,6 +217,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
 
     return (
       <Cristal
+                getSnapMargin={this.props.getSnapMargin}
            zIndex={this.props.starterZIndex}
         getScale={this.props.getScale}
        parentID = {this.props.id}

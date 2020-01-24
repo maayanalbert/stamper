@@ -12,6 +12,7 @@ import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 import ImageStampIcon from "./icons/image.svg";
 import BlobStampIcon from "./icons/code.svg";
+import MediaAssetIcon from "./icons/layers-light.svg";
 
 import "./theme-p5.js";
 
@@ -21,6 +22,7 @@ import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
+
 
 import { Resizable, ResizableBox } from "react-resizable";
 
@@ -131,6 +133,7 @@ export default class FunctionStamp extends Component {
 
   componentDidMount() {
     // this.loadp5Lib()
+
     this.checkName();
     this.setDataUri(() => this.props.requestCompile(this.props.id));
     window.addEventListener("message", this.updateLooping);
@@ -343,6 +346,16 @@ export default class FunctionStamp extends Component {
     }
   }
 
+  getExtension(name){
+    var nameArr = name.split(".")
+    if(nameArr.length < 2){
+      return ""
+    }else{
+      var ext = nameArr.pop()
+      return ext
+    }    
+  }
+
   addExtension(name, nameWithExtension){
     var nameArr = nameWithExtension.split(".")
     if(nameArr.length < 2){
@@ -467,6 +480,20 @@ export default class FunctionStamp extends Component {
           <source src={this.state.code} type={mimeType} />
         </video>
       );
+    }else{
+      return (
+        <div className={"bg-borderGrey pt-5 d-flex justify-content-center"} style={{width: this.state.iframeWidth, 
+        height: this.state.iframeHeight}}>
+      {React.createElement("img", {
+      style:  {width: 100, 
+        height: 100,
+        opacity:.5 },
+      src: MediaAssetIcon
+    })}
+      </div>
+      )
+
+
     }
   }
 
