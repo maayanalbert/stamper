@@ -1354,7 +1354,7 @@ _stopLooping =setTimeout(() => {
 
   getSnapMargin(){
     if(this.state.snapToGrid){
-      return this.gridSize
+      return this.calcSnapMargin()
     }else{
       return 0
     }
@@ -1384,29 +1384,56 @@ _stopLooping =setTimeout(() => {
     )
 
   }
-
+  calcSnapMargin(){
+    var snapMargin = Math.max(Math.round(1/this.state.scale) * 20, 5)
+    return snapMargin
+  }
 
   renderGridLines(){
+
     if(this.state.snapToGrid === false){
       return null
     }
 
     var gridLines = []
 
-    var x = 0
-    while(x < window.innerWidth){
-      gridLines.push(<span className="border-left border-greyBorder"
-        style={{position:"absolute", top:0, height:window.innerHeight, 
-        width:10, left:x, background:"transparent"}} />)
-      x += this.gridSize
+    var borderWidth = Math.max(Math.round(1/this.state.scale), .5)
+    var snapMargin = this.calcSnapMargin()
+
+    var roundedScale = Math.round(1/this.state.scale)
+
+    var actualOriginX = -this.state.originX
+
+    // var x0 = -Math.round(this.state.originX /snapMargin)*snapMargin
+    // var y0 = -Math.round(this.state.originY/snapMargin)*snapMargin
+
+    var x0 = -this.state.originX/this.state.scale
+    var y0 = -this.state.originY/this.state.scale
+
+    var roundedX0 = Math.round(x0/snapMargin)*snapMargin
+    var roundedY0 = Math.round(y0/snapMargin)*snapMargin
+
+    var width = window.innerWidth/this.state.scale
+    var height = window.innerHeight/this.state.scale
+
+    var x = roundedX0
+
+    while(x < width + x0){
+      gridLines.push(<span className="border-borderGrey"
+        style={{position:"absolute", top:roundedY0, height:height, 
+        width:10, left:x, background:"transparent",  borderLeft:borderWidth +"px solid" }} />)
+      x += snapMargin
     }
 
-    var y = 0
-    while(y < window.innerHeight){
-      gridLines.push(<span className="border-top border-greyBorder"
+    var y = roundedY0
+
+    while(y < height+ y0){
+   
+      gridLines.push(<span className="border-borderGrey"
         style={{position:"absolute", top:y, height:10, 
-        width:window.innerWidth, left:0, background:"transparent"}} />)
-      y += this.gridSize
+        width:width, left:roundedX0, background:"transparent", 
+        borderTop:borderWidth +"px solid"}} />)
+      y += snapMargin
     }
 
     return gridLines

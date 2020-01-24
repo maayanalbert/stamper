@@ -223,10 +223,13 @@ var Cristal = (function(_super) {
     _this.getDimensions = function(widthDiff, heightDiff, changeX) {
       var newWidth = _this.state.ghostX + widthDiff;
       var newHeight = _this.state.ghostY + heightDiff;
+      var oldAbsX = Math.round(_this.state.x + _this.state.width);
+      var oldAbsY = Math.round(_this.state.y + _this.state.height);
       var newAbsX = Math.round(_this.state.x + newWidth);
       var newAbsY = Math.round(_this.state.y + newHeight);
 
       if (changeX) {
+        oldAbsX = Math.round(_this.state.x);
         newAbsX -= Math.round(_this.state.x + widthDiff);
       }
 
@@ -252,11 +255,11 @@ var Cristal = (function(_super) {
 
         var sendingWidthDiff = 0;
         var sendingHeightDiff = 0;
-        if (newAbsX === roundAbsX) {
-          sendingWidthDiff = ghostX - _this.state.width;
+        if (roundAbsX != oldAbsX && widthDiff != 0) {
+          sendingWidthDiff = roundAbsX - oldAbsX;
         }
-        if (newAbsY === roundAbsY) {
-          sendingHeightDiff = ghostY - _this.state.height;
+        if (roundAbsY != oldAbsX && heightDiff != 0) {
+          sendingHeightDiff = roundAbsY - oldAbsY;
         }
 
         var resizeBlocked = onResize(
@@ -266,7 +269,6 @@ var Cristal = (function(_super) {
           false
         );
 
-        console.log(!resizeBlocked)
         if (!resizeBlocked) {
           this.setState({ ghostX: ghostX, ghostY: ghostY });
           return { widthDiff: sendingWidthDiff, heightDiff: sendingHeightDiff };
