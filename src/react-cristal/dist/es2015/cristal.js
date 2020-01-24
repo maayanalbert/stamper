@@ -225,17 +225,22 @@ var Cristal = (function(_super) {
     _this.getDimensions = function(widthDiff, heightDiff, changeX) {
       var newWidth = _this.state.ghostX + widthDiff;
       var newHeight = _this.state.ghostY + heightDiff;
-      var oldAbsX = Math.round(_this.state.x + _this.state.width);
-      var oldAbsY = Math.round(_this.state.y + _this.state.height);
-      var newAbsX = Math.round(_this.state.x + newWidth);
-      var newAbsY = Math.round(_this.state.y + newHeight);
+      var oldAbsX = _this.state.x + _this.state.width;
+      var oldAbsY = _this.state.y + _this.state.height;
+      var newAbsX = _this.state.x + newWidth;
+      var newAbsY = _this.state.y + newHeight;
+
 
       if (changeX) {
-        oldAbsX = Math.round(_this.state.x);
-        newAbsX -= Math.round(_this.state.x + widthDiff);
+        oldAbsX = _this.state.x
+        newAbsX = _this.state.ghostX - widthDiff
       }
 
+
       var ghostX = Math.max(newWidth, minWidth);
+      if(changeX){
+        ghostX = _this.state.ghostX - widthDiff
+      }
       var ghostY = Math.max(newHeight, minHeight);
       var onResize = _this.props.onResize;
 
@@ -257,19 +262,24 @@ var Cristal = (function(_super) {
 
         var sendingWidthDiff = 0;
         var sendingHeightDiff = 0;
-        if (roundAbsX != oldAbsX && widthDiff != 0) {
+        if (widthDiff != 0) {
           sendingWidthDiff = roundAbsX - oldAbsX;
         }
-        if (roundAbsY != oldAbsX && heightDiff != 0) {
+        if (heightDiff != 0) {
           sendingHeightDiff = roundAbsY - oldAbsY;
+        }
+
+                if(changeX){
+          sendingWidthDiff = -sendingWidthDiff
         }
 
         var resizeBlocked = onResize(
           sendingWidthDiff,
-          sendingWidthDiff,
+          sendingHeightDiff,
           _this.state.x,
           false
         );
+
 
         if (!resizeBlocked) {
           this.setState({ ghostX: ghostX, ghostY: ghostY });
@@ -480,7 +490,7 @@ var Cristal = (function(_super) {
       return _this.setState({ isResizingX: true });
     };
     _this.startXLeftResize = function() {
-      _this.setState({ ghostX: _this.state.width, ghostY: _this.state.height });
+      _this.setState({ ghostX: _this.state.x, ghostY: _this.state.height });
       _this.notifyStartResize();
       return _this.setState({ isResizingXLeft: true });
     };

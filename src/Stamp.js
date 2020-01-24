@@ -634,6 +634,8 @@ onMouseOver={this.compileCallback.bind(this)}
     var height = this.state.editorHeight + heightDiff;
     var width = this.state.editorWidth + widthDiff;
 
+
+
     if (height < 0 || width < 0) {
       return true;
     }
