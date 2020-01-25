@@ -309,7 +309,7 @@ export default class View extends Component {
             worldPublishTime:stamperObject.worldPublishTime
           },
           () => {
-          
+            console.log(this.state.worldKey)
 
 
             var callback = () => 

@@ -499,7 +499,7 @@ export default class ModalManager extends Component {
 
   checkIfCurIsAWorld(callback) {
     var curStamper = this.props.getStamperObject();
-    console.log(curStamper.worldKey)
+    // console.log(curStamper.worldKey)
 
 
     for (var i = 0; i < worlds.length; i++) {
