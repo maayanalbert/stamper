@@ -76,6 +76,31 @@ function createWindow() {
     fileManager = new FileManager(mainWindow);
     fileManager.name = "Untitled";
     mainWindow.setTitle(fileManager.name);
+    mainWindow.webContents.send("getWorlds")
+
+    ipcMain.on("sendWorlds", (event, data) => {
+
+
+        var worldButtons = data.map( world => 
+
+          {
+
+           if(!world.name){
+            return { type: "separator" }
+           } 
+          return {
+            label:world.name, 
+            click(){
+          fileManager.onNewProject(world.key)
+            }
+          }
+        }
+
+        )
+
+        setMenu(worldButtons)
+    })
+
   });
 }
 
@@ -105,21 +130,8 @@ app.on("activate", () => {
   }
 });
 
-function setMenu() {
+function setMenu(worldButtons = []) {
   var menu = defaultMenu(app, shell);
-
-  var worldButtons = worldNames.map( name => 
-
-          {
-          return {
-            label:name, 
-            click(){
-          fileManager.onNewProject(name)
-            }
-          }
-        }
-
-        )
 
   menu.splice(1, 0, {
     label: "File",

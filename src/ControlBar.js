@@ -653,8 +653,8 @@ function noiseWave() {
           />
         </div>
 
-        <span hidden={!ipc} />
-        <div hidden={ipc} className="mr-5" 
+        <span hidden={true} />
+        <div className="mr-5" 
         onMouseOver={() => {
           var modalManagerWorldDropDowns = this.props.modalManagerRef.current.setWorldDropDowns
           this.props.modalManagerRef.current.setWorldDropDowns = this.setWorldDropDowns.bind(this)
@@ -698,25 +698,22 @@ function noiseWave() {
         icon: InfoIcon
       })
 
-
+      if(ipc){
+        this.setState({worldDropDowns:dropDownData})
+        return
+      }
     dropDownData.push({})
 
 
-    dropDownData.push({name:"starter",
+    var permanentDropDowns = worlds.map(item => {return {
+      name:item.name, 
+        callback: () =>
+        this.props.modalManagerRef.current.requestWorldLoad(item.data),  
+        icon:PermanentWorldIcon  
+    }
+    })
 
-      callback: () =>
-        this.props.modalManagerRef.current.requestWorldLoad(starter),
-      icon:PermanentWorldIcon,
-     })
-
-
-
-     dropDownData.push({name:"empty",
-      icon:PermanentWorldIcon,
-      callback: () =>
-        this.props.modalManagerRef.current.requestWorldLoad(empty)
-
-     })
+    dropDownData = dropDownData.concat(permanentDropDowns)
 
      var onlineWorldDropDowns = []
      onlineWorlds.map(item => {

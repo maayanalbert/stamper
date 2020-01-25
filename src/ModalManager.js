@@ -70,7 +70,7 @@ export default class ModalManager extends Component {
 
     };
     this.setWorldDropDowns = undefined
-    this.domain = "maayanalbert.github.io/p5stamper"
+    this.domain = "localhost:3000"
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.checkFiles = this.checkFiles.bind(this);
@@ -98,11 +98,52 @@ export default class ModalManager extends Component {
 
 
   loadInitialStamperObject() {
+
+
     if (ipc) {
       this.props.loadStamperObject(starter);
       return;
+    }else{
+      var url = window.location.href
+
+      if(url.startsWith("http://")){
+        url = url.substring("http://".length)
+      } else if(url.startsWith("https://")){
+        url = url.substring("https://".length)
+      }
+
+      if(url.startsWith(this.domain)){
+        url = url.substring(this.domain.length)
+        if(url.startsWith("/")){
+          url = url.substring(1)
+        }
+  
+        if(url.endsWith("/")){
+          url =url.substring(0, url.length -1)
+        }
+
+        if(url != ""){
+          try{
+            this.loadOnlineWorld(url, this.loadStoredStamperObject.bind(this))
+            return
+          }catch(error){
+            console.log("there was an error")
+            this.props.loadStamperObject(starter);
+          }
+
+
+
+        }
+      }
+
     }
 
+    this.loadStoredStamperObject()
+
+
+  }
+
+  loadStoredStamperObject(){
     var stored = localStorage.getItem("storedStamper");
 
     if (stored === null) {
@@ -123,6 +164,7 @@ export default class ModalManager extends Component {
       return;
     }
   }
+
 
   componentDidMount() {
  
@@ -179,14 +221,31 @@ export default class ModalManager extends Component {
 
     ipc &&
       ipc.on("resetView", (event, data) => {
+        if(data.worldName === "undefined"){
+          this.props.loadStamperObject(starter)
+          return
+        }
         for (var i = 0; i < worlds.length; i++) {
           if (data.exampleName === worlds[i].name) {
             this.props.loadStamperObject(worlds[i].data);
             return;
           }
         }
-        this.props.loadStamperObject(starter);
+        this.loadOnlineWorld(data.worldKey);
       });
+
+    ipc && ipc.on("getWorlds", (event, data) => {
+      var electronWorlds = []
+      worlds.map(item => electronWorlds.push({name:item.name, key:item.name}))
+      electronWorlds.push({})
+      this.getOnlineWorlds((onlineWorlds) => {
+        console.log(onlineWorlds)
+
+        electronWorlds = electronWorlds.concat(onlineWorlds)
+        ipc && ipc.send("sendWorlds", electronWorlds)
+      } )
+
+    })
 
     this.createInputElement();
 
@@ -769,7 +828,7 @@ this.setState({publishModalWorldExists:true})
             {
               "This will add your sketch to the examples list and give you a link to share it with."
             }
-            <div class="row picker p-2" >
+            <div class="row picker p-2" onMouseOut={ () => this.checkWorldName()}>
               <input
                 placeholder="name"
                 class="picker m-1"
@@ -778,8 +837,8 @@ this.setState({publishModalWorldExists:true})
                 onChange={e =>{
 
                   this.setState({
-                    publishModalName: e.target.value.split("%").join("_")
-                  }, () => this.checkWorldName())
+                    publishModalName: e.target.value.split("*").join("_").split("`").join("_").split("/").join("_")
+                  })
                 }
                 }
               />
@@ -792,8 +851,8 @@ this.setState({publishModalWorldExists:true})
                 onChange={e =>{
 
                   this.setState({
-                    publishModalAuthor: e.target.value.split("%").join("_").split("`").join("_")
-                  }, () => this.checkWorldName())
+                    publishModalAuthor: e.target.value.split("*").join("_").split("`").join("_").split("/").join("_")
+                  })
                 }
                 }
               />
@@ -837,6 +896,9 @@ this.setState({publishModalWorldExists:true})
 
     var fileName = 
     this.worldNameToFileName(this.state.publishModalName + " by " + this.state.publishModalAuthor)
+        this.props.setWorldData({worldName:this.state.publishModalName, 
+          worldAuthor:this.state.publishModalAuthor, worldKey:fileName, 
+          worldPublishTime: new Date()}, () => {
 
 
     repo.writeFile("master", fileName, JSON.stringify(this.props.getStamperObject()), "commited new world", {}, 
@@ -848,14 +910,16 @@ this.setState({publishModalWorldExists:true})
           return
         }
         
-        this.props.setWorldData({worldName:this.state.publishModalName, 
-          worldAuthor:this.state.publishModalAuthor, worldKey:fileName, 
-          worldPublishTime: new Date()})
         localStorage.setItem("localWorldAuthor", this.state.publishModalAuthor)
         this.setState({publishModalSuccess:true})
 
-
     })
+
+
+
+          })
+
+
 
   }
 
@@ -875,14 +939,13 @@ this.setState({publishModalWorldExists:true})
 
 
     })
+
   }
 
   setOnlineWorlds(){
 
+
     this.getOnlineWorlds((onlineWorlds) =>  this.setWorldDropDowns(onlineWorlds))
-
-     
-
   
 
   }
@@ -890,31 +953,33 @@ this.setState({publishModalWorldExists:true})
   worldFileNameToName(fileName){
         var fileNameArr = fileName.split(".")
         if(fileNameArr.length <= 1){
-          return ""
+          return fileName
         }
         fileNameArr.pop()
-        var worldName = fileNameArr.join("").split("%").join(" by ").split("`").join(" ")
+        var worldName = fileNameArr.join("").split("*").join(" by ").split("`").join(" ")
         return worldName
   }
 
   worldNameToFileName(name){
-    return name.split(' by ').join("%").split(" ").join("`") + ".json"
+    return name.split(' by ').join("*").split(" ").join("`") + ".json"
   }
 
-  loadOnlineWorld(key){
+  loadOnlineWorld(key, callback =() => null ){
+    console.log(key)
     var gh = new GitHub({token:this.oauthToken})
     var repo = gh.getRepo("p5stamper", "worlds")
     repo.getContents( "master",key, false, (error, result, request) => { 
     if(error){
       this.setState({
         modalVisible: true,
-        modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName}'.`,
+        modalHeader: `Oh no! It looks like there were issues loading the example '${this.worldFileNameToName(key)}'.`,
         modalContent:
-          "The example may be corrupted or our server may not have finished writing it yet.",
+        "Our server may not be fully updated or the example may be corrupted.",
         modalButtons: [
           { text: "ok", color: "outline-secondary", callback: this.hideModal }
         ]
-      });      
+      });  
+      callback()
       return
     }
 
@@ -923,11 +988,12 @@ this.setState({publishModalWorldExists:true})
     try{
       this.props.loadStamperObject(JSON.parse(stringContent))
     }catch(error){
+      callback()
       this.setState({
         modalVisible: true,
         modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName}'.`,
         modalContent:
-          "The example may be corrupted or our server may not have finished writing it yet.",
+           "Our server may not be fully updated or the example may be corrupted.",
         modalButtons: [
           { text: "ok", color: "outline-secondary", callback: this.hideModal }
         ]

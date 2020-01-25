@@ -108,9 +108,9 @@ module.exports = class FileManager {
 
   }
 
-  onNewProject(exampleName) {
+  onNewProject(worldKey) {
    
-    this.protectUnsaved(() => this.openNewProject(exampleName));
+    this.protectUnsaved(() => this.openNewProject(worldKey));
   }
 
   protectUnsaved(yesCallBack = () => null) {
@@ -136,12 +136,12 @@ module.exports = class FileManager {
     }
   }
 
-  openNewProject(exampleName) {
+  openNewProject(worldKey) {
 
     this.resetFiles();
 
 
-    this.mainWindow.webContents.send("resetView", {exampleName:exampleName});
+    this.mainWindow.webContents.send("resetView", {worldKey:worldKey});
   }
 
   onSaveCommand() {
