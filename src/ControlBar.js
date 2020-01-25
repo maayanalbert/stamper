@@ -718,7 +718,7 @@ function noiseWave() {
      var onlineWorldDropDowns = []
      onlineWorlds.map(item => {
       onlineWorldDropDowns.push({name:item.name, 
-        callback: () => this.props.modalManagerRef.current.loadOnlineWorld(item.key)})
+        callback: () => this.props.modalManagerRef.current.loadOnlineWorld(item.key, (stamperObject) => this.props.modalManagerRef.current.requestWorldLoad(stamperObject) )})
      })
 
 

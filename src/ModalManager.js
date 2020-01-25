@@ -123,12 +123,17 @@ export default class ModalManager extends Component {
         }
 
         if(url != ""){
+          console.log("loading online")
+
           try{
-            this.loadOnlineWorld(url, this.loadStoredStamperObject.bind(this))
+                console.log("hello")
+            this.loadOnlineWorld(url, (so) => this.props.loadStamperObject(so), () => this.loadStoredStamperObject())
             return
           }catch(error){
-            console.log("there was an error")
-            this.props.loadStamperObject(starter);
+            console.log(error)
+            console.log()
+            this.loadStoredStamperObject(starter);
+            return
           }
 
 
@@ -231,7 +236,7 @@ export default class ModalManager extends Component {
             return;
           }
         }
-        this.loadOnlineWorld(data.worldKey);
+        this.loadOnlineWorld(data.worldKey, (so) =>  this.props.loadStamperObject(so) );
       });
 
     ipc && ipc.on("getWorlds", (event, data) => {
@@ -1017,7 +1022,9 @@ this.setState({publishModalWorldExists:true})
 
 
 
-  loadOnlineWorld(key, callback =() => null ){
+  loadOnlineWorld(key, loadingFn, callback =() => null ){
+
+    console.log(key)
 
     var gh = new GitHub({token:this.oauthToken})
     var repo = gh.getRepo("p5stamper", "worlds")
@@ -1039,12 +1046,14 @@ this.setState({publishModalWorldExists:true})
     var bufContent = new Buffer(result.content, "base64"); 
     var stringContent = new TextDecoder("utf-8").decode(bufContent);
     try{
-      this.requestWorldLoad(JSON.parse(stringContent))
+      console.log(key)
+      loadingFn(JSON.parse(stringContent))
     }catch(error){
       callback()
+      console.log(error)
       this.setState({
         modalVisible: true,
-        modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName}'.`,
+        modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName(key)}'.`,
         modalContent:
            "Our server may not be fully updated or the example may be corrupted.",
         modalButtons: [
