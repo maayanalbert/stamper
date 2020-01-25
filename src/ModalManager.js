@@ -8,6 +8,21 @@ import JSZip from "jszip";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
+import FunctionStampIcon from "./icons/box.svg";
+import BuiltInStampIcon from "./icons/tool.svg";
+import ListenerStampIcon from "./icons/bell.svg";
+import BlobStampIcon from "./icons/code.svg";
+import ExpandMoreIcon from "./icons/chevron-down.svg";
+import DownloadIcon from "./icons/download.svg";
+import UploadIcon from "./icons/upload.svg";
+import WorldsIcon from "./icons/archive.svg";
+import GlobalVarIcon from "./icons/globe.svg";
+import CommentIcon from "./icons/message-square.svg";
+import FileStampIcon from "./icons/file.svg";
+import ImageStampIcon from "./icons/image.svg";
+import InfoIcon from "./icons/info.svg";
+import PermanentWorldIcon from "./icons/star.svg";
+
 import pf1, {
   normalFn,
   commentBlob,
@@ -16,6 +31,7 @@ import pf1, {
   builtInFns,
   worlds,
   starter,
+  empty,
   stamperHeader
 } from "./starterStamps.js";
 var GitHub = require("github-api");
@@ -49,15 +65,18 @@ export default class ModalManager extends Component {
       publishModalName: undefined,
       publishModalAuthor: undefined,
       publishModalSuccess:false,
-      publishModalLink:""
-    };
+      publishInfoVisible:false,
+      publishModalWorldExists:false
 
+    };
+    this.setWorldDropDowns = undefined
     this.domain = "maayanalbert.github.io/p5stamper"
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.checkFiles = this.checkFiles.bind(this);
     this.hideModal = this.hideModal.bind(this);
     this.hidePublishModal = this.hidePublishModal.bind(this);
+    this.hidePublishInfoModal = this.hidePublishInfoModal.bind(this);
     this.sendSaveData = this.sendSaveData.bind(this);
     this.libs = {
       "p5.js": "https://cdn.jsdelivr.net/npm/p5",
@@ -76,6 +95,7 @@ export default class ModalManager extends Component {
         "https://cdn.jsdelivr.net/gh/processing/p5.accessibility@0.2.0/dist/p5.accessibility.js"
     };
   }
+
 
   loadInitialStamperObject() {
     if (ipc) {
@@ -105,6 +125,7 @@ export default class ModalManager extends Component {
   }
 
   componentDidMount() {
+ 
     this.loadInitialStamperObject();
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({ saveInterval: saveInterval });
@@ -687,6 +708,7 @@ export default class ModalManager extends Component {
   }
 
   requestPublish() {
+
     var worldData = this.props.getWorldData();
     var localWorldAuthor = localStorage.getItem("localWorldAuthor");
 
@@ -706,19 +728,32 @@ export default class ModalManager extends Component {
         publishModalAuthor: publishModalAuthor
       },
       () => {
-        this.setState({ publishVisible: true, publishSubmitted:false });
+        this.checkWorldName()
+        this.setState({ publishVisible: true, publishModalSuccess:false });
       }
     );
 
-    // console.log("hi")
-    // var gh = new GitHub({token:this.oauthToken})
+  }
 
-    // var repo = gh.getRepo("p5stamper", "worlds")
+  requestPublishInfo(){
+    this.setState({publishInfoVisible:true})
+  }
 
-    // repo.writeFile("master", "test.json", "Hello World", "testing", {})
+  checkWorldName(){
+    var key = this.worldNameToFileName(this.state.publishModalName + " by " + this.state.publishModalAuthor)
+        var gh = new GitHub({token:this.oauthToken})
+    var repo = gh.getRepo("p5stamper", "worlds")
+    repo.getContents( "master",key, false, (error, result, request) => { 
+      if(error){
+        this.setState({publishModalWorldExists:false})
+      }else{
+this.setState({publishModalWorldExists:true})
+      }
+    })
   }
 
   renderPublishModal() {
+
     return (
       <Modal
         show={this.state.publishVisible}
@@ -734,16 +769,18 @@ export default class ModalManager extends Component {
             {
               "This will add your sketch to the examples list and give you a link to share it with."
             }
-            <div class="row picker p-2">
+            <div class="row picker p-2" >
               <input
                 placeholder="name"
                 class="picker m-1"
                 style={{ width: 150 }}
                 value={this.state.publishModalName}
-                onChange={e =>
+                onChange={e =>{
+
                   this.setState({
                     publishModalName: e.target.value.split("%").join("_")
-                  })
+                  }, () => this.checkWorldName())
+                }
                 }
               />
               <div class="picker m-2">{"by"}</div>
@@ -752,16 +789,21 @@ export default class ModalManager extends Component {
                 class="picker m-1"
                 style={{ width: 150 }}
                 value={this.state.publishModalAuthor}
-                onChange={e =>
+                onChange={e =>{
+
                   this.setState({
-                    publishModalAuthor: e.target.value.split("%").join("_")
-                  })
+                    publishModalAuthor: e.target.value.split("%").join("_").split("`").join("_")
+                  }, () => this.checkWorldName())
+                }
                 }
               />
             </div>
+            <div hidden={!this.state.publishModalWorldExists} class="picker">
+            {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if it isn't or example to overwrite)."}
+            </div>
             <div hidden={!this.state.publishModalSuccess}>
             <div class="picker">Yay! Your sketch was successfully published. Use this link to access it:</div> 
-            <u class="picker">{this.state.publishModalLink}</u>
+            <u class="picker">{this.domain + "/" +this.props.getWorldData().worldKey}</u>
             </div>
           </div>
         </Modal.Body>
@@ -776,7 +818,7 @@ export default class ModalManager extends Component {
           <Button
             variant={"outline-primary"}
             size="sm"
-            onClick={this.publishWorld.bind()}
+            onClick={this.publishWorld.bind(this)}
           >
             {"publish"}
           </Button>
@@ -786,7 +828,171 @@ export default class ModalManager extends Component {
   }
 
   publishWorld(){
+    // console.log("hi")
+    var gh = new GitHub({token:this.oauthToken})
 
+    var repo = gh.getRepo("p5stamper", "worlds")
+
+
+
+    var fileName = 
+    this.worldNameToFileName(this.state.publishModalName + " by " + this.state.publishModalAuthor)
+
+
+    repo.writeFile("master", fileName, JSON.stringify(this.props.getStamperObject()), "commited new world", {}, 
+      (error, result, request) => {
+
+
+        if(error){
+          console.log(error)
+          return
+        }
+        
+        this.props.setWorldData({worldName:this.state.publishModalName, 
+          worldAuthor:this.state.publishModalAuthor, worldKey:fileName, 
+          worldPublishTime: new Date()})
+        localStorage.setItem("localWorldAuthor", this.state.publishModalAuthor)
+        this.setState({publishModalSuccess:true})
+
+
+    })
+
+  }
+
+  getOnlineWorlds(callback){
+        var gh = new GitHub({token:this.oauthToken})
+
+    var repo = gh.getRepo("p5stamper", "worlds")
+    repo.getContents( "master","", false, (error, result, request) => {
+      var onlineWorlds = []
+      result.map((item) => {
+        var worldName = this.worldFileNameToName(item.name)
+        onlineWorlds.push({name:worldName, key:item.name})
+
+
+      })
+      callback(onlineWorlds)
+
+
+    })
+  }
+
+  setOnlineWorlds(){
+
+    this.getOnlineWorlds((onlineWorlds) =>  this.setWorldDropDowns(onlineWorlds))
+
+     
+
+  
+
+  }
+
+  worldFileNameToName(fileName){
+        var fileNameArr = fileName.split(".")
+        if(fileNameArr.length <= 1){
+          return ""
+        }
+        fileNameArr.pop()
+        var worldName = fileNameArr.join("").split("%").join(" by ").split("`").join(" ")
+        return worldName
+  }
+
+  worldNameToFileName(name){
+    return name.split(' by ').join("%").split(" ").join("`") + ".json"
+  }
+
+  loadOnlineWorld(key){
+    var gh = new GitHub({token:this.oauthToken})
+    var repo = gh.getRepo("p5stamper", "worlds")
+    repo.getContents( "master",key, false, (error, result, request) => { 
+    if(error){
+      this.setState({
+        modalVisible: true,
+        modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName}'.`,
+        modalContent:
+          "The example may be corrupted or our server may not have finished writing it yet.",
+        modalButtons: [
+          { text: "ok", color: "outline-secondary", callback: this.hideModal }
+        ]
+      });      
+      return
+    }
+
+    var bufContent = new Buffer(result.content, "base64"); 
+    var stringContent = new TextDecoder("utf-8").decode(bufContent);
+    try{
+      this.props.loadStamperObject(JSON.parse(stringContent))
+    }catch(error){
+      this.setState({
+        modalVisible: true,
+        modalHeader: `Oh no!It looks like there were issues loading the example '${this.worldFileNameToName}'.`,
+        modalContent:
+          "The example may be corrupted or our server may not have finished writing it yet.",
+        modalButtons: [
+          { text: "ok", color: "outline-secondary", callback: this.hideModal }
+        ]
+      }); 
+    }
+
+    })
+  }
+
+  hidePublishInfoModal(){
+    this.setState({publishInfoVisible:false})
+  }
+
+  renderPublishInfoModal() {
+
+    var worldData = this.props.getWorldData()
+    var dataString = ""
+    if(worldData.worldPublishTime){
+      dataString = worldData.worldPublishTime.toLocaleString()
+    }
+    var title = `${worldData.worldName} by ${worldData.worldAuthor}`
+    if(!worldData.worldKey){
+      title = "You aren't working in a published sketch."
+    }
+
+    return (
+      <Modal
+        show={this.state.publishInfoVisible}
+        style={{ zIndex: 2000000000000000001 }}
+        centered
+        onHide={this.hidePublishInfoModal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="name">{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <div>
+          <div hidden={!worldData.worldKey}>
+            <div class="picker">
+            {this.domain + "/" + worldData.worldKey}
+            </div>
+            <div class="picker">
+            {"last published @ " + dataString}
+            </div>
+  
+          </div>
+          <div hidden={worldData.worldKey} class="picker">
+            {"Publish this sketch to see it's published info"}
+  
+          </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant={"outline-secondary"}
+            size="sm"
+            onClick={this.hidePublishInfoModal}
+          >
+            {"ok"}
+          </Button>
+
+
+        </Modal.Footer>
+      </Modal>
+    );
   }
 
   render() {
@@ -814,6 +1020,7 @@ export default class ModalManager extends Component {
         </Modal>
 
         {this.renderPublishModal()}
+        {this.renderPublishInfoModal()}
       </div>
     );
   }

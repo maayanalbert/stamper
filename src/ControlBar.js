@@ -27,6 +27,8 @@ import GlobalVarIcon from "./icons/globe.svg";
 import CommentIcon from "./icons/message-square.svg";
 import FileStampIcon from "./icons/file.svg";
 import ImageStampIcon from "./icons/image.svg";
+import InfoIcon from "./icons/info.svg";
+import PermanentWorldIcon from "./icons/star.svg";
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -48,7 +50,9 @@ import pf1, {
   listenerFns,
   builtInFns,
   worlds,
-  sampleFile
+  sampleFile, 
+  empty,
+  starter
 } from "./starterStamps.js";
 
 var _ = require("lodash");
@@ -75,7 +79,9 @@ export default class ControlBar extends Component {
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
     this.spanWidth = 35;
+
     this.state = {
+      worldDropDowns:[],
       jsImporterHeight: 110,
       sideBarWidth: 200,
       pickerHeight:
@@ -99,6 +105,7 @@ function noiseWave() {
   }
 
   componentDidMount() {
+    this.setWorldDropDowns()
     this.props.updateControlBarDimensions(
       this.state.sideBarWidth,
       this.topBarHeight
@@ -647,30 +654,80 @@ function noiseWave() {
         </div>
 
         <span hidden={!ipc} />
-        <div hidden={ipc} className="mr-5">
+        <div hidden={ipc} className="mr-5" 
+        onMouseOver={() => {
+          var modalManagerWorldDropDowns = this.props.modalManagerRef.current.setWorldDropDowns
+          this.props.modalManagerRef.current.setWorldDropDowns = this.setWorldDropDowns.bind(this)
+          if(!modalManagerWorldDropDowns){
+          this.props.modalManagerRef.current.setOnlineWorlds()
+          }
+
+        }
+}
+        >
           <TopButton
             iconType={WorldsIcon}
             uniqueClass="worlds"
             iconCallback={null}
-            dropDownData={
-              [{
-                name:"publish current sketch",
-                callback:() => this.props.modalManagerRef.current.requestPublish()
-              }].concat(
-
-
-              worlds.map(world => ({
-              name: world.name,
-              callback: () =>
-                this.props.modalManagerRef.current.requestWorldLoad(world.data)
-            })))
-            }
+            dropDownData={this.state.worldDropDowns}
             tooltipText="examples..."
-            
+
+
           />
         </div>
       </div>
     );
+  }
+
+
+
+
+  setWorldDropDowns(onlineWorlds = []){
+
+    var dropDownData =
+              [{
+                name:"publish current sketch",
+                callback:() => this.props.modalManagerRef.current.requestPublish(),
+                icon:UploadIcon
+              }]
+
+
+      dropDownData.push({
+        name: "get current example info",
+        callback:() => this.props.modalManagerRef.current.requestPublishInfo(),
+        icon: InfoIcon
+      })
+
+
+    dropDownData.push({})
+
+
+    dropDownData.push({name:"starter",
+
+      callback: () =>
+        this.props.modalManagerRef.current.requestWorldLoad(starter),
+      icon:PermanentWorldIcon,
+     })
+
+
+
+     dropDownData.push({name:"empty",
+      icon:PermanentWorldIcon,
+      callback: () =>
+        this.props.modalManagerRef.current.requestWorldLoad(empty)
+
+     })
+
+     var onlineWorldDropDowns = []
+     onlineWorlds.map(item => {
+      onlineWorldDropDowns.push({name:item.name, 
+        callback: () => this.props.modalManagerRef.current.loadOnlineWorld(item.key)})
+     })
+
+
+     dropDownData = dropDownData.concat(onlineWorldDropDowns)
+
+    this.setState({worldDropDowns:dropDownData})
   }
 
   render() {

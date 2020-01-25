@@ -82,6 +82,7 @@ export default class View extends Component {
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
+
     this.onWheel = this.onWheel.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
@@ -216,7 +217,7 @@ export default class View extends Component {
     if (this.state.panDisabled) {
       return;
     }
-    ipc && ipc.send("edited");
+
     var a = this.state,
       currentX = a.originX,
       currentY = a.originY;
@@ -230,7 +231,7 @@ export default class View extends Component {
       return;
     }
 
-    ipc && ipc.send("edited");
+
 
     var scale = this.state.scale,
       x = this.state.originX,
@@ -1499,6 +1500,12 @@ var name = this.getFirstLine(stampRef.state.code);
     };
   }
 
+  getWorldData(){
+    return {worldName:this.state.worldName, worldAuthor:this.state.worldAuthor, 
+            worldKey:this.state.worldKey, worldPublishTime:this.state.worldPublishTime}
+  }
+
+
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1539,9 +1546,11 @@ var name = this.getFirstLine(stampRef.state.code);
           updateControlBarDimensions={this.updateControlBarDimensions.bind(
             this
           )}
+          ref={this.controlBarRef}
           modalManagerRef={this.modalManagerRef}
           onDragEnd={this.onDragEnd.bind(this)}
           recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
+          getWorldData = {this.getWorldData.bind(this)}
         />
 
         <ModalManager
@@ -1552,8 +1561,8 @@ var name = this.getFirstLine(stampRef.state.code);
           getFileDict={this.getFileDict.bind(this)}
           addStamp={this.addStamp.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
-          getWorldData={() => {return {worldName:this.state.worldName, worldAuthor:this.state.worldAuthor, 
-            worldKey:this.state.worldKey, worldPublishTime:this.state.worldPublishTime}} }
+          getWorldData={this.getWorldData.bind(this) }
+          setWorldData={(data, callback) => this.setState(data, callback)}
         />
       </div>
     );
