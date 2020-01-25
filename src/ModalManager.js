@@ -239,7 +239,7 @@ export default class ModalManager extends Component {
       worlds.map(item => electronWorlds.push({name:item.name, key:item.name}))
       electronWorlds.push({})
       this.getOnlineWorlds((onlineWorlds) => {
-        console.log(onlineWorlds)
+      
 
         electronWorlds = electronWorlds.concat(onlineWorlds)
         ipc && ipc.send("sendWorlds", electronWorlds)
@@ -292,7 +292,7 @@ export default class ModalManager extends Component {
   }
 
   createMiniImputElem(fileType, callback) {
-    console.log(fileType);
+
     if (fileType === "text") {
       var accept = "text/*";
     } else {
@@ -497,8 +497,10 @@ export default class ModalManager extends Component {
     }
   }
 
-  curIsAWorld() {
+  checkIfCurIsAWorld(callback) {
     var curStamper = this.props.getStamperObject();
+    console.log(curStamper.worldKey)
+
 
     for (var i = 0; i < worlds.length; i++) {
       var worldStamper = worlds[i].data;
@@ -506,13 +508,55 @@ export default class ModalManager extends Component {
       curStamper.scale = worldStamper.scale;
       curStamper.originX = worldStamper.originX;
       curStamper.originY = worldStamper.originY;
-      curStamper.compressedJs = worldStamper.compressedJs;
+      delete curStamper.compressedJs
+      delete worldStamper.compressedJs
+
+   
       if (deepEqual(curStamper, worldStamper)) {
-        return true;
+         callback(true);
+         return
       }
     }
 
-    return false;
+    if(!curStamper.worldKey){
+      callback(false)
+      return
+    }
+
+
+    var gh = new GitHub({token:this.oauthToken})
+    var repo = gh.getRepo("p5stamper", "worlds")
+    repo.getContents( "master",curStamper.worldKey, false, (error, result, request) => { 
+      
+    if(error){
+
+          console.log(error)
+      callback(false)
+      return
+    }
+
+    var bufContent = new Buffer(result.content, "base64"); 
+    var stringContent = new TextDecoder("utf-8").decode(bufContent);
+    try{
+      var worldStamper = JSON.parse(stringContent)
+      curStamper.scale = worldStamper.scale;
+      curStamper.originX = worldStamper.originX;
+      curStamper.originY = worldStamper.originY;
+      delete curStamper.compressedJs
+      delete worldStamper.compressedJs
+
+
+         callback(deepEqual(curStamper, worldStamper));
+
+    }catch(error){
+      callback(false)
+      return
+      
+      }
+    })
+
+
+
   }
 
   requestWorldLoad(newWorldStamper) {
@@ -541,8 +585,9 @@ export default class ModalManager extends Component {
         }
       });
     }
+    this.checkIfCurIsAWorld((curIsAWorld) => {
 
-    if (this.curIsAWorld()) {
+    if (curIsAWorld) {
       this.props.loadStamperObject(newWorldStamper);
     } else {
       this.setState({
@@ -552,6 +597,11 @@ export default class ModalManager extends Component {
         modalButtons: buttons
       });
     }
+
+
+    })
+
+
   }
 
   sendSaveData() {
@@ -887,7 +937,7 @@ this.setState({publishModalWorldExists:true})
   }
 
   publishWorld(){
-    // console.log("hi")
+
     var gh = new GitHub({token:this.oauthToken})
 
     var repo = gh.getRepo("p5stamper", "worlds")
@@ -964,8 +1014,11 @@ this.setState({publishModalWorldExists:true})
     return name.split(' by ').join("*").split(" ").join("`") + ".json"
   }
 
+
+
+
   loadOnlineWorld(key, callback =() => null ){
-    console.log(key)
+
     var gh = new GitHub({token:this.oauthToken})
     var repo = gh.getRepo("p5stamper", "worlds")
     repo.getContents( "master",key, false, (error, result, request) => { 
@@ -986,7 +1039,7 @@ this.setState({publishModalWorldExists:true})
     var bufContent = new Buffer(result.content, "base64"); 
     var stringContent = new TextDecoder("utf-8").decode(bufContent);
     try{
-      this.props.loadStamperObject(JSON.parse(stringContent))
+      this.requestWorldLoad(JSON.parse(stringContent))
     }catch(error){
       callback()
       this.setState({

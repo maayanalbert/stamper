@@ -75,10 +75,10 @@ export default class View extends Component {
       panDisabled: false,
       stampOrder:[],
       snapToGrid:false,
-      worldName:undefined,
-      worldAuthor:undefined,
-      worldKey:undefined,
-      worldPublishTime:undefined
+      worldName:null,
+      worldAuthor:null,
+      worldKey:null,
+      worldPublishTime:null
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -291,10 +291,10 @@ export default class View extends Component {
         originY: 0,
         compiledBefore: false,
         stampOrder:[],      
-        worldName:undefined,
-      worldAuthor:undefined,
-      worldKey:undefined,
-      worldPublishTime:undefined
+        worldName:null,
+      worldAuthor:null,
+      worldKey:null,
+      worldPublishTime:null
       },
       () => {
 
@@ -309,7 +309,7 @@ export default class View extends Component {
             worldPublishTime:stamperObject.worldPublishTime
           },
           () => {
-
+          
 
 
             var callback = () => 
@@ -760,9 +760,11 @@ callback(id)
     var fileDict = {}
     fileDict["sketch.js"] = {content:this.getExportableCode(), type:"text"}
     var stamperObject = this.getStamperObject()
+
     stamperObject.compressedJs = LZUTF8.compress(fileDict["sketch.js"].content, {
       outputEncoding: "StorageBinaryString"
     });
+  
 
     fileDict["stamper.js"] = {content:stamperHeader + JSON.stringify(stamperObject), type:"text"}
 
