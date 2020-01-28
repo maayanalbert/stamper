@@ -79,6 +79,7 @@ export default class ControlBar extends Component {
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
     this.spanWidth = 35;
+    this.receiveMessage = this.receiveMessage.bind(this)
 
     this.state = {
       worldDropDowns:[],
@@ -105,15 +106,29 @@ function noiseWave() {
   }
 
   componentDidMount() {
-    this.setWorldDropDowns()
+  
     this.props.updateControlBarDimensions(
       this.state.sideBarWidth,
       this.topBarHeight
     );
     window.addEventListener("resize", this.onWindowResize.bind(this));
+    window.addEventListener("message", this.receiveMessage)
+    
   }
   componentWillUnmount() {
     window.removeEventListener("resize", this.onWindowResize);
+    window.removeEventListener("message", this.receiveMessage)
+  }
+
+    receiveMessage(e){
+     if(e.data.type != "worlds"){
+        return
+      } 
+
+
+      this.setWorldDropDowns()
+
+      
   }
 
   onWindowResize(e) {
@@ -655,15 +670,7 @@ function noiseWave() {
 
         <span hidden={true} />
         <div className="mr-5" 
-        onMouseOver={() => {
-          var modalManagerWorldDropDowns = this.props.modalManagerRef.current.setWorldDropDowns
-          this.props.modalManagerRef.current.setWorldDropDowns = this.setWorldDropDowns.bind(this)
-          if(!modalManagerWorldDropDowns){
-          this.props.modalManagerRef.current.setOnlineWorlds()
-          }
 
-        }
-}
         >
           <TopButton
             iconType={WorldsIcon}
@@ -682,7 +689,7 @@ function noiseWave() {
 
 
 
-  setWorldDropDowns(onlineWorlds = []){
+  setWorldDropDowns(){
 
     var dropDownData =
               [{
@@ -704,27 +711,16 @@ function noiseWave() {
       }
     dropDownData.push({})
 
-
-    var permanentDropDowns = worlds.map(item => {return {
-      name:item.name, 
-        callback: () =>
-        this.props.modalManagerRef.current.requestWorldLoad(item.data),  
-        icon:PermanentWorldIcon  
-    }
+    this.props.modalManagerRef.current.getWorldNamesAndKeys((allWorlds) => {
+      allWorlds.map(item => {
+        dropDownData.push({name:item.name,
+          callback:() => this.props.modalManagerRef.current.getWorldObject(item.key, true, 
+            (so) => this.props.modalManagerRef.current.loadWithOverwriteProtection(so))
+        })
+        this.setState({worldDropDowns:dropDownData})
+      })
     })
 
-    dropDownData = dropDownData.concat(permanentDropDowns)
-
-     var onlineWorldDropDowns = []
-     onlineWorlds.map(item => {
-      onlineWorldDropDowns.push({name:item.name, 
-        callback: () => this.props.modalManagerRef.current.loadOnlineWorld(item.key, (stamperObject) => this.props.modalManagerRef.current.requestWorldLoad(stamperObject) )})
-     })
-
-
-     dropDownData = dropDownData.concat(onlineWorldDropDowns)
-
-    this.setState({worldDropDowns:dropDownData})
   }
 
   render() {

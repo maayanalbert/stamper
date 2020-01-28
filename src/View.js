@@ -75,8 +75,6 @@ export default class View extends Component {
       panDisabled: false,
       stampOrder:[],
       snapToGrid:false,
-      worldName:null,
-      worldAuthor:null,
       worldKey:null,
       worldPublishTime:null
     };
@@ -291,8 +289,7 @@ export default class View extends Component {
         originY: 0,
         compiledBefore: false,
         stampOrder:[],      
-        worldName:null,
-      worldAuthor:null,
+
       worldKey:null,
       worldPublishTime:null
       },
@@ -303,14 +300,13 @@ export default class View extends Component {
             scale: stamperObject.scale,
             originX: stamperObject.originX,
             originY: stamperObject.originY,
-            worldName:stamperObject.worldName,
-            worldAuthor:stamperObject.worldAuthor,
+
             worldKey:stamperObject.worldKey,
             worldPublishTime:stamperObject.worldPublishTime
           },
           () => {
 
-           
+
             var callback = () => 
               this.recompileIfEnoughStamps(
                 stamperObject.stamps.length
@@ -1247,8 +1243,6 @@ _stopLooping =setTimeout(() => {
       console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
       originY: this.state.originY,
-      worldName:this.state.worldName,
-      worldAuthor:this.state.worldAuthor,
       worldKey:this.state.worldKey,
       worldPublishTime:this.state.worldPublishTime
     };
@@ -1502,7 +1496,7 @@ var name = this.getFirstLine(stampRef.state.code);
   }
 
   getWorldData(){
-    return {worldName:this.state.worldName, worldAuthor:this.state.worldAuthor, 
+    return {
             worldKey:this.state.worldKey, worldPublishTime:this.state.worldPublishTime}
   }
 
