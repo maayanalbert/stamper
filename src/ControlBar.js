@@ -762,6 +762,7 @@ class TopButton extends Component {
   constructor(props) {
     super(props);
     this.state = { down: false, mouseOverDropDown: false };
+    this.topBarHeight = 60
   }
 
   onMouseDown() {
@@ -892,10 +893,13 @@ class TopButton extends Component {
     if (this.props.alignRight) {
       right = 0;
     }
+
+    var dropDownHeight = window.innerHeight - this.topBarHeight
+
     return (
       <div
         class="bg-white border border-borderGrey rounded mt-2 justify-content-left"
-        style={{ position: "absolute", right: right, "overflow-y":"scroll", maxHeight:window.innerHeight }}
+        style={{ position: "absolute", right: right, "overflow-y":"scroll", maxHeight:dropDownHeight}}
       >
         {dropDowns}
       </div>
