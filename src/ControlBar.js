@@ -382,10 +382,6 @@ function noiseWave() {
               {this.renderPicker(item)}
 
             </div>
-
-
- 
-
       )
 
       }else{
@@ -570,6 +566,14 @@ function noiseWave() {
           width: "100%",
           zIndex: 1000000000000000001
         }}
+        onMouseOver={() => {
+          this.props.disablePan(true);
+          this.props.disableZoom(true);
+        }}
+        onMouseOut={() => {
+          this.props.disablePan(false);
+          this.props.disableZoom(false);
+        }}
       >
         <span hidden={!ipc} />
         <div class="row ml-5" hidden={ipc}>
@@ -580,7 +584,7 @@ function noiseWave() {
               this.props.modalManagerRef.current.requestUpload();
             }}
             tooltipText="upload p5 sketch"
-            
+            alignLeft
           />
           <span style={{ width: this.spanWidth*2 }} />
           <TopButton
@@ -690,7 +694,7 @@ function noiseWave() {
         </div>
 
         <span hidden={true} />
-        <div className="mr-5" 
+        <div className="mr-5"
 
         >
           <TopButton
@@ -699,7 +703,7 @@ function noiseWave() {
             iconCallback={null}
             dropDownData={this.state.worldDropDowns}
             tooltipText="examples..."
-
+            alignRight
 
           />
         </div>
@@ -848,7 +852,7 @@ class TopButton extends Component {
           class={
             this.props.uniqueClass +
             oneWordName +
-            " picker text-greyText p-2 pl-3 pr-3"
+            " picker text-greyText p-1 pl-3 pr-3"
           }
           onMouseOver={() => {
             if (!data.name) {
@@ -891,7 +895,7 @@ class TopButton extends Component {
     return (
       <div
         class="bg-white border border-borderGrey rounded mt-2 justify-content-left"
-        style={{ position: "absolute", right: right }}
+        style={{ position: "absolute", right: right, "overflow-y":"scroll", maxHeight:window.innerHeight }}
       >
         {dropDowns}
       </div>
@@ -899,38 +903,38 @@ class TopButton extends Component {
   }
 
   renderTooltip() {
-    if (this.props.alignRight) {
-      return (
-        <div
-          class={"picker text-greyText tooltip" + this.props.uniqueClass}
-          style={{
-            opacity: "1",
-            position: "absolute",
-            right: 20,
-            top: 5,
-            transition: "all .2s ease-out"
-          }}
-        >
-          {this.props.tooltipText}
-        </div>
-      );
-    }
+    // if (this.props.alignRight) {
+    //   return (
+    //     <div
+    //       class={"picker text-greyText tooltip" + this.props.uniqueClass}
+    //       style={{
+    //         opacity: "1",
+    //         position: "absolute",
+    //         right: 20,
+    //         top: 5,
+    //         transition: "all .2s ease-out"
+    //       }}
+    //     >
+    //       {this.props.tooltipText}
+    //     </div>
+    //   );
+    // }
 
-    if (this.props.alignLeft) {
-      return (
-        <div
-          class={"picker text-greyText tooltip" + this.props.uniqueClass}
-          style={{
-            opacity: "1",
-            position: "absolute",
-            left: 20,
-            top: 5
-          }}
-        >
-          {this.props.tooltipText}
-        </div>
-      );
-    }
+    // if (this.props.alignLeft) {
+    //   return (
+    //     <div
+    //       class={"picker text-greyText tooltip" + this.props.uniqueClass}
+    //       style={{
+    //         opacity: "1",
+    //         position: "absolute",
+    //         left: 20,
+    //         top: 5
+    //       }}
+    //     >
+    //       {this.props.tooltipText}
+    //     </div>
+    //   );
+    // }
 
     var offset = "-140px";
     if (this.props.dropDownData) {

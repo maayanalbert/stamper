@@ -64,12 +64,12 @@ export default class ModalManager extends Component {
       publishVisible: false,
       publishModalName: undefined,
       publishModalAuthor: undefined,
-      publishModalSuccess:false,
       publishInfoVisible:false,
       publishModalWorldExists:false,
       onlineWorldDict:null,
-      edited:false
 
+      publishModalMode:"unsubmitted",
+      // can be unsubmitted, success, failure, loading
     };
     this.receiveMessage = this.receiveMessage.bind(this)
     this.domain = "localhost:3000"
@@ -194,7 +194,7 @@ export default class ModalManager extends Component {
     if(e.data.type != "edited"){
       return
     } 
-    this.setState({edited:true})
+    this.props.setWorldData({worldEdited:true})
 
 
 
@@ -552,7 +552,7 @@ export default class ModalManager extends Component {
       callback: () => {
         this.props.loadStamperObject(newWorldStamper);
         this.hideModal();
-        this.setState({edited:false})
+        this.props.setWorldData({worldEdited:false})
       }
     });
     if (!ipc) {
@@ -563,15 +563,15 @@ export default class ModalManager extends Component {
           this.requestDownload();
           this.props.loadStamperObject(newWorldStamper);
           this.hideModal();
-          this.setState({edited:false})
+          this.props.setWorldData({worldEdited:false})
         }
       });
     }
  
    
-    if (!this.state.edited) {
+    if (!this.props.getWorldData().worldEdited) {
       this.props.loadStamperObject(newWorldStamper);
-      this.setState({edited:false})
+      this.props.setWorldData({worldEdited:false})
     } else {
       this.setState({
         modalVisible: true,
@@ -849,7 +849,7 @@ export default class ModalManager extends Component {
       },
       () => {
         this.checkPublishWorldName()
-        this.setState({ publishVisible: true, publishModalSuccess:false });
+        this.setState({ publishVisible: true, publishModalMode:"unsubmitted" });
       }
     );
 
@@ -886,7 +886,7 @@ checkPublishWorldName(){
             <div class="row picker p-2" >
               <input
                 placeholder="name"
-                class="picker m-1"
+                class=" m-1 form-control form-control-sm"
                 style={{ width: 150 }}
                 value={this.state.publishModalName}
 
@@ -894,15 +894,16 @@ checkPublishWorldName(){
        
                   this.setState({
                     publishModalName: e.target.value.split("_").join(" ").split("~").join(" "),
-                    publishModalSuccess:false
+              
+                    publishModalMode:"unsubmitted"
                   }, () => this.checkPublishWorldName())
                 }
                 }
               />
-              <div class="picker m-2">{"by"}</div>
+              <div class=" picker m-2">{"by"}</div>
               <input
                 placeholder="author (you)"
-                class="picker m-1"
+                class=" m-1 form-control form-control-sm"
                 style={{ width: 150 }}
                 value={this.state.publishModalAuthor}
 
@@ -910,18 +911,24 @@ checkPublishWorldName(){
                   
                   this.setState({
                     publishModalAuthor: e.target.value.split("_").join(" ").split("~").join(" "),
-                    publishModalSuccess:false
+                                        publishModalMode:"unsubmitted"
                   }, () => this.checkPublishWorldName())
                 }
                 }
               />
             </div>
-            <div hidden={!this.state.publishModalWorldExists || this.state.publishModalSuccess} class="picker">
+            <div hidden={this.state.publishModalMode != "loading"} class="picker text-greyText" style={{fontStyle:"italic"}}>
+            {"loading..."}
+            </div>
+            <div hidden={this.state.publishModalMode != "failure"} class="picker text-warningOrangeDark">
+            {"Oh no! There was an error publishing your sketch. Please restart Stamper or try again later."}
+            </div>
+            <div hidden={!this.state.publishModalWorldExists || this.state.publishModalMode !== "unsubmitted"} class="picker text-warningOrangeDark">
             {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if this isn't your example to overwrite)."}
             </div>
-            <div hidden={!this.state.publishModalSuccess}>
-            <div class="picker">Yay! Your sketch was successfully published. Use this link to access it:</div> 
-            <u class="picker">{this.domain + "/" +this.props.getWorldData().worldKey}</u>
+            <div hidden={this.state.publishModalMode != "success"}>
+            <div class="picker text-primary">Yay! Your sketch was successfully published. Use this link to access it:</div> 
+            <div class="mt-1 picker form-control form-control-sm">{this.domain + "/" +this.props.getWorldData().worldKey}</div>
             </div>
           </div>
         </Modal.Body>
@@ -931,10 +938,10 @@ checkPublishWorldName(){
             size="sm"
             onClick={this.hidePublishModal}
           >
-            {"done"}
+            {(this.state.publishModalMode === "unsubmitted") ? "cancel" : "done"}
           </Button>
           <Button
-            disabled ={!this.state.publishModalName || !this.state.publishModalAuthor}
+            disabled ={!this.state.publishModalName || !this.state.publishModalAuthor || this.state.publishModalLoading}
             variant={"outline-primary"}
             size="sm"
             onClick={this.publishWorld.bind(this)}
@@ -957,7 +964,10 @@ checkPublishWorldName(){
     var key = this.worldNameAuthorToKey(this.state.publishModalName, this.state.publishModalAuthor)
     var fileName = this.worldKeyToFileName(key)
         this.props.setWorldData({ worldKey:key, 
-          worldPublishTime: new Date()}, () => {
+          worldPublishTime: new Date()}, () => this.setState({publishModalMode:"loading"},() => { 
+
+
+  
 
 
     repo.writeFile("master", fileName, JSON.stringify(this.props.getStamperObject()), "commited new world", {}, 
@@ -966,17 +976,18 @@ checkPublishWorldName(){
 
         if(error){
           console.log(error)
+          this.setState({publishModalMode:"failure"})
           return
         }
         
         localStorage.setItem("localWorldAuthor", this.state.publishModalAuthor)
-        this.setState({publishModalSuccess:true})
+        this.setState({publishModalMode:"success"})
 
     })
 
 
 
-          })
+          }))
 
 
 
@@ -1098,11 +1109,14 @@ checkPublishWorldName(){
         <Modal.Body>
         <div>
           <div hidden={!worldData.worldKey}>
-            <div class="picker">
+            <div class="picker picker form-control form-control-sm">
             {this.domain + "/" + worldData.worldKey}
             </div>
-            <div class="picker">
+            <div class="ml-1 picker text-greyText">
             {"last published @ " + dataString}
+            </div>
+            <div class="ml-1 picker text-primary" hidden={!this.props.getWorldData().worldEdited}>
+            {"the sketch you have now is an edited version of what's published"}
             </div>
   
           </div>

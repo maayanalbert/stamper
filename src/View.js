@@ -76,7 +76,8 @@ export default class View extends Component {
       stampOrder:[],
       snapToGrid:false,
       worldKey:null,
-      worldPublishTime:null
+      worldPublishTime:null,
+      worldEdited:false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -291,6 +292,7 @@ export default class View extends Component {
         stampOrder:[],      
 
       worldKey:null,
+      worldEdited:false,
       worldPublishTime:null
       },
       () => {
@@ -302,6 +304,7 @@ export default class View extends Component {
             originY: stamperObject.originY,
 
             worldKey:stamperObject.worldKey,
+            worldEdited:stamperObject.worldEdited,
             worldPublishTime:stamperObject.worldPublishTime
           },
           () => {
@@ -1244,6 +1247,7 @@ _stopLooping =setTimeout(() => {
       originX: this.state.originX,
       originY: this.state.originY,
       worldKey:this.state.worldKey,
+      worldEdited:this.state.worldEdited,
       worldPublishTime:this.state.worldPublishTime
     };
     this.state.stampOrder.map(stampID => {
@@ -1496,8 +1500,11 @@ var name = this.getFirstLine(stampRef.state.code);
   }
 
   getWorldData(){
+console.log(this.state.worldEdited)
     return {
-            worldKey:this.state.worldKey, worldPublishTime:this.state.worldPublishTime}
+            worldKey:this.state.worldKey, 
+            worldPublishTime:this.state.worldPublishTime, 
+            worldEdited:this.state.worldEdited}
   }
 
 
