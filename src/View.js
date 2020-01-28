@@ -793,7 +793,7 @@ callback(id)
     // if (this.state.compiledBefore === false) {
     //   this.setState({ compiledBefore: true });
     // } else {
-    //   ipc && ipc.send("edited");
+    //   window.postMessage({type:"edited"}, '*');
     // }
 
     // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
@@ -1215,7 +1215,7 @@ _stopLooping =setTimeout(() => {
   }
 
   onDelete(id) {
-    ipc && ipc.send("edited");
+    window.postMessage({type:"edited"}, '*')
 
     if(id in this.state.stampRefs){
       var stampRefs = Object.assign({}, this.state.stampRefs);
@@ -1319,7 +1319,7 @@ _stopLooping =setTimeout(() => {
   manualPan(xDiff, yDiff) {
     $(".allStamps").css({ transition: "all .5s ease" });
     setTimeout(() => $(".allStamps").css({ transition: "" }), 500);
-    ipc && ipc.send("edited");
+    window.postMessage({type:"edited"}, '*');
     this.setState({
       originX: this.state.originX + xDiff,
       originY: this.state.originY + yDiff
@@ -1367,7 +1367,7 @@ _stopLooping =setTimeout(() => {
       return
     }
 
-
+window.postMessage({type:"edited"}, '*')
     if(result.source.index === 0 || result.destination.index === 0){return}
     var stampOrder = Object.assign([], this.state.stampOrder)
 

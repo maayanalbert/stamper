@@ -206,6 +206,7 @@ function noiseWave() {
       var curNumStamps = this.props.getNumStamps();
 
       var callback = () => {
+        window.postMessage({type:"edited"}, '*')
         this.props.recompileIfEnoughStamps(
           stamperObject.stamps.length + curNumStamps.stamps
         );
@@ -597,14 +598,22 @@ function noiseWave() {
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
-              this.props.addStamp(normalFn, id => this.props.requestCompile(id))
+              this.props.addStamp(normalFn, id => {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            }
+                )
             }
             dropDownData={builtInFns
               .map(data => ({
                 name: data.name,
                 icon: BuiltInStampIcon,
                 callback: () =>
-                  this.props.addStamp(data, id => this.props.requestCompile(id))
+                  this.props.addStamp(data, id => {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            }
+                    )
               }))
               .concat([{}])
               .concat(
@@ -613,7 +622,10 @@ function noiseWave() {
                   icon: ListenerStampIcon,
                   callback: () =>
                     this.props.addStamp(data, id =>
-                      this.props.requestCompile(id)
+                      {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            }
                     )
                 }))
               )}
@@ -625,14 +637,20 @@ function noiseWave() {
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
-              this.props.addStamp(starterBlobs[0].data, id => this.props.requestCompile(id))
+              this.props.addStamp(starterBlobs[0].data, id => {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            })
             }
             dropDownData={starterBlobs.map(starterBlob => ({
               name:starterBlob.name,
               icon:BlobStampIcon,
               callback:() => 
                       this.props.addStamp(starterBlob.data, id =>
-                      this.props.requestCompile(id)
+                      {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            }
                     )
             }))
           }
@@ -652,7 +670,10 @@ function noiseWave() {
               this.props.modalManagerRef.current.requestFileUpload("text") },
               {name:"new file", icon:FileStampIcon, callback:() =>
               this.props.addStamp(sampleFile, id =>
-                this.props.requestCompile(id)
+                {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            }
               ) } ]
           }
           />
@@ -811,6 +832,16 @@ class TopButton extends Component {
 
         oneWordName = data.name.replace(new RegExp(' ', 'g'), "-");
 
+      }else{
+
+        return (
+          <div>
+          <div 
+        style={{height:5, color:"transparent", width:"100%"}}>hi</div>
+          <div className="border-top border-borderGrey" 
+        style={{height:5, color:"transparent", width:"100%"}}>hi</div>
+        </div>
+        )
       }
       return (
         <div

@@ -312,7 +312,7 @@ var Cristal = (function(_super) {
         innerHeight = window.innerHeight;
 
       if (isDragging) {
-        ipc && ipc.send("edited");
+        window.postMessage({type:"edited"}, '*');
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
@@ -338,7 +338,7 @@ var Cristal = (function(_super) {
         // _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
       } else if (isResizing) {
-        ipc && ipc.send("edited");
+        window.postMessage({type:"edited"}, '*');
         _this.resizeCristal(e);
       }
     };

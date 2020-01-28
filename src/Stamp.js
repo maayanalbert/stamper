@@ -99,7 +99,7 @@ export default class FunctionStamp extends Component {
   }
 
   toggleHide(callback) {
-    ipc && ipc.send("edited");
+    window.postMessage({type:"edited"}, '*');
     if (this.state.hidden) {
       this.setState(
         { hidden: false, iframeHeight: this.state.iframeHeight },
@@ -231,7 +231,7 @@ export default class FunctionStamp extends Component {
   }
 
   updateIframeDimensions(movementX = 0, movementY = 0) {
-    ipc && ipc.send("edited");
+    window.postMessage({type:"edited"}, '*')
 
     var width = this.state.iframeWidth + movementX;
     var height = this.state.iframeHeight + movementY;
@@ -312,7 +312,7 @@ export default class FunctionStamp extends Component {
           theme={theme}
           onChange={value => {
             this.setState({ code: value, editsMade: true });
-            ipc && ipc.send("edited");
+            window.postMessage({type:"edited"}, '*');
           }}
           name={"name" + this.props.id.toString()}
           fontSize={this.state.codeSize}
@@ -370,7 +370,7 @@ export default class FunctionStamp extends Component {
     if (this.state.editsMade) {
       var compileActions = () => {
         this.props.requestCompile(this.props.id);
-        ipc && ipc.send("edited");
+        window.postMessage({type:"edited"}, '*');
         this.setState({ editsMade: false, runningBorder: true }, () =>
           setTimeout(() => {
             this.setState({ runningBorder: false });
@@ -429,7 +429,7 @@ export default class FunctionStamp extends Component {
               newName = this.addExtension(newName, this.state.name)
             }
             this.setState({name:newName})
-            ipc && ipc.send("edited");
+            window.postMessage({type:"edited"}, '*');
           }}
           style={{ background: "transparent" }}
           value={displayName}
@@ -447,7 +447,7 @@ export default class FunctionStamp extends Component {
           }
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
-            ipc && ipc.send("edited");
+            window.postMessage({type:"edited"}, '*');
           }}
           style={{ background: "transparent" }}
           value={this.state.args}
@@ -626,6 +626,7 @@ export default class FunctionStamp extends Component {
   }
 
   copyAndOpt(isOpt = false) {
+    window.postMessage({type:"edited"}, '*')
     if (this.props.isIndex) {
       return;
     }
@@ -817,6 +818,7 @@ export default class FunctionStamp extends Component {
           parentID={this.props.id}
           showCodeSize={this.props.isBlob}
           onCodeSize={() => {
+            window.postMessage({type:"edited"}, '*')
             if (this.state.codeSize === globals.codeSize) {
               this.setState({ codeSize: globals.bigCodeSize });
             } else {

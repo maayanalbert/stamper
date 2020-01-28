@@ -66,10 +66,12 @@ export default class ModalManager extends Component {
       publishModalAuthor: undefined,
       publishModalSuccess:false,
       publishInfoVisible:false,
-      publishModalWorldExists:false
+      publishModalWorldExists:false,
+      onlineWorldDict:null,
+      edited:false
 
     };
-
+    this.receiveMessage = this.receiveMessage.bind(this)
     this.domain = "localhost:3000"
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
@@ -188,11 +190,22 @@ export default class ModalManager extends Component {
     }
   }
 
+  receiveMessage(e){
+    if(e.data.type != "edited"){
+      return
+    } 
+    this.setState({edited:true})
 
+
+
+    ipc && ipc.send("edited")
+  }
 
 
   componentDidMount() {
     window.postMessage({type:"worlds"}, '*')
+    window.addEventListener("message", this.receiveMessage)
+
     this.loadInitialStamperObject();
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({ saveInterval: saveInterval });
@@ -262,6 +275,7 @@ export default class ModalManager extends Component {
   }
 
   getWorldNamesAndKeys(callback = () => null){
+
           var allWorlds = []
       worlds.map(item => allWorlds.push({key:item.name, name:item.name}))
       allWorlds.push({})
@@ -339,6 +353,7 @@ export default class ModalManager extends Component {
   }
 
   componentWillUnmout() {
+        window.removeEventListener("message", this.receiveMessage)
     window.removeEventListener("beforeunload", this.sendSaveData);
     this.state.inputElem.removeEventListener("change", this.checkFiles);
     clearInterval(this.state.saveInterval);
@@ -417,7 +432,10 @@ export default class ModalManager extends Component {
       var reader = new FileReader();
 
       var callback = imgData =>
-        this.props.addStamp(imgData, id => this.props.requestCompile(id));
+        this.props.addStamp(imgData, id => {
+              this.props.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            });
 
       reader.onload = e => {
         var data = {
@@ -520,66 +538,6 @@ export default class ModalManager extends Component {
     }
   }
 
-  checkIfCurIsAWorld(callback) {
-    var curStamper = this.props.getStamperObject();
-
-
-    for (var i = 0; i < worlds.length; i++) {
-      var worldStamper = worlds[i].data;
-
-      curStamper.scale = worldStamper.scale;
-      curStamper.originX = worldStamper.originX;
-      curStamper.originY = worldStamper.originY;
-      delete curStamper.compressedJs
-      delete worldStamper.compressedJs
-
-   
-      if (deepEqual(curStamper, worldStamper)) {
-         callback(true);
-         return
-      }
-    }
-
-    if(!curStamper.worldKey){
-      callback(false)
-      return
-    }
-
-
-    var gh = new GitHub({token:this.oauthToken})
-    var repo = gh.getRepo("p5stamper", "worlds")
-    repo.getContents( "master",curStamper.worldKey, false, (error, result, request) => { 
-      
-    if(error){
-
-          console.log(error)
-      callback(false)
-      return
-    }
-
-    var bufContent = new Buffer(result.content, "base64"); 
-    var stringContent = new TextDecoder("utf-8").decode(bufContent);
-    try{
-      var worldStamper = JSON.parse(stringContent)
-      curStamper.scale = worldStamper.scale;
-      curStamper.originX = worldStamper.originX;
-      curStamper.originY = worldStamper.originY;
-      delete curStamper.compressedJs
-      delete worldStamper.compressedJs
-
-
-         callback(deepEqual(curStamper, worldStamper));
-
-    }catch(error){
-      callback(false)
-      return
-      
-      }
-    })
-
-
-
-  }
 
   loadWithOverwriteProtection(newWorldStamper) {
     var buttons = [];
@@ -594,6 +552,7 @@ export default class ModalManager extends Component {
       callback: () => {
         this.props.loadStamperObject(newWorldStamper);
         this.hideModal();
+        this.setState({edited:false})
       }
     });
     if (!ipc) {
@@ -604,13 +563,15 @@ export default class ModalManager extends Component {
           this.requestDownload();
           this.props.loadStamperObject(newWorldStamper);
           this.hideModal();
+          this.setState({edited:false})
         }
       });
     }
-    this.checkIfCurIsAWorld((curIsAWorld) => {
-
-    if (true) {
+ 
+   
+    if (!this.state.edited) {
       this.props.loadStamperObject(newWorldStamper);
+      this.setState({edited:false})
     } else {
       this.setState({
         modalVisible: true,
@@ -621,7 +582,7 @@ export default class ModalManager extends Component {
     }
 
 
-    })
+ 
 
 
   }
@@ -902,13 +863,7 @@ export default class ModalManager extends Component {
 
 checkPublishWorldName(){
   var key = this.worldNameAuthorToKey(this.state.publishModalName, this.state.publishModalAuthor)
-  this.getOnlineWorldObject(key, false, stamperObject => {
-    if(stamperObject){
-      this.setState({publishModalWorldExists:true})
-    }else{
-      this.setState({publishModalWorldExists:false})
-    }
-  })
+  this.setState({publishModalWorldExists:key in this.state.onlineWorldDict})
 }
 
   renderPublishModal() {
@@ -928,17 +883,19 @@ checkPublishWorldName(){
             {
               "This will add your sketch to the examples list and give you a link to share it with."
             }
-            <div class="row picker p-2" onMouseOut={ this.checkPublishWorldName.bind(this)}>
+            <div class="row picker p-2" >
               <input
                 placeholder="name"
                 class="picker m-1"
                 style={{ width: 150 }}
                 value={this.state.publishModalName}
-                onChange={e =>{
 
+                onChange={e =>{
+       
                   this.setState({
-                    publishModalName: e.target.value.split("_").join(" ").split("~").join(" ")
-                  })
+                    publishModalName: e.target.value.split("_").join(" ").split("~").join(" "),
+                    publishModalSuccess:false
+                  }, () => this.checkPublishWorldName())
                 }
                 }
               />
@@ -948,17 +905,19 @@ checkPublishWorldName(){
                 class="picker m-1"
                 style={{ width: 150 }}
                 value={this.state.publishModalAuthor}
-                onChange={e =>{
 
+                onChange={e =>{
+                  
                   this.setState({
-                    publishModalAuthor: e.target.value.split("_").join(" ").split("~").join(" ")
-                  })
+                    publishModalAuthor: e.target.value.split("_").join(" ").split("~").join(" "),
+                    publishModalSuccess:false
+                  }, () => this.checkPublishWorldName())
                 }
                 }
               />
             </div>
-            <div hidden={!this.state.publishModalWorldExists} class="picker">
-            {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if it isn't or example to overwrite)."}
+            <div hidden={!this.state.publishModalWorldExists || this.state.publishModalSuccess} class="picker">
+            {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if this isn't your example to overwrite)."}
             </div>
             <div hidden={!this.state.publishModalSuccess}>
             <div class="picker">Yay! Your sketch was successfully published. Use this link to access it:</div> 
@@ -972,9 +931,10 @@ checkPublishWorldName(){
             size="sm"
             onClick={this.hidePublishModal}
           >
-            {"cancel"}
+            {"done"}
           </Button>
           <Button
+            disabled ={!this.state.publishModalName || !this.state.publishModalAuthor}
             variant={"outline-primary"}
             size="sm"
             onClick={this.publishWorld.bind(this)}
@@ -1023,20 +983,24 @@ checkPublishWorldName(){
   }
 
   getOnlineWorlds(callback){
+
         var gh = new GitHub({token:this.oauthToken})
 
     var repo = gh.getRepo("p5stamper", "worlds")
     repo.getContents( "master","", false, (error, result, request) => {
       var onlineWorlds = []
+      var onlineWorldDict = {}
       result.map((item) => {
         var fileName = item.name
         var key = this.worldFileNameToKey(fileName)
         var name = this.worldKeyToNameAuthor(key).name + " by " + this.worldKeyToNameAuthor(key).author
         onlineWorlds.push({ name: name, key:key})
-
+        onlineWorldDict[key] = ""
 
       })
-      callback(onlineWorlds)
+
+      this.setState({onlineWorldDict:onlineWorldDict}, () => callback(onlineWorlds))
+
 
 
     })
