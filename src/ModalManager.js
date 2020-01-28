@@ -917,6 +917,7 @@ checkPublishWorldName(){
                 }
               />
             </div>
+            <div class="mt-2">
             <div hidden={this.state.publishModalMode != "loading"} class="picker text-greyText" style={{fontStyle:"italic"}}>
             {"loading..."}
             </div>
@@ -927,8 +928,9 @@ checkPublishWorldName(){
             {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if this isn't your example to overwrite)."}
             </div>
             <div hidden={this.state.publishModalMode != "success"}>
-            <div class="picker text-primary">Yay! Your sketch was successfully published. Use this link to access it:</div> 
-            <div class="mt-1 picker form-control form-control-sm">{this.domain + "/" +this.props.getWorldData().worldKey}</div>
+            <div class="picker text-primary">Yay! Your sketch was successfully published. Access it at:</div> 
+            {this.renderLinkForm()}
+            </div>
             </div>
           </div>
         </Modal.Body>
@@ -959,12 +961,12 @@ checkPublishWorldName(){
 
     var repo = gh.getRepo("p5stamper", "worlds")
 
-
+    var publishDate = new Date()
 
     var key = this.worldNameAuthorToKey(this.state.publishModalName, this.state.publishModalAuthor)
     var fileName = this.worldKeyToFileName(key)
         this.props.setWorldData({ worldKey:key, 
-          worldPublishTime: new Date()}, () => this.setState({publishModalMode:"loading"},() => { 
+          worldPublishTime: publishDate.toString()}, () => this.setState({publishModalMode:"loading"},() => { 
 
 
   
@@ -1081,13 +1083,27 @@ checkPublishWorldName(){
     this.setState({publishInfoVisible:false})
   }
 
+  renderLinkForm(){
+
+
+
+    return (               <input class="picker picker form-control form-control-sm mt-1 mb-1"
+
+      value={this.domain + "/" + this.props.getWorldData().worldKey}/>
+
+      )
+  }
+
+
+
   renderPublishInfoModal() {
 
     var worldData = this.props.getWorldData()
-    var dataString = ""
-    if(worldData.worldPublishTime){
-      dataString = worldData.worldPublishTime.toLocaleString()
-    }
+
+    // var dataString = ""
+    // if(worldData.worldPublishTime){
+    //   dataString = worldData.worldPublishTime.toLocaleString()
+    // }
     
     var title = "You aren't working in a published sketch."
 
@@ -1109,11 +1125,9 @@ checkPublishWorldName(){
         <Modal.Body>
         <div>
           <div hidden={!worldData.worldKey}>
-            <div class="picker picker form-control form-control-sm">
-            {this.domain + "/" + worldData.worldKey}
-            </div>
+            {this.renderLinkForm()}
             <div class="ml-1 picker text-greyText">
-            {"last published @ " + dataString}
+            {"published " + worldData.worldPublishTime}
             </div>
             <div class="ml-1 picker text-primary" hidden={!this.props.getWorldData().worldEdited}>
             {"the sketch you have now is an edited version of what's published"}

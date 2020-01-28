@@ -1500,7 +1500,7 @@ var name = this.getFirstLine(stampRef.state.code);
   }
 
   getWorldData(){
-console.log(this.state.worldEdited)
+
     return {
             worldKey:this.state.worldKey, 
             worldPublishTime:this.state.worldPublishTime, 
