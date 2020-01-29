@@ -924,13 +924,13 @@ checkPublishWorldName(){
             {"loading..."}
             </div>
             <div hidden={this.state.publishModalMode != "failure"} class="picker text-warningOrangeDark">
-            {"Oh no! There was an error publishing your sketch. Please restart Stamper or try again later."}
+            {"Oh no! There was an error publishing your sketch. If you recently published a sketch with the same name and author, we may still be processing it. Please try again in another minute or so."}
             </div>
             <div hidden={!this.state.publishModalWorldExists || this.state.publishModalMode !== "unsubmitted"} class="picker text-warningOrangeDark">
             {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if this isn't your example to overwrite)."}
             </div>
             <div hidden={this.state.publishModalMode != "success"}>
-            <div class="picker text-primary">Yay! Your sketch was successfully published. Access it at:</div> 
+            <div class="picker text-primary">Congrats! Your sketch was successfully published. Access it at:</div> 
             {this.renderLinkForm()}
             </div>
             </div>
