@@ -579,7 +579,7 @@ function logToConsole(message, lineno){
       consoleHeight = data.consoleHeight;
     const release = await this.counterMutex.acquire();
     var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, release());
+    this.setState({ counter: counter + 1 }, () => release());
 
     var ref = React.createRef();
 
@@ -1219,10 +1219,12 @@ _stopLooping =setTimeout(() => {
     return name in globals.specialFns && globals.specialFns[name] === false;
   }
 
-  onDelete(id) {
+  async onDelete(id) {
     window.postMessage({type:"edited"}, '*')
 
     if(id in this.state.stampRefs){
+      const release = await this.counterMutex.acquire();
+
       var stampRefs = Object.assign({}, this.state.stampRefs);
       var stampElems = Object.assign({}, this.state.stampElems);
       delete stampRefs[id]
@@ -1232,6 +1234,7 @@ _stopLooping =setTimeout(() => {
       stampOrder.splice(stampOrder.indexOf(id), 1)
       this.setState({stampRefs:stampRefs, stampElems:stampElems, stampOrder:stampOrder}, () => 
         this.requestCompile(id))
+        release()
     }
 
   }

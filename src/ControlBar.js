@@ -71,7 +71,7 @@ export default class ControlBar extends Component {
   constructor(props) {
     super(props);
     this.editorRef = React.createRef();
-    this.minPickerHeight = 30;
+    this.minPickerHeight = 70;
     this.minJsImporterHeight = 30;
     this.topBarHeight = 60;
     this.minWidth = 150;
