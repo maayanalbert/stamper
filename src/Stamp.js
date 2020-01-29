@@ -86,7 +86,7 @@ export default class FunctionStamp extends Component {
       hidden: this.props.initialHidden,
       looping: true,
       loopingTransition: "",
-      zIndex: -1,
+      zIndex: this.props.starterZIndex,
       exportableCode: "",
       codeSize: this.props.starterCodeSize,
       dataUri: ""
@@ -102,7 +102,7 @@ export default class FunctionStamp extends Component {
     window.postMessage({type:"edited"}, '*');
     if (this.state.hidden) {
       this.setState(
-        { hidden: false, iframeHeight: this.state.iframeHeight },
+        { hidden: false, iframeHeight: this.state.iframeHeight, zIndex:undefined },
         callback
       );
     } else {
@@ -786,7 +786,7 @@ export default class FunctionStamp extends Component {
     return (
       <div>
         <Cristal
-          zIndex={this.props.starterZIndex}
+          zIndex={this.state.zIndex}
           onZChange={s => this.setState({ zIndex: s.zIndex })}
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}
