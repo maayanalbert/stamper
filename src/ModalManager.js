@@ -67,7 +67,7 @@ export default class ModalManager extends Component {
       publishInfoVisible:false,
       publishModalWorldExists:false,
       onlineWorldDict:null,
-
+      lastWorldCheck:-1,
       publishModalMode:"unsubmitted",
       // can be unsubmitted, success, failure, loading
     };
@@ -202,9 +202,40 @@ export default class ModalManager extends Component {
   }
 
 
+  requestOnlineWorldCheck(){
+    var gh = new GitHub({token:this.oauthToken})
+    var repo = gh.getRepo("p5stamper", "worlds")
+    var date = new Date()
+
+    repo.listCommits({}, (error, result, request) => {
+      if(error){
+
+        window.postMessage({type:"worlds"}, '*')
+        this.setState({lastWorldCheck:date.getTime()})
+        return
+      }
+
+
+      this.getWorldPublishTime("", (time) => {
+
+        if(time >= this.state.lastWorldCheck){
+          console.log("UPDATING WORLDS")
+          window.postMessage({type:"worlds"}, '*')
+        }
+           this.setState({lastWorldCheck:date.getTime()})
+      })
+     
+
+
+    })
+
+
+
+  }
 
   componentDidMount() {
-    window.postMessage({type:"worlds"}, '*')
+    this.requestOnlineWorldCheck()
+
     window.addEventListener("message", this.receiveMessage)
 
 
@@ -591,7 +622,7 @@ export default class ModalManager extends Component {
 
   sendSaveData() {
     console.log("SAVING");
-
+    this.requestOnlineWorldCheck()
     var stamperObject = this.props.getStamperObject();
     var compressedStamperObj = LZUTF8.compress(JSON.stringify(stamperObject), {
       outputEncoding: "StorageBinaryString"
@@ -999,7 +1030,7 @@ checkPublishWorldName(){
 
   getOnlineWorlds(callback){
 
-        var gh = new GitHub({token:this.oauthToken})
+    var gh = new GitHub({token:this.oauthToken})
 
     var repo = gh.getRepo("p5stamper", "worlds")
     repo.getContents( "master","", false, (error, result, request) => {
@@ -1010,8 +1041,8 @@ checkPublishWorldName(){
     var onlineWorldTimeDict = {}
 
 
-    var timeCallback = (time, key) => {
-      console.log(time)
+    var timeCallback = (time, fileName) => {
+      var key = this.worldFileNameToKey(fileName)
       onlineWorldTimeArr.push(time)
       onlineWorldTimeDict[time] = key
       if(onlineWorldTimeArr.length === result.length){
@@ -1027,14 +1058,14 @@ checkPublishWorldName(){
           }
         })
         this.setState({onlineWorldDict:onlineWorldDict}, () => callback(onlineWorlds))
-        console.log(onlineWorlds)
+
       }
     }
 
 
 
       result.map((item) => {
-        this.getWorldPublishTime(item.name, timeCallback.bind(this))
+        this.getWorldPublishTime(item.name, (time) => timeCallback(time, item.name))
 
       })
 
@@ -1074,10 +1105,10 @@ callback(-1, fileName)
         var dateString = result[0].commit.committer.date
          var dateObj = new Date(dateString)
          var timeNum = dateObj.getTime()
-         callback(timeNum, this.worldFileNameToKey(fileName))
+         callback(timeNum)
    
       }
-      // console.log(result[0].commit.committer.date.getTime())
+
     })   
   }
 
@@ -1112,8 +1143,7 @@ callback(-1, fileName)
       callback(JSON.parse(stringContent))
     }catch(error){
       console.log(error)
-      callback(undefined)
-      console.log(error)
+
       modalizeErrors && this.setState({
         modalVisible: true,
         modalHeader: `Oh no! It looks like there were issues loading '${this.worldKeyToNameAuthor(key).name}'.`,

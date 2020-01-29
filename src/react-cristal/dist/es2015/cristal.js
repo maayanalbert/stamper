@@ -820,7 +820,8 @@ var Cristal = (function(_super) {
         ref: this.saveWrapperRef,
         isActive: isActive,
         className: className + " rounded " + this.props.wrapperName,
-        onMouseDown: this.changeZIndex
+        onMouseDown: this.changeZIndex,
+        overflow:"hidden"
       },
       <div>{HeaderComponent}</div>,
       ContentComponent,
