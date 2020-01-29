@@ -202,9 +202,11 @@ export default class ModalManager extends Component {
   }
 
 
+
   componentDidMount() {
     window.postMessage({type:"worlds"}, '*')
     window.addEventListener("message", this.receiveMessage)
+
 
     this.loadInitialStamperObject();
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
@@ -1001,18 +1003,41 @@ checkPublishWorldName(){
 
     var repo = gh.getRepo("p5stamper", "worlds")
     repo.getContents( "master","", false, (error, result, request) => {
-      var onlineWorlds = []
-      var onlineWorldDict = {}
+
+
+
+    var onlineWorldTimeArr = []
+    var onlineWorldTimeDict = {}
+
+
+    var timeCallback = (time, key) => {
+      console.log(time)
+      onlineWorldTimeArr.push(time)
+      onlineWorldTimeDict[time] = key
+      if(onlineWorldTimeArr.length === result.length){
+        onlineWorldTimeArr.sort().reverse()
+        var onlineWorlds = []
+        var onlineWorldDict = {}
+        onlineWorldTimeArr.map(time => {
+          if(time >= 0 && time in onlineWorldTimeDict){
+            var key = onlineWorldTimeDict[time]
+            var name = this.worldKeyToNameAuthor(key).name + " by " + this.worldKeyToNameAuthor(key).author
+            onlineWorlds.push({ name: name, key:key})
+            onlineWorldDict[key] = ""
+          }
+        })
+        this.setState({onlineWorldDict:onlineWorldDict}, () => callback(onlineWorlds))
+        console.log(onlineWorlds)
+      }
+    }
+
+
+
       result.map((item) => {
-        var fileName = item.name
-        var key = this.worldFileNameToKey(fileName)
-        var name = this.worldKeyToNameAuthor(key).name + " by " + this.worldKeyToNameAuthor(key).author
-        onlineWorlds.push({ name: name, key:key})
-        onlineWorldDict[key] = ""
+        this.getWorldPublishTime(item.name, timeCallback.bind(this))
 
       })
 
-      this.setState({onlineWorldDict:onlineWorldDict}, () => callback(onlineWorlds))
 
 
 
@@ -1036,11 +1061,34 @@ checkPublishWorldName(){
         this.getOnlineWorldObject(key, modalizeErrors, callback );
   }
 
+  getWorldPublishTime(fileName, callback){
+   
+     var gh = new GitHub({token:this.oauthToken})
+    var repo = gh.getRepo("p5stamper", "worlds")
+    repo.listCommits({path:fileName}, (error, result, request) => {
+      if(error){
+callback(-1, fileName)
+      }else if(result.length === 0){
+        callback(-1, fileName)
+      }else{
+        var dateString = result[0].commit.committer.date
+         var dateObj = new Date(dateString)
+         var timeNum = dateObj.getTime()
+         callback(timeNum, this.worldFileNameToKey(fileName))
+   
+      }
+      // console.log(result[0].commit.committer.date.getTime())
+    })   
+  }
+
   getOnlineWorldObject(key, modalizeErrors, callback ){
 
     var gh = new GitHub({token:this.oauthToken})
     var repo = gh.getRepo("p5stamper", "worlds")
+
     repo.getContents( "master", this.worldKeyToFileName(key), false, (error, result, request) => { 
+      
+
     if(error){
 
       modalizeErrors && this.setState({
@@ -1055,6 +1103,7 @@ checkPublishWorldName(){
       callback(undefined)
       return
     }
+
 
     var bufContent = new Buffer(result.content, "base64"); 
     var stringContent = new TextDecoder("utf-8").decode(bufContent);
