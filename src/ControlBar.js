@@ -554,6 +554,7 @@ function noiseWave() {
     );
   }
 
+
   renderTopBar() {
     return (
       <div

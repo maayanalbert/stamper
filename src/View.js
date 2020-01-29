@@ -191,6 +191,7 @@ export default class View extends Component {
   }
 
   onMouseMove(e) {
+
     if (this.state.mouseIsDown && this.state.downKey == this.space) {
       this.pan(e.movementX, e.movementY);
     }
@@ -316,7 +317,8 @@ export default class View extends Component {
               );
             this.addConsoleStamp(stamperObject.console);
             this.addManyStamps(stamperObject.stamps, callback)
-
+            this.disablePan(false)
+            this.disableZoom(false)
          
           }
         );
