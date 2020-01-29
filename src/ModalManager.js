@@ -961,7 +961,7 @@ checkPublishWorldName(){
             {"An example with this name and author already exists. If you publish, you'll overwrite that example (please don't do this if this isn't your example to overwrite)."}
             </div>
             <div hidden={this.state.publishModalMode != "success"}>
-            <div class="picker text-primary">Congrats! Your sketch was successfully published. Access it at:</div> 
+            <div class="picker text-primary">Congrats! Your sketch was successfully published (it will take several minutes for it to show up in the examples list). Access it at:</div> 
             {this.renderLinkForm()}
             </div>
             </div>
