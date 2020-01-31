@@ -863,7 +863,7 @@ nameColor = "pink";
             <div class="p-2">
               <div hidden={this.props.isBlob}>{this.renderFunctionName()}</div>
 
-              <div class="row m-0 mt-2">
+              <div class="row m-0 mt-2" style={{flexWrap:"nowrap"}}>
                 {this.renderEditor()}
 
                 {this.renderIframe()}

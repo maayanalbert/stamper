@@ -783,14 +783,14 @@ callback(id)
   }
 
   updateLineData(id){
-    var lineData = this.getLineData()
+    // var lineData = this.getLineData()
 
-    this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      var stampRef = stamp.current;
-      stampRef.setLineData(lineData.filter(line => line.start === id));
+    // this.state.stampOrder.map(id => {
+    //   var stamp = this.state.stampRefs[id]
+    //   var stampRef = stamp.current;
+    //   stampRef.setLineData(lineData.filter(line => line.start === id));
   
-    });
+    // });
 
   }
 
@@ -1172,12 +1172,16 @@ callback(id)
   getLineStyle(type){
   
     var strokeColor
-    if(type === "file" || type === "index"){
+    if(type === "file"){
       strokeColor = "rgba(140,154, 53, .2)"
     }else if(type === "js"){
       strokeColor = "rgba(70,160,206, .2)"
-    }else if(type === "listener" || type === "setup"){
+    }else if(type === "listener"){
       strokeColor = "rgba(218,16,96, .2)"
+    }else if(type === "setup" ){
+      strokeColor = "rgba(175,175,175, .2)"
+    }else if(type === "index"){
+      strokeColor = "rgba(175,175,175, .2)"
     }
         var style = {strokeColor:strokeColor, strokeWidth:15*this.state.scale, arrowLength:2.5, 
           arrowThickness:2.5}
