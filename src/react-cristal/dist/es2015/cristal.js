@@ -142,8 +142,10 @@ var Cristal = (function(_super) {
 
       _this.setState({ width: width, height: height, originalHeight: height });
       _this.setInitialPosition({ width: width, height: height });
+
     };
     _this.setInitialPosition = function(size) {
+     
       var initialPosition = _this.props.initialPosition;
 
       if (!initialPosition) return;
@@ -590,7 +592,6 @@ var Cristal = (function(_super) {
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
     var iframeElem = document.getElementById("iframe" + this.props.parentID);
-
     if (iframeElem) {
       iframeElem.addEventListener("wheel", e => console.log(e));
     }
@@ -829,17 +830,22 @@ var Cristal = (function(_super) {
     //   })
     // }
 
+
     var lineRelations = lineData.map(line => {
       var targetAnchor;
       var sourceAnchor;
-      var sourceX = x
-      var sourceY = y
-      var targetX = parseInt($("#vertex_" + line.end).css("left"), 10)
-      var targetY = parseInt($("#vertex_" + line.end).css("top"), 10)
+      var sourceX = x + width/2
+      var sourceY = y + height/2
+      var targetX = parseInt($("#vertex_" + line.end).css("left"), 10) + parseInt($("#vertex_" + line.end).css("width"), 10)/2 
+      var targetY = parseInt($("#vertex_" + line.end).css("top"), 10)+ parseInt($("#vertex_" + line.end).css("height"), 10)/2 
 
       var xDiff = sourceX - targetX
       var yDiff = sourceY - targetY
 
+      if(!targetX){
+        return null
+      }
+  
 
       if(Math.abs(yDiff) > Math.abs(xDiff)){
         if(yDiff > 0){
@@ -859,14 +865,14 @@ var Cristal = (function(_super) {
         }
       }
 
-      // console.log(targetX)
-
       return {
         targetId: "line_" + line.end,
         targetAnchor: targetAnchor,
         sourceAnchor: sourceAnchor
       };
     });
+
+    lineRelations = lineRelations.filter(line => line)
 
 
     var allContent = (

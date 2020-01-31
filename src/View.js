@@ -663,6 +663,7 @@ function logToConsole(message, lineno){
         starterArgs={data.args}
         starterName={data.name}
         errorLines={{}}
+        updateLineData={this.updateLineData.bind(this)}
         starterEditorWidth={data.editorWidth}
         starterEditorHeight={data.editorHeight}
         initialPosition={{ x: data.x, y: data.y }}
@@ -781,9 +782,21 @@ callback(id)
     return fileDict
   }
 
-  requestCompile(id) {
-
+  updateLineData(id){
     var lineData = this.getLineData()
+
+    this.state.stampOrder.map(id => {
+      var stamp = this.state.stampRefs[id]
+      var stampRef = stamp.current;
+      stampRef.setLineData(lineData.filter(line => line.start === id));
+  
+    });
+
+  }
+
+  requestCompile(id) {
+    this.updateLineData(id)
+ 
 
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
@@ -818,7 +831,7 @@ callback(id)
           newErrors.push(0);
         }
 
-        stampRef.clearErrorsAndUpdate(newErrors, lineData.filter(line => line.start === id));
+        stampRef.clearErrorsAndUpdate(newErrors);
       }
     });
 
@@ -1066,7 +1079,7 @@ callback(id)
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current
-      if( this.isListener(stampRef.state.name) || !this.isFnStamp(id)){
+      if( this.isListener(stampRef.state.name) || !this.isFnStamp(id) || stampRef.state.name === "setup"){
         return
       }
       listenerIDs.map(listenerID => {
@@ -1203,23 +1216,29 @@ callback(id)
 
   }
 
-  getRunnableCode(id) {
+  getRunnableCode(overalID) {
     var runnableCode = [];
     var ranges = [];
     var curLine = 1;
     var code;
 
 
+
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id]
+      console.log(stamp.current.state.name)
+      console.log(this.isListener(stamp.current.state.name) === false)
+      console.log(this.isListener(this.state.stampRefs[overalID].current.state.name) === false)
       if (
         stamp.current.state.name != "draw" &&
         stamp.current.props.isTxtFile === false &&
         stamp.current.props.isMediaFile === false &&
         stamp.current.props.isIndex === false &&
-        (this.isListener(stamp.current.state.name) === false ||
-          this.isListener(this.state.stampRefs[id].current.state.name) ===
-            false)
+        !(this.isListener(stamp.current.state.name) &&
+          this.isListener(this.state.stampRefs[overalID].current.state.name)) &&
+        !(this.isListener(stamp.current.state.name) &&  
+          this.state.stampRefs[overalID].current.state.name === "setup")
+
       ) {
         var state = stamp.current.state;
         if(stamp.current.props.isBlob){
@@ -1248,14 +1267,15 @@ callback(id)
       }
     });
 
+
     if (
-      id in this.state.stampRefs == false ||
-      this.state.stampRefs[id].current === null
+      overalID in this.state.stampRefs == false ||
+      this.state.stampRefs[overalID].current === null
     ) {
       return runnableCode.join("");
     }
 
-    var stampRef = this.state.stampRefs[id].current;
+    var stampRef = this.state.stampRefs[overalID].current;
     var state = stampRef.state;
     if (state.name === "draw" || this.isListener(state.name)) {
       var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
@@ -1282,12 +1302,13 @@ callback(id)
     }
 
     runnableCode = this.setLoopingControl(
-      id,
+      overalID,
       runnableCode.join(""),
       state.name
     );
 
 
+    console.log(runnableCode)
 
     return { ranges: ranges, runnableCode: runnableCode };
   }
@@ -1454,7 +1475,13 @@ _stopLooping =setTimeout(() => {
   }
 
   toggleHide(stampRef) {
-    stampRef.toggleHide(() => this.setLayerPicker());
+    stampRef.toggleHide(() => {
+      this.updateLineData()
+      this.setLayerPicker()
+    })
+
+
+ 
   }
 
   getFirstLine(text) {
@@ -1643,7 +1670,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
     return (
       <div>
-       <ArcherContainer  strokeColor='red' strokeWidth={this.state.scale*2}>
+       <ArcherContainer  strokeColor='red' strokeWidth={this.state.scale*2} >
         <div class="row bg-grey" 
         style={{ height: "100vh" }}>
           <div

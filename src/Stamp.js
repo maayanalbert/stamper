@@ -187,12 +187,16 @@ export default class FunctionStamp extends Component {
     );
   }
 
-  clearErrorsAndUpdate(newErrors = [], lineData = []) {
+  setLineData( lineData = []){
+    this.setState({lineData:lineData})
+  }
+
+  clearErrorsAndUpdate(newErrors = []) {
  
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 
-    this.setState({ errorLines: newErrorLines, lineData:lineData }, () => {
+    this.setState({ errorLines: newErrorLines}, () => {
       var iframeCode = "";
       var exportableCode = "";
 
@@ -790,7 +794,14 @@ export default class FunctionStamp extends Component {
       <div>
         <Cristal
           zIndex={this.state.zIndex}
-          onZChange={s => this.setState({ zIndex: s.zIndex })}
+          onZChange={s => 
+
+            {
+            this.setState({ zIndex: s.zIndex }, () =>   this.props.updateLineData())
+          
+            }}
+
+
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}
           initialSize={this.getSize()}
