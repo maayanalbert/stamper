@@ -812,23 +812,8 @@ var Cristal = (function(_super) {
       };
     });
 
-    console.log(lineRelations, "line_" + this.props.parentID);
+    // console.log(lineRelations, "line_" + this.props.parentID);
     // console.log("line_" + this.props.parentID)
-
-    var cristalComponent = React.createElement(
-      Wrapper,
-      {
-        style: style,
-        ref: this.saveWrapperRef,
-        isActive: isActive,
-        className: className + " rounded " + this.props.wrapperName,
-        onMouseDown: this.changeZIndex,
-        overflow: "hidden"
-      },
-      HeaderComponent,
-      ContentComponent,
-      this.renderResizeHandles()
-    );
 
     // var allContent = (
 
@@ -842,67 +827,35 @@ var Cristal = (function(_super) {
 
     // )
 
-    const rootStyle = { display: "flex", justifyContent: "center" };
-    const rowStyle = {
-      margin: "200px 0",
-      display: "flex",
-      justifyContent: "space-between"
-    };
-    const boxStyle = { padding: "10px", border: "1px solid black" };
-
-    return (
-      <div>
-   
+    var allContent = (
           <ArcherElement
-            id="root"
-            relations={[
-              {
-                targetId: "element2",
-                targetAnchor: "top",
-                sourceAnchor: "bottom"
-              }
-            ]}
+            id={"line_" + this.props.parentID}
+            relations={lineRelations}
           >
-            {cristalComponent}
-          </ArcherElement>
-     
-
-        <div style={rowStyle}>
-          <ArcherElement
-            id="element2"
-            relations={[
-              {
-                targetId: "element3",
-                targetAnchor: "left",
-                sourceAnchor: "right",
-                style: { strokeColor: "blue", strokeWidth: 1 },
-                label: <div style={{ marginTop: "-20px" }}>Arrow 2</div>
-              }
-            ]}
-          >
-            <div style={boxStyle}>Element 2</div>
+      {HeaderComponent}
+      {ContentComponent}
           </ArcherElement>
 
-          <ArcherElement id="element3">
-            <div style={boxStyle}>Element 3</div>
-          </ArcherElement>
+    )
 
-          <ArcherElement
-            id="element4"
-            relations={[
-              {
-                targetId: "root",
-                targetAnchor: "right",
-                sourceAnchor: "left",
-                label: "Arrow 3"
-              }
-            ]}
-          >
-            <div style={boxStyle}>Element 4</div>
-          </ArcherElement>
-        </div>
-      </div>
+    var cristalComponent = React.createElement(
+      Wrapper,
+      {
+        style: style,
+        ref: this.saveWrapperRef,
+        isActive: isActive,
+        className: className + " rounded " + this.props.wrapperName,
+        onMouseDown: this.changeZIndex,
+        overflow: "hidden"
+      },
+      allContent,
+      this.renderResizeHandles()
     );
+
+
+
+    return cristalComponent
+
   };
   Cristal.defaultProps = {
     children: null,

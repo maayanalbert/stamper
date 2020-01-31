@@ -1042,7 +1042,7 @@ callback(id)
       var declaringID = declaredDict[variable];
 
       if (declaringID && usingID && this.isFnStamp(usingID)) {
-        lineData.push({start:usingID, end:declaringID,  type:"js"});
+        lineData.push({end:usingID, start:declaringID,  type:"js"});
       }
     }); 
 
@@ -1070,7 +1070,7 @@ callback(id)
         return
       }
       listenerIDs.map(listenerID => {
-        lineData.push({ start:id,end:listenerID, type:"listener"})
+        lineData.push({ end:id,start:listenerID, type:"listener"})
       })
 
     })
@@ -1094,7 +1094,7 @@ callback(id)
     if(setupID){
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id) && setupID != id){
-          lineData.push({start:id, end:setupID, type:"setup"})
+          lineData.push({end:id, start:setupID, type:"setup"})
         }
       })      
     }
@@ -1152,7 +1152,7 @@ callback(id)
       var stampRef = this.state.stampRefs[id].current
       Object.keys(fileIdDict).map(fileName => {
         if(this.fileIsReferenced(stampRef.state.code, fileName)){
-          lineData.push({start:id, end:fileIdDict[fileName], type:"file"})
+          lineData.push({end:id, start:fileIdDict[fileName], type:"file"})
         }
       })
     })
@@ -1644,6 +1644,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
     return (
       <div>
+       <ArcherContainer  strokeColor='red'>
         <div class="row bg-grey" 
         style={{ height: "100vh" }}>
           <div
@@ -1652,17 +1653,19 @@ var name = this.getFirstLine(stampRef.state.code);
               position: "absolute",
               left: this.state.originX,
               top: this.state.originY,
-              transform: "scale(" + this.state.scale + ")"
+              transform: "scale(" + this.state.scale+ ")"
             }}
           >
             {this.renderGridLines()}
-            <ArcherContainer  strokeColor='red'>
+           
+
             {Object.values(this.state.stampElems)}
-            </ArcherContainer>
+      
+    
             {consoleElem}
           </div>
         </div>
-
+        </ArcherContainer>
         <ControlBar
         addManyStamps = {this.addManyStamps.bind(this)}
           getNumStamps={this.getNumStamps.bind(this)}
