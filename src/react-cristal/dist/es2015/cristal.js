@@ -865,10 +865,13 @@ var Cristal = (function(_super) {
         }
       }
 
+
       return {
         targetId: "line_" + line.end,
         targetAnchor: targetAnchor,
-        sourceAnchor: sourceAnchor
+        sourceAnchor: sourceAnchor,
+        label:line.label,
+        style:line.style
       };
     });
 

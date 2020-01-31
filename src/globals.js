@@ -16,6 +16,33 @@ export const globals = {
   iconTransition: "all .3s ease",
   borderTransition: "border .3s ease-out",
 
+  listeners:{
+        windowResized:  false,
+    deviceMoved:  false,
+    deviceTurned: false,
+    deviceShaken: false,
+
+    keyPressed: false,
+    keyReleased:  false,
+    keyTyped: false,
+
+    mouseMoved: false,
+    mouseDragged: false,
+
+    mousePressed: false,
+    mouseReleased:  false,
+    mouseClicked: false,
+    doubleClicked:  false,
+    
+    mouseWheel: false,
+  },
+
+
+  builtIns:{
+        draw:           true,
+    preload:        true,
+    setup:          true,
+  },
 
   specialFns: {
     draw:           true,

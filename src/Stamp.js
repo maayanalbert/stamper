@@ -400,8 +400,11 @@ export default class FunctionStamp extends Component {
     }
 
     var nameColor = "blue";
-    if (this.state.isSpecialFn) {
+    if (this.state.name in globals.builtIns) {
       nameColor = "pink";
+    } else if(this.state.name in globals.listeners){
+nameColor = "pink";
+
     } else if (
       this.props.isIndex ||
       this.props.isTxtFile ||

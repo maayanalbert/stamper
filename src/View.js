@@ -1055,7 +1055,8 @@ callback(id)
       var declaringID = declaredDict[variable];
 
       if (declaringID && usingID && this.isFnStamp(usingID)) {
-        lineData.push({end:usingID, start:declaringID,  type:"js"});
+        lineData.push({end:usingID, start:declaringID,  type:"js", label:this.getLabel("", "js"),
+            style:this.getLineStyle("js")});
       }
     }); 
 
@@ -1083,7 +1084,8 @@ callback(id)
         return
       }
       listenerIDs.map(listenerID => {
-        lineData.push({ end:id,start:listenerID, type:"listener"})
+        lineData.push({ end:id,start:listenerID, type:"listener", label:this.getLabel("", "listener"),
+            style:this.getLineStyle("listener")})
       })
 
     })
@@ -1107,7 +1109,8 @@ callback(id)
     if(setupID){
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id) && setupID != id){
-          lineData.push({end:id, start:setupID, type:"setup"})
+          lineData.push({end:id, start:setupID, type:"setup", label:this.getLabel("", "setup"),
+            style:this.getLineStyle("setup")})
         }
       })      
     }
@@ -1135,7 +1138,8 @@ callback(id)
       }
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id)){
-          lineData.push({start:indexID, end:id, type:"index"})
+          lineData.push({start:indexID, end:id, type:"index", label:this.getLabel("", "index"),
+            style:this.getLineStyle("index")})
         }
       })      
     }
@@ -1151,6 +1155,35 @@ callback(id)
 
 
 
+  getLabel(text, type){
+    var color
+    if(type === "file"){
+      color = "text-htmlCssName"
+    }
+    var label = (
+       <div className={color + " picker bg-grey"} style={{transform:"scale(" + 1+ ")"}}>
+            {text}
+            </div>)
+
+    return label
+
+  }
+
+  getLineStyle(type){
+  
+    var strokeColor
+    if(type === "file" || type === "index"){
+      strokeColor = "rgba(140,154, 53, .2)"
+    }else if(type === "js"){
+      strokeColor = "rgba(70,160,206, .2)"
+    }else if(type === "listener" || type === "setup"){
+      strokeColor = "rgba(218,16,96, .2)"
+    }
+        var style = {strokeColor:strokeColor, strokeWidth:15*this.state.scale, arrowLength:2.5, 
+          arrowThickness:2.5}
+    return style
+  }
+
   getFileLineData(){
     var fileIdDict = {}
     var lineData = []
@@ -1161,11 +1194,18 @@ callback(id)
       }
     })
 
+
+
+
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current
       Object.keys(fileIdDict).map(fileName => {
         if(this.fileIsReferenced(stampRef.state.code, fileName)){
-          lineData.push({end:id, start:fileIdDict[fileName], type:"file"})
+          lineData.push({end:id, start:fileIdDict[fileName], type:"file", label:this.getLabel("", "file"),
+            style:this.getLineStyle("file")
+
+
+            })
         }
       })
     })
@@ -1177,11 +1217,7 @@ callback(id)
 
 
   getLineData() {
-    // console.log("js lines", this.getJSLineData())
-    // console.log("listener lines", this.getListenerLineData())
-    // console.log("setup lines", this.getSetupLineData())
-    // console.log("index lines", this.getIndexLineData())
-    // console.log("file lines", this.getFileLineData())
+
 
     var lineData = []
     lineData = lineData.concat(this.getJSLineData())
@@ -1192,13 +1228,6 @@ callback(id)
 
 
     var lineDict = {}
-    // lineData.map(line => {
-    //   var lineKey = line.start + "_" + line.end
-    //   if(lineKey in lineDict === false){
-    //     lineDict[lineKey] = 0
-    //   }
-    //   lineDict[lineKey] += 1
-    // })
 
 
     lineData = lineData.filter(line => {
@@ -1226,9 +1255,7 @@ callback(id)
 
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id]
-      console.log(stamp.current.state.name)
-      console.log(this.isListener(stamp.current.state.name) === false)
-      console.log(this.isListener(this.state.stampRefs[overalID].current.state.name) === false)
+
       if (
         stamp.current.state.name != "draw" &&
         stamp.current.props.isTxtFile === false &&
@@ -1308,7 +1335,7 @@ callback(id)
     );
 
 
-    console.log(runnableCode)
+
 
     return { ranges: ranges, runnableCode: runnableCode };
   }
@@ -1420,6 +1447,7 @@ _stopLooping =setTimeout(() => {
   }
 
   onStopMove(s) {
+    this.updateLineData()
     this.setState({ mouseWheelTimeout: null });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1670,7 +1698,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
     return (
       <div>
-       <ArcherContainer  strokeColor='red' strokeWidth={this.state.scale*2} >
+       <ArcherContainer  strokeWidth={this.state.scale*2} >
         <div class="row bg-grey" 
         style={{ height: "100vh" }}>
           <div
