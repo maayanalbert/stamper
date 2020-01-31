@@ -78,7 +78,12 @@ export default class View extends Component {
       snapToGrid:false,
       worldKey:null,
       worldPublishTime:null,
-      worldEdited:false
+      worldEdited:false,
+      jsLinesOn:true,
+      indexLinesOn:false,
+      setupLinesOn:false,
+      fileLinesOn:false,
+      listenerLinesOn:false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -783,14 +788,14 @@ callback(id)
   }
 
   updateLineData(id){
-    // var lineData = this.getLineData()
+    var lineData = this.getLineData()
 
-    // this.state.stampOrder.map(id => {
-    //   var stamp = this.state.stampRefs[id]
-    //   var stampRef = stamp.current;
-    //   stampRef.setLineData(lineData.filter(line => line.start === id));
+    this.state.stampOrder.map(id => {
+      var stamp = this.state.stampRefs[id]
+      var stampRef = stamp.current;
+      stampRef.setLineData(lineData.filter(line => line.start === id));
   
-    // });
+    });
 
   }
 
@@ -1213,11 +1218,25 @@ callback(id)
 
 
     var lineData = []
+    if(this.state.jsLinesOn){
     lineData = lineData.concat(this.getJSLineData())
+    }
+    if(this.state.listenerLinesOn){
     lineData = lineData.concat(this.getListenerLineData())
+    }
+    if(this.state.setupLinesOn){
     lineData = lineData.concat(this.getSetupLineData())
+    }
+    if(this.state.indexLinesOn){
     lineData = lineData.concat(this.getIndexLineData())
+    }
+    if(this.state.fileLinesOn){
     lineData = lineData.concat(this.getFileLineData())
+    }
+
+
+
+
 
 
     var lineDict = {}
