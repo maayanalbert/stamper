@@ -798,9 +798,6 @@ callback(id)
     this.updateLineData(id)
  
 
-    // var newTraversalGraph = this.setLineData()
-    // var oldTravarsalGraph = this.state.traversalGraph
-    // this.setState({traversalGraph:newTraversalGraph})
     this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
 
     this.setLayerPicker();
@@ -809,15 +806,7 @@ callback(id)
 
     this.checkForSetup();
 
-    // if (this.state.compiledBefore === false) {
-    //   this.setState({ compiledBefore: true });
-    // } else {
-    //   window.postMessage({type:"edited"}, '*');
-    // }
 
-    // this.recursiveCompileStamp(id, {}, newTraversalGraph, duplicateNamedStamps)
-
-    // this.recursiveCompileStamp(id, {}, oldTravarsalGraph, duplicateNamedStamps)
 
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id]

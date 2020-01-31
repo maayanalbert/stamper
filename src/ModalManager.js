@@ -72,7 +72,7 @@ export default class ModalManager extends Component {
       // can be unsubmitted, success, failure, loading
     };
     this.receiveMessage = this.receiveMessage.bind(this)
-    this.domain = "localhost:3000"
+    this.domain = "maayanalbert.github.io/p5stamper"
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.checkFiles = this.checkFiles.bind(this);
@@ -99,30 +99,33 @@ export default class ModalManager extends Component {
   }
 
   getUrlWorldKey(){
-    var url = window.location.href
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return urlParams.get("example")
+    // var url = window.location.href
 
-      if(url.startsWith("http://")){
-        url = url.substring("http://".length)
-      } else if(url.startsWith("https://")){
-        url = url.substring("https://".length)
-      }
+    //   if(url.startsWith("http://")){
+    //     url = url.substring("http://".length)
+    //   } else if(url.startsWith("https://")){
+    //     url = url.substring("https://".length)
+    //   }
 
-            if(!url.startsWith(this.domain)){
-              return ""
-            }
+    //         if(!url.startsWith(this.domain)){
+    //           return ""
+    //         }
 
 
-        url = url.substring(this.domain.length)
-        if(url.startsWith("/")){
-          url = url.substring(1)
-        }
+    //     url = url.substring(this.domain.length)
+    //     if(url.startsWith("/")){
+    //       url = url.substring(1)
+    //     }
   
-        if(url.endsWith("/")){
-          url =url.substring(0, url.length -1)
-        }
+    //     if(url.endsWith("/")){
+    //       url =url.substring(0, url.length -1)
+    //     }
 
       
-      return url
+  
 
   }
 
@@ -137,7 +140,8 @@ export default class ModalManager extends Component {
       
 
         var urlWorldKey = this.getUrlWorldKey()
-        if(urlWorldKey != ""){
+ 
+        if(urlWorldKey){
         
 
           try{
@@ -1078,7 +1082,7 @@ checkPublishWorldName(){
 
 
   getWorldObject(key, modalizeErrors, callback){
-
+console.log("GETTING WORLD OBJECT")
     if(!key){
       callback(undefined)
     }
@@ -1124,7 +1128,7 @@ callback(-1, fileName)
 
       modalizeErrors && this.setState({
         modalVisible: true,
-        modalHeader: `Oh no! It looks like '${this.worldKeyToNameAuthor(key).name}' doesn't exist in our example list yet.`,
+        modalHeader: `Oh no! It looks like '${this.worldKeyToNameAuthor(key).name} by ${this.worldKeyToNameAuthor(key).author}' doesn't exist in our example list yet.`,
         modalContent:
         "Our server may not be fully updated, try again in a few minutes.",
         modalButtons: [
@@ -1168,7 +1172,7 @@ callback(-1, fileName)
 
     return (               <input class="picker picker form-control form-control-sm mt-1 mb-1"
 
-      value={this.domain + "/" + this.props.getWorldData().worldKey}/>
+      value={this.domain + "/?example=" + this.props.getWorldData().worldKey}/>
 
       )
   }

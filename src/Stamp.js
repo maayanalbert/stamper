@@ -91,7 +91,9 @@ export default class FunctionStamp extends Component {
       exportableCode: "",
       codeSize: this.props.starterCodeSize,
       dataUri: "",
-      lineData:[]
+      lineData:[],
+      editorTopShadow:false,
+      editorBottomShadow:false
     };
 
     this.cristalRef = React.createRef();
@@ -271,6 +273,8 @@ export default class FunctionStamp extends Component {
   }
 
   renderEditor() {
+
+
     var markers = [];
     for (var i in this.state.errorLines) {
       if (i != 0) {
@@ -300,6 +304,16 @@ export default class FunctionStamp extends Component {
       var mode = "javascript";
     }
 
+    var shadow = ""
+
+    if(this.state.editorBottomShadow && this.state.editorTopShadow){
+shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 0, 0, .3)"
+    }else     if(this.state.editorTopShadow){
+      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3)"
+    }else    if(this.state.editorBottomShadow){
+      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .3)"
+    }
+
     return (
       <div
         onMouseOut={() => {
@@ -313,15 +327,29 @@ export default class FunctionStamp extends Component {
             width: this.state.editorWidth,
             height: this.state.editorHeight,
             background: "transparent",
-            fontFamily: "Inconsolata"
+            fontFamily: "Inconsolata",
+            boxShadow:  shadow
           }}
           mode={mode}
           theme={theme}
-          onChange={value => {
+          onChange={(value, editor) => {
             this.setState({ code: value, editsMade: true });
             window.postMessage({type:"edited"}, '*');
+
+
+
+
           }}
           name={"name" + this.props.id.toString()}
+       
+          onLoad={(editor) => {
+
+                    this.setEditorShadow(editor.renderer.scrollBar)
+   editor.on('change', (arg, editor) => {
+      this.setEditorShadow(editor.renderer.scrollBar)
+    });
+
+          }}
           fontSize={this.state.codeSize}
           showPrintMargin={false}
           wrapEnabled={true}
@@ -329,7 +357,14 @@ export default class FunctionStamp extends Component {
           highlightActiveLine={false}
           value={this.state.code}
           ref={this.editorRef}
-          onScroll={() => this.setEditorScrolling(true)}
+          onScroll={(editor) => {
+
+        this.setEditorScrolling(true)
+        this.setEditorShadow(editor.renderer.scrollBar)
+          }
+
+
+    }
           setOptions={{
             enableBasicAutocompletion: false,
             enableLiveAutocompletion: false,
@@ -341,6 +376,23 @@ export default class FunctionStamp extends Component {
         />
       </div>
     );
+  }
+
+  setEditorShadow(scrollBar){
+
+    var editorTopShadow = false
+    var editorBottomShadow = false
+
+    if(scrollBar.scrollTop -5 > 0){
+      editorTopShadow = true
+    }
+
+    if(scrollBar.scrollTop + this.state.editorHeight + 5< scrollBar.scrollHeight){
+      editorBottomShadow = true
+    }
+
+
+    this.setState({editorTopShadow:editorTopShadow, editorBottomShadow:editorBottomShadow})
   }
 
   stripExtension(name){
@@ -708,12 +760,15 @@ nameColor = "pink";
     }
 
     if (change) {
+    
+
       this.setState({
         editorHeight: height,
         editorWidth: width,
         x: x
       });
       this.editorRef.current.editor.resize();
+
     }
   }
 
@@ -810,8 +865,16 @@ nameColor = "pink";
           initialSize={this.getSize()}
           ref={this.cristalRef}
           isResizable={!this.props.isMediaFile}
-          onStartResize={this.props.onStartMove.bind(this)}
-          onStopResize={this.props.onStopMove.bind(this)}
+          onStartResize={() => {
+            this.props.onStartMove()
+                        this.setEditorShadow(this.editorRef.current.editor.renderer.scrollBar)
+          }}
+
+          onStopResize={() => {
+            this.props.onStopMove()
+                        this.setEditorShadow(this.editorRef.current.editor.renderer.scrollBar)
+          }}
+
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
           onClose={() => this.props.onDelete(this.props.id)}
