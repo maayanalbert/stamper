@@ -1121,7 +1121,7 @@ callback(id)
         return []
       }
       this.state.stampOrder.map(id => {
-        if(this.isFnStamp(id) && indexID != id){
+        if(this.isFnStamp(id)){
           lineData.push({start:indexID, end:id, type:"index"})
         }
       })      
@@ -1194,11 +1194,10 @@ callback(id)
         lineDict[lineKey] = 0
       }
       lineDict[lineKey] += 1
-      return lineDict[lineKey] === 1
+      return lineDict[lineKey] === 1 && line.start != line.end
 
     })
 
-    console.log(lineData)
 
     return lineData
 
@@ -1603,7 +1602,7 @@ var name = this.getFirstLine(stampRef.state.code);
       }
 
       pickerData.push({
-        name: name + "-" + stampRef.props.id,
+        name: name,
         icon: stampRef.getIcon(),
         status: !stampRef.state.hidden,
         centerCallback: (xOff, yOff) =>
@@ -1644,7 +1643,7 @@ var name = this.getFirstLine(stampRef.state.code);
 
     return (
       <div>
-       <ArcherContainer  strokeColor='red'>
+       <ArcherContainer  strokeColor='red' strokeWidth={this.state.scale*2}>
         <div class="row bg-grey" 
         style={{ height: "100vh" }}>
           <div

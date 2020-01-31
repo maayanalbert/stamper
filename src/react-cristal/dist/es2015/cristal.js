@@ -804,28 +804,70 @@ var Cristal = (function(_super) {
       HeaderComponent = null;
     }
 
-    var lineRelations = this.props.lineData.map(line => {
+    if(this.props.lineData){
+      var lineData = this.props.lineData
+    }else{
+      var lineData = []
+    }
+
+    // var lineRelations = []
+    // for(var i = 0; i < lineData.length; i++){
+    //   var line = lineData[i]
+    //   var targetAnchor;
+    //   var sourceAnchor;
+    //   var sourceX = x
+    //   var sourceY = y
+    //   var targetX = $("#vertex_" + line.end).css("left")
+    //   var targetY = $("#vertex_" + line.end).css("top")
+
+    //   // console.log(targetX)
+
+    //   lineRelations.push( {
+    //     targetId: "line_" + line.end,
+    //     targetAnchor: "top",
+    //     sourceAnchor: "bottom"
+    //   })
+    // }
+
+    var lineRelations = lineData.map(line => {
+      var targetAnchor;
+      var sourceAnchor;
+      var sourceX = x
+      var sourceY = y
+      var targetX = parseInt($("#vertex_" + line.end).css("left"), 10)
+      var targetY = parseInt($("#vertex_" + line.end).css("top"), 10)
+
+      var xDiff = sourceX - targetX
+      var yDiff = sourceY - targetY
+
+
+      if(Math.abs(yDiff) > Math.abs(xDiff)){
+        if(yDiff > 0){
+          targetAnchor = "bottom"
+          sourceAnchor = "top"
+        }else{
+          targetAnchor = "top"
+          sourceAnchor = "bottom"
+        }
+      }else{
+        if(xDiff < 0){
+          targetAnchor = "left"
+          sourceAnchor = "right"
+        }else{
+          targetAnchor = "right"
+          sourceAnchor = "left"
+        }
+      }
+
+      // console.log(targetX)
+
       return {
         targetId: "line_" + line.end,
-        targetAnchor: "top",
-        sourceAnchor: "bottom"
+        targetAnchor: targetAnchor,
+        sourceAnchor: sourceAnchor
       };
     });
 
-    // console.log(lineRelations, "line_" + this.props.parentID);
-    // console.log("line_" + this.props.parentID)
-
-    // var allContent = (
-
-    //   <ArcherElement
-    //         id={"line_" + this.props.parentID}
-    //         relations={lineRelations}
-    //       >
-    //   {HeaderComponent}
-    //   {ContentComponent}
-    //       </ArcherElement>
-
-    // )
 
     var allContent = (
           <ArcherElement
@@ -841,6 +883,7 @@ var Cristal = (function(_super) {
     var cristalComponent = React.createElement(
       Wrapper,
       {
+        id:"vertex_" + this.props.parentID,
         style: style,
         ref: this.saveWrapperRef,
         isActive: isActive,
