@@ -34,6 +34,7 @@ import pf, { globals, p5Lib } from "./../../../globals.js";
 
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
+import { ArcherContainer, ArcherElement } from 'react-archer';
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -813,6 +814,27 @@ var Cristal = (function(_super) {
       HeaderComponent = null;
     }
 
+
+
+
+    var lineRelations = this.props.lineData.map(line => {return {targetId:"line_" + line.end,
+                targetAnchor: 'top',
+              sourceAnchor: 'bottom',}})
+
+    console.log(lineRelations)
+    console.log("line_" + this.props.parentID)
+
+    var allContent = (
+      <ArcherElement
+            id={"line_" + this.props.parentID}
+            relations={lineRelations}
+          >
+      {HeaderComponent}
+      {ContentComponent}
+          </ArcherElement>
+
+    )
+
     return React.createElement(
       Wrapper,
       {
@@ -823,10 +845,9 @@ var Cristal = (function(_super) {
         onMouseDown: this.changeZIndex,
         overflow:"hidden"
       },
-      <div>{HeaderComponent}</div>,
-      ContentComponent,
+      allContent,
       this.renderResizeHandles()
-    );
+    )
   };
   Cristal.defaultProps = {
     children: null,

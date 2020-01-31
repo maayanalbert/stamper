@@ -579,6 +579,8 @@ function noiseWave() {
         <span hidden={!ipc} />
         <div class="row ml-5" hidden={ipc}>
           <TopButton
+                      disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
             iconType={UploadIcon}
             uniqueClass="upload"
             iconCallback={() => {
@@ -589,6 +591,8 @@ function noiseWave() {
           />
           <span style={{ width: this.spanWidth*2 }} />
           <TopButton
+                      disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
             iconType={DownloadIcon}
             uniqueClass="download p5 sketch"
             iconCallback={() => {
@@ -600,6 +604,8 @@ function noiseWave() {
 
         <div class="row">
           <TopButton
+                      disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
             iconType={FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
@@ -639,6 +645,8 @@ function noiseWave() {
           <span style={{ width: this.spanWidth }} />
 
           <TopButton
+                      disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
             iconType={BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
@@ -664,6 +672,8 @@ function noiseWave() {
           <span style={{ width: this.spanWidth }} />
 
           <TopButton
+                      disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
             iconType={FileStampIcon}
             uniqueClass="fileStamp"
             iconCallback={() =>
@@ -691,6 +701,8 @@ function noiseWave() {
               this.props.modalManagerRef.current.requestFileUpload()
             }
             tooltipText="media"
+                        disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
           />
         </div>
 
@@ -705,7 +717,8 @@ function noiseWave() {
             dropDownData={this.state.worldDropDowns}
             tooltipText="examples..."
             alignRight
-
+            disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
           />
         </div>
       </div>
@@ -768,6 +781,9 @@ class TopButton extends Component {
 
   onMouseDown() {
     if (this.state.mouseOverDropDown === false) {
+                this.props.disablePan(false);
+
+          this.props.disableZoom(false);
       this.setState({ down: false });
     }
   }
@@ -841,7 +857,7 @@ class TopButton extends Component {
       }else{
 
         return (
-          <div>
+          <div >
           <div 
         style={{height:5, color:"transparent", width:"100%"}}>hi</div>
           <div className="border-top border-borderGrey" 
@@ -875,6 +891,9 @@ class TopButton extends Component {
             });
           }}
           onClick={() => {
+
+
+
             if (!data.name) {
               return;
             }
@@ -899,6 +918,7 @@ class TopButton extends Component {
 
     return (
       <div
+
         class="bg-white border border-borderGrey rounded mt-2 justify-content-left"
         style={{ position: "absolute", right: right, "overflow-y":"scroll", maxHeight:dropDownHeight}}
       >

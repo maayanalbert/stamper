@@ -41,7 +41,7 @@ if (mouseIsPressed) {
     code: `createCanvas(${globals.defaultIframeWidth},${globals.defaultEditorHeight})
 background(100);`
   },
-  { name: "preload", args: "", code: "" }
+  { name: "preload", args: "", code: "img = loadImage('YOUR IMAGE');" }
 ];
 
 var keyPressCode =

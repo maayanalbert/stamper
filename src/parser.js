@@ -166,13 +166,13 @@ function addFn(fnStamps, item, rawCode) {
 
 exports.jsToStamps = jsToStamps;
 
-//////////////////////////////////// getIdentifiers
+//////////////////////////////////// getVariables
 
 function isDeclaration(typeName){
   return typeName.includes("Declaration") || typeName.includes("Declarator")
 }
 
-function getIdentifiers(rawCode) {
+function getVariables(rawCode) {
 
 
   try {
@@ -258,4 +258,4 @@ function getIdentifiers(rawCode) {
 }
 
 
-exports.getIdentifiers = getIdentifiers;
+exports.getVariables = getVariables;

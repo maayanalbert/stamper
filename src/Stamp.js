@@ -13,6 +13,7 @@ import ListenerStampIcon from "./icons/bell.svg";
 import ImageStampIcon from "./icons/image.svg";
 import BlobStampIcon from "./icons/code.svg";
 import MediaAssetIcon from "./icons/layers-light.svg";
+import { ArcherContainer, ArcherElement } from 'react-archer';
 
 import "./theme-p5.js";
 
@@ -89,7 +90,8 @@ export default class FunctionStamp extends Component {
       zIndex: this.props.starterZIndex,
       exportableCode: "",
       codeSize: this.props.starterCodeSize,
-      dataUri: ""
+      dataUri: "",
+      lineData:[]
     };
 
     this.cristalRef = React.createRef();
@@ -185,11 +187,12 @@ export default class FunctionStamp extends Component {
     );
   }
 
-  clearErrorsAndUpdate(newErrors = []) {
+  clearErrorsAndUpdate(newErrors = [], lineData = []) {
+ 
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 
-    this.setState({ errorLines: newErrorLines }, () => {
+    this.setState({ errorLines: newErrorLines, lineData:lineData }, () => {
       var iframeCode = "";
       var exportableCode = "";
 
@@ -803,6 +806,7 @@ export default class FunctionStamp extends Component {
           closeHidden={this.props.isIndex}
           copyHidden={this.props.isIndex}
           initialPosition={{ x: this.state.x, y: this.state.y }}
+          lineData={this.state.lineData}
           className={
             "stamp shadow-sm " +
             bgColor +

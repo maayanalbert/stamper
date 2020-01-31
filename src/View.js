@@ -7,6 +7,7 @@ import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
+import { ArcherContainer, ArcherElement } from 'react-archer';
 
 
 import { Mutex } from "async-mutex";
@@ -317,8 +318,7 @@ export default class View extends Component {
               );
             this.addConsoleStamp(stamperObject.console);
             this.addManyStamps(stamperObject.stamps, callback)
-            this.disablePan(false)
-            this.disableZoom(false)
+
          
           }
         );
@@ -783,6 +783,7 @@ callback(id)
 
   requestCompile(id) {
 
+    var lineData = this.getLineData()
 
     // var newTraversalGraph = this.setLineData()
     // var oldTravarsalGraph = this.state.traversalGraph
@@ -817,7 +818,7 @@ callback(id)
           newErrors.push(0);
         }
 
-        stampRef.clearErrorsAndUpdate(newErrors);
+        stampRef.clearErrorsAndUpdate(newErrors, lineData.filter(line => line.start === id));
       }
     });
 
@@ -986,102 +987,212 @@ callback(id)
     return end + 1;
   }
 
-  setLines() {
-    var lines = [];
-    var borderColorInt = 205 + 15 - 15 * this.state.scale;
-    var style = {
-      borderColor: `rgb(${borderColorInt}, ${borderColorInt}, ${borderColorInt})`,
-      borderWidth: 1
-    };
+  // setLines() {
+  //   var lines = [];
+  //   var borderColorInt = 205 + 15 - 15 * this.state.scale;
+  //   var style = {
+  //     borderColor: `rgb(${borderColorInt}, ${borderColorInt}, ${borderColorInt})`,
+  //     borderWidth: 1
+  //   };
 
-    this.state.lineData.map(singleLineData => {
-      lines.push(
-        <SteppedLineTo
-          {...style}
-          from={"vertex" + singleLineData[0]}
-          to={"vertex" + singleLineData[1]}
-          orientation="v"
-        />
-      );
-    });
+  //   this.state.lineData.map(singleLineData => {
+  //     lines.push(
+  //       <SteppedLineTo
+  //         {...style}
+  //         from={"vertex" + singleLineData[0]}
+  //         to={"vertex" + singleLineData[1]}
+  //         orientation="v"
+  //       />
+  //     );
+  //   });
 
-    this.setState({ lines: lines });
-  }
+  //   this.setState({ lines: lines });
+  // }
 
-  setLineData() {
+  getJSLineData(){
     var declaredDict = {};
     var undeclaredArr = [];
     var lineData = [];
-    var setupID = -1;
-    var traversalGraph = {};
 
-    // Object.keys(this.state.blobStampRefs).map(id => {
-    //   var stampRef = this.state.blobStampRefs[id].current;
-    //   var code = stampRef.state.code;
-    //   var identifiers = parser.getIdentifiers(code);
-
-    //   if (identifiers) {
-    //     identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-    //     identifiers.undeclared.map(identifier =>
-    //       undeclaredArr.push([identifier, id])
-    //     );
-    //   }
-    // });
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
 
-      if (stampRef.state.name === "setup") {
-        setupID = id;
-      }
       var state = stampRef.state;
-      var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-      var identifiers = parser.getIdentifiers(code);
-      if (identifiers) {
-        identifiers.declared.map(identifier => (declaredDict[identifier] = id));
-        identifiers.undeclared.map(identifier =>
-          undeclaredArr.push([identifier, id])
+      if(stampRef.props.isMediaFile || stampRef.props.isTxtFile || stampRef.props.isIndex){
+        return 
+      }else if(stampRef.props.isBlob){
+        var code = state.code
+      }else{
+        var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+      }
+      var variables = parser.getVariables(code);
+      if (variables) {
+        variables.declared.map(variable => (declaredDict[variable] = id));
+        variables.undeclared.map(variable =>
+
+          undeclaredArr.push({variable:variable, id:id})
         );
       }
     });
 
     undeclaredArr.map(undeclaredItem => {
-      var identifier = undeclaredItem[0];
-      var usingFn = undeclaredItem[1];
-      var declaringFn = declaredDict[identifier];
-      if (declaringFn && usingFn) {
-        lineData.push([usingFn, declaringFn]);
-        if (declaringFn in traversalGraph === false) {
-          traversalGraph[declaringFn] = [];
-        }
-        traversalGraph[declaringFn].push(usingFn);
+      var variable = undeclaredItem.variable;
+      var usingID = undeclaredItem.id;
+      var declaringID = declaredDict[variable];
+
+      if (declaringID && usingID && this.isFnStamp(usingID)) {
+        lineData.push({start:usingID, end:declaringID,  type:"js"});
       }
-    });
+    }); 
 
-    // this.state.stampOrder.map(id => {
-    //   if (id != this.state.htmlID && id != this.state.cssID && id != setupID) {
-    //     lineData.push([id, setupID]);
-    //     if (setupID in traversalGraph === false) {
-    //       traversalGraph[setupID] = [];
-    //     }
-    //     traversalGraph[setupID].push(id);
+    return lineData  
+  }
+
+  isFnStamp(id){
+    var props = this.state.stampRefs[id].current.props
+    return !props.isBlob && !props.isMediaFile && !props.isTxtFile && !props.isIndex
+  }
+
+  getListenerLineData(){
+    var listenerIDs = []
+    var lineData = []
+    this.state.stampOrder.map(id => {
+      var stampRef = this.state.stampRefs[id].current
+      if(this.isListener(stampRef.state.name)){
+        listenerIDs.push(stampRef.props.id)
+      }
+    })
+
+    this.state.stampOrder.map(id => {
+      var stampRef = this.state.stampRefs[id].current
+      if( this.isListener(stampRef.state.name) || !this.isFnStamp(id)){
+        return
+      }
+      listenerIDs.map(listenerID => {
+        lineData.push({ start:id,end:listenerID, type:"listener"})
+      })
+
+    })
+
+    return lineData
+
+  }
+
+  getSetupLineData(){
+     var lineData = []
+    var setupID
+
+    for(var i = 0; i < this.state.stampOrder.length; i++){
+      var id = this.state.stampOrder[i]
+      var stampRef = this.state.stampRefs[id].current
+      if(stampRef.state.name === "setup"){
+        setupID = id
+      }
+    }
+ 
+    if(setupID){
+      this.state.stampOrder.map(id => {
+        if(this.isFnStamp(id) && setupID != id){
+          lineData.push({start:id, end:setupID, type:"setup"})
+        }
+      })      
+    }
+
+    return lineData   
+  }
+
+  getIndexLineData(){
+     var lineData = []
+    var indexID
+
+    for(var i = 0; i < this.state.stampOrder.length; i++){
+      var id = this.state.stampOrder[i]
+      var stampRef = this.state.stampRefs[id].current
+      if(stampRef.props.isIndex){
+        indexID = id
+      }
+    }
+
+    if(indexID){
+      this.state.stampOrder.map(id => {
+        if(this.isFnStamp(id) && indexID != id){
+          lineData.push({start:id, end:indexID, type:"index"})
+        }
+      })      
+    }
+
+    return lineData   
+  }
+
+
+
+  getFileLineData(){
+    var fileIdDict = {}
+    var lineData = []
+    this.state.stampOrder.map(id => {
+      var stampRef = this.state.stampRefs[id].current
+      if(stampRef.props.isMediaFile || stampRef.props.isTxtFile || stampRef.props.isIndex){
+        fileIdDict[stampRef.state.name] = id
+      }
+    })
+
+    this.state.stampOrder.map(id => {
+      var stampRef = this.state.stampRefs[id].current
+      Object.keys(fileIdDict).map(fileName => {
+        if(stampRef.state.code.includes(`'${fileName}'`)
+          || stampRef.state.code.includes(`"${fileName}"`)
+          || stampRef.state.code.includes("`" + fileName + "`")){
+          lineData.push({start:id, end:fileIdDict[fileName], type:"file"})
+        }
+      })
+    })
+
+    return lineData
+
+  }
+
+
+
+  getLineData() {
+    // console.log("js lines", this.getJSLineData())
+    // console.log("listener lines", this.getListenerLineData())
+    // console.log("setup lines", this.getSetupLineData())
+    // console.log("index lines", this.getIndexLineData())
+    // console.log("file lines", this.getFileLineData())
+
+    var lineData = []
+    lineData = lineData.concat(this.getJSLineData())
+    lineData = lineData.concat(this.getListenerLineData())
+    lineData = lineData.concat(this.getSetupLineData())
+    lineData = lineData.concat(this.getIndexLineData())
+    lineData = lineData.concat(this.getFileLineData())
+
+
+    var lineDict = {}
+    // lineData.map(line => {
+    //   var lineKey = line.start + "_" + line.end
+    //   if(lineKey in lineDict === false){
+    //     lineDict[lineKey] = 0
     //   }
-    // });
+    //   lineDict[lineKey] += 1
+    // })
 
-    this.setState({ lineData: lineData }, () => this.setLines());
 
-    // this.state.stampOrder.map(id => {
-    //   if (id != this.state.htmlID && id != this.state.cssID) {
-    //     if (this.state.htmlID in traversalGraph === false) {
-    //       traversalGraph[this.state.htmlID] = [];
-    //     }
-    //     traversalGraph[this.state.htmlID].push(id);
-    //   }
-    // });
+    lineData = lineData.filter(line => {
+      var lineKey = line.start + "_" + line.end
+      if(lineKey in lineDict === false){
+        lineDict[lineKey] = 0
+      }
+      lineDict[lineKey] += 1
+      return lineDict[lineKey] === 1
 
-    // traversalGraph[this.state.cssID] = [this.state.htmlID];
+    })
 
-    return traversalGraph;
+
+
+    return lineData
+
   }
 
   getRunnableCode(id) {
@@ -1276,7 +1387,7 @@ _stopLooping =setTimeout(() => {
       stamp.setIframeDisabled(true);
     }
 
-    this.setState({ lines: [] });
+
   }
 
   onStopMove(s) {
@@ -1287,7 +1398,6 @@ _stopLooping =setTimeout(() => {
       stamp.setIframeDisabled(false);
     }
 
-    this.setLines();
   }
 
   centerOnStamp(id, xOff, yOff) {
@@ -1449,6 +1559,7 @@ window.postMessage({type:"edited"}, '*')
   }
 
 
+
   setLayerPicker() {
 
 
@@ -1483,7 +1594,7 @@ var name = this.getFirstLine(stampRef.state.code);
       }
 
       pickerData.push({
-        name: name,
+        name: name + "-" + stampRef.props.id,
         icon: stampRef.getIcon(),
         status: !stampRef.state.hidden,
         centerCallback: (xOff, yOff) =>
@@ -1536,7 +1647,9 @@ var name = this.getFirstLine(stampRef.state.code);
             }}
           >
             {this.renderGridLines()}
+            <ArcherContainer >
             {Object.values(this.state.stampElems)}
+            </ArcherContainer>
             {consoleElem}
           </div>
         </div>
