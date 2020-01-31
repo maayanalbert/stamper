@@ -34,7 +34,7 @@ import pf, { globals, p5Lib } from "./../../../globals.js";
 
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import { ArcherContainer, ArcherElement } from 'react-archer';
+import { ArcherContainer, ArcherElement } from "react-archer";
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -78,9 +78,7 @@ var Cristal = (function(_super) {
       Stacker.updateMaxIndex(zIndex);
     } else {
       var zIndex = Stacker.getNextIndex();
-  
     }
-
 
     _this.state = {
       x: padding,
@@ -103,7 +101,7 @@ var Cristal = (function(_super) {
     _this.plus = 187;
     _this.minus = 189;
     _this.zero = 48;
-    _this.space = 32
+    _this.space = 32;
     _this.onWindowResize = function() {
       var _a = _this.state,
         x = _a.x,
@@ -203,9 +201,9 @@ var Cristal = (function(_super) {
       _this.setState({ width: width + widthDiff, height: height + heightDiff });
     };
 
-    _this.manualSetSize = function(width, height){
-      _this.setState({width:width, height:height})
-    }
+    _this.manualSetSize = function(width, height) {
+      _this.setState({ width: width, height: height });
+    };
 
     _this.onWheel = function(e) {
       if (e.ctrlKey) {
@@ -217,7 +215,6 @@ var Cristal = (function(_super) {
       var scale = _this.props.getScale();
       var newX = _this.state.ghostX + movementX;
       var newY = _this.state.ghostY + movementY;
-
 
       this.setState({ ghostX: newX, ghostY: newY });
       var snapMargin = _this.props.getSnapMargin();
@@ -238,16 +235,14 @@ var Cristal = (function(_super) {
       var newAbsX = _this.state.x + newWidth;
       var newAbsY = _this.state.y + newHeight;
 
-
       if (changeX) {
-        oldAbsX = _this.state.x
-        newAbsX = _this.state.ghostX - widthDiff
+        oldAbsX = _this.state.x;
+        newAbsX = _this.state.ghostX - widthDiff;
       }
 
-
       var ghostX = Math.max(newWidth, minWidth);
-      if(changeX){
-        ghostX = _this.state.ghostX - widthDiff
+      if (changeX) {
+        ghostX = _this.state.ghostX - widthDiff;
       }
       var ghostY = Math.max(newHeight, minHeight);
       var onResize = _this.props.onResize;
@@ -277,8 +272,8 @@ var Cristal = (function(_super) {
           sendingHeightDiff = roundAbsY - oldAbsY;
         }
 
-                if(changeX){
-          sendingWidthDiff = -sendingWidthDiff
+        if (changeX) {
+          sendingWidthDiff = -sendingWidthDiff;
         }
 
         var resizeBlocked = onResize(
@@ -287,7 +282,6 @@ var Cristal = (function(_super) {
           _this.state.x,
           false
         );
-
 
         if (!resizeBlocked) {
           this.setState({ ghostX: ghostX, ghostY: ghostY });
@@ -313,25 +307,22 @@ var Cristal = (function(_super) {
         innerHeight = window.innerHeight;
 
       if (isDragging) {
-        window.postMessage({type:"edited"}, '*');
+        window.postMessage({ type: "edited" }, "*");
         var size =
           currentWidth && currentHeight
             ? { width: currentWidth, height: currentHeight }
             : undefined;
 
- 
         _this.onStartMove(() => {
-          if(_this.state.downKey === _this.space){
-            return
+          if (_this.state.downKey === _this.space) {
+            return;
           }
-        var newPosition = _this.getPosition(
-          movementX / scale,
-          movementY / scale
-        );
-        var newX = newPosition.x;
-        var newY = newPosition.y;
-
-
+          var newPosition = _this.getPosition(
+            movementX / scale,
+            movementY / scale
+          );
+          var newX = newPosition.x;
+          var newY = newPosition.y;
 
           _this.setState({ x: newX, y: newY });
         });
@@ -339,7 +330,7 @@ var Cristal = (function(_super) {
         // _this.setState({ x: newX, y: newY }, _this.onStartMove);
         return;
       } else if (isResizing) {
-        window.postMessage({type:"edited"}, '*');
+        window.postMessage({ type: "edited" }, "*");
         _this.resizeCristal(e);
       }
     };
@@ -402,7 +393,6 @@ var Cristal = (function(_super) {
     _this.onStartMove = function(callBack) {
       _this.notifyMove();
       if (_this.state.isMoving === false) {
-
         _this.setState({ ghostX: _this.state.x, ghostY: _this.state.y }, () => {
           _this.setState({ isMoving: true }, () => callBack());
         });
@@ -814,28 +804,18 @@ var Cristal = (function(_super) {
       HeaderComponent = null;
     }
 
+    var lineRelations = this.props.lineData.map(line => {
+      return {
+        targetId: "line_" + line.end,
+        targetAnchor: "top",
+        sourceAnchor: "bottom"
+      };
+    });
 
+    console.log(lineRelations, "line_" + this.props.parentID);
+    // console.log("line_" + this.props.parentID)
 
-
-    var lineRelations = this.props.lineData.map(line => {return {targetId:"line_" + line.end,
-                targetAnchor: 'top',
-              sourceAnchor: 'bottom',}})
-
-    console.log(lineRelations)
-    console.log("line_" + this.props.parentID)
-
-    var allContent = (
-      <ArcherElement
-            id={"line_" + this.props.parentID}
-            relations={lineRelations}
-          >
-      {HeaderComponent}
-      {ContentComponent}
-          </ArcherElement>
-
-    )
-
-    return React.createElement(
+    var cristalComponent = React.createElement(
       Wrapper,
       {
         style: style,
@@ -843,11 +823,86 @@ var Cristal = (function(_super) {
         isActive: isActive,
         className: className + " rounded " + this.props.wrapperName,
         onMouseDown: this.changeZIndex,
-        overflow:"hidden"
+        overflow: "hidden"
       },
-      allContent,
+      HeaderComponent,
+      ContentComponent,
       this.renderResizeHandles()
-    )
+    );
+
+    // var allContent = (
+
+    //   <ArcherElement
+    //         id={"line_" + this.props.parentID}
+    //         relations={lineRelations}
+    //       >
+    //   {HeaderComponent}
+    //   {ContentComponent}
+    //       </ArcherElement>
+
+    // )
+
+    const rootStyle = { display: "flex", justifyContent: "center" };
+    const rowStyle = {
+      margin: "200px 0",
+      display: "flex",
+      justifyContent: "space-between"
+    };
+    const boxStyle = { padding: "10px", border: "1px solid black" };
+
+    return (
+      <div>
+   
+          <ArcherElement
+            id="root"
+            relations={[
+              {
+                targetId: "element2",
+                targetAnchor: "top",
+                sourceAnchor: "bottom"
+              }
+            ]}
+          >
+            {cristalComponent}
+          </ArcherElement>
+     
+
+        <div style={rowStyle}>
+          <ArcherElement
+            id="element2"
+            relations={[
+              {
+                targetId: "element3",
+                targetAnchor: "left",
+                sourceAnchor: "right",
+                style: { strokeColor: "blue", strokeWidth: 1 },
+                label: <div style={{ marginTop: "-20px" }}>Arrow 2</div>
+              }
+            ]}
+          >
+            <div style={boxStyle}>Element 2</div>
+          </ArcherElement>
+
+          <ArcherElement id="element3">
+            <div style={boxStyle}>Element 3</div>
+          </ArcherElement>
+
+          <ArcherElement
+            id="element4"
+            relations={[
+              {
+                targetId: "root",
+                targetAnchor: "right",
+                sourceAnchor: "left",
+                label: "Arrow 3"
+              }
+            ]}
+          >
+            <div style={boxStyle}>Element 4</div>
+          </ArcherElement>
+        </div>
+      </div>
+    );
   };
   Cristal.defaultProps = {
     children: null,

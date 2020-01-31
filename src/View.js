@@ -1114,15 +1114,26 @@ callback(id)
       }
     }
 
+
     if(indexID){
+      if(!this.fileIsReferenced(this.state.stampRefs[indexID].current.state.code, "sketch.js")){
+   
+        return []
+      }
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id) && indexID != id){
-          lineData.push({start:id, end:indexID, type:"index"})
+          lineData.push({start:indexID, end:id, type:"index"})
         }
       })      
     }
 
+
+
     return lineData   
+  }
+
+  fileIsReferenced(code, fileName){
+    return code.includes(`'${fileName}'`) || code.includes(`"${fileName}"`) || code.includes("`" + fileName + "`")
   }
 
 
@@ -1140,9 +1151,7 @@ callback(id)
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current
       Object.keys(fileIdDict).map(fileName => {
-        if(stampRef.state.code.includes(`'${fileName}'`)
-          || stampRef.state.code.includes(`"${fileName}"`)
-          || stampRef.state.code.includes("`" + fileName + "`")){
+        if(this.fileIsReferenced(stampRef.state.code, fileName)){
           lineData.push({start:id, end:fileIdDict[fileName], type:"file"})
         }
       })
@@ -1189,7 +1198,7 @@ callback(id)
 
     })
 
-
+    console.log(lineData)
 
     return lineData
 
@@ -1647,7 +1656,7 @@ var name = this.getFirstLine(stampRef.state.code);
             }}
           >
             {this.renderGridLines()}
-            <ArcherContainer >
+            <ArcherContainer  strokeColor='red'>
             {Object.values(this.state.stampElems)}
             </ArcherContainer>
             {consoleElem}

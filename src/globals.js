@@ -16,6 +16,7 @@ export const globals = {
   iconTransition: "all .3s ease",
   borderTransition: "border .3s ease-out",
 
+
   specialFns: {
     draw:           true,
     preload:        true,
