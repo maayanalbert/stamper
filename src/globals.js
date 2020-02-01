@@ -7,7 +7,7 @@ import HtmlStampIcon from "./icons/layout.svg";
 import BuiltInStampIcon from "./icons/tool.svg";
 import ListenerStampIcon from "./icons/bell.svg";
 import ImageStampIcon from "./icons/image.svg";
-import BlobStampIcon from "./icons/code.svg";
+import BlobStampIcon from "./icons/globe.svg";
 import MediaAssetIcon from "./icons/layers-light.svg";
 import DeleteStampIcon from "./icons/trash.svg";
 import CopyIcon from "./icons/copy.svg";

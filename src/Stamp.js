@@ -720,9 +720,33 @@ nameColor = "pink";
     var newName = this.props.addStamp(data, callback);
   }
 
+    getFirstLine(text) {
+    var firstN = text.length;
+
+    for (var i = 0; i < text.length; i++) {
+      if (text[i] === "\n") {
+        if (firstN === text.length) {
+          firstN = i;
+        }
+      }
+    }
+
+    if (firstN === 0) {
+      return " ";
+    }
+
+    return text.substr(0, Math.min(firstN, 15));
+  }
+
   getData() {
+
+    var name = this.state.name
+    if(this.props.isBlob){
+      name = this.getFirstLine(this.state.code)
+    }
+
     var data = {
-      name: this.state.name,
+      name: name,
       code: this.state.code,
       args: this.state.args,
       x: this.state.x,
@@ -738,7 +762,8 @@ nameColor = "pink";
       exported: true,
       zIndex: this.state.zIndex,
       isBlob: this.props.isBlob,
-      codeSize: this.state.codeSize
+      codeSize: this.state.codeSize,
+      icon:this.getIcon()
     };
 
     return data;

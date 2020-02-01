@@ -64,7 +64,7 @@ export default class ControlBar extends Component {
     this.minNonSideBarWidth = 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
-    this.spanWidth = 35;
+    this.spanWidth = 10;
     this.receiveMessage = this.receiveMessage.bind(this)
 
     this.state = {
@@ -202,7 +202,6 @@ function noiseWave() {
 
       this.setState({ code: "" });
     } catch (e) {
-      console.log(e);
       this.setState({ codeHasError: true });
     }
   }
@@ -613,10 +612,10 @@ function noiseWave() {
             iconCallback={() => {
               this.props.modalManagerRef.current.requestUpload();
             }}
-            tooltipText="upload p5 sketch"
+            tooltipText="upload sketch"
             alignLeft
           />
-          <span style={{ width: this.spanWidth*2 }} />
+          <span style={{ width: this.spanWidth*5 }} />
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
@@ -625,7 +624,7 @@ function noiseWave() {
             iconCallback={() => {
               this.props.modalManagerRef.current.requestDownload();
             }}
-            tooltipText="download p5 sketch"
+            tooltipText="download sketch"
           />
         </div>
 
@@ -731,12 +730,33 @@ function noiseWave() {
                         disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
           />
+
+          <span style={{ width: this.spanWidth *5}} />
+
+          <TopButton
+            disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
+            iconType={globals.ClearConsoleIcon}
+            uniqueClass="undoDelete"
+            iconCallback={() => this.props.undoDelete()}
+            dropDownData={this.props.deletedStamps.map((stampData, index) => ({
+              name:stampData.name,
+              icon:stampData.icon,
+              callback: () => this.props.undoDelete(index)
+            })).reverse()
+          }
+            tooltipText="undo delete"
+          />
+
+
         </div>
 
         <span hidden={true} />
-        <div className="mr-5"
+        <div className="mr-5 row">
 
-        >
+
+        
+
           <TopButton
             iconType={globals.WorldsIcon}
             uniqueClass="worlds"
@@ -870,6 +890,10 @@ class TopButton extends Component {
     });
   }
 
+    getUniqueID(){
+    return   Math.random().toString(36).substr(2, 9)
+  }
+
   renderDropDowns() {
     if (this.state.down === false) {
       return null;
@@ -879,7 +903,7 @@ class TopButton extends Component {
       var oneWordName = "";
       if (data.name) {
 
-        oneWordName = data.name.replace(new RegExp(' ', 'g'), "-");
+        oneWordName = this.getUniqueID()
 
       }else{
 

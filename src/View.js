@@ -88,7 +88,8 @@ export default class View extends Component {
       fileLinesOn:false,
       listenerLinesOn:false,
       settingsPicker:[],
-      lineData:[]
+      lineData:[],
+      deletedStamps:[]
 
     };
     this.counterMutex = new Mutex();
@@ -323,6 +324,7 @@ export default class View extends Component {
       setupLinesOn:false,
       fileLinesOn:false,
       listenerLinesOn:false,
+      deletedStamps:[]
 
       },
       () => {
@@ -1235,9 +1237,9 @@ callback(id)
     }else if(type === "listener"){
       return "rgba(218,16,96, "+opacity+")"
     }else if(type === "setup" ){
-      return "rgba(175,175,175, "+opacity+")"
+      return "rgba(190,190,190, "+opacity+")"
     }else if(type === "index"){
-      return "rgba(175,175,175, "+opacity+")"
+      return "rgba(190,190,190, "+opacity+")"
     }   
   }
 
@@ -1473,17 +1475,43 @@ _stopLooping =setTimeout(() => {
 
       var stampRefs = Object.assign({}, this.state.stampRefs);
       var stampElems = Object.assign({}, this.state.stampElems);
+      var deletedStamps = Object.assign([], this.state.deletedStamps);
+      var stampData = stampRefs[id].current.getData()
+      deletedStamps.push(stampData)
       delete stampRefs[id]
       stampElems[id] = (<span hidden={true}/>)
 
       var stampOrder = Object.assign([], this.state.stampOrder)
       stampOrder.splice(stampOrder.indexOf(id), 1)
-      this.setState({stampRefs:stampRefs, stampElems:stampElems, stampOrder:stampOrder}, () => 
+      this.setState({stampRefs:stampRefs, stampElems:stampElems, stampOrder:stampOrder, deletedStamps:deletedStamps}, () => 
         this.requestCompile(id))
         release()
     }
 
   }
+
+  undoDelete(position = this.state.deletedStamps.length-1){
+    console.log(this.state.deletedStamps)
+    console.log(position)
+    if(this.state.deletedStamps.length <= position){
+      return
+    }
+    var deletedStamps = Object.assign([], this.state.deletedStamps);
+    console.log(deletedStamps)
+
+
+    var stampData = deletedStamps[position]
+    deletedStamps.splice(position, 1);
+
+
+    this.setState({deletedStamps:deletedStamps})
+
+              this.addStamp(stampData, id => {
+              this.requestCompile(id)
+              window.postMessage({type:"edited"}, '*')
+            
+  })
+            }
 
   refreshConsoleStamp(consoleStamp) {
     var data = consoleStamp.ref.current.getData();
@@ -1896,6 +1924,8 @@ var name = this.getFirstLine(stampRef.state.code);
           recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
           getWorldData = {this.getWorldData.bind(this)}
           settingsPicker = {this.state.settingsPicker}
+          deletedStamps = {this.state.deletedStamps}
+          undoDelete ={this.undoDelete.bind(this)}
         />
 
         <ModalManager
