@@ -603,7 +603,7 @@ function noiseWave() {
         }}
       >
         <span hidden={!ipc} />
-        <div class="row ml-5" hidden={ipc}>
+        <div class="row pl-5" hidden={ipc}>
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
@@ -752,7 +752,7 @@ function noiseWave() {
         </div>
 
         <span hidden={true} />
-        <div className="mr-5 row">
+        <div className="pr-5 row">
 
 
         

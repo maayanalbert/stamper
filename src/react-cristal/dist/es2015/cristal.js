@@ -669,7 +669,8 @@ var Cristal = (function(_super) {
           trigger="hover"
           placement="top"
           overlay={
-            <Tooltip id="alert" className="picker" style={{ fontSize: 12 }}>
+            <Tooltip id="alert" className="picker" style={{ fontSize: 12,   "font-family": "Montserrat, sans-serif",
+  "font-weight": 300}}>
               {tooltipText}
             </Tooltip>
           }
@@ -875,7 +876,7 @@ var Cristal = (function(_super) {
 
     lineRelations = lineRelations.filter(line => line)
 
-
+if(this.props.getLinesOn()){
     var allContent = (
           <ArcherElement
             id={"line_" + this.props.parentID}
@@ -886,6 +887,11 @@ var Cristal = (function(_super) {
           </ArcherElement>
 
     )
+}else{
+  var allContent = (<div>      {HeaderComponent}
+      {ContentComponent}</div>)
+}
+
 
     var cristalComponent = React.createElement(
       Wrapper,

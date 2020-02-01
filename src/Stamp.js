@@ -18,6 +18,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
 
+
 import { Resizable, ResizableBox } from "react-resizable";
 
 var mime = require("mime-types");
@@ -320,17 +321,14 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
             width: this.state.editorWidth,
             height: this.state.editorHeight,
             background: "transparent",
-            fontFamily: "Inconsolata",
             boxShadow:  shadow
           }}
+          className="code"
           mode={mode}
           theme={theme}
           onChange={(value, editor) => {
             this.setState({ code: value, editsMade: true });
             window.postMessage({type:"edited"}, '*');
-
-
-
 
           }}
           name={"name" + this.props.id.toString()}
@@ -364,7 +362,8 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
             enableSnippets: false,
             showLineNumbers: false,
             tabSize: 2,
-            hasCssTransforms: true
+            hasCssTransforms: true,
+            fontFamily:"Inconsolata"
           }}
         />
       </div>
@@ -720,29 +719,13 @@ nameColor = "pink";
     var newName = this.props.addStamp(data, callback);
   }
 
-    getFirstLine(text) {
-    var firstN = text.length;
 
-    for (var i = 0; i < text.length; i++) {
-      if (text[i] === "\n") {
-        if (firstN === text.length) {
-          firstN = i;
-        }
-      }
-    }
-
-    if (firstN === 0) {
-      return " ";
-    }
-
-    return text.substr(0, Math.min(firstN, 15));
-  }
 
   getData() {
 
     var name = this.state.name
     if(this.props.isBlob){
-      name = this.getFirstLine(this.state.code)
+      name = this.props.getFirstLine(this.state.code)
     }
 
     var data = {
@@ -900,6 +883,7 @@ nameColor = "pink";
           onOptMove={() => this.copyAndOpt(true)}
           closeHidden={this.props.isIndex}
           copyHidden={this.props.isIndex}
+          getLinesOn={this.props.getLinesOn}
           initialPosition={{ x: this.state.x, y: this.state.y }}
           lineData={this.state.lineData}
           className={

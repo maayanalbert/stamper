@@ -82,14 +82,12 @@ export default class View extends Component {
       worldEdited:false,
 
       snapToGrid:false,
-      jsLinesOn:false,
-      indexLinesOn:false,
-      setupLinesOn:false,
-      fileLinesOn:false,
-      listenerLinesOn:false,
+      linseOn:false,
+
       settingsPicker:[],
       lineData:[],
-      deletedStamps:[]
+      deletedStamps:[],
+      actualLinesOn:false
 
     };
     this.counterMutex = new Mutex();
@@ -212,6 +210,7 @@ export default class View extends Component {
   }
 
   onWheel(e) {
+          var newTimeOut = setTimeout( (s) => this.onStopZoom(), 250);
     if (this.state.mouseWheelTimeout) {
       clearTimeout(this.state.mouseWheelTimeout);
     } else {
@@ -220,12 +219,12 @@ export default class View extends Component {
 
       }else{
         this.onStartMove()
-        var newTimeOut = setTimeout(this.onStopZoom.bind(this), 250);
+   
       }
 
     }
 
-      var newTimeOut = setTimeout(this.onStopZoom.bind(this), 250);
+
     this.setState({ mouseWheelTimeout: newTimeOut });
 
     if (e.ctrlKey) {
@@ -319,11 +318,7 @@ export default class View extends Component {
       worldPublishTime:null,
 
       snapToGrid:false,
-      jsLinesOn:false,
-      indexLinesOn:false,
-      setupLinesOn:false,
-      fileLinesOn:false,
-      listenerLinesOn:false,
+      linesOn:false,
       deletedStamps:[]
 
       },
@@ -342,11 +337,7 @@ export default class View extends Component {
               
 
       snapToGrid:stamperObject.snapToGrid == true,
-      jsLinesOn:stamperObject.jsLinesOn == true,
-      indexLinesOn:stamperObject.indexLinesOn == true,
-      setupLinesOn:stamperObject.setupLinesOn == true,
-      fileLinesOn:stamperObject.fileLinesOn == true,
-      listenerLinesOn:stamperObject.listenerLinesOn == true
+      linesOn:stamperObject.linesOn == true,
           },
           () => {
 
@@ -707,6 +698,7 @@ function logToConsole(message, lineno){
         starterEditorHeight={data.editorHeight}
         initialPosition={{ x: data.x, y: data.y }}
         starterCodeSize={data.codeSize}
+        getFirstLine={this.getFirstLine.bind(this)}
         id={stampID}
                 setLayerPicker={this.setLayerPicker.bind(this)}
         deleteFrame={this.deleteFrame}
@@ -724,6 +716,7 @@ function logToConsole(message, lineno){
         getHTML={this.getHTML.bind(this)}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
         getScale={this.getScale.bind(this)}
+        getLinesOn={() =>  this.state.linesOn}
         getSnapMargin={this.getSnapMargin.bind(this)}
       />
     );
@@ -1287,21 +1280,21 @@ callback(id)
 
 
     var lineData = []
-    if(this.state.jsLinesOn){
+
     lineData = lineData.concat(this.getJSLineData())
-    }
-    if(this.state.listenerLinesOn){
+
+
     lineData = lineData.concat(this.getListenerLineData())
-    }
-    if(this.state.setupLinesOn){
+
+
     lineData = lineData.concat(this.getSetupLineData())
-    }
-    if(this.state.indexLinesOn){
+
+
     lineData = lineData.concat(this.getIndexLineData())
-    }
-    if(this.state.fileLinesOn){
+
+
     lineData = lineData.concat(this.getFileLineData())
-    }
+
 
 
 
@@ -1529,11 +1522,7 @@ _stopLooping =setTimeout(() => {
       worldEdited:this.state.worldEdited,
       worldPublishTime:this.state.worldPublishTime,
       snapToGrid:this.state.snapToGrid,
-      jsLinesOn:this.state.jsLinesOn,
-      indexLinesOn:this.state.indexLinesOn,
-      setupLinesOn:this.state.setupLinesOn,
-      fileLinesOn:this.state.fileLinesOn,
-      listenerLinesOn:this.state.listenerLinesOn,
+      linesOn:this.state.linesOn,
 
 
 
@@ -1552,7 +1541,7 @@ _stopLooping =setTimeout(() => {
 
 
   onStartZoom(){
-    this.setState({jsLinesOn:false, indexLinesOn:false, setupLinesOn:false, fileLinesOn:false, listenerLinesOn:false}, 
+    this.setState({actualLinesOn:this.state.linesOn, linesOn:false}, 
       () => this.setLineData())
     this.onStopMove()
   }
@@ -1568,13 +1557,15 @@ _stopLooping =setTimeout(() => {
 
   }
 
-  onStopZoom(s){
-    this.setState({jsLinesOn:true, indexLinesOn:true, setupLinesOn:true, fileLinesOn:true, listenerLinesOn:true}, 
+  onStopZoom(){
+
+    this.setState({linesOn:this.state.actualLinesOn}, 
       () => this.setLineData())
-    this.onStopMove(s)
+    this.onStopMove()
   }
 
-  onStopMove(s) {
+
+  onStopMove() {
 
     this.supplyLineData()
     this.setState({ mouseWheelTimeout: null });
@@ -1623,12 +1614,13 @@ _stopLooping =setTimeout(() => {
 
   manualPan(xDiff, yDiff) {
     $(".allStamps").css({ transition: "all .5s ease" });
-    this.onStartZoom()
+
     setTimeout(() => {
 
       $(".allStamps").css({ transition: "" })
       this.onStopZoom()
     }, 500);
+        this.onStartZoom()
     window.postMessage({type:"edited"}, '*');
     this.setState({
       originX: this.state.originX + xDiff,
@@ -1661,7 +1653,14 @@ _stopLooping =setTimeout(() => {
       return " ";
     }
 
-    return text.substr(0, Math.min(firstN, 15));
+    var dots = ""
+    if(firstN > 15){
+      firstN = 15
+      dots = "..."
+
+    }
+
+    return text.substr(0, firstN) + dots;
   }
 
   getScale() {
@@ -1766,17 +1765,12 @@ window.postMessage({type:"edited"}, '*')
 
 pickerData.push({
         name: "lines",
-        status: this.state.setupLinesOn && this.state.indexLinesOn && this.state.jsLinesOn && this.state.listenerLinesOn
-        && this.state.fileLinesOn,
+        status: this.state.linesOn,
         icon: globals.LinesIcon,
  
         hideCallback: () => 
         {
-          this.setState({indexLinesOn:!this.state.indexLinesOn, 
-            setupLinesOn:!this.state.setupLinesOn,
-            jsLinesOn:!this.state.jsLinesOn,
-            listenerLinesOn:!this.state.listenerLinesOn,
-            fileLinesOn:!this.state.fileLinesOn}, () => {
+          this.setState({linesOn:!this.state.linesOn}, () => {
             this.setLayerPicker()
             this.setLineData()
           })
