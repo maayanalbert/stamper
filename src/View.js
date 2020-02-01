@@ -88,7 +88,7 @@ export default class View extends Component {
       fileLinesOn:false,
       listenerLinesOn:false,
       settingsPicker:[],
-      settingsExpanded:false
+
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -179,7 +179,8 @@ export default class View extends Component {
       if(e.keyCode === this.g){
 
         var snapToGrid = this.state.snapToGrid
-        this.setState({snapToGrid:!snapToGrid})
+        this.setState({snapToGrid:!snapToGrid}, () => this.setLayerPicker())
+
       }
 
     }else {
@@ -313,7 +314,7 @@ export default class View extends Component {
       setupLinesOn:false,
       fileLinesOn:false,
       listenerLinesOn:false,
-            settingsExpanded:false
+
       },
       () => {
 
@@ -327,7 +328,7 @@ export default class View extends Component {
             worldKey:stamperObject.worldKey,
             worldEdited:stamperObject.worldEdited == true,
             worldPublishTime:stamperObject.worldPublishTime,
-                  settingsExpanded:stamperObject.settingsExpanded === true,
+              
 
       snapToGrid:stamperObject.snapToGrid == true,
       jsLinesOn:stamperObject.jsLinesOn == true,
@@ -1185,20 +1186,23 @@ callback(id)
 
   }
 
+  getLineColor(type){
+     if(type === "file"){
+      return "rgba(140,154, 53, .2)"
+    }else if(type === "js"){
+      return "rgba(70,160,206, .2)"
+    }else if(type === "listener"){
+      return "rgba(218,16,96, .2)"
+    }else if(type === "setup" ){
+      return "rgba(175,175,175, .2)"
+    }else if(type === "index"){
+      return "rgba(175,175,175, .2)"
+    }   
+  }
+
   getLineStyle(type){
   
-    var strokeColor
-    if(type === "file"){
-      strokeColor = "rgba(140,154, 53, .2)"
-    }else if(type === "js"){
-      strokeColor = "rgba(70,160,206, .2)"
-    }else if(type === "listener"){
-      strokeColor = "rgba(218,16,96, .2)"
-    }else if(type === "setup" ){
-      strokeColor = "rgba(175,175,175, .2)"
-    }else if(type === "index"){
-      strokeColor = "rgba(175,175,175, .2)"
-    }
+    var strokeColor = this.getLineColor(type)
         var style = {strokeColor:strokeColor, strokeWidth:15*this.state.scale, arrowLength:2.5, 
           arrowThickness:2.5}
     return style
@@ -1461,7 +1465,7 @@ _stopLooping =setTimeout(() => {
       setupLinesOn:this.state.setupLinesOn,
       fileLinesOn:this.state.fileLinesOn,
       listenerLinesOn:this.state.listenerLinesOn,
-      settingsExpanded:this.state.settingsExpanded
+
 
 
     };
@@ -1667,56 +1671,25 @@ window.postMessage({type:"edited"}, '*')
 
   setSettingsPicker(){
     var pickerData = [];
-    var envTitle = "show env settings"
-    if(this.state.settingsExpanded){
-      envTitle = "hide env settings"
-    }
-      pickerData.push({
-        name: envTitle,
-        status: !this.state.settingsExpanded,
-        icon: globals.EmptyIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({settingsExpanded:!this.state.settingsExpanded}, () => {
-            this.setLayerPicker()
-  
-          })
-        },
-        id: this.getUniqueID(),
-        isSetting:true
-      });
 
 
-      if(this.state.settingsExpanded === false){
-        this.setState({settingsPicker:pickerData})
-        return
-      }
 
-      pickerData.push({
-        name: "javascript lines",
-        status: this.state.jsLinesOn,
+
+
+
+pickerData.push({
+        name: "lines",
+        status: this.state.setupLinesOn && this.state.indexLinesOn && this.state.jsLinesOn && this.state.listenerLinesOn
+        && this.state.fileLinesOn,
         icon: globals.LinesIcon,
  
         hideCallback: () => 
         {
-          this.setState({jsLinesOn:!this.state.jsLinesOn}, () => {
-            this.setLayerPicker()
-            this.updateLineData()
-          })
-        },
-        id: this.getUniqueID(),
-        isSetting:true
-      });
-
-      pickerData.push({
-        name: "file lines",
-        status: this.state.fileLinesOn,
-        icon: globals.LinesIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({fileLinesOn:!this.state.fileLinesOn}, () => {
+          this.setState({indexLinesOn:!this.state.indexLinesOn, 
+            setupLinesOn:!this.state.setupLinesOn,
+            jsLinesOn:!this.state.jsLinesOn,
+            listenerLinesOn:!this.state.listenerLinesOn,
+            fileLinesOn:!this.state.fileLinesOn}, () => {
             this.setLayerPicker()
             this.updateLineData()
           })
@@ -1726,42 +1699,7 @@ window.postMessage({type:"edited"}, '*')
         isSetting:true
       });
 
-      pickerData.push({
-        name: "listener lines",
-        status: this.state.listenerLinesOn,
-        icon: globals.LinesIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({listenerLinesOn:!this.state.listenerLinesOn}, () => {
-            this.setLayerPicker()
-            this.updateLineData()
-          })
-        },
-
-        id: this.getUniqueID(),
-        isSetting:true
-      });
-
-
-       pickerData.push({
-        name: "p5 lines",
-        status: this.state.setupLinesOn && this.state.indexLinesOn,
-        icon: globals.LinesIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({indexLinesOn:!this.state.indexLinesOn, setupLinesOn:!this.state.setupLinesOn}, () => {
-            this.setLayerPicker()
-            this.updateLineData()
-          })
-        },
-
-        id: this.getUniqueID(),
-        isSetting:true
-      });
-
-      pickerData.push({
+    pickerData.push({
         name: "snap to grid",
         status: this.state.snapToGrid,
         icon: globals.GridIcon,
@@ -1869,7 +1807,9 @@ var name = this.getFirstLine(stampRef.state.code);
               transform: "scale(" + this.state.scale+ ")"
             }}
           >
+           
             {this.renderGridLines()}
+       
            
 
             {Object.values(this.state.stampElems)}
