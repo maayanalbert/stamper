@@ -64,7 +64,8 @@ export default class ControlBar extends Component {
     this.minNonSideBarWidth = 30;
     this.editorRef = React.createRef();
     this.importButtonHeight = 50;
-    this.spanWidth = 10;
+    this.spanWidth = 5;
+    this.spanWidthWide = 60
     this.receiveMessage = this.receiveMessage.bind(this)
 
     this.state = {
@@ -615,7 +616,7 @@ function noiseWave() {
             tooltipText="upload sketch"
             alignLeft
           />
-          <span style={{ width: this.spanWidth*5 }} />
+          <span style={{ width: this.spanWidthWide }} />
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
@@ -731,7 +732,7 @@ function noiseWave() {
             disableZoom={this.props.disableZoom}
           />
 
-          <span style={{ width: this.spanWidth *5}} />
+          <span style={{ width: this.spanWidthWide}} />
 
           <TopButton
             disablePan={this.props.disablePan}

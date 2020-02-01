@@ -7,8 +7,7 @@ import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
-import { ArcherContainer, ArcherElement } from 'react-archer';
-
+import { ArcherContainer, ArcherElement } from "react-archer";
 
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
@@ -22,7 +21,6 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LZUTF8 from "lzutf8";
 
-
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-css";
 import "ace-builds/src-noconflict/mode-html";
@@ -33,7 +31,7 @@ import "ace-builds/src-noconflict/snippets/javascript";
 import pf1, { starter, stamperHeader } from "./starterStamps.js";
 
 var _ = require("lodash");
-var mime = require('mime-types')
+var mime = require("mime-types");
 
 var esprima = require("esprima");
 
@@ -51,7 +49,7 @@ export default class View extends Component {
     this.state = {
       compiledBefore: false,
       stampRefs: {},
-      stampElems:{},
+      stampElems: {},
       scale: 1,
       counter: 0,
       htmlID: -1,
@@ -75,20 +73,19 @@ export default class View extends Component {
       mouseIsDown: false,
       downKey: -1,
       panDisabled: false,
-      stampOrder:[],
+      stampOrder: [],
 
-      worldKey:null,
-      worldPublishTime:null,
-      worldEdited:false,
+      worldKey: null,
+      worldPublishTime: null,
+      worldEdited: false,
 
-      snapToGrid:false,
-      linseOn:false,
+      snapToGrid: false,
+      linseOn: false,
 
-      settingsPicker:[],
-      lineData:[],
-      deletedStamps:[],
-      actualLinesOn:false
-
+      settingsPicker: [],
+      lineData: [],
+      deletedStamps: [],
+      actualLinesOn: false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -99,7 +96,7 @@ export default class View extends Component {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
-    this.gridSize = 50
+    this.gridSize = 50;
     this.newStampMarginVariance = 100;
     this.newStampMargin = 20;
     this.space = 32;
@@ -108,18 +105,11 @@ export default class View extends Component {
     this.plus = 187;
     this.minus = 189;
     this.zero = 48;
-    this.g = 71
-    this.shft = 16
-
-
+    this.g = 71;
+    this.shft = 16;
   }
 
-
   componentDidMount() {
-
-
-    
-
     document.addEventListener("wheel", this.onWheel);
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
@@ -156,11 +146,9 @@ export default class View extends Component {
   }
 
   onKeyDown(e) {
-
     if (e.keyCode === this.space) {
       document.body.style.cursor = "grab";
     }
-  
 
     var centerX = window.innerWidth / 2 + this.state.topBarHeight;
     var centerY = window.innerHeight / 2 + this.state.sideBarWidth;
@@ -175,15 +163,12 @@ export default class View extends Component {
         e.preventDefault();
         this.zoom(this.state.scale * 0.5, centerX, centerY, true);
       }
-    } else if(this.state.downKey === this.shft){
-      if(e.keyCode === this.g){
-
-        var snapToGrid = this.state.snapToGrid
-        this.setState({snapToGrid:!snapToGrid}, () => this.setLayerPicker())
-
+    } else if (this.state.downKey === this.shft) {
+      if (e.keyCode === this.g) {
+        var snapToGrid = this.state.snapToGrid;
+        this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
       }
-
-    }else {
+    } else {
       this.setState({ downKey: e.keyCode });
     }
   }
@@ -203,27 +188,22 @@ export default class View extends Component {
   }
 
   onMouseMove(e) {
-
     if (this.state.mouseIsDown && this.state.downKey == this.space) {
       this.pan(e.movementX, e.movementY);
     }
   }
 
   onWheel(e) {
-          var newTimeOut = setTimeout( (s) => this.onStopZoom(), 250);
+    var newTimeOut = setTimeout(s => this.onStopZoom(), 250);
     if (this.state.mouseWheelTimeout) {
       clearTimeout(this.state.mouseWheelTimeout);
     } else {
-      if(e.ctrlKey){
-      this.onStartZoom();
-
-      }else{
-        this.onStartMove()
-   
+      if (e.ctrlKey) {
+        this.onStartZoom();
+      } else {
+        this.onStartMove();
       }
-
     }
-
 
     this.setState({ mouseWheelTimeout: newTimeOut });
 
@@ -251,8 +231,6 @@ export default class View extends Component {
     if (this.state.zoomDisabled) {
       return;
     }
-
-
 
     var scale = this.state.scale,
       x = this.state.originX,
@@ -287,22 +265,18 @@ export default class View extends Component {
   }
 
   recompileIfEnoughStamps(numFns) {
-
-    if (
-      this.state.stampOrder.length === numFns
-    ) {
+    if (this.state.stampOrder.length === numFns) {
       this.requestCompile();
     }
   }
 
   loadStamperObject(stamperObject) {
-
     this.setState(
       {
         stampRefs: {},
-    
-        stampElems:{},
-  
+
+        stampElems: {},
+
         counter: 0,
         htmlID: -1,
         scale: 1,
@@ -311,85 +285,71 @@ export default class View extends Component {
         originX: 0,
         originY: 0,
         compiledBefore: false,
-        stampOrder:[],      
+        stampOrder: [],
 
-      worldKey:null,
-      worldEdited:false,
-      worldPublishTime:null,
+        worldKey: null,
+        worldEdited: false,
+        worldPublishTime: null,
 
-      snapToGrid:false,
-      linesOn:false,
-      deletedStamps:[]
-
+        snapToGrid: false,
+        linesOn: false,
+        deletedStamps: []
       },
       () => {
-
-
         this.setState(
           {
             scale: stamperObject.scale,
             originX: stamperObject.originX,
             originY: stamperObject.originY,
 
-            worldKey:stamperObject.worldKey,
-            worldEdited:stamperObject.worldEdited == true,
-            worldPublishTime:stamperObject.worldPublishTime,
-              
+            worldKey: stamperObject.worldKey,
+            worldEdited: stamperObject.worldEdited == true,
+            worldPublishTime: stamperObject.worldPublishTime,
 
-      snapToGrid:stamperObject.snapToGrid == true,
-      linesOn:stamperObject.linesOn == true,
+            snapToGrid: stamperObject.snapToGrid == true,
+            linesOn: stamperObject.linesOn == true
           },
           () => {
-
-
-            var callback = () => 
-              this.recompileIfEnoughStamps(
-                stamperObject.stamps.length
-              );
+            var callback = () =>
+              this.recompileIfEnoughStamps(stamperObject.stamps.length);
             this.addConsoleStamp(stamperObject.console);
-            this.addManyStamps(stamperObject.stamps, callback)
-
-         
+            this.addManyStamps(stamperObject.stamps, callback);
           }
         );
       }
     );
   }
 
-  addManyStamps(datas, callback){
-            var xPos = this.setInitialPosition("x")
-            var yPos = this.setInitialPosition("y")
-            var xPosBlob = xPos + 700
-            var yPosBlob = yPos
+  addManyStamps(datas, callback) {
+    var xPos = this.setInitialPosition("x");
+    var yPos = this.setInitialPosition("y");
+    var xPosBlob = xPos + 700;
+    var yPosBlob = yPos;
 
-            var xPosFile = xPos + 1200
-            var yPosFile = yPos
-datas.map(data => 
-            {
+    var xPosFile = xPos + 1200;
+    var yPosFile = yPos;
+    datas.map(data => {
+      if (!data.x && !data.y) {
+        if (data.isBlob) {
+          data.x = xPosBlob;
+          data.y = yPosBlob;
+          xPosBlob += globals.copyOffset * 3;
+          yPosBlob += globals.copyOffset * 3;
+        } else if (data.isMediaFile || data.isIndex || data.isTxtFile) {
+          data.x = xPosFile;
+          data.y = yPosFile;
+          xPosFile += globals.copyOffset * 3;
+          yPosFile += globals.copyOffset * 3;
+        } else {
+          data.x = xPos;
+          data.y = yPos;
+          xPos += globals.copyOffset * 3;
+          yPos += globals.copyOffset * 3;
+        }
+      }
 
-              if(!data.x && !data.y){
-
-                if(data.isBlob){
-              data.x = xPosBlob
-              data.y = yPosBlob
-              xPosBlob += globals.copyOffset * 3
-              yPosBlob += globals.copyOffset * 3
-                }else if(data.isMediaFile || data.isIndex || data.isTxtFile){
-              data.x = xPosFile
-              data.y = yPosFile
-              xPosFile += globals.copyOffset * 3
-              yPosFile += globals.copyOffset * 3
-                }else{
-              data.x = xPos
-              data.y = yPos
-              xPos += globals.copyOffset * 3
-              yPos += globals.copyOffset * 3
-                }
-              }
-
-              this.addStamp(data, callback)
-            })
-
+      this.addStamp(data, callback);
+    });
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -468,19 +428,20 @@ function logToConsole(message, lineno){
 
   loadAssets(htmlCode) {
     this.state.stampOrder.map(id => {
-      var item = this.state.stampRefs[id]
+      var item = this.state.stampRefs[id];
       var name = item.current.state.name;
       var code = item.current.state.code;
-      if(item.current.props.isTxtFile){
-        code = item.current.state.dataUri
-
+      if (item.current.props.isTxtFile) {
+        code = item.current.state.dataUri;
       }
       if (item.current.props.isTxtFile || item.current.props.isMediaFile) {
         htmlCode = htmlCode
-          .split(`'${name}'`).join(`"${code}"`) 
-          .split("`" + name + "`").join(`"${code}"`)
-          .split(`"${name}"`).join(`"${code}"`)
-
+          .split(`'${name}'`)
+          .join(`"${code}"`)
+          .split("`" + name + "`")
+          .join(`"${code}"`)
+          .split(`"${name}"`)
+          .join(`"${code}"`);
       }
     });
 
@@ -497,7 +458,7 @@ function logToConsole(message, lineno){
       var ranges = [];
     } else {
       var codeData = this.getRunnableCode(id);
-      var runnableCode  = codeData.runnableCode
+      var runnableCode = codeData.runnableCode;
 
       var ranges = codeData.ranges;
     }
@@ -552,11 +513,10 @@ function logToConsole(message, lineno){
     );
     parser(jsSelector).replaceWith(jsBlock);
 
+    var html = parser.html();
+    html = this.loadAssets(html);
 
-    var html = parser.html()
-    html = this.loadAssets(html)
-
-    return html
+    return html;
   }
 
   addErrorLine(lineNum, id) {
@@ -619,6 +579,7 @@ function logToConsole(message, lineno){
       <ConsoleStamp
         ref={ref}
         initialPosition={{ x: x, y: y }}
+       getLinesOn={() => this.state.linesOn}
         id={stampID}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
@@ -630,7 +591,6 @@ function logToConsole(message, lineno){
         getScale={this.getScale.bind(this)}
         starterZIndex={data.zIndex}
         getSnapMargin={this.getSnapMargin.bind(this)}
-
       />
     );
 
@@ -638,17 +598,13 @@ function logToConsole(message, lineno){
     this.setState({ consoleStamp: consoleStamp, consoleId: stampID });
   }
 
-
-  getUniqueID(){
-    return   Math.random().toString(36).substr(2, 9)
+  getUniqueID() {
+    return Math.random()
+      .toString(36)
+      .substr(2, 9);
   }
 
-  addStamp(
-    data,
-    callback = () => null,
-  ) {
-
-
+  addStamp(data, callback = () => null) {
     var defaults = {
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
@@ -663,10 +619,10 @@ function logToConsole(message, lineno){
       isIndex: false,
       isTxtFile: false,
       isMediaFile: false,
-      isBlob:false,
+      isBlob: false,
       hidden: false,
       zIndex: undefined,
-      codeSize:globals.codeSize
+      codeSize: globals.codeSize
     };
 
     Object.keys(defaults).map(setting => {
@@ -677,8 +633,7 @@ function logToConsole(message, lineno){
     data = defaults;
 
     var ref = React.createRef();
-    var stampID = this.getUniqueID()
-
+    var stampID = this.getUniqueID();
 
     var elem = (
       <Stamp
@@ -700,7 +655,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         getFirstLine={this.getFirstLine.bind(this)}
         id={stampID}
-                setLayerPicker={this.setLayerPicker.bind(this)}
+        setLayerPicker={this.setLayerPicker.bind(this)}
         deleteFrame={this.deleteFrame}
         initialHidden={data.hidden}
         onStartMove={this.onStartMove.bind(this)}
@@ -716,49 +671,40 @@ function logToConsole(message, lineno){
         getHTML={this.getHTML.bind(this)}
         addNewIframeConsole={this.addNewIframeConsole.bind(this)}
         getScale={this.getScale.bind(this)}
-        getLinesOn={() =>  this.state.linesOn}
+        getLinesOn={() => this.state.linesOn}
         getSnapMargin={this.getSnapMargin.bind(this)}
       />
     );
 
-        if (data.isIndex) {
+    if (data.isIndex) {
       this.setState({ htmlID: stampID });
     }
 
-    this.addStampToState(ref, elem, stampID, callback)
+    this.addStampToState(ref, elem, stampID, callback);
+  }
 
-}
-
-
-
-  async addStampToState(ref, elem, id, callback){
-     const release = await this.counterMutex.acquire();
+  async addStampToState(ref, elem, id, callback) {
+    const release = await this.counterMutex.acquire();
     var stampRefs = Object.assign({}, this.state.stampRefs);
     var stampElems = Object.assign({}, this.state.stampElems);
-    var stampOrder = Object.assign([], this.state.stampOrder)
+    var stampOrder = Object.assign([], this.state.stampOrder);
     stampRefs[id] = ref;
-    stampElems[id] = elem
-    stampOrder.push(id)
-
-
-
+    stampElems[id] = elem;
+    stampOrder.push(id);
 
     this.setState(
       {
         stampRefs: stampRefs,
-        stampElems:stampElems, 
+        stampElems: stampElems,
 
-        stampOrder:stampOrder
-
+        stampOrder: stampOrder
       },
-          () => {
-            release()
-callback(id)
-          }
-
-  )
+      () => {
+        release();
+        callback(id);
+      }
+    );
   }
-
 
   addNewIframeConsole(newConsole) {
     if (this.state.consoleStamp === null) {
@@ -790,52 +736,52 @@ callback(id)
   }
 
   getFileDict() {
-    var fileDict = {}
-    fileDict["sketch.js"] = {content:this.getExportableCode(), type:"text"}
-    var stamperObject = this.getStamperObject()
+    var fileDict = {};
+    fileDict["sketch.js"] = { content: this.getExportableCode(), type: "text" };
+    var stamperObject = this.getStamperObject();
 
-    stamperObject.compressedJs = LZUTF8.compress(fileDict["sketch.js"].content, {
-      outputEncoding: "StorageBinaryString"
-    });
-  
+    stamperObject.compressedJs = LZUTF8.compress(
+      fileDict["sketch.js"].content,
+      {
+        outputEncoding: "StorageBinaryString"
+      }
+    );
 
-    fileDict["stamper.js"] = {content:stamperHeader + JSON.stringify(stamperObject), type:"text"}
+    fileDict["stamper.js"] = {
+      content: stamperHeader + JSON.stringify(stamperObject),
+      type: "text"
+    };
 
     this.state.stampOrder.map(id => {
-      var item = this.state.stampRefs[id]
-      var code = item.current.state.code
-      var name = item.current.state.name
-      if(item.current.props.isTxtFile || item.current.props.isIndex){
-        fileDict[name] = {content:code, type:'text'}
-      }else if(item.current.props.isMediaFile){
-        fileDict[name] = {content:code, type:"media"}
+      var item = this.state.stampRefs[id];
+      var code = item.current.state.code;
+      var name = item.current.state.name;
+      if (item.current.props.isTxtFile || item.current.props.isIndex) {
+        fileDict[name] = { content: code, type: "text" };
+      } else if (item.current.props.isMediaFile) {
+        fileDict[name] = { content: code, type: "media" };
       }
-    })
-    return fileDict
-  }
-
-  setLineData(id){
-
-    var lineData = this.getLineData()
-    this.setState({lineData:lineData}, () => this.supplyLineData())
-
- 
-
-  }
-
-  supplyLineData(){
-      this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      var stampRef = stamp.current;
-      stampRef.setLineData(this.state.lineData.filter(line => line.start === id));
-  
     });
-  
+    return fileDict;
+  }
+
+  setLineData(id) {
+    var lineData = this.getLineData();
+    this.setState({ lineData: lineData }, () => this.supplyLineData());
+  }
+
+  supplyLineData() {
+    this.state.stampOrder.map(id => {
+      var stamp = this.state.stampRefs[id];
+      var stampRef = stamp.current;
+      stampRef.setLineData(
+        this.state.lineData.filter(line => line.start === id)
+      );
+    });
   }
 
   requestCompile(id) {
-    this.setLineData(id)
- 
+    this.setLineData(id);
 
     this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
 
@@ -845,10 +791,8 @@ callback(id)
 
     this.checkForSetup();
 
-
-
     this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
+      var stamp = this.state.stampRefs[id];
       var stampRef = stamp.current;
       if (stampRef) {
         var newErrors = [];
@@ -862,7 +806,6 @@ callback(id)
         stampRef.clearErrorsAndUpdate(newErrors);
       }
     });
-
   }
 
   recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
@@ -915,8 +858,10 @@ callback(id)
   checkAllNames() {
     var nameDict = {};
     this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      if(stamp.current.props.isBlob){return}
+      var stamp = this.state.stampRefs[id];
+      if (stamp.current.props.isBlob) {
+        return;
+      }
       if (stamp.current) {
         var name = stamp.current.state.name;
         if (!(name in nameDict)) {
@@ -927,16 +872,21 @@ callback(id)
     });
     var duplicateNamedStamps = {};
     this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      if(stamp.current.props.isBlob){return}
+      var stamp = this.state.stampRefs[id];
+      if (stamp.current.props.isBlob) {
+        return;
+      }
 
-
-      if(stamp.current.props.isTxtFile || stamp.current.props.isMediaFile){
-        var mimeType = mime.lookup(stamp.current.state.name)
-        if(!mimeType){
-          duplicateNamedStamps[stamp.current.props.id] = ""
+      if (stamp.current.props.isTxtFile || stamp.current.props.isMediaFile) {
+        var mimeType = mime.lookup(stamp.current.state.name);
+        if (!mimeType) {
+          duplicateNamedStamps[stamp.current.props.id] = "";
           this.state.consoleStamp.ref.current.logToConsole(
-            `Stamper Error: The file extension '.${stamp.current.state.name.split(".")[stamp.current.state.name.split(".").length -1]}' is invalid.`
+            `Stamper Error: The file extension '.${
+              stamp.current.state.name.split(".")[
+                stamp.current.state.name.split(".").length - 1
+              ]
+            }' is invalid.`
           );
         }
       }
@@ -956,28 +906,25 @@ callback(id)
     return duplicateNamedStamps;
   }
 
-
-
-
   getExportableCode() {
     var runnableCode = [];
     var ranges = [];
     var curLine = 1;
     var code;
 
-
     this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      if(stamp.current.props.isTxtFile  ||
+      var stamp = this.state.stampRefs[id];
+      if (
+        stamp.current.props.isTxtFile ||
         stamp.current.props.isIndex ||
-        stamp.current.props.isMediaFile ){
-        return
+        stamp.current.props.isMediaFile
+      ) {
+        return;
       }
 
-
-      if(stamp.current.props.isBlob){
+      if (stamp.current.props.isBlob) {
         var code = "\n" + stamp.current.state.code + "\n";
-            curLine = this.addCodeBlock(
+        curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
           runnableCode,
@@ -985,12 +932,12 @@ callback(id)
           curLine,
           false
         );
-      }else {
+      } else {
         var state = stamp.current.state;
-        var contents = state.code.split("\n").join("\n  ")
+        var contents = state.code.split("\n").join("\n  ");
 
         var code = `function ${state.name}(${state.args}){\n  ${contents}\n}`;
-                curLine = this.addCodeBlock(
+        curLine = this.addCodeBlock(
           code,
           stamp.current.props.id,
           runnableCode,
@@ -999,18 +946,14 @@ callback(id)
           true
         );
       }
-
-
     });
 
     return runnableCode.join("\n");
   }
 
   getNumLines(code) {
-
     var numLines = 0;
     for (var i = 0; i < code.length; i++) {
-
       if (code[i] === "\n") {
         numLines += 1;
       }
@@ -1050,273 +993,283 @@ callback(id)
   //   this.setState({ lines: lines });
   // }
 
-  getJSLineData(){
+  getJSLineData() {
     var declaredDict = {};
     var undeclaredArr = [];
     var lineData = [];
-
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
 
       var state = stampRef.state;
-      if(stampRef.props.isMediaFile || stampRef.props.isTxtFile || stampRef.props.isIndex){
-        return 
-      }else if(stampRef.props.isBlob){
-        var code = state.code
-      }else{
+      if (
+        stampRef.props.isMediaFile ||
+        stampRef.props.isTxtFile ||
+        stampRef.props.isIndex
+      ) {
+        return;
+      } else if (stampRef.props.isBlob) {
+        var code = state.code;
+      } else {
         var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
       }
       var variables = parser.getVariables(code);
       if (variables) {
         variables.declared.map(variable => (declaredDict[variable] = id));
         variables.undeclared.map(variable =>
-
-          undeclaredArr.push({variable:variable, id:id})
+          undeclaredArr.push({ variable: variable, id: id })
         );
       }
     });
 
-    var lineDict = {}
-
-
+    var lineDict = {};
 
     undeclaredArr.map(undeclaredItem => {
       var variable = undeclaredItem.variable;
       var usingID = undeclaredItem.id;
       var declaringID = declaredDict[variable];
-  
 
       if (declaringID && usingID && this.isFnStamp(usingID)) {
-
-        if(!(usingID + "_" + declaringID in lineDict)){
-          lineDict[usingID + "_" + declaringID] = []
+        if (!(usingID + "_" + declaringID in lineDict)) {
+          lineDict[usingID + "_" + declaringID] = [];
         }
-        lineDict[usingID + "_" + declaringID].push(variable)
-         
-
+        lineDict[usingID + "_" + declaringID].push(variable);
       }
-    }); 
+    });
 
-  
     var lineData = Object.keys(lineDict).map(lineKey => {
+      return {
+        end: lineKey.split("_")[0],
+        start: lineKey.split("_")[1],
+        type: "js",
+        label: this.getLineLabel(lineDict[lineKey].join(", "), "js"),
+        style: this.getLineStyle("js")
+      };
+    });
 
-        return {end:lineKey.split("_")[0], start:lineKey.split("_")[1],  type:"js", label:this.getLineLabel(lineDict[lineKey].join(", "), "js"),
-            style:this.getLineStyle("js")};
-      }
-
-    )
-
-
-
-
-    return lineData  
+    return lineData;
   }
 
-  isFnStamp(id){
-    var props = this.state.stampRefs[id].current.props
-    return !props.isBlob && !props.isMediaFile && !props.isTxtFile && !props.isIndex
+  isFnStamp(id) {
+    var props = this.state.stampRefs[id].current.props;
+    return (
+      !props.isBlob && !props.isMediaFile && !props.isTxtFile && !props.isIndex
+    );
   }
 
-  getListenerLineData(){
-    var listenerIDs = []
-    var lineData = []
+  getListenerLineData() {
+    var listenerIDs = [];
+    var lineData = [];
     this.state.stampOrder.map(id => {
-      var stampRef = this.state.stampRefs[id].current
-      if(this.isListener(stampRef.state.name)){
-        listenerIDs.push(stampRef.props.id)
+      var stampRef = this.state.stampRefs[id].current;
+      if (this.isListener(stampRef.state.name)) {
+        listenerIDs.push(stampRef.props.id);
       }
-    })
+    });
 
     this.state.stampOrder.map(id => {
-      var stampRef = this.state.stampRefs[id].current
-      if( this.isListener(stampRef.state.name) || !this.isFnStamp(id) || stampRef.state.name === "setup"){
-        return
+      var stampRef = this.state.stampRefs[id].current;
+      if (
+        this.isListener(stampRef.state.name) ||
+        !this.isFnStamp(id) ||
+        stampRef.state.name === "setup"
+      ) {
+        return;
       }
       listenerIDs.map(listenerID => {
-        lineData.push({ end:id,start:listenerID, type:"listener", label:this.getLineLabel(this.state.stampRefs[listenerID].current.state.name, "listener"),
-            style:this.getLineStyle("listener")})
-      })
+        lineData.push({
+          end: id,
+          start: listenerID,
+          type: "listener",
+          label: this.getLineLabel(
+            this.state.stampRefs[listenerID].current.state.name,
+            "listener"
+          ),
+          style: this.getLineStyle("listener")
+        });
+      });
+    });
 
-    })
-
-    return lineData
-
+    return lineData;
   }
 
-  getSetupLineData(){
-     var lineData = []
-    var setupID
+  getSetupLineData() {
+    var lineData = [];
+    var setupID;
 
-    for(var i = 0; i < this.state.stampOrder.length; i++){
-      var id = this.state.stampOrder[i]
-      var stampRef = this.state.stampRefs[id].current
-      if(stampRef.state.name === "setup"){
-        setupID = id
+    for (var i = 0; i < this.state.stampOrder.length; i++) {
+      var id = this.state.stampOrder[i];
+      var stampRef = this.state.stampRefs[id].current;
+      if (stampRef.state.name === "setup") {
+        setupID = id;
       }
     }
- 
-    if(setupID){
+
+    if (setupID) {
       this.state.stampOrder.map(id => {
-        if(this.isFnStamp(id) && setupID != id){
-          lineData.push({end:id, start:setupID, type:"setup", label:this.getLineLabel("setup", "setup"),
-            style:this.getLineStyle("setup")})
+        if (this.isFnStamp(id) && setupID != id) {
+          lineData.push({
+            end: id,
+            start: setupID,
+            type: "setup",
+            label: this.getLineLabel("setup", "setup"),
+            style: this.getLineStyle("setup")
+          });
         }
-      })      
+      });
     }
 
-    return lineData   
+    return lineData;
   }
 
-  getIndexLineData(){
-     var lineData = []
-    var indexID
+  getIndexLineData() {
+    var lineData = [];
+    var indexID;
 
-    for(var i = 0; i < this.state.stampOrder.length; i++){
-      var id = this.state.stampOrder[i]
-      var stampRef = this.state.stampRefs[id].current
-      if(stampRef.props.isIndex){
-        indexID = id
+    for (var i = 0; i < this.state.stampOrder.length; i++) {
+      var id = this.state.stampOrder[i];
+      var stampRef = this.state.stampRefs[id].current;
+      if (stampRef.props.isIndex) {
+        indexID = id;
       }
     }
 
-
-    if(indexID){
-      if(!this.fileIsReferenced(this.state.stampRefs[indexID].current.state.code, "sketch.js")){
-   
-        return []
+    if (indexID) {
+      if (
+        !this.fileIsReferenced(
+          this.state.stampRefs[indexID].current.state.code,
+          "sketch.js"
+        )
+      ) {
+        return [];
       }
       this.state.stampOrder.map(id => {
-        if(this.isFnStamp(id)){
-          lineData.push({start:indexID, end:id, type:"index", label:this.getLineLabel("index", "index"),
-            style:this.getLineStyle("index")})
+        if (this.isFnStamp(id)) {
+          lineData.push({
+            start: indexID,
+            end: id,
+            type: "index",
+            label: this.getLineLabel("index", "index"),
+            style: this.getLineStyle("index")
+          });
         }
-      })      
+      });
     }
 
-
-
-    return lineData   
+    return lineData;
   }
 
-  fileIsReferenced(code, fileName){
-    return code.includes(`'${fileName}'`) || code.includes(`"${fileName}"`) || code.includes("`" + fileName + "`")
+  fileIsReferenced(code, fileName) {
+    return (
+      code.includes(`'${fileName}'`) ||
+      code.includes(`"${fileName}"`) ||
+      code.includes("`" + fileName + "`")
+    );
   }
 
-
-
-  getLineLabel(text, type){
-  
-
+  getLineLabel(text, type) {
     var label = (
-       <div className={"name rounded p-2"} style={{transform:"scale(" + this.state.scale*.8+ ")", color:this.getLineColor(type),
-       backgroundColor:"transparent" }}>
-            {text}
-            </div>)
+      <div
+        className={"name rounded p-2"}
+        style={{
+          transform: "scale(" + this.state.scale * 0.8 + ")",
+          color: this.getLineColor(type),
+          backgroundColor: "transparent"
+        }}
+      >
+        {text}
+      </div>
+    );
 
-    return label
-
+    return label;
   }
 
-  getLineColor(type, seeThru = false){
-    var opacity = "1"
-    if(seeThru){
-      opacity = ".2"
+  getLineColor(type, seeThru = false) {
+    var opacity = "1";
+    if (seeThru) {
+      opacity = ".2";
     }
-     if(type === "file"){
-      return "rgba(140,154, 53, "+opacity+")"
-    }else if(type === "js"){
-      return "rgba(70,160,206, "+opacity+")"
-    }else if(type === "listener"){
-      return "rgba(218,16,96, "+opacity+")"
-    }else if(type === "setup" ){
-      return "rgba(190,190,190, "+opacity+")"
-    }else if(type === "index"){
-      return "rgba(190,190,190, "+opacity+")"
-    }   
+    if (type === "file") {
+      return "rgba(140,154, 53, " + opacity + ")";
+    } else if (type === "js") {
+      return "rgba(70,160,206, " + opacity + ")";
+    } else if (type === "listener") {
+      return "rgba(218,16,96, " + opacity + ")";
+    } else if (type === "setup") {
+      return "rgba(190,190,190, " + opacity + ")";
+    } else if (type === "index") {
+      return "rgba(190,190,190, " + opacity + ")";
+    }
   }
 
-  getLineStyle(type){
-  
-    var strokeColor = this.getLineColor(type, true)
-        var style = {strokeColor:strokeColor, strokeWidth:15*this.state.scale, arrowLength:2.5, 
-          arrowThickness:2.5}
-    return style
+  getLineStyle(type) {
+    var strokeColor = this.getLineColor(type, true);
+    var style = {
+      strokeColor: strokeColor,
+      strokeWidth: 15 * this.state.scale,
+      arrowLength: 2.5,
+      arrowThickness: 2.5
+    };
+    return style;
   }
 
-  getFileLineData(){
-    var fileIdDict = {}
-    var lineData = []
+  getFileLineData() {
+    var fileIdDict = {};
+    var lineData = [];
     this.state.stampOrder.map(id => {
-      var stampRef = this.state.stampRefs[id].current
-      if(stampRef.props.isMediaFile || stampRef.props.isTxtFile || stampRef.props.isIndex){
-        fileIdDict[stampRef.state.name] = id
+      var stampRef = this.state.stampRefs[id].current;
+      if (
+        stampRef.props.isMediaFile ||
+        stampRef.props.isTxtFile ||
+        stampRef.props.isIndex
+      ) {
+        fileIdDict[stampRef.state.name] = id;
       }
-    })
-
-
-
+    });
 
     this.state.stampOrder.map(id => {
-      var stampRef = this.state.stampRefs[id].current
+      var stampRef = this.state.stampRefs[id].current;
       Object.keys(fileIdDict).map(fileName => {
-        if(this.fileIsReferenced(stampRef.state.code, fileName)){
-          lineData.push({end:id, start:fileIdDict[fileName], type:"file", label:this.getLineLabel(fileName, "file"),
-            style:this.getLineStyle("file")
-
-
-            })
+        if (this.fileIsReferenced(stampRef.state.code, fileName)) {
+          lineData.push({
+            end: id,
+            start: fileIdDict[fileName],
+            type: "file",
+            label: this.getLineLabel(fileName, "file"),
+            style: this.getLineStyle("file")
+          });
         }
-      })
-    })
+      });
+    });
 
-    return lineData
-
+    return lineData;
   }
-
-
 
   getLineData() {
+    var lineData = [];
 
+    lineData = lineData.concat(this.getJSLineData());
 
-    var lineData = []
+    lineData = lineData.concat(this.getListenerLineData());
 
-    lineData = lineData.concat(this.getJSLineData())
+    lineData = lineData.concat(this.getSetupLineData());
 
+    lineData = lineData.concat(this.getIndexLineData());
 
-    lineData = lineData.concat(this.getListenerLineData())
+    lineData = lineData.concat(this.getFileLineData());
 
-
-    lineData = lineData.concat(this.getSetupLineData())
-
-
-    lineData = lineData.concat(this.getIndexLineData())
-
-
-    lineData = lineData.concat(this.getFileLineData())
-
-
-
-
-
-
-
-    var lineDict = {}
-
+    var lineDict = {};
 
     lineData = lineData.filter(line => {
-      var lineKey = line.start + "_" + line.end
-      if(lineKey in lineDict === false){
-        lineDict[lineKey] = 0
+      var lineKey = line.start + "_" + line.end;
+      if (lineKey in lineDict === false) {
+        lineDict[lineKey] = 0;
       }
-      lineDict[lineKey] += 1
-      return lineDict[lineKey] === 1 && line.start != line.end
+      lineDict[lineKey] += 1;
+      return lineDict[lineKey] === 1 && line.start != line.end;
+    });
 
-    })
-
-
-    return lineData
-
+    return lineData;
   }
 
   getRunnableCode(overalID) {
@@ -1325,49 +1278,48 @@ callback(id)
     var curLine = 1;
     var code;
 
-
-
     this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
+      var stamp = this.state.stampRefs[id];
 
       if (
         stamp.current.state.name != "draw" &&
         stamp.current.props.isTxtFile === false &&
         stamp.current.props.isMediaFile === false &&
         stamp.current.props.isIndex === false &&
-        !(this.isListener(stamp.current.state.name) &&
-          this.isListener(this.state.stampRefs[overalID].current.state.name)) &&
-        !(this.isListener(stamp.current.state.name) &&  
-          this.state.stampRefs[overalID].current.state.name === "setup")
-
+        !(
+          this.isListener(stamp.current.state.name) &&
+          this.isListener(this.state.stampRefs[overalID].current.state.name)
+        ) &&
+        !(
+          this.isListener(stamp.current.state.name) &&
+          this.state.stampRefs[overalID].current.state.name === "setup"
+        )
       ) {
         var state = stamp.current.state;
-        if(stamp.current.props.isBlob){
-
-          var code = state.code
+        if (stamp.current.props.isBlob) {
+          var code = state.code;
 
           curLine = this.addCodeBlock(
-          code,
-          stamp.current.props.id,
-          runnableCode,
-          ranges,
-          curLine,
-          false
-        );
-        }else{
+            code,
+            stamp.current.props.id,
+            runnableCode,
+            ranges,
+            curLine,
+            false
+          );
+        } else {
           var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
           curLine = this.addCodeBlock(
-          code,
-          stamp.current.props.id,
-          runnableCode,
-          ranges,
-          curLine,
-          true
-        );
+            code,
+            stamp.current.props.id,
+            runnableCode,
+            ranges,
+            curLine,
+            true
+          );
         }
       }
     });
-
 
     if (
       overalID in this.state.stampRefs == false ||
@@ -1408,9 +1360,6 @@ callback(id)
       state.name
     );
 
-
-
-
     return { ranges: ranges, runnableCode: runnableCode };
   }
 
@@ -1444,14 +1393,15 @@ _stopLooping =setTimeout(() => {
 
 `;
 
-    runnableCode = runnableCode.split("noLoop()").join(`noLoop(); _isLooping = false`)
+    runnableCode = runnableCode
+      .split("noLoop()")
+      .join(`noLoop(); _isLooping = false`);
 
-
-    runnableCode = runnableCode.split("loop()").join(`loop(); _isLooping = true`)
-
+    runnableCode = runnableCode
+      .split("loop()")
+      .join(`loop(); _isLooping = true`);
 
     runnableCode = runnableCode + loopingCallbacks;
-
 
     return runnableCode;
   }
@@ -1461,50 +1411,53 @@ _stopLooping =setTimeout(() => {
   }
 
   async onDelete(id) {
-    window.postMessage({type:"edited"}, '*')
+    window.postMessage({ type: "edited" }, "*");
 
-    if(id in this.state.stampRefs){
+    if (id in this.state.stampRefs) {
       const release = await this.counterMutex.acquire();
 
       var stampRefs = Object.assign({}, this.state.stampRefs);
       var stampElems = Object.assign({}, this.state.stampElems);
       var deletedStamps = Object.assign([], this.state.deletedStamps);
-      var stampData = stampRefs[id].current.getData()
-      deletedStamps.push(stampData)
-      delete stampRefs[id]
-      stampElems[id] = (<span hidden={true}/>)
+      var stampData = stampRefs[id].current.getData();
+      deletedStamps.push(stampData);
+      delete stampRefs[id];
+      stampElems[id] = <span hidden={true} />;
 
-      var stampOrder = Object.assign([], this.state.stampOrder)
-      stampOrder.splice(stampOrder.indexOf(id), 1)
-      this.setState({stampRefs:stampRefs, stampElems:stampElems, stampOrder:stampOrder, deletedStamps:deletedStamps}, () => 
-        this.requestCompile(id))
-        release()
+      var stampOrder = Object.assign([], this.state.stampOrder);
+      stampOrder.splice(stampOrder.indexOf(id), 1);
+      this.setState(
+        {
+          stampRefs: stampRefs,
+          stampElems: stampElems,
+          stampOrder: stampOrder,
+          deletedStamps: deletedStamps
+        },
+        () => this.requestCompile(id)
+      );
+      release();
     }
-
   }
 
-  undoDelete(position = this.state.deletedStamps.length-1){
-    console.log(this.state.deletedStamps)
-    console.log(position)
-    if(this.state.deletedStamps.length <= position){
-      return
+  undoDelete(position = this.state.deletedStamps.length - 1) {
+    console.log(this.state.deletedStamps);
+    console.log(position);
+    if (this.state.deletedStamps.length <= position) {
+      return;
     }
     var deletedStamps = Object.assign([], this.state.deletedStamps);
-    console.log(deletedStamps)
+    console.log(deletedStamps);
 
-
-    var stampData = deletedStamps[position]
+    var stampData = deletedStamps[position];
     deletedStamps.splice(position, 1);
 
+    this.setState({ deletedStamps: deletedStamps });
 
-    this.setState({deletedStamps:deletedStamps})
-
-              this.addStamp(stampData, id => {
-              this.requestCompile(id)
-              window.postMessage({type:"edited"}, '*')
-            
-  })
-            }
+    this.addStamp(stampData, id => {
+      this.requestCompile(id);
+      window.postMessage({ type: "edited" }, "*");
+    });
+  }
 
   refreshConsoleStamp(consoleStamp) {
     var data = consoleStamp.ref.current.getData();
@@ -1518,14 +1471,11 @@ _stopLooping =setTimeout(() => {
       console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
       originY: this.state.originY,
-      worldKey:this.state.worldKey,
-      worldEdited:this.state.worldEdited,
-      worldPublishTime:this.state.worldPublishTime,
-      snapToGrid:this.state.snapToGrid,
-      linesOn:this.state.linesOn,
-
-
-
+      worldKey: this.state.worldKey,
+      worldEdited: this.state.worldEdited,
+      worldPublishTime: this.state.worldPublishTime,
+      snapToGrid: this.state.snapToGrid,
+      linesOn: this.state.linesOn
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1534,16 +1484,14 @@ _stopLooping =setTimeout(() => {
       }
     });
 
-
-
     return data;
   }
 
-
-  onStartZoom(){
-    this.setState({actualLinesOn:this.state.linesOn, linesOn:false}, 
-      () => this.setLineData())
-    this.onStopMove()
+  onStartZoom() {
+    this.setState({ actualLinesOn: this.state.linesOn, linesOn: false }, () =>
+      this.setLineData()
+    );
+    this.onStopMove();
   }
 
   onStartMove() {
@@ -1554,27 +1502,24 @@ _stopLooping =setTimeout(() => {
       stamp.setIframeDisabled(true);
     }
 
-    this.setState({actualLinesOn:this.state.linesOn}) 
+    this.setState({ actualLinesOn: this.state.linesOn });
   }
 
-  onStopZoom(){
-
-    this.setState({linesOn:this.state.actualLinesOn}, 
-      () => this.setLineData())
-    this.onStopMove()
+  onStopZoom() {
+    this.setState({ linesOn: this.state.actualLinesOn }, () =>
+      this.setLineData()
+    );
+    this.onStopMove();
   }
-
 
   onStopMove() {
-
-    this.supplyLineData()
+    this.supplyLineData();
     this.setState({ mouseWheelTimeout: null });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
       var stamp = stampRefs[i].current;
       stamp.setIframeDisabled(false);
     }
-
   }
 
   centerOnStamp(id, xOff, yOff) {
@@ -1616,12 +1561,11 @@ _stopLooping =setTimeout(() => {
     $(".allStamps").css({ transition: "all .5s ease" });
 
     setTimeout(() => {
-
-      $(".allStamps").css({ transition: "" })
-      this.onStopZoom()
+      $(".allStamps").css({ transition: "" });
+      this.onStopZoom();
     }, 500);
-        this.onStartZoom()
-    window.postMessage({type:"edited"}, '*');
+    this.onStartZoom();
+    window.postMessage({ type: "edited" }, "*");
     this.setState({
       originX: this.state.originX + xDiff,
       originY: this.state.originY + yDiff
@@ -1630,12 +1574,9 @@ _stopLooping =setTimeout(() => {
 
   toggleHide(stampRef) {
     stampRef.toggleHide(() => {
-      this.supplyLineData()
-      this.setLayerPicker()
-    })
-
-
- 
+      this.supplyLineData();
+      this.setLayerPicker();
+    });
   }
 
   getFirstLine(text) {
@@ -1653,11 +1594,10 @@ _stopLooping =setTimeout(() => {
       return " ";
     }
 
-    var dots = ""
-    if(firstN > 15){
-      firstN = 15
-      dots = "..."
-
+    var dots = "";
+    if (firstN > 15) {
+      firstN = 15;
+      dots = "...";
     }
 
     return text.substr(0, firstN) + dots;
@@ -1667,131 +1607,137 @@ _stopLooping =setTimeout(() => {
     return this.state.scale;
   }
 
-  getSnapMargin(){
-    if(this.state.snapToGrid){
-      return this.calcSnapMargin()
-    }else{
-      return 0
+  getSnapMargin() {
+    if (this.state.snapToGrid) {
+      return this.calcSnapMargin();
+    } else {
+      return 0;
     }
-
   }
 
-  onDragEnd(result){
-
-    if(!result.destination){
-      return
+  onDragEnd(result) {
+    if (!result.destination) {
+      return;
     }
 
-window.postMessage({type:"edited"}, '*')
-  
-    var stampOrder = Object.assign([], this.state.stampOrder)
+    window.postMessage({ type: "edited" }, "*");
+
+    var stampOrder = Object.assign([], this.state.stampOrder);
 
     const [removed] = stampOrder.splice(result.source.index, 1);
     stampOrder.splice(result.destination.index, 0, removed);
 
-
-
-    this.setState({stampOrder:[]}, 
-      () => {
-        this.setLayerPicker()
-        this.setState({stampOrder:stampOrder}, () => this.setLayerPicker())
-      }
-    )
-
+    this.setState({ stampOrder: [] }, () => {
+      this.setLayerPicker();
+      this.setState({ stampOrder: stampOrder }, () => this.setLayerPicker());
+    });
   }
-  calcSnapMargin(){
-    var snapMargin = Math.max(Math.round(1/this.state.scale) * 20, 5)
-    return snapMargin
+  calcSnapMargin() {
+    var snapMargin = Math.max(Math.round(1 / this.state.scale) * 20, 5);
+    return snapMargin;
   }
 
-  renderGridLines(){
-
-    if(this.state.snapToGrid === false){
-      return null
+  renderGridLines() {
+    if (this.state.snapToGrid === false) {
+      return null;
     }
 
-    var gridLines = []
+    var gridLines = [];
 
-    var borderWidth = Math.max(Math.round(1/this.state.scale), .5)
-    var snapMargin = this.calcSnapMargin()
+    var borderWidth = Math.max(Math.round(1 / this.state.scale), 0.5);
+    var snapMargin = this.calcSnapMargin();
 
-    var roundedScale = Math.round(1/this.state.scale)
+    var roundedScale = Math.round(1 / this.state.scale);
 
-    var actualOriginX = -this.state.originX
+    var actualOriginX = -this.state.originX;
 
     // var x0 = -Math.round(this.state.originX /snapMargin)*snapMargin
     // var y0 = -Math.round(this.state.originY/snapMargin)*snapMargin
 
-    var x0 = -this.state.originX/this.state.scale
-    var y0 = -this.state.originY/this.state.scale
+    var x0 = -this.state.originX / this.state.scale;
+    var y0 = -this.state.originY / this.state.scale;
 
-    var roundedX0 = Math.round(x0/snapMargin)*snapMargin
-    var roundedY0 = Math.round(y0/snapMargin)*snapMargin
+    var roundedX0 = Math.round(x0 / snapMargin) * snapMargin;
+    var roundedY0 = Math.round(y0 / snapMargin) * snapMargin;
 
-    var width = window.innerWidth/this.state.scale
-    var height = window.innerHeight/this.state.scale
+    var width = window.innerWidth / this.state.scale;
+    var height = window.innerHeight / this.state.scale;
 
-    var x = roundedX0
+    var x = roundedX0;
 
-    while(x < width + x0){
-      gridLines.push(<span className="border-borderGrey"
-        style={{position:"absolute", top:roundedY0, height:height, 
-        width:10, left:x, background:"transparent",  borderLeft:borderWidth +"px solid" }} />)
-      x += snapMargin
+    while (x < width + x0) {
+      gridLines.push(
+        <span
+          className="border-borderGrey"
+          style={{
+            position: "absolute",
+            top: roundedY0,
+            height: height,
+            width: 10,
+            left: x,
+            background: "transparent",
+            borderLeft: borderWidth + "px solid"
+          }}
+        />
+      );
+      x += snapMargin;
     }
 
-    var y = roundedY0
+    var y = roundedY0;
 
-    while(y < height+ y0){
-   
-      gridLines.push(<span className="border-borderGrey"
-        style={{position:"absolute", top:y, height:10, 
-        width:width, left:roundedX0, background:"transparent", 
-        borderTop:borderWidth +"px solid"}} />)
-      y += snapMargin
+    while (y < height + y0) {
+      gridLines.push(
+        <span
+          className="border-borderGrey"
+          style={{
+            position: "absolute",
+            top: y,
+            height: 10,
+            width: width,
+            left: roundedX0,
+            background: "transparent",
+            borderTop: borderWidth + "px solid"
+          }}
+        />
+      );
+      y += snapMargin;
     }
 
-    return gridLines
+    return gridLines;
   }
 
-
-  setSettingsPicker(){
+  setSettingsPicker() {
     var pickerData = [];
 
+    pickerData.push({
+      name: "lines",
+      status: this.state.linesOn,
+      icon: globals.LinesIcon,
 
+      hideCallback: () => {
+        this.setState({ linesOn: !this.state.linesOn }, () => {
+          this.setLayerPicker();
+          this.setLineData();
+        });
+      },
 
-
-
-
-pickerData.push({
-        name: "lines",
-        status: this.state.linesOn,
-        icon: globals.LinesIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({linesOn:!this.state.linesOn}, () => {
-            this.setLayerPicker()
-            this.setLineData()
-          })
-        },
-
-        id: this.getUniqueID(),
-        isSetting:true
-      });
+      id: this.getUniqueID(),
+      isSetting: true
+    });
 
     pickerData.push({
-        name: "snap to grid",
-        status: this.state.snapToGrid,
-        icon: globals.GridIcon,
- 
-        hideCallback: () => 
-        {
-          this.setState({snapToGrid:!this.state.snapToGrid}, () => this.setLayerPicker())
-        },
-        id: this.getUniqueID(),
-        isSetting:true
-      });
+      name: "snap to grid",
+      status: this.state.snapToGrid,
+      icon: globals.GridIcon,
+
+      hideCallback: () => {
+        this.setState({ snapToGrid: !this.state.snapToGrid }, () =>
+          this.setLayerPicker()
+        );
+      },
+      id: this.getUniqueID(),
+      isSetting: true
+    });
 
     if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
       var consoleRef = this.state.consoleStamp.ref.current;
@@ -1803,22 +1749,17 @@ pickerData.push({
           this.centerOnStamp(consoleRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(consoleRef),
         id: consoleRef.props.id,
-        isSetting:true
+        isSetting: true
       });
     }
 
-      this.setState({settingsPicker:pickerData})
+    this.setState({ settingsPicker: pickerData });
   }
 
-
-
   setLayerPicker() {
+    this.setSettingsPicker();
 
-    this.setSettingsPicker()
-
-    var pickerData = []
-
-
+    var pickerData = [];
 
     this.state.stampOrder.map(id => {
       if (id in this.state.stampRefs) {
@@ -1826,12 +1767,11 @@ pickerData.push({
         if (!stampRef) {
           return;
         }
-        if(stampRef.props.isBlob){
-var name = this.getFirstLine(stampRef.state.code);
-        }else{
-        var name = stampRef.state.name;
+        if (stampRef.props.isBlob) {
+          var name = this.getFirstLine(stampRef.state.code);
+        } else {
+          var name = stampRef.state.name;
         }
-
       }
 
       pickerData.push({
@@ -1842,8 +1782,8 @@ var name = this.getFirstLine(stampRef.state.code);
           this.centerOnStamp(stampRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(stampRef),
         id: stampRef.props.id,
-        isConsole:false,
-        hasError:Object.keys(stampRef.state.errorLines).length > 0
+        isConsole: false,
+        hasError: Object.keys(stampRef.state.errorLines).length > 0
       });
     });
 
@@ -1856,15 +1796,13 @@ var name = this.getFirstLine(stampRef.state.code);
     };
   }
 
-  getWorldData(){
-
+  getWorldData() {
     return {
-            worldKey:this.state.worldKey, 
-            worldPublishTime:this.state.worldPublishTime, 
-            worldEdited:this.state.worldEdited}
+      worldKey: this.state.worldKey,
+      worldPublishTime: this.state.worldPublishTime,
+      worldEdited: this.state.worldEdited
+    };
   }
-
-
 
   render() {
     if (this.state.consoleStamp) {
@@ -1873,39 +1811,33 @@ var name = this.getFirstLine(stampRef.state.code);
       var consoleElem = null;
     }
 
-
-
-  
-
-
     return (
       <div>
-       <ArcherContainer  strokeWidth={this.state.scale*2} >
-        <div class="row bg-grey" 
-        style={{ height: "100vh" }}>
-          <div
-            className="allStamps"
-            style={{
-              position: "absolute",
-              left: this.state.originX,
-              top: this.state.originY,
-              transform: "scale(" + this.state.scale+ ")"
-            }}
-          >
-           
-            {this.renderGridLines()}
-       
-           
 
-            {Object.values(this.state.stampElems)}
-      
-    
-            {consoleElem}
+        <ArcherContainer strokeWidth={this.state.scale * 2}>
+          <div
+            class="row bg-grey"
+            style={{ height: "100vh" }}
+          >
+
+            <div
+              className="allStamps"
+              style={{
+                position: "absolute",
+                left: this.state.originX,
+                top: this.state.originY,
+                transform: "scale(" + this.state.scale + ")"
+              }}
+            >
+                  {this.renderGridLines()}
+              {Object.values(this.state.stampElems)}
+
+              {consoleElem}
+            </div>
           </div>
-        </div>
         </ArcherContainer>
         <ControlBar
-        addManyStamps = {this.addManyStamps.bind(this)}
+          addManyStamps={this.addManyStamps.bind(this)}
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
@@ -1920,10 +1852,10 @@ var name = this.getFirstLine(stampRef.state.code);
           modalManagerRef={this.modalManagerRef}
           onDragEnd={this.onDragEnd.bind(this)}
           recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
-          getWorldData = {this.getWorldData.bind(this)}
-          settingsPicker = {this.state.settingsPicker}
-          deletedStamps = {this.state.deletedStamps}
-          undoDelete ={this.undoDelete.bind(this)}
+          getWorldData={this.getWorldData.bind(this)}
+          settingsPicker={this.state.settingsPicker}
+          deletedStamps={this.state.deletedStamps}
+          undoDelete={this.undoDelete.bind(this)}
         />
 
         <ModalManager
@@ -1934,9 +1866,8 @@ var name = this.getFirstLine(stampRef.state.code);
           getFileDict={this.getFileDict.bind(this)}
           addStamp={this.addStamp.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
-          getWorldData={this.getWorldData.bind(this) }
+          getWorldData={this.getWorldData.bind(this)}
           setWorldData={(data, callback) => this.setState(data, callback)}
-
         />
       </div>
     );

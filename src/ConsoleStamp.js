@@ -217,6 +217,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
 
     return (
       <Cristal
+             getLinesOn={this.props.getLinesOn}
                 getSnapMargin={this.props.getSnapMargin}
            zIndex={this.props.starterZIndex}
         getScale={this.props.getScale}
