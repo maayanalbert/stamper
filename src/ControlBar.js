@@ -314,7 +314,7 @@ function noiseWave() {
     var overalOpacity = 1;
     var centerCallback = item.centerCallback;
 
-    if (item.status === false) {
+    if (item.status === false && item.icon != globals.EmptyIcon) {
       overalOpacity = 0.5;
       centerCallback = () => null;
     }
@@ -322,6 +322,14 @@ function noiseWave() {
     if(!item.centerCallback){
       centerCallback = () => null
       iconNameCallback = null
+    }
+
+    if(item.icon === globals.EmptyIcon){
+
+      var iconType = globals.ExpandMoreIcon
+      if(item.status === false){
+        var iconType = globals.ExpandLessIcon
+      }
     }
 
 
@@ -332,7 +340,7 @@ function noiseWave() {
         class="d-flex justify-content-between p-1 pl-2 pr-3"
       >
         <div
-          clas="row border-bottom"
+          clas="row"
           style={{ overflow: "hidden", cursor: "auto" }}
           onClick={() =>
             centerCallback(this.state.sideBarWidth, this.topBarHeight)
@@ -349,7 +357,8 @@ function noiseWave() {
           {this.createIcon(
             "hide" + item.id.toString(),
             iconType,
-            item.hideCallback
+            item.hideCallback,
+
           )}
         </div>
       </div>
@@ -417,7 +426,11 @@ function noiseWave() {
 
     renderSettingsPickers(){
 
-      var pickers =  this.props.settingsPicker.map( item => (
+
+      var pickers =  this.props.settingsPicker.map( item => 
+
+
+        (
                   <div
               class="border-bottom border-borderGrey bg-grey"
             >
@@ -480,6 +493,7 @@ function noiseWave() {
   }
 
   createIcon(uniqueClass, iconType, hideCallback = null, text) {
+
     var mouseOverCallback = () => {
       $("." + uniqueClass + "Icon").css({ opacity: "1" });
       $("." + uniqueClass + "Text")

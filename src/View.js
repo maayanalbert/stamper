@@ -87,7 +87,8 @@ export default class View extends Component {
       setupLinesOn:false,
       fileLinesOn:false,
       listenerLinesOn:false,
-      settingsPicker:[]
+      settingsPicker:[],
+      settingsExpanded:false
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -311,7 +312,8 @@ export default class View extends Component {
       indexLinesOn:false,
       setupLinesOn:false,
       fileLinesOn:false,
-      listenerLinesOn:false
+      listenerLinesOn:false,
+            settingsExpanded:false
       },
       () => {
 
@@ -325,6 +327,7 @@ export default class View extends Component {
             worldKey:stamperObject.worldKey,
             worldEdited:stamperObject.worldEdited == true,
             worldPublishTime:stamperObject.worldPublishTime,
+                  settingsExpanded:stamperObject.settingsExpanded === true,
 
       snapToGrid:stamperObject.snapToGrid == true,
       jsLinesOn:stamperObject.jsLinesOn == true,
@@ -1457,7 +1460,8 @@ _stopLooping =setTimeout(() => {
       indexLinesOn:this.state.indexLinesOn,
       setupLinesOn:this.state.setupLinesOn,
       fileLinesOn:this.state.fileLinesOn,
-      listenerLinesOn:this.state.listenerLinesOn
+      listenerLinesOn:this.state.listenerLinesOn,
+      settingsExpanded:this.state.settingsExpanded
 
 
     };
@@ -1589,7 +1593,7 @@ _stopLooping =setTimeout(() => {
     }
 
 window.postMessage({type:"edited"}, '*')
-    if(result.source.index === 0 || result.destination.index === 0){return}
+  
     var stampOrder = Object.assign([], this.state.stampOrder)
 
     const [removed] = stampOrder.splice(result.source.index, 1);
@@ -1663,7 +1667,31 @@ window.postMessage({type:"edited"}, '*')
 
   setSettingsPicker(){
     var pickerData = [];
+    var envTitle = "show env settings"
+    if(this.state.settingsExpanded){
+      envTitle = "hide env settings"
+    }
+      pickerData.push({
+        name: envTitle,
+        status: !this.state.settingsExpanded,
+        icon: globals.EmptyIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({settingsExpanded:!this.state.settingsExpanded}, () => {
+            this.setLayerPicker()
+  
+          })
+        },
+        id: this.getUniqueID(),
+        isSetting:true
+      });
 
+
+      if(this.state.settingsExpanded === false){
+        this.setState({settingsPicker:pickerData})
+        return
+      }
 
       pickerData.push({
         name: "javascript lines",
@@ -1716,7 +1744,7 @@ window.postMessage({type:"edited"}, '*')
       });
 
 
-      pickerData.push({
+       pickerData.push({
         name: "p5 lines",
         status: this.state.setupLinesOn && this.state.indexLinesOn,
         icon: globals.LinesIcon,

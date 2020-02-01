@@ -15,6 +15,7 @@ import ClearConsoleIcon from "./icons/rotate-ccw.svg";
 import CodeSizeIcon from "./icons/type.svg";
 import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
 
+import ExpandLessIcon from "./icons/chevron-up.svg";
 import ExpandMoreIcon from "./icons/chevron-down.svg";
 import DownloadIcon from "./icons/download.svg";
 import UploadIcon from "./icons/upload.svg";
@@ -26,8 +27,11 @@ import PermanentWorldIcon from "./icons/star.svg";
 
 import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
+import EmptyIcon from "./icons/empty.svg";
 
 export const globals = {
+  ExpandLessIcon:ExpandLessIcon,
+  EmptyIcon:EmptyIcon,
   GridIcon:GridIcon,
   LinesIcon:LinesIcon,
   ConsoleStampIcon:ConsoleStampIcon, 
