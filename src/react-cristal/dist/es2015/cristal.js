@@ -23,11 +23,8 @@ import {
 } from "./utils";
 import { Stacker } from "./stacker";
 import styled from "styled-components";
-import DeleteStampIcon from "./../../../icons/trash.svg";
-import CopyIcon from "./../../../icons/copy.svg";
-import ClearConsoleIcon from "./../../../icons/rotate-ccw.svg";
-import CodeSizeIcon from "./../../../icons/type.svg";
-import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
+
+
 import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
@@ -35,6 +32,7 @@ import pf, { globals, p5Lib } from "./../../../globals.js";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import { ArcherContainer, ArcherElement } from "react-archer";
+
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -694,7 +692,7 @@ var Cristal = (function(_super) {
 
       var closeBtn = createIcon(
         this,
-        DeleteStampIcon,
+        globals.DeleteStampIcon,
         closeHidden,
         "mouseOnClose",
         onClose,
@@ -702,7 +700,7 @@ var Cristal = (function(_super) {
       );
       var copyBtn = createIcon(
         this,
-        CopyIcon,
+        globals.CopyIcon,
         copyHidden,
         "mouseOnCopy",
         onCopy,
@@ -710,7 +708,7 @@ var Cristal = (function(_super) {
       );
       var clearBtn = createIcon(
         this,
-        ClearConsoleIcon,
+        globals.ClearConsoleIcon,
         !_a.showClear,
         "mousOnClear",
         _a.onClear,
@@ -720,7 +718,7 @@ var Cristal = (function(_super) {
       if (_a.onMinimize) {
         var minimizeBtn = createIcon(
           this,
-          MinimzeIcon,
+          globals.MinimzeIcon,
           _a.onMinimize === null,
           "mouseOnMinimize",
           _a.onMinimize
@@ -734,7 +732,7 @@ var Cristal = (function(_super) {
 
       var makeBigIcon = createIcon(
         this,
-        CodeSizeIcon,
+        globals.CodeSizeIcon,
         !_a.showCodeSize,
         "mouseOnBig",
         _a.onCodeSize,

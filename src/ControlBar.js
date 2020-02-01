@@ -12,23 +12,9 @@ import parser from "./parser.js";
 import anim from "css-animation";
 import { Resizable, ResizableBox } from "react-resizable";
 import styled from "styled-components";
-import VisibilityIcon from "./icons/eye.svg";
-import VisibilityOffIcon from "./icons/eye-off.svg";
 
-import FunctionStampIcon from "./icons/box.svg";
-import BuiltInStampIcon from "./icons/tool.svg";
-import ListenerStampIcon from "./icons/bell.svg";
-import BlobStampIcon from "./icons/code.svg";
-import ExpandMoreIcon from "./icons/chevron-down.svg";
-import DownloadIcon from "./icons/download.svg";
-import UploadIcon from "./icons/upload.svg";
-import WorldsIcon from "./icons/archive.svg";
-import GlobalVarIcon from "./icons/globe.svg";
-import CommentIcon from "./icons/message-square.svg";
-import FileStampIcon from "./icons/file.svg";
-import ImageStampIcon from "./icons/image.svg";
-import InfoIcon from "./icons/info.svg";
-import PermanentWorldIcon from "./icons/star.svg";
+
+
 
 import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -42,7 +28,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 import Modal from "react-bootstrap/Modal";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import ConsoleStampIcon from "./icons/message-circle.svg";
+
 
 import pf1, {
   normalFn,
@@ -317,11 +303,11 @@ function noiseWave() {
 
   renderPicker(item) {
     if (item.status) {
-      var iconType = VisibilityIcon;
+      var iconType = globals.VisibilityIcon;
       var iconNameCallback = () =>
         centerCallback(this.state.sideBarWidth, this.topBarHeight);
     } else {
-      var iconType = VisibilityOffIcon;
+      var iconType = globals.VisibilityOffIcon;
       var iconNameCallback = null;
     }
 
@@ -332,6 +318,13 @@ function noiseWave() {
       overalOpacity = 0.5;
       centerCallback = () => null;
     }
+
+    if(!item.centerCallback){
+      centerCallback = () => null
+      iconNameCallback = null
+    }
+
+
 
     return (
       <div
@@ -370,22 +363,15 @@ function noiseWave() {
       overflowY = "scroll";
     }
 
+
+
     this.props.pickerData.map((item, index) => {
 
-      if(item.isConsole){
+
+ 
       pickers.push(
-
-
-            <div
-              class="border-bottom border-borderGrey bg-grey"
-            >
-              {this.renderPicker(item)}
-
-            </div>
-      )
-
-      }else{
-      pickers.push(
+     
+  
         <Draggable draggableId={item.id.toString()} index={index}>
           {(provided, snapshot) => (
             <div
@@ -398,26 +384,29 @@ function noiseWave() {
             </div>
           )}
         </Draggable>
+   
       )
-    }
+    
     
 
 
 
     });
 
+
     return (
+
       <div
         className=" bg-white"
         style={{
-          overflow: "hidden",
           "overflow-y": overflowY,
           width: this.state.sideBarWidth,
-          height: this.state.pickerHeight
+          flexGrow:1
         }}
         ref={provided.innerRef}
         {...provided.droppableProps}
       >
+
         {pickers}
         {provided.placeholder}
         <br />
@@ -425,6 +414,28 @@ function noiseWave() {
       </div>
     );
   }
+
+    renderSettingsPickers(){
+
+      var pickers =  this.props.settingsPicker.map( item => (
+                  <div
+              class="border-bottom border-borderGrey bg-grey"
+            >
+              {this.renderPicker(item)}
+
+            </div>))
+
+
+
+      return (<div class="bg-white  border-bottom border-borderGrey shadow-sm" style={{zIndex:2}}>
+        {pickers}
+        </div>
+
+        )
+
+    }
+
+    
 
   renderLayerPicker() {
     return (
@@ -455,7 +466,9 @@ function noiseWave() {
         axis="y"
         handle={this.renderPickerResizeHandle()}
       >
-        <div>
+        <div      style= {{    overflow: "hidden", flexFlow:"column", display:"flex",
+          height: this.state.pickerHeight}}>
+        {this.renderSettingsPickers()}
           <DragDropContext onDragEnd={this.props.onDragEnd}>
             <Droppable droppableId="droppable">
               {this.renderPickers.bind(this)}
@@ -581,7 +594,7 @@ function noiseWave() {
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
-            iconType={UploadIcon}
+            iconType={globals.UploadIcon}
             uniqueClass="upload"
             iconCallback={() => {
               this.props.modalManagerRef.current.requestUpload();
@@ -593,7 +606,7 @@ function noiseWave() {
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
-            iconType={DownloadIcon}
+            iconType={globals.DownloadIcon}
             uniqueClass="download p5 sketch"
             iconCallback={() => {
               this.props.modalManagerRef.current.requestDownload();
@@ -606,7 +619,7 @@ function noiseWave() {
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
-            iconType={FunctionStampIcon}
+            iconType={globals.FunctionStampIcon}
             uniqueClass="basic"
             iconCallback={() =>
               this.props.addStamp(normalFn, id => {
@@ -618,7 +631,7 @@ function noiseWave() {
             dropDownData={builtInFns
               .map(data => ({
                 name: data.name,
-                icon: BuiltInStampIcon,
+                icon: globals.BuiltInStampIcon,
                 callback: () =>
                   this.props.addStamp(data, id => {
               this.props.requestCompile(id)
@@ -630,7 +643,7 @@ function noiseWave() {
               .concat(
                 listenerFns.map(data => ({
                   name: data.name,
-                  icon: ListenerStampIcon,
+                  icon: globals.ListenerStampIcon,
                   callback: () =>
                     this.props.addStamp(data, id =>
                       {
@@ -647,7 +660,7 @@ function noiseWave() {
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
-            iconType={BlobStampIcon}
+            iconType={globals.BlobStampIcon}
             uniqueClass="varStamp"
             iconCallback={() =>
               this.props.addStamp(starterBlobs[0].data, id => {
@@ -657,7 +670,7 @@ function noiseWave() {
             }
             dropDownData={starterBlobs.map(starterBlob => ({
               name:starterBlob.name,
-              icon:BlobStampIcon,
+              icon:globals.BlobStampIcon,
               callback:() => 
                       this.props.addStamp(starterBlob.data, id =>
                       {
@@ -674,16 +687,16 @@ function noiseWave() {
           <TopButton
                       disablePan={this.props.disablePan}
             disableZoom={this.props.disableZoom}
-            iconType={FileStampIcon}
+            iconType={globals.FileStampIcon}
             uniqueClass="fileStamp"
             iconCallback={() =>
  this.props.modalManagerRef.current.requestFileUpload("text")
             }
             tooltipText="file"
             dropDownData={
-              [{name:"upload files", icon:FileStampIcon, callback:() =>
+              [{name:"upload files", icon:globals.FileStampIcon, callback:() =>
               this.props.modalManagerRef.current.requestFileUpload("text") },
-              {name:"new file", icon:FileStampIcon, callback:() =>
+              {name:"new file", icon:globals.FileStampIcon, callback:() =>
               this.props.addStamp(sampleFile, id =>
                 {
               this.props.requestCompile(id)
@@ -695,7 +708,7 @@ function noiseWave() {
 
           <span style={{ width: this.spanWidth }} />
           <TopButton
-            iconType={ImageStampIcon}
+            iconType={globals.ImageStampIcon}
             uniqueClass="imageStamp"
             iconCallback={() =>
               this.props.modalManagerRef.current.requestFileUpload()
@@ -711,7 +724,7 @@ function noiseWave() {
 
         >
           <TopButton
-            iconType={WorldsIcon}
+            iconType={globals.WorldsIcon}
             uniqueClass="worlds"
             iconCallback={null}
             dropDownData={this.state.worldDropDowns}
@@ -734,14 +747,14 @@ function noiseWave() {
               [{
                 name:"publish current sketch",
                 callback:() => this.props.modalManagerRef.current.requestPublish(),
-                icon:UploadIcon
+                icon:globals.UploadIcon
               }]
 
 
       dropDownData.push({
         name: "get current example info",
         callback:() => this.props.modalManagerRef.current.requestPublishInfo(),
-        icon: InfoIcon
+        icon: globals.InfoIcon
       })
 
       if(ipc){
@@ -815,7 +828,7 @@ class TopButton extends Component {
         () => {
           if (
             this.state.down === false ||
-            (iconType != ExpandMoreIcon && this.props.iconCallback)
+            (iconType != globals.ExpandMoreIcon && this.props.iconCallback)
           ) {
             $("." + uniqueClass).css({ opacity: globals.iconOpacity });
           }
@@ -995,7 +1008,7 @@ class TopButton extends Component {
     var expandButton = null;
     if (this.props.dropDownData) {
       expandButton = this.createIcon(
-        ExpandMoreIcon,
+        globals.ExpandMoreIcon,
         () => this.setState({ down: !this.state.down }),
         this.props.uniqueClass + "expand",
         16

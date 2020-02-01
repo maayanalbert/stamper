@@ -5,7 +5,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 import { Hook, Console, Decode } from "console-feed";
-import ConsoleStampIcon from "./icons/message-circle.svg";
+
 
 var _ = require("lodash");
 
@@ -63,7 +63,7 @@ export default class ConsoleStamp extends Component {
   }
 
   getIcon() {
-    return ConsoleStampIcon;
+    return globals.ConsoleStampIcon;
   }
 
   toggleHide(callback) {

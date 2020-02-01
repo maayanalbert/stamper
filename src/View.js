@@ -22,6 +22,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LZUTF8 from "lzutf8";
 
+
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-css";
 import "ace-builds/src-noconflict/mode-html";
@@ -75,15 +76,18 @@ export default class View extends Component {
       downKey: -1,
       panDisabled: false,
       stampOrder:[],
-      snapToGrid:false,
+
       worldKey:null,
       worldPublishTime:null,
       worldEdited:false,
-      jsLinesOn:true,
+
+      snapToGrid:false,
+      jsLinesOn:false,
       indexLinesOn:false,
       setupLinesOn:false,
       fileLinesOn:false,
-      listenerLinesOn:false
+      listenerLinesOn:false,
+      settingsPicker:[]
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -300,9 +304,17 @@ export default class View extends Component {
 
       worldKey:null,
       worldEdited:false,
-      worldPublishTime:null
+      worldPublishTime:null,
+
+      snapToGrid:false,
+      jsLinesOn:false,
+      indexLinesOn:false,
+      setupLinesOn:false,
+      fileLinesOn:false,
+      listenerLinesOn:false
       },
       () => {
+
 
         this.setState(
           {
@@ -311,8 +323,15 @@ export default class View extends Component {
             originY: stamperObject.originY,
 
             worldKey:stamperObject.worldKey,
-            worldEdited:stamperObject.worldEdited,
-            worldPublishTime:stamperObject.worldPublishTime
+            worldEdited:stamperObject.worldEdited == true,
+            worldPublishTime:stamperObject.worldPublishTime,
+
+      snapToGrid:stamperObject.snapToGrid == true,
+      jsLinesOn:stamperObject.jsLinesOn == true,
+      indexLinesOn:stamperObject.indexLinesOn == true,
+      setupLinesOn:stamperObject.setupLinesOn == true,
+      fileLinesOn:stamperObject.fileLinesOn == true,
+      listenerLinesOn:stamperObject.listenerLinesOn == true
           },
           () => {
 
@@ -1432,7 +1451,15 @@ _stopLooping =setTimeout(() => {
       originY: this.state.originY,
       worldKey:this.state.worldKey,
       worldEdited:this.state.worldEdited,
-      worldPublishTime:this.state.worldPublishTime
+      worldPublishTime:this.state.worldPublishTime,
+      snapToGrid:this.state.snapToGrid,
+      jsLinesOn:this.state.jsLinesOn,
+      indexLinesOn:this.state.indexLinesOn,
+      setupLinesOn:this.state.setupLinesOn,
+      fileLinesOn:this.state.fileLinesOn,
+      listenerLinesOn:this.state.listenerLinesOn
+
+
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1565,8 +1592,8 @@ window.postMessage({type:"edited"}, '*')
     if(result.source.index === 0 || result.destination.index === 0){return}
     var stampOrder = Object.assign([], this.state.stampOrder)
 
-    const [removed] = stampOrder.splice(result.source.index-1, 1);
-    stampOrder.splice(result.destination.index-1, 0, removed);
+    const [removed] = stampOrder.splice(result.source.index, 1);
+    stampOrder.splice(result.destination.index, 0, removed);
 
 
 
@@ -1634,11 +1661,90 @@ window.postMessage({type:"edited"}, '*')
   }
 
 
-
-  setLayerPicker() {
-
-
+  setSettingsPicker(){
     var pickerData = [];
+
+
+      pickerData.push({
+        name: "javascript lines",
+        status: this.state.jsLinesOn,
+        icon: globals.LinesIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({jsLinesOn:!this.state.jsLinesOn}, () => {
+            this.setLayerPicker()
+            this.updateLineData()
+          })
+        },
+        id: this.getUniqueID(),
+        isSetting:true
+      });
+
+      pickerData.push({
+        name: "file lines",
+        status: this.state.fileLinesOn,
+        icon: globals.LinesIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({fileLinesOn:!this.state.fileLinesOn}, () => {
+            this.setLayerPicker()
+            this.updateLineData()
+          })
+        },
+
+        id: this.getUniqueID(),
+        isSetting:true
+      });
+
+      pickerData.push({
+        name: "listener lines",
+        status: this.state.listenerLinesOn,
+        icon: globals.LinesIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({listenerLinesOn:!this.state.listenerLinesOn}, () => {
+            this.setLayerPicker()
+            this.updateLineData()
+          })
+        },
+
+        id: this.getUniqueID(),
+        isSetting:true
+      });
+
+
+      pickerData.push({
+        name: "p5 lines",
+        status: this.state.setupLinesOn && this.state.indexLinesOn,
+        icon: globals.LinesIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({indexLinesOn:!this.state.indexLinesOn, setupLinesOn:!this.state.setupLinesOn}, () => {
+            this.setLayerPicker()
+            this.updateLineData()
+          })
+        },
+
+        id: this.getUniqueID(),
+        isSetting:true
+      });
+
+      pickerData.push({
+        name: "snap to grid",
+        status: this.state.snapToGrid,
+        icon: globals.GridIcon,
+ 
+        hideCallback: () => 
+        {
+          this.setState({snapToGrid:!this.state.snapToGrid}, () => this.setLayerPicker())
+        },
+        id: this.getUniqueID(),
+        isSetting:true
+      });
 
     if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
       var consoleRef = this.state.consoleStamp.ref.current;
@@ -1650,9 +1756,22 @@ window.postMessage({type:"edited"}, '*')
           this.centerOnStamp(consoleRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(consoleRef),
         id: consoleRef.props.id,
-        isConsole:true
+        isSetting:true
       });
     }
+
+      this.setState({settingsPicker:pickerData})
+  }
+
+
+
+  setLayerPicker() {
+
+    this.setSettingsPicker()
+
+    var pickerData = []
+
+
 
     this.state.stampOrder.map(id => {
       if (id in this.state.stampRefs) {
@@ -1749,6 +1868,7 @@ var name = this.getFirstLine(stampRef.state.code);
           onDragEnd={this.onDragEnd.bind(this)}
           recompileIfEnoughStamps={this.recompileIfEnoughStamps.bind(this)}
           getWorldData = {this.getWorldData.bind(this)}
+          settingsPicker = {this.state.settingsPicker}
         />
 
         <ModalManager
@@ -1761,6 +1881,7 @@ var name = this.getFirstLine(stampRef.state.code);
           requestCompile={this.requestCompile.bind(this)}
           getWorldData={this.getWorldData.bind(this) }
           setWorldData={(data, callback) => this.setState(data, callback)}
+
         />
       </div>
     );

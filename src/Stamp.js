@@ -5,14 +5,7 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-import FunctionStampIcon from "./icons/box.svg";
-import FileStampIcon from "./icons/file.svg";
-import HtmlStampIcon from "./icons/layout.svg";
-import BuiltInStampIcon from "./icons/tool.svg";
-import ListenerStampIcon from "./icons/bell.svg";
-import ImageStampIcon from "./icons/image.svg";
-import BlobStampIcon from "./icons/code.svg";
-import MediaAssetIcon from "./icons/layers-light.svg";
+
 import { ArcherContainer, ArcherElement } from 'react-archer';
 
 import "./theme-p5.js";
@@ -550,7 +543,7 @@ nameColor = "pink";
       style:  {width: 100, 
         height: 100,
         opacity:.5 },
-      src: MediaAssetIcon
+      src: globals.MediaAssetIcon
     })}
       </div>
       )
@@ -773,20 +766,20 @@ nameColor = "pink";
   }
 
   getIcon() {
-    var icon = FunctionStampIcon;
+    var icon = globals.FunctionStampIcon;
     if (this.props.isIndex) {
-      icon = HtmlStampIcon;
+      icon = globals.HtmlStampIcon;
     } else if (this.props.isBlob) {
-      icon = BlobStampIcon;
+      icon = globals.BlobStampIcon;
     } else if (this.props.isTxtFile) {
-      icon = FileStampIcon;
+      icon = globals.FileStampIcon;
     } else if (this.props.isMediaFile) {
-      icon = ImageStampIcon;
+      icon = globals.ImageStampIcon;
     } else if (this.state.isSpecialFn) {
       if (globals.specialFns[this.state.name]) {
-        icon = BuiltInStampIcon;
+        icon =globals.BuiltInStampIcon;
       } else {
-        icon = ListenerStampIcon;
+        icon = globals.ListenerStampIcon;
       }
     }
 

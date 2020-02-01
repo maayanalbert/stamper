@@ -1,4 +1,59 @@
+import GridIcon from "./icons/grid.svg";
+import LinesIcon from "./icons/git-commit.svg";
+import ConsoleStampIcon from "./icons/message-circle.svg";
+import FunctionStampIcon from "./icons/box.svg";
+import FileStampIcon from "./icons/file.svg";
+import HtmlStampIcon from "./icons/layout.svg";
+import BuiltInStampIcon from "./icons/tool.svg";
+import ListenerStampIcon from "./icons/bell.svg";
+import ImageStampIcon from "./icons/image.svg";
+import BlobStampIcon from "./icons/code.svg";
+import MediaAssetIcon from "./icons/layers-light.svg";
+import DeleteStampIcon from "./icons/trash.svg";
+import CopyIcon from "./icons/copy.svg";
+import ClearConsoleIcon from "./icons/rotate-ccw.svg";
+import CodeSizeIcon from "./icons/type.svg";
+import MinimzeIcon from "@material-ui/icons/MinimizeOutlined";
+
+import ExpandMoreIcon from "./icons/chevron-down.svg";
+import DownloadIcon from "./icons/download.svg";
+import UploadIcon from "./icons/upload.svg";
+import WorldsIcon from "./icons/archive.svg";
+import GlobalVarIcon from "./icons/globe.svg";
+import CommentIcon from "./icons/message-square.svg";
+import InfoIcon from "./icons/info.svg";
+import PermanentWorldIcon from "./icons/star.svg";
+
+import VisibilityIcon from "./icons/eye.svg";
+import VisibilityOffIcon from "./icons/eye-off.svg";
+
 export const globals = {
+  GridIcon:GridIcon,
+  LinesIcon:LinesIcon,
+  ConsoleStampIcon:ConsoleStampIcon, 
+  FunctionStampIcon:FunctionStampIcon,
+  FileStampIcon:FileStampIcon,
+  HtmlStampIcon:HtmlStampIcon, 
+  BuiltInStampIcon:BuiltInStampIcon,
+  ListenerStampIcon:ListenerStampIcon,
+  ImageStampIcon:ImageStampIcon,
+  BlobStampIcon:BlobStampIcon, 
+  MediaAssetIcon:MediaAssetIcon,
+  DeleteStampIcon:DeleteStampIcon, 
+  CopyIcon:CopyIcon, 
+  ClearConsoleIcon:ClearConsoleIcon,
+  ExpandMoreIcon:ExpandMoreIcon,
+  DownloadIcon:DownloadIcon,
+  UploadIcon:UploadIcon,
+  WorldsIcon:WorldsIcon,
+  GlobalVarIcon:GlobalVarIcon,
+  CommentIcon:CommentIcon,
+  InfoIcon:InfoIcon,
+  PermanentWorldIcon:PermanentWorldIcon,
+  CodeSizeIcon:CodeSizeIcon,
+  MinimzeIcon:MinimzeIcon,
+  VisibilityIcon:VisibilityIcon,
+  VisibilityOffIcon:VisibilityOffIcon,
   defaultEditorWidth: 225,
   defaultVarEditorHeight: 200,
   defaultEditorHeight:200,
