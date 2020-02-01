@@ -1554,7 +1554,7 @@ _stopLooping =setTimeout(() => {
       stamp.setIframeDisabled(true);
     }
 
-
+    this.setState({actualLinesOn:this.state.linesOn}) 
   }
 
   onStopZoom(){
@@ -1865,6 +1865,7 @@ var name = this.getFirstLine(stampRef.state.code);
   }
 
 
+
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1872,6 +1873,9 @@ var name = this.getFirstLine(stampRef.state.code);
       var consoleElem = null;
     }
 
+
+
+  
 
 
     return (
