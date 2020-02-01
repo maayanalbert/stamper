@@ -88,6 +88,7 @@ export default class View extends Component {
       fileLinesOn:false,
       listenerLinesOn:false,
       settingsPicker:[],
+      lineData:[]
 
     };
     this.counterMutex = new Mutex();
@@ -691,7 +692,7 @@ function logToConsole(message, lineno){
         starterArgs={data.args}
         starterName={data.name}
         errorLines={{}}
-        updateLineData={this.updateLineData.bind(this)}
+        setLineData={this.setLineData.bind(this)}
         starterEditorWidth={data.editorWidth}
         starterEditorHeight={data.editorHeight}
         initialPosition={{ x: data.x, y: data.y }}
@@ -810,20 +811,27 @@ callback(id)
     return fileDict
   }
 
-  updateLineData(id){
-    var lineData = this.getLineData()
+  setLineData(id){
 
-    this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id]
-      var stampRef = stamp.current;
-      stampRef.setLineData(lineData.filter(line => line.start === id));
-  
-    });
+    var lineData = this.getLineData()
+    this.setState({lineData:lineData}, () => this.supplyLineData())
+
+ 
 
   }
 
+  supplyLineData(){
+      this.state.stampOrder.map(id => {
+      var stamp = this.state.stampRefs[id]
+      var stampRef = stamp.current;
+      stampRef.setLineData(this.state.lineData.filter(line => line.start === id));
+  
+    });
+  
+  }
+
   requestCompile(id) {
-    this.updateLineData(id)
+    this.setLineData(id)
  
 
     this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
@@ -1066,16 +1074,38 @@ callback(id)
       }
     });
 
+    var lineDict = {}
+
+
+
     undeclaredArr.map(undeclaredItem => {
       var variable = undeclaredItem.variable;
       var usingID = undeclaredItem.id;
       var declaringID = declaredDict[variable];
+  
 
       if (declaringID && usingID && this.isFnStamp(usingID)) {
-        lineData.push({end:usingID, start:declaringID,  type:"js", label:this.getLabel("", "js"),
-            style:this.getLineStyle("js")});
+
+        if(!(usingID + "_" + declaringID in lineDict)){
+          lineDict[usingID + "_" + declaringID] = []
+        }
+        lineDict[usingID + "_" + declaringID].push(variable)
+         
+
       }
     }); 
+
+  
+    var lineData = Object.keys(lineDict).map(lineKey => {
+
+        return {end:lineKey.split("_")[0], start:lineKey.split("_")[1],  type:"js", label:this.getLineLabel(lineDict[lineKey].join(", "), "js"),
+            style:this.getLineStyle("js")};
+      }
+
+    )
+
+
+
 
     return lineData  
   }
@@ -1101,7 +1131,7 @@ callback(id)
         return
       }
       listenerIDs.map(listenerID => {
-        lineData.push({ end:id,start:listenerID, type:"listener", label:this.getLabel("", "listener"),
+        lineData.push({ end:id,start:listenerID, type:"listener", label:this.getLineLabel(this.state.stampRefs[listenerID].current.state.name, "listener"),
             style:this.getLineStyle("listener")})
       })
 
@@ -1126,7 +1156,7 @@ callback(id)
     if(setupID){
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id) && setupID != id){
-          lineData.push({end:id, start:setupID, type:"setup", label:this.getLabel("", "setup"),
+          lineData.push({end:id, start:setupID, type:"setup", label:this.getLineLabel("setup", "setup"),
             style:this.getLineStyle("setup")})
         }
       })      
@@ -1155,7 +1185,7 @@ callback(id)
       }
       this.state.stampOrder.map(id => {
         if(this.isFnStamp(id)){
-          lineData.push({start:indexID, end:id, type:"index", label:this.getLabel("", "index"),
+          lineData.push({start:indexID, end:id, type:"index", label:this.getLineLabel("index", "index"),
             style:this.getLineStyle("index")})
         }
       })      
@@ -1172,13 +1202,12 @@ callback(id)
 
 
 
-  getLabel(text, type){
-    var color
-    if(type === "file"){
-      color = "text-htmlCssName"
-    }
+  getLineLabel(text, type){
+  
+
     var label = (
-       <div className={color + " picker bg-grey"} style={{transform:"scale(" + 1+ ")"}}>
+       <div className={"name rounded p-2"} style={{transform:"scale(" + this.state.scale*.8+ ")", color:this.getLineColor(type),
+       backgroundColor:"transparent" }}>
             {text}
             </div>)
 
@@ -1186,23 +1215,27 @@ callback(id)
 
   }
 
-  getLineColor(type){
+  getLineColor(type, seeThru = false){
+    var opacity = "1"
+    if(seeThru){
+      opacity = ".2"
+    }
      if(type === "file"){
-      return "rgba(140,154, 53, .2)"
+      return "rgba(140,154, 53, "+opacity+")"
     }else if(type === "js"){
-      return "rgba(70,160,206, .2)"
+      return "rgba(70,160,206, "+opacity+")"
     }else if(type === "listener"){
-      return "rgba(218,16,96, .2)"
+      return "rgba(218,16,96, "+opacity+")"
     }else if(type === "setup" ){
-      return "rgba(175,175,175, .2)"
+      return "rgba(175,175,175, "+opacity+")"
     }else if(type === "index"){
-      return "rgba(175,175,175, .2)"
+      return "rgba(175,175,175, "+opacity+")"
     }   
   }
 
   getLineStyle(type){
   
-    var strokeColor = this.getLineColor(type)
+    var strokeColor = this.getLineColor(type, true)
         var style = {strokeColor:strokeColor, strokeWidth:15*this.state.scale, arrowLength:2.5, 
           arrowThickness:2.5}
     return style
@@ -1225,7 +1258,7 @@ callback(id)
       var stampRef = this.state.stampRefs[id].current
       Object.keys(fileIdDict).map(fileName => {
         if(this.fileIsReferenced(stampRef.state.code, fileName)){
-          lineData.push({end:id, start:fileIdDict[fileName], type:"file", label:this.getLabel("", "file"),
+          lineData.push({end:id, start:fileIdDict[fileName], type:"file", label:this.getLineLabel(fileName, "file"),
             style:this.getLineStyle("file")
 
 
@@ -1494,7 +1527,8 @@ _stopLooping =setTimeout(() => {
   }
 
   onStopMove(s) {
-    this.updateLineData()
+
+   
     this.setState({ mouseWheelTimeout: null });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1551,7 +1585,7 @@ _stopLooping =setTimeout(() => {
 
   toggleHide(stampRef) {
     stampRef.toggleHide(() => {
-      this.updateLineData()
+      this.setLineData()
       this.setLayerPicker()
     })
 
@@ -1691,7 +1725,7 @@ pickerData.push({
             listenerLinesOn:!this.state.listenerLinesOn,
             fileLinesOn:!this.state.fileLinesOn}, () => {
             this.setLayerPicker()
-            this.updateLineData()
+            this.setLineData()
           })
         },
 

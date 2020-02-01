@@ -848,7 +848,7 @@ nameColor = "pink";
           onZChange={s => 
 
             {
-            this.setState({ zIndex: s.zIndex }, () =>   this.props.updateLineData())
+            this.setState({ zIndex: s.zIndex }, () =>   this.props.setLineData())
           
             }}
 
