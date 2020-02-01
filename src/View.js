@@ -214,9 +214,17 @@ export default class View extends Component {
     if (this.state.mouseWheelTimeout) {
       clearTimeout(this.state.mouseWheelTimeout);
     } else {
-      this.onStartMove();
+      if(e.ctrlKey){
+      this.onStartZoom();
+
+      }else{
+        this.onStartMove()
+        var newTimeOut = setTimeout(this.onStopZoom.bind(this), 250);
+      }
+
     }
-    var newTimeOut = setTimeout(this.onStopMove.bind(this), 250);
+
+      var newTimeOut = setTimeout(this.onStopZoom.bind(this), 250);
     this.setState({ mouseWheelTimeout: newTimeOut });
 
     if (e.ctrlKey) {
@@ -1515,6 +1523,12 @@ _stopLooping =setTimeout(() => {
   }
 
 
+  onStartZoom(){
+    this.setState({jsLinesOn:false, indexLinesOn:false, setupLinesOn:false, fileLinesOn:false, listenerLinesOn:false}, 
+      () => this.setLineData())
+    this.onStopMove()
+  }
+
   onStartMove() {
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1526,9 +1540,15 @@ _stopLooping =setTimeout(() => {
 
   }
 
+  onStopZoom(s){
+    this.setState({jsLinesOn:true, indexLinesOn:true, setupLinesOn:true, fileLinesOn:true, listenerLinesOn:true}, 
+      () => this.setLineData())
+    this.onStopMove(s)
+  }
+
   onStopMove(s) {
 
-   
+    this.supplyLineData()
     this.setState({ mouseWheelTimeout: null });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1575,7 +1595,12 @@ _stopLooping =setTimeout(() => {
 
   manualPan(xDiff, yDiff) {
     $(".allStamps").css({ transition: "all .5s ease" });
-    setTimeout(() => $(".allStamps").css({ transition: "" }), 500);
+    this.onStartZoom()
+    setTimeout(() => {
+
+      $(".allStamps").css({ transition: "" })
+      this.onStopZoom()
+    }, 500);
     window.postMessage({type:"edited"}, '*');
     this.setState({
       originX: this.state.originX + xDiff,
@@ -1585,7 +1610,7 @@ _stopLooping =setTimeout(() => {
 
   toggleHide(stampRef) {
     stampRef.toggleHide(() => {
-      this.setLineData()
+      this.supplyLineData()
       this.setLayerPicker()
     })
 
