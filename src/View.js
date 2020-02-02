@@ -106,7 +106,7 @@ export default class View extends Component {
     this.minus = 189;
     this.zero = 48;
     this.g = 71;
-    this.l = 76
+    this.l = 76;
     this.shft = 16;
   }
 
@@ -123,19 +123,28 @@ export default class View extends Component {
 
     ipc &&
       ipc.on("zoomIn", () => {
-        this.zoom(this.state.scale * 2, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(
+          this.state.scale * 2,
+          centerX,
+          centerY,
+          this.setLineData.bind(this)
+        );
       });
 
     ipc &&
       ipc.on("zoomOut", () => {
-        this.zoom(this.state.scale * 0.5, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(
+          this.state.scale * 0.5,
+          centerX,
+          centerY,
+          this.setLineData.bind(this)
+        );
       });
 
     ipc &&
       ipc.on("zoomActual", () => {
         this.zoom(1, centerX, centerY, this.setLineData.bind(this));
       });
-
   }
 
   componentWillUnmount() {
@@ -160,17 +169,27 @@ export default class View extends Component {
         this.zoom(1, centerX, centerY, this.setLineData.bind(this));
       } else if (e.keyCode === this.plus) {
         e.preventDefault();
-        this.zoom(this.state.scale * 2, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(
+          this.state.scale * 2,
+          centerX,
+          centerY,
+          this.setLineData.bind(this)
+        );
       } else if (e.keyCode === this.minus) {
         e.preventDefault();
-        this.zoom(this.state.scale * 0.5, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(
+          this.state.scale * 0.5,
+          centerX,
+          centerY,
+          this.setLineData.bind(this)
+        );
       }
     } else if (this.state.downKey === this.shft) {
       if (e.keyCode === this.g) {
         var snapToGrid = this.state.snapToGrid;
         this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
-      }else if(e.keyCode === this.l){
-          this.setState({ linesOn: !this.state.linesOn }, () => {
+      } else if (e.keyCode === this.l) {
+        this.setState({ linesOn: !this.state.linesOn }, () => {
           this.setLayerPicker();
           this.setLineData();
         });
@@ -201,15 +220,11 @@ export default class View extends Component {
   }
 
   onWheel(e) {
-    var newTimeOut = setTimeout(s => this.onStopZoom(), 250);
+    var newTimeOut = setTimeout(s => this.onStopMove(), 250);
     if (this.state.mouseWheelTimeout) {
       clearTimeout(this.state.mouseWheelTimeout);
     } else {
-      if (e.ctrlKey) {
-        this.onStartZoom();
-      } else {
-        this.onStartMove();
-      }
+      this.onStartMove();
     }
 
     this.setState({ mouseWheelTimeout: newTimeOut });
@@ -235,7 +250,6 @@ export default class View extends Component {
   }
 
   zoom(newScale, mouseX, mouseY, callback = () => null) {
-
     if (this.state.zoomDisabled) {
       return;
     }
@@ -264,7 +278,7 @@ export default class View extends Component {
       newY = newOriginY - scaledDistY;
 
     this.setState({ scale: newScale }, () =>
-      this.setState({ originX: newX, originY: newY }, () => callback() )
+      this.setState({ originX: newX, originY: newY }, () => callback())
     );
   }
 
@@ -587,7 +601,7 @@ function logToConsole(message, lineno){
       <ConsoleStamp
         ref={ref}
         initialPosition={{ x: x, y: y }}
-       getLinesOn={() => this.state.linesOn}
+        getLinesOn={() => this.state.linesOn}
         id={stampID}
         onStartMove={this.onStartMove.bind(this)}
         onStopMove={this.onStopMove.bind(this)}
@@ -774,7 +788,6 @@ function logToConsole(message, lineno){
   }
 
   setLineData(id) {
-
     var lineData = this.getLineData();
     this.setState({ lineData: lineData }, () => this.supplyLineData());
   }
@@ -1181,7 +1194,7 @@ function logToConsole(message, lineno){
       <div
         className={"name rounded p-2"}
         style={{
-          transform: "scale(" + this.state.scale * 0.8 + ")",
+          transform: "scale(" + 0.8 + ")",
           color: this.getLineColor(type),
           backgroundColor: "transparent"
         }}
@@ -1215,7 +1228,7 @@ function logToConsole(message, lineno){
     var strokeColor = this.getLineColor(type, true);
     var style = {
       strokeColor: strokeColor,
-      strokeWidth: 15 * this.state.scale,
+      strokeWidth: 15,
       arrowLength: 2.5,
       arrowThickness: 2.5
     };
@@ -1449,12 +1462,10 @@ _stopLooping =setTimeout(() => {
   }
 
   undoDelete(position = this.state.deletedStamps.length - 1) {
-
     if (this.state.deletedStamps.length <= position || position < 0) {
       return;
     }
     var deletedStamps = Object.assign([], this.state.deletedStamps);
-
 
     var stampData = deletedStamps[position];
     deletedStamps.splice(position, 1);
@@ -1495,12 +1506,12 @@ _stopLooping =setTimeout(() => {
     return data;
   }
 
-  onStartZoom() {
-    this.setState({ actualLinesOn: this.state.linesOn, linesOn: false }, () =>
-      this.setLineData()
-    );
-    this.onStopMove();
-  }
+  // onStartZoom() {
+  //   this.setState({ actualLinesOn: this.state.linesOn, linesOn: false }, () =>
+  //     this.setLineData()
+  //   );
+  //   this.onStopMove();
+  // }
 
   onStartMove() {
     var stampRefs = this.state.stampRefs;
@@ -1509,16 +1520,14 @@ _stopLooping =setTimeout(() => {
 
       stamp.setIframeDisabled(true);
     }
-
-    this.setState({ actualLinesOn: this.state.linesOn });
   }
 
-  onStopZoom() {
-    this.setState({ linesOn: this.state.actualLinesOn }, () =>
-      this.setLineData()
-    );
-    this.onStopMove();
-  }
+  // onStopZoom() {
+  //   this.setState({ linesOn: this.state.actualLinesOn }, () =>
+  //     this.setLineData()
+  //   );
+  //   this.onStopMove();
+  // }
 
   onStopMove() {
     this.supplyLineData();
@@ -1570,9 +1579,8 @@ _stopLooping =setTimeout(() => {
 
     setTimeout(() => {
       $(".allStamps").css({ transition: "" });
-      this.onStopZoom();
     }, 500);
-    this.onStartZoom();
+
     window.postMessage({ type: "edited" }, "*");
     this.setState({
       originX: this.state.originX + xDiff,
@@ -1812,6 +1820,27 @@ _stopLooping =setTimeout(() => {
     };
   }
 
+  getMaxCoords() {
+    var coords = this.state.stampOrder.map(key => {
+      var stampRef = this.state.stampRefs[key].current;
+      if (!stampRef) {
+        return { x: 0, y: 0 };
+      }
+      return {
+        x: stampRef.state.x + stampRef.getSize().width,
+        y: stampRef.state.y + stampRef.getSize().height
+      };
+    });
+    coords.push({ x: 0, y: 0 });
+
+    return coords.reduce((maxCoords, coords) => {
+      return {
+        x: Math.max(maxCoords.x, coords.x),
+        y: Math.max(maxCoords.y, coords.y)
+      };
+    });
+  }
+
   render() {
     if (this.state.consoleStamp) {
       var consoleElem = this.state.consoleStamp.elem;
@@ -1819,31 +1848,43 @@ _stopLooping =setTimeout(() => {
       var consoleElem = null;
     }
 
+    var maxCoords = this.getMaxCoords();
+const rootStyle = { display: 'flex', justifyContent: 'center' };
+const rowStyle = { margin: '200px 0', display: 'flex', justifyContent: 'space-between', }
+const boxStyle = { padding: '10px', border: '1px solid black', };
+
     return (
       <div>
-
-        <ArcherContainer strokeWidth={this.state.scale * 2}>
+        <div class="row bg-grey" style={{ height: "100vh" }}>
           <div
-            class="row bg-grey"
-            style={{ height: "100vh" }}
+            className="allStamps"
+            style={{
+              position: "absolute",
+              left: this.state.originX,
+              top: this.state.originY,
+              transform: "scale(" + this.state.scale + ")", 
+
+            }}
           >
+            {this.renderGridLines()}
+            <ArcherContainer>
+              {Object.values(this.state.stampElems)}
+            </ArcherContainer>
+            {consoleElem}
 
             <div
-              className="allStamps"
               style={{
-                position: "absolute",
-                left: this.state.originX,
-                top: this.state.originY,
-                transform: "scale(" + this.state.scale + ")"
+    background:"pink", 
+
+
+  
               }}
             >
-                  {this.renderGridLines()}
-              {Object.values(this.state.stampElems)}
 
-              {consoleElem}
             </div>
           </div>
-        </ArcherContainer>
+        </div>
+
         <ControlBar
           addManyStamps={this.addManyStamps.bind(this)}
           getNumStamps={this.getNumStamps.bind(this)}

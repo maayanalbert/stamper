@@ -790,6 +790,7 @@ var Cristal = (function(_super) {
     var style = {
       left: x,
       top: y,
+      margin:0,
       width: width,
       height: height,
       zIndex: zIndex,
