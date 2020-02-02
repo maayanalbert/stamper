@@ -1642,7 +1642,7 @@ _stopLooping =setTimeout(() => {
   }
   calcSnapMargin() {
     var snapMargin = Math.max(Math.round(1 / this.state.scale) * 20, 5);
-    return snapMargin;
+    return 20;
   }
 
   renderGridLines() {
