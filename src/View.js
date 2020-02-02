@@ -122,17 +122,17 @@ export default class View extends Component {
 
     ipc &&
       ipc.on("zoomIn", () => {
-        this.zoom(centerX, window.innerHeight / 2, true);
+        this.zoom(this.state.scale * 2, centerX, centerY, this.setLineData.bind(this));
       });
 
     ipc &&
       ipc.on("zoomOut", () => {
-        this.zoom(this.state.scale * 0.5, centerX, centerY, true);
+        this.zoom(this.state.scale * 0.5, centerX, centerY, this.setLineData.bind(this));
       });
 
     ipc &&
       ipc.on("zoomActual", () => {
-        this.zoom(1, centerX, centerY, true);
+        this.zoom(1, centerX, centerY, this.setLineData.bind(this));
       });
   }
 
@@ -155,13 +155,13 @@ export default class View extends Component {
     if (this.state.downKey === this.cmd || this.state.downKey === this.ctrl) {
       if (e.keyCode === this.zero) {
         e.preventDefault();
-        this.zoom(1, centerX, centerY, true);
+        this.zoom(1, centerX, centerY, this.setLineData.bind(this));
       } else if (e.keyCode === this.plus) {
         e.preventDefault();
-        this.zoom(this.state.scale * 2, centerX, centerY, true);
+        this.zoom(this.state.scale * 2, centerX, centerY, this.setLineData.bind(this));
       } else if (e.keyCode === this.minus) {
         e.preventDefault();
-        this.zoom(this.state.scale * 0.5, centerX, centerY, true);
+        this.zoom(this.state.scale * 0.5, centerX, centerY, this.setLineData.bind(this));
       }
     } else if (this.state.downKey === this.shft) {
       if (e.keyCode === this.g) {
@@ -227,7 +227,8 @@ export default class View extends Component {
     this.setState({ originX: newX, originY: newY });
   }
 
-  zoom(newScale, mouseX, mouseY) {
+  zoom(newScale, mouseX, mouseY, callback = () => null) {
+
     if (this.state.zoomDisabled) {
       return;
     }
@@ -256,7 +257,7 @@ export default class View extends Component {
       newY = newOriginY - scaledDistY;
 
     this.setState({ scale: newScale }, () =>
-      this.setState({ originX: newX, originY: newY })
+      this.setState({ originX: newX, originY: newY }, () => callback() )
     );
   }
 
@@ -766,6 +767,7 @@ function logToConsole(message, lineno){
   }
 
   setLineData(id) {
+
     var lineData = this.getLineData();
     this.setState({ lineData: lineData }, () => this.supplyLineData());
   }
@@ -1445,7 +1447,7 @@ _stopLooping =setTimeout(() => {
       return;
     }
     var deletedStamps = Object.assign([], this.state.deletedStamps);
-    console.log(deletedStamps);
+
 
     var stampData = deletedStamps[position];
     deletedStamps.splice(position, 1);
