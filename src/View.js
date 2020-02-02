@@ -427,28 +427,40 @@ function logToConsole(message, lineno){
     }`;
   }
 
-  // replaceFileStamps(parser) {
-  //   this.state.stampOrder.map(id => {
-  //     var item = this.state.stampRefs[id]
-  //     if (item.current.props.isTxtFile) {
-  //       var name = item.current.state.name;
-  //       var code = item.current.state.code;
+  getP5CanvasDimensions(code = this.getExportableCode()){
 
-  //       var srcNodes = parser(`[src="${name}"]`);
-  //       for (var i = 0; i < srcNodes.length; i++) {
-  //         var singleNode = srcNodes.eq(i);
-  //         var tagName = srcNodes.get(i).tagName;
-  //         singleNode.replaceWith(`<${tagName}>${code}</${tagName}>`);
-  //       }
+    var defaultDimens = {width: 10,height:10}
+    var createCanvasStart = code.indexOf("createCanvas(")
+    if(createCanvasStart < 0){
+      return defaultDimens
+    }
 
-  //       if (name.endsWith(".js")) {
-  //         parser(`[href="${name}"]`).replaceWith(`<script>${code}</script>`);
-  //       } else if (name.endsWith(".css")) {
-  //         parser(`[href="${name}"]`).replaceWith(`<style>${code}</style>`);
-  //       }
-  //     }
-  //   });
-  // }
+
+
+    var start = createCanvasStart + "createCanvas(".length
+
+
+
+    var end = code.indexOf(")", start)
+    if(end < 0){
+      return defaultDimens
+    }
+
+    var paramsArr = code.substr(start, end - start).split(",")
+    if(paramsArr.length != 2){
+      return defaultDimens
+    }
+
+
+    var width = Number(paramsArr[0])
+    var height = Number(paramsArr[1])
+    if(!width || !height){
+      return defaultDimens
+    } 
+
+    return {width:width, height:height}
+
+  }
 
   loadAssets(htmlCode) {
     this.state.stampOrder.map(id => {
@@ -679,6 +691,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         getFirstLine={this.getFirstLine.bind(this)}
         id={stampID}
+        getP5CanvasDimensions={this.getP5CanvasDimensions.bind(this)}
         setLayerPicker={this.setLayerPicker.bind(this)}
         deleteFrame={this.deleteFrame}
         initialHidden={data.hidden}

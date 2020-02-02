@@ -86,7 +86,8 @@ export default class FunctionStamp extends Component {
       editorTopShadow:false,
       editorBottomShadow:false,
       ghostX:starterIframeWidth,
-      ghostY:starterIframeHeight
+      ghostY:starterIframeHeight,
+      iframeDimensTransition:""
     };
 
     this.cristalRef = React.createRef();
@@ -577,22 +578,48 @@ nameColor = "pink";
     }
   }
 
+  manualIframeResize(width, height){
+
+          // this.setState({iframeWidth:dimens.width, iframeHeight:dimens.height, resizingIframe:true}, setTimeout(() => 
+          //       this.setState({resizingIframe:false}), 250))
+
+setTimeout(() => {
+      this.setState({iframeDimensTransition:""})
+    }, 1200)
+
+setTimeout(() => {
+      this.setState({resizingIframe:false,  iframeDimensTransition:"opacity 1s ease-out"})
+    }, 200)
+
+
+  this.setState({resizingIframe:true})
+    this.updateIframeDimensions(width-this.state.iframeWidth, height-this.state.iframeHeight)
+  }
+
   renderIframe() {
     var loopingOpacity = 0.0;
     if (this.state.looping === false) {
       loopingOpacity = 0.5;
     }
 
+    if(this.state.resizingIframe){
+      var iframeDimensOpacity = .5
+    }else{
+      var iframeDimensOpacity = 0
+    }
+
+
     return (
       <div>
         <div
-          hidden={!this.state.resizingIframe}
+     
           style={{
             position: "absolute",
             fontSize: globals.codeSize,
-            opacity: 0.5,
+            opacity: iframeDimensOpacity,
             top: globals.fnTitleHeight - 5,
-            right: 25
+            right: 25,
+            transition:this.state.iframeDimensTransition
           }}
           class="text-greyText "
         >
@@ -643,6 +670,11 @@ nameColor = "pink";
             zIndex: 5,
             border: "none"
           }}
+          handle={(<span className="react-resizable-handle react-resizable-handle-se" 
+            onDoubleClick={() => {
+              var dimens = this.props.getP5CanvasDimensions()
+              this.manualIframeResize(dimens.width, dimens.height)
+            }}/>)}
         >
           <div>
             <div
@@ -659,7 +691,8 @@ nameColor = "pink";
             <div
               style={{
                 height: this.state.iframeHeight,
-                width: this.state.iframeWidth
+                width: this.state.iframeWidth,
+                zIndex:-1
               }}
             >
               {this.renderMediaAsset()}
