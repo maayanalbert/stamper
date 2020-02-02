@@ -351,7 +351,7 @@ export default class View extends Component {
   }
 
   addRawJavascript(rawJS){
-    console.log(rawJS)
+
       var stamperObject = parser.jsToStamps(rawJS);
       var curNumStamps = this.getNumStamps();
 
@@ -1961,13 +1961,12 @@ _stopLooping =setTimeout(() => {
               position: "absolute",
               left: this.state.originX,
               top: this.state.originY,
-              transform: "scale(" + this.state.scale + ")", 
+              transform: "scale(" + 1 + ")", 
 
             }}
           >
             {this.renderGridLines()}
-            <ArcherContainer scale={1/this.state.scale}>
-    
+            <ArcherContainer scale={1} top={this.state.originY} left={this.state.originX}>
               {Object.values(this.state.stampElems)}
                        {consoleElem}
             </ArcherContainer>

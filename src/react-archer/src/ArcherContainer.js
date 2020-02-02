@@ -38,10 +38,11 @@ type State = {
 
 const defaultSvgContainerStyle = {
   position: 'absolute',
-  width: '100%',
-  height: '100%',
-  top: 0,
+  width: "100%",
+  height: "100%",
+  top:0,
   left: 0,
+  background:"black"
 };
 
 function rectToPoint(rect: ClientRect) {
@@ -164,8 +165,8 @@ export class ArcherContainer extends React.Component<Props, State> {
     const absolutePosition = computeCoordinatesFromAnchorPosition(position, rect);
 
     var retPos = absolutePosition.substract(parentCoordinates);
-    retPos.x = retPos.x * this.props.scale
-    retPos.y = retPos.y * this.props.scale
+    retPos.x = retPos.x / this.props.scale
+    retPos.y = retPos.y / this.props.scale
 
     return retPos;
   };
@@ -244,7 +245,7 @@ export class ArcherContainer extends React.Component<Props, State> {
         source.anchor,
         source.id,
         parentCoordinates,
-      );
+      )
 
       const endingAnchorOrientation = target.anchor;
       const endingPoint = this.getPointCoordinatesFromAnchorPosition(
@@ -330,12 +331,18 @@ export class ArcherContainer extends React.Component<Props, State> {
           unregisterChild: this.unregisterChild,
         }}
       >
-        <div style={{ ...this.props.style, position: 'relative' }} className={this.props.className}>
-          <svg style={this.svgContainerStyle()}>
+        <div style={{ ...this.props.style }} className={this.props.className}>
+      <div >
+          <svg viewBox={`${-this.props.left} ${-this.props.top} ${window.innerWidth} ${window.innerHeight}`} style={{position:"absolute", top:-this.props.top, left:-this.props.left, 
+          width:window.innerWidth, height:window.innerHeight, 
+          background:"pink"}}>
             <defs>{this.generateAllArrowMarkers()}</defs>
+            
             {SvgArrows}
+     
           </svg>
-
+       
+</div>
           <div style={{ height: '100%' }} ref={this.storeParent}>
             {this.props.children}
           </div>
