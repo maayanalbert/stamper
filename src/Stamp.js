@@ -5,9 +5,6 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
-
-import { ArcherContainer, ArcherElement } from 'react-archer';
-
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";

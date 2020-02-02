@@ -1,0 +1,117 @@
+{
+  "_from": "react-archer@^1.5.0",
+  "_id": "react-archer@1.5.0",
+  "_inBundle": false,
+  "_integrity": "sha512-NOSMD7eZCQfzVegg0+6dA7/Y3k37V4NZUd1Ri0kMWZ4e57ezfP0uX1tAuVOiSxdIFQiM+v7A8HRCSyTBxJXn7A==",
+  "_location": "/react-archer",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "react-archer@^1.5.0",
+    "name": "react-archer",
+    "escapedName": "react-archer",
+    "rawSpec": "^1.5.0",
+    "saveSpec": null,
+    "fetchSpec": "^1.5.0"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-archer/-/react-archer-1.5.0.tgz",
+  "_shasum": "c0d3427310178d748d72f0c3db0dd75b4b533f61",
+  "_spec": "react-archer@^1.5.0",
+  "_where": "/Users/maayan/repos/stamper",
+  "bugs": {
+    "url": "https://github.com/pierpo/react-archer/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "react-fast-compare": "^2.0.4",
+    "resize-observer-polyfill": "1.5.0"
+  },
+  "deprecated": false,
+  "description": "Draw arrows between DOM elements in React",
+  "devDependencies": {
+    "@babel/core": "7.6.2",
+    "@babel/plugin-proposal-class-properties": "7.5.5",
+    "@babel/preset-env": "7.6.2",
+    "@babel/preset-flow": "7.0.0",
+    "@babel/preset-react": "7.0.0",
+    "babel-core": "^7.0.0-bridge",
+    "babel-eslint": "10.0.3",
+    "babel-jest": "24.9.0",
+    "babel-loader": "8.0.6",
+    "cross-env": "6.0.3",
+    "css-loader": "3.2.0",
+    "cypress": "3.4.1",
+    "cypress-image-snapshot": "3.1.1",
+    "enzyme": "3.10.0",
+    "enzyme-adapter-react-16": "1.14.0",
+    "eslint": "6.5.1",
+    "eslint-config-prettier": "6.4.0",
+    "eslint-config-standard": "14.1.0",
+    "eslint-config-standard-react": "9.2.0",
+    "eslint-plugin-cypress": "2.7.0",
+    "eslint-plugin-flowtype": "4.3.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "7.16.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "flow-bin": "0.109.0",
+    "gh-pages": "2.0.1",
+    "html-webpack-plugin": "3.2.0",
+    "jest": "24.9.0",
+    "prettier": "1.18.2",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-test-renderer": "^16.6.3",
+    "release-it": "12.4.3",
+    "style-loader": "1.0.0",
+    "terser-webpack-plugin": "^2.1.2",
+    "webpack": "4.41.0",
+    "webpack-cli": "3.3.9",
+    "webpack-dev-server": "3.8.2"
+  },
+  "homepage": "https://github.com/pierpo/react-archer",
+  "jest": {
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}"
+    ],
+    "setupFiles": [
+      "./shim.js",
+      "./setup-tests.js"
+    ]
+  },
+  "license": "MIT",
+  "main": "lib/react-archer.js",
+  "module": "lib/react-archer.js",
+  "name": "react-archer",
+  "peerDependencies": {
+    "@types/react": "^16.8.8",
+    "prop-types": "^15.6.2",
+    "react": "^16.4.0-0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pierpo/react-archer.git"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.prod.config.js",
+    "deploy:example": "webpack --config webpack.example-app.config.js && gh-pages -d example-dist",
+    "lint": "eslint --ext .js,.jsx src/ example/",
+    "prepare": "npm run build",
+    "pretest": "yarn lint && yarn flow",
+    "start": "webpack-dev-server --hot --progress --colors --config ./webpack.config.js",
+    "test": "jest --coverage ./src/",
+    "test:e2e": "cypress open",
+    "test:e2e:update-snapshots": "rm -rf ./cypress/snapshots",
+    "test:watch": "jest ./src/ --watch"
+  },
+  "types": "types/react-archer.d.ts",
+  "version": "1.5.0"
+}

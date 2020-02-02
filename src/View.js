@@ -7,7 +7,9 @@ import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
-import { ArcherContainer, ArcherElement } from "react-archer";
+// import { ArcherContainer, ArcherElement } from "react-archer";
+import ArcherContainer from "./react-archer/src/ArcherContainer.js";
+import ArcherElement from "./react-archer/src/ArcherElement.js";
 
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
@@ -1880,7 +1882,32 @@ const boxStyle = { padding: '10px', border: '1px solid black', };
   
               }}
             >
+               <ArcherContainer strokeColor='red' scale={1/this.state.scale}>
+   <div style={{position:"absolute", left:10, top:50}}> 
+          <ArcherElement
+            id="root"
+            relations={[{
+              targetId: 'element2',
+              targetAnchor: 'left',
+              sourceAnchor: 'right',
+            }]}
+          >
+            <div>Element 1</div>
+          </ArcherElement>
+          </div>
+        <div style={{width:500, height:500}}>_</div>
 
+   <div style={{position:"absolute", left:400, top:100}}>
+          <ArcherElement
+            id="element2"
+            relations={[]}
+          >
+            <div >Element 2</div>
+          </ArcherElement>
+
+    </div>
+    
+      </ArcherContainer>
             </div>
           </div>
         </div>
