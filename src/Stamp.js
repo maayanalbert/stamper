@@ -87,7 +87,9 @@ export default class FunctionStamp extends Component {
       dataUri: "",
       lineData:[],
       editorTopShadow:false,
-      editorBottomShadow:false
+      editorBottomShadow:false,
+      ghostX:starterIframeWidth,
+      ghostY:starterIframeHeight
     };
 
     this.cristalRef = React.createRef();
@@ -233,7 +235,34 @@ export default class FunctionStamp extends Component {
       });
   }
 
+  getIframeDimensionFromGhost(movementX, movementY){
+    var snapMargin = this.props.getSnapMargin();
+       var newX = this.state.ghostX + movementX;
+      var newY = this.state.ghostY + movementY;
+      this.setState({ ghostX: newX, ghostY: newY });
+      var snapMargin = this.props.getSnapMargin();
+
+      if (snapMargin === 0) {
+        return { movementX: movementX, movementY: movementY };
+      } else {
+        var roundX = Math.round(newX / snapMargin) * snapMargin;
+        var roundY = Math.round(newY / snapMargin) * snapMargin;
+        return { movementX: roundX - this.state.iframeWidth, movementY: roundY -this.state.iframeHeight };
+      }
+
+  }
+
   updateIframeDimensions(movementX = 0, movementY = 0) {
+
+    var newDimensions = this.getIframeDimensionFromGhost(movementX, movementY)
+
+    if(newDimensions.movementX === 0 && newDimensions.movementY === 0){
+      return
+    }
+
+    movementX = newDimensions.movementX
+    movementY = newDimensions.movementY
+
     window.postMessage({type:"edited"}, '*')
 
     var width = this.state.iframeWidth + movementX;
@@ -591,16 +620,21 @@ nameColor = "pink";
         <Resizable
           className="ml-1 bg-white shadow"
           onResize={e => {
+
             this.updateIframeDimensions(
               e.movementX / this.props.getScale(),
               e.movementY / this.props.getScale()
             );
           }}
           onResizeStart={() => {
+  
             this.props.onStartMove();
             this.setState({ resizingIframe: true });
+            this.setState({ghostX:this.state.iframeWidth, ghostY:this.state.iframeHeight})
           }}
           onResizeStop={e => {
+
+            this.setState({ghostX:this.state.iframeWidth, ghostY:this.state.iframeHeight})
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
             var newSize = this.getSize()
