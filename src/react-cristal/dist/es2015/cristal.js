@@ -872,21 +872,21 @@ var Cristal = (function(_super) {
       HeaderComponent = null;
     }
 
-if(this.props.getLinesOn()){
+    var relations = []
+    if(this.props.getLinesOn()){
+      relations = getLineRelations(this)
+    }
     var allContent = (
           <ArcherElement
             id={"line_" + this.props.parentID}
-            relations={getLineRelations(this)}
+            relations={relations}
           >
       {HeaderComponent}
       {ContentComponent}
           </ArcherElement>
 
     )
-}else{
-  var allContent = (<div>      {HeaderComponent}
-      {ContentComponent}</div>)
-}
+
 
 
     var cristalComponent = React.createElement(

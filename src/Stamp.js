@@ -641,6 +641,8 @@ setTimeout(() => {
         >
           {"paused"}
         </div>
+
+
         <Resizable
           className="ml-1 bg-white shadow"
           onResize={e => {
