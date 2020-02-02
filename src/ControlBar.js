@@ -199,8 +199,8 @@ function noiseWave() {
         );
       };
 
-      this.props.addManyStamps(stamperObject.stamps, callback);
-
+  
+      stamperObject.stamps.map(data => this.props.addStamp(data, callback))
       this.setState({ code: "" });
     } catch (e) {
       this.setState({ codeHasError: true });

@@ -337,43 +337,77 @@ export default class View extends Component {
             var callback = () =>
               this.recompileIfEnoughStamps(stamperObject.stamps.length);
             this.addConsoleStamp(stamperObject.console);
-            this.addManyStamps(stamperObject.stamps, callback);
+            var layoutedStampsData = this.getAutoLayout(stamperObject.stamps, stamperObject.js)
+            layoutedStampsData.map(data => this.addStamp(data, callback))
+
           }
         );
       }
     );
   }
 
-  addManyStamps(datas, callback) {
+
+  getAutoLayout(stampsData, rawJS){
+    if(!rawJS){
+      rawJS = ""
+    }
     var xPos = this.setInitialPosition("x");
     var yPos = this.setInitialPosition("y");
-    var xPosBlob = xPos + 700;
-    var yPosBlob = yPos;
 
-    var xPosFile = xPos + 1200;
-    var yPosFile = yPos;
-    datas.map(data => {
-      if (!data.x && !data.y) {
-        if (data.isBlob) {
-          data.x = xPosBlob;
-          data.y = yPosBlob;
-          xPosBlob += globals.copyOffset * 3;
-          yPosBlob += globals.copyOffset * 3;
-        } else if (data.isMediaFile || data.isIndex || data.isTxtFile) {
-          data.x = xPosFile;
-          data.y = yPosFile;
-          xPosFile += globals.copyOffset * 3;
-          yPosFile += globals.copyOffset * 3;
-        } else {
-          data.x = xPos;
-          data.y = yPos;
-          xPos += globals.copyOffset * 3;
-          yPos += globals.copyOffset * 3;
-        }
+    var initialXPos = xPos
+    var maxHeight = -1
+    var layoutedStampsData = []
+
+    for(var i = 0; i < stampsData.length; i++){
+      var data = stampsData[i]
+      data = this.getFilledInStampData(data)
+      var iframeDimens = this.getP5CanvasDimensions(rawJS)
+      data.iframeWidth = iframeDimens.width
+      data.iframeHeight = iframeDimens.height
+
+      if(!data.isBlob && !data.isTxtFile){
+        data.editorHeight = Math.max(data.editorHeight, data.iframeHeight - globals.brHeight)
+      }
+      var cristalDimens = this.getCristalDimens(data)
+
+      data.x = xPos
+      data.y = yPos
+
+    console.log(data.name)
+    console.log((xPos - this.state.originX + cristalDimens.width)*this.state.scale)
+    console.log(this.state.sideBarWidth)
+    console.log(window.innerWidth / this.state.scale)
+    console.log("")
+
+
+      var absoluteEndPoint = xPos + cristalDimens.width + globals.autoLayoutMargin
+      var endPointRelativeToScreen = (absoluteEndPoint - this.state.originX)*this.state.scale
+
+      if(endPointRelativeToScreen >= window.innerWidth){
+    
+        xPos = initialXPos
+        yPos = yPos + maxHeight + globals.autoLayoutMargin
+        maxHeight = -1
+         data.x = xPos
+        data.y = yPos    
+
       }
 
-      this.addStamp(data, callback);
-    });
+      xPos += cristalDimens.width + globals.autoLayoutMargin
+      maxHeight = Math.max(maxHeight, cristalDimens.height)
+
+
+
+
+      layoutedStampsData.push(data)
+
+
+    }
+
+
+    return layoutedStampsData
+
+
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -429,7 +463,7 @@ function logToConsole(message, lineno){
 
   getP5CanvasDimensions(code = this.getExportableCode()){
 
-    var defaultDimens = {width: 10,height:10}
+    var defaultDimens = {width: 100,height:100}
     var createCanvasStart = code.indexOf("createCanvas(")
     if(createCanvasStart < 0){
       return defaultDimens
@@ -640,7 +674,7 @@ function logToConsole(message, lineno){
       .substr(2, 9);
   }
 
-  addStamp(data, callback = () => null) {
+  getFilledInStampData(data){
     var defaults = {
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
@@ -661,12 +695,32 @@ function logToConsole(message, lineno){
       codeSize: globals.codeSize
     };
 
+    if(!data.iframeWidth && !data.iframeHeight && !data.isIndex && !data.isTxtFile && !data.isMediaFile){
+      if(data.isBlob){
+        var seenCode = data.code.toString()
+      }else{
+        var seenCode = `function ${data.name.toString()}(${data.args.toString()}){\n  ${data.code.toString()}\n}`
+      }
+
+      var iframeDimens = this.getP5CanvasDimensions(this.getExportableCode() + "\n"+seenCode)
+      data.iframeWidth = iframeDimens.width
+      data.iframeHeight = iframeDimens.height
+    }
+
     Object.keys(defaults).map(setting => {
       if (setting in data) {
         defaults[setting] = data[setting];
       }
     });
-    data = defaults;
+
+    return defaults    
+  }
+
+  addStamp(data, callback = () => null) {
+
+    data = this.getFilledInStampData(data);
+
+    ///
 
     var ref = React.createRef();
     var stampID = this.getUniqueID();
@@ -684,6 +738,7 @@ function logToConsole(message, lineno){
         starterArgs={data.args}
         starterName={data.name}
         errorLines={{}}
+        getCristalDimens = {this.getCristalDimens.bind(this)}
         setLineData={this.setLineData.bind(this)}
         starterEditorWidth={data.editorWidth}
         starterEditorHeight={data.editorHeight}
@@ -1509,7 +1564,8 @@ _stopLooping =setTimeout(() => {
       worldEdited: this.state.worldEdited,
       worldPublishTime: this.state.worldPublishTime,
       snapToGrid: this.state.snapToGrid,
-      linesOn: this.state.linesOn
+      linesOn: this.state.linesOn,
+      js:this.getExportableCode()
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1835,26 +1891,43 @@ _stopLooping =setTimeout(() => {
     };
   }
 
-  getMaxCoords() {
-    var coords = this.state.stampOrder.map(key => {
-      var stampRef = this.state.stampRefs[key].current;
-      if (!stampRef) {
-        return { x: 0, y: 0 };
-      }
-      return {
-        x: stampRef.state.x + stampRef.getSize().width,
-        y: stampRef.state.y + stampRef.getSize().height
-      };
-    });
-    coords.push({ x: 0, y: 0 });
+  // getMaxCoords() {
+  //   var coords = this.state.stampOrder.map(key => {
+  //     var stampRef = this.state.stampRefs[key].current;
+  //     if (!stampRef) {
+  //       return { x: 0, y: 0 };
+  //     }
+  //     return {
+  //       x: stampRef.state.x + stampRef.getSize().width,
+  //       y: stampRef.state.y + stampRef.getSize().height
+  //     };
+  //   });
+  //   coords.push({ x: 0, y: 0 });
 
-    return coords.reduce((maxCoords, coords) => {
-      return {
-        x: Math.max(maxCoords.x, coords.x),
-        y: Math.max(maxCoords.y, coords.y)
-      };
-    });
-  }
+  //   return coords.reduce((maxCoords, coords) => {
+  //     return {
+  //       x: Math.max(maxCoords.x, coords.x),
+  //       y: Math.max(maxCoords.y, coords.y)
+  //     };
+  //   });
+  //          // <div  style={{width:this.getMaxCoords().x,height:this.getMaxCoords().y, background:"black" }} >hi</div>
+  // }
+
+  getCristalDimens(data){
+        var iframeWidth = data.iframeWidth;
+    if (data.isTxtFile || data.isBlob) {
+      iframeWidth = 0;
+    }
+
+    var initialHeight = data.editorHeight + globals.fnTitleHeight + 60;
+    if (data.isMediaFile) {
+      initialHeight = data.iframeHeight + globals.fnTitleHeight + 35;
+    } else if (data.isBlob) {
+      initialHeight = data.editorHeight + 60;
+    }
+
+    return {width: iframeWidth + data.editorWidth + 42, height:initialHeight}
+  }  
 
   render() {
     if (this.state.consoleStamp) {
@@ -1863,7 +1936,7 @@ _stopLooping =setTimeout(() => {
       var consoleElem = null;
     }
 
-    var maxCoords = this.getMaxCoords();
+    // var maxCoords = this.getMaxCoords();
 
     return (
       <div>
@@ -1880,7 +1953,7 @@ _stopLooping =setTimeout(() => {
           >
             {this.renderGridLines()}
             <ArcherContainer scale={1/this.state.scale}>
-            <div  style={{width:this.getMaxCoords().x,height:this.getMaxCoords().y, background:"black" }} >hi</div>
+    
               {Object.values(this.state.stampElems)}
                        {consoleElem}
             </ArcherContainer>
@@ -1890,7 +1963,7 @@ _stopLooping =setTimeout(() => {
         </div>
 
         <ControlBar
-          addManyStamps={this.addManyStamps.bind(this)}
+       
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}

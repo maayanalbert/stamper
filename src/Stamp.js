@@ -661,7 +661,7 @@ setTimeout(() => {
             this.setState({ghostX:this.state.iframeWidth, ghostY:this.state.iframeHeight})
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
-            var newSize = this.getSize()
+            var newSize = this.props.getCristalDimens(this.getData())
             this.cristalRef.current.manualSetSize(newSize.width, newSize.height)
           }}
           onMouseOver={this.compileCallback.bind(this)}
@@ -858,23 +858,6 @@ setTimeout(() => {
     return icon;
   }
 
-  getSize(){
-        var iframeWidth = this.state.iframeWidth;
-    if (this.props.isTxtFile) {
-      iframeWidth = 0;
-    }
-
-    var initialHeight = this.state.editorHeight + globals.fnTitleHeight + 60;
-    if (this.props.isMediaFile) {
-      initialHeight = this.state.iframeHeight + globals.fnTitleHeight + 35;
-    } else if (this.props.isBlob) {
-      initialHeight = this.state.editorHeight + 60;
-    }
-
-    return {width: iframeWidth + this.state.editorWidth + 42, height:initialHeight}
-
-  }
-
   render() {
     var headerColor = "bg-white";
     if (0 in this.state.errorLines) {
@@ -927,7 +910,7 @@ setTimeout(() => {
 
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}
-          initialSize={this.getSize()}
+          initialSize={this.props.getCristalDimens(this.getData())}
           ref={this.cristalRef}
           isResizable={!this.props.isMediaFile}
           onStartResize={() => {

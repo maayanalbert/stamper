@@ -674,12 +674,13 @@ export default class ModalManager extends Component {
 
     try {
       var newStamperObject = parser.jsToStamps(js);
+      newStamperObject.js = js
     } catch (e) {
       throw "Syntax error in Javascript";
     }
 
     newStamperObject.console = { hidden: true };
-    newStamperObject.scale = 0.7;
+    newStamperObject.scale = .7;
     newStamperObject.originX = 0;
     newStamperObject.originY = 0;
     newStamperObject.imgs = [];

@@ -74,6 +74,7 @@ export const globals = {
   iconSize:15,
   iconTransition: "all .3s ease",
   borderTransition: "border .3s ease-out",
+  autoLayoutMargin:20,
 
   listeners:{
         windowResized:  false,
