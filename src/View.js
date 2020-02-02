@@ -106,6 +106,7 @@ export default class View extends Component {
     this.minus = 189;
     this.zero = 48;
     this.g = 71;
+    this.l = 76
     this.shft = 16;
   }
 
@@ -134,6 +135,7 @@ export default class View extends Component {
       ipc.on("zoomActual", () => {
         this.zoom(1, centerX, centerY, this.setLineData.bind(this));
       });
+
   }
 
   componentWillUnmount() {
@@ -167,6 +169,11 @@ export default class View extends Component {
       if (e.keyCode === this.g) {
         var snapToGrid = this.state.snapToGrid;
         this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
+      }else if(e.keyCode === this.l){
+          this.setState({ linesOn: !this.state.linesOn }, () => {
+          this.setLayerPicker();
+          this.setLineData();
+        });
       }
     } else {
       this.setState({ downKey: e.keyCode });
@@ -1711,7 +1718,7 @@ _stopLooping =setTimeout(() => {
     var pickerData = [];
 
     pickerData.push({
-      name: "lines",
+      name: "lines  (⬆L)",
       status: this.state.linesOn,
       icon: globals.LinesIcon,
 
@@ -1727,7 +1734,7 @@ _stopLooping =setTimeout(() => {
     });
 
     pickerData.push({
-      name: "snap to grid",
+      name: "snap to grid (⬆G)",
       status: this.state.snapToGrid,
       icon: globals.GridIcon,
 

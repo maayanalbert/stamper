@@ -191,12 +191,8 @@ function setMenu(worldButtons = []) {
     ]
   });
 
-  menu.splice(5, 0, {
-    label: "Sketch",
-    submenu: []
-  });
 
-  menu[6].submenu = [
+  menu[5].submenu = [
     {
       label: "p5.js Reference",
       click() {
@@ -222,6 +218,7 @@ function setMenu(worldButtons = []) {
       }
     }
   ];
+
 
   menu[3].submenu.push({ type: "separator" });
   menu[3].submenu.push({
