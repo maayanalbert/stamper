@@ -337,8 +337,12 @@ export default class View extends Component {
             var callback = () =>
               this.recompileIfEnoughStamps(stamperObject.stamps.length);
             this.addConsoleStamp(stamperObject.console);
-            var layoutedStampsData = this.getAutoLayout(stamperObject.stamps, stamperObject.js)
-            layoutedStampsData.map(data => this.addStamp(data, callback))
+            var stampData = stamperObject.stamps
+            if(stamperObject.stamps.length > 0 && !stamperObject.stamps[0].x){
+              stampData = this.getAutoLayout(stamperObject.stamps, stamperObject.js)
+            }
+
+            stampData.map(data => this.addStamp(data, callback))
 
           }
         );
@@ -346,6 +350,22 @@ export default class View extends Component {
     );
   }
 
+  addRawJavascript(rawJS){
+    console.log(rawJS)
+      var stamperObject = parser.jsToStamps(rawJS);
+      var curNumStamps = this.getNumStamps();
+
+      var callback = () => {
+        window.postMessage({type:"edited"}, '*')
+        this.recompileIfEnoughStamps(
+          stamperObject.stamps.length + curNumStamps.stamps
+        );
+      };
+
+      var stampData = this.getAutoLayout(stamperObject.stamps, this.getExportableCode() + "\n" + rawJS)
+
+      stampData.map(data => this.addStamp(data, callback))
+  }
 
   getAutoLayout(stampsData, rawJS){
     if(!rawJS){
@@ -372,12 +392,6 @@ export default class View extends Component {
 
       data.x = xPos
       data.y = yPos
-
-    console.log(data.name)
-    console.log((xPos - this.state.originX + cristalDimens.width)*this.state.scale)
-    console.log(this.state.sideBarWidth)
-    console.log(window.innerWidth / this.state.scale)
-    console.log("")
 
 
       var absoluteEndPoint = xPos + cristalDimens.width + globals.autoLayoutMargin
@@ -1982,6 +1996,7 @@ _stopLooping =setTimeout(() => {
           settingsPicker={this.state.settingsPicker}
           deletedStamps={this.state.deletedStamps}
           undoDelete={this.undoDelete.bind(this)}
+          addRawJavascript={this.addRawJavascript.bind(this)}
         />
 
         <ModalManager

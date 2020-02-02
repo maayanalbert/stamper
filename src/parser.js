@@ -39,6 +39,7 @@ function jsToStamps(rawCode) {
   var stamperObject = { stamps: [] };
  
   fillStampArrays(body, stamperObject.stamps, rawCode);
+    
 
   return stamperObject;
 }

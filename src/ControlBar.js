@@ -189,18 +189,9 @@ function noiseWave() {
 
   parseCode() {
     try {
-      var stamperObject = parser.jsToStamps(this.state.code);
-      var curNumStamps = this.props.getNumStamps();
 
-      var callback = () => {
-        window.postMessage({type:"edited"}, '*')
-        this.props.recompileIfEnoughStamps(
-          stamperObject.stamps.length + curNumStamps.stamps
-        );
-      };
 
-  
-      stamperObject.stamps.map(data => this.props.addStamp(data, callback))
+      this.props.addRawJavascript(this.state.code)
       this.setState({ code: "" });
     } catch (e) {
       this.setState({ codeHasError: true });
