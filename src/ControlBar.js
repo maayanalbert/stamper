@@ -747,6 +747,7 @@ function noiseWave() {
             })).reverse()
           }
             tooltipText="undo delete"
+            disabled = {this.props.deletedStamps.length === 0}
           />
 
 
@@ -842,11 +843,10 @@ class TopButton extends Component {
     document.removeEventListener("mousedown", this.onMouseDown);
   }
 
-  createIcon(iconType, callback, givenUniqueClass, size, dropDownIcon = false) {
+  createTopButtonIcon(iconType, callback, givenUniqueClass, size, dropDownIcon = false, disabled) {
     var uniqueClass = givenUniqueClass;
     var mouseOverCallback = () => {
-      // $(".tooltip" + givenUniqueClass).addClass("text-black")
-      //         .removeClass("text-greyText");
+
 
       this.setState({ mouseOverDropDown: true }, () =>
         $("." + uniqueClass).css({ opacity: "1" })
@@ -854,8 +854,7 @@ class TopButton extends Component {
     };
 
     var mouseOutCallback = () => {
-      // $(".tooltip" + givenUniqueClass).addClass("text-greyText")
-      //         .removeClass("text-black");
+
 
       this.setState(
         { mouseOverDropDown: false },
@@ -879,6 +878,14 @@ class TopButton extends Component {
     if (dropDownIcon) {
       mouseOverCallback = () => null;
       mouseOutCallback = () => null;
+    }
+
+
+
+    if(this.props.disabled){
+      mouseOverCallback = () => null;
+      mouseOutCallback = () => null;
+      callback = () => null     
     }
 
     return React.createElement("img", {
@@ -954,7 +961,7 @@ class TopButton extends Component {
           }}
         >
           <a className="mr-2" hidden={!data.name || !data.icon}>
-            {this.createIcon(data.icon, undefined, "dropDown", 12, true)}
+            {this.createTopButtonIcon(data.icon, undefined, "dropDown", 12, true, this.props.disabled)}
           </a>
           {data.name}
         </div>
@@ -1046,23 +1053,32 @@ class TopButton extends Component {
 
     var expandButton = null;
     if (this.props.dropDownData) {
-      expandButton = this.createIcon(
+      expandButton = this.createTopButtonIcon(
         globals.ExpandMoreIcon,
         () => this.setState({ down: !this.state.down }),
         this.props.uniqueClass + "expand",
-        16
+        16,
+        false,
+        this.props.disabled
       );
     }
 
+    var opacity = 1
+    if(this.props.disabled){
+      opacity = opacity*.5
+    }
+
     return (
-      <div class="m-3 mt-4">
+      <div class="m-3 mt-4" style={{opacity:opacity}}>
         {this.renderTooltip()}
         <div>
-          {this.createIcon(
+          {this.createTopButtonIcon(
             this.props.iconType,
             this.props.iconCallback,
             this.props.uniqueClass,
-            20
+            20,
+            false,
+            this.props.disabled
           )}
 
           {expandButton}

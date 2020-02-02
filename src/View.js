@@ -1442,7 +1442,7 @@ _stopLooping =setTimeout(() => {
   undoDelete(position = this.state.deletedStamps.length - 1) {
     console.log(this.state.deletedStamps);
     console.log(position);
-    if (this.state.deletedStamps.length <= position) {
+    if (this.state.deletedStamps.length <= position || position < 0) {
       return;
     }
     var deletedStamps = Object.assign([], this.state.deletedStamps);
