@@ -1961,12 +1961,12 @@ _stopLooping =setTimeout(() => {
               position: "absolute",
               left: this.state.originX,
               top: this.state.originY,
-              transform: "scale(" + 1 + ")", 
+              transform: "scale(" + this.state.scale + ")", 
 
             }}
           >
             {this.renderGridLines()}
-            <ArcherContainer scale={1} top={this.state.originY} left={this.state.originX}>
+            <ArcherContainer scale={this.state.scale} top={this.state.originY} left={this.state.originX}>
               {Object.values(this.state.stampElems)}
                        {consoleElem}
             </ArcherContainer>

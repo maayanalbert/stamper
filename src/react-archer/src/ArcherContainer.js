@@ -333,9 +333,9 @@ export class ArcherContainer extends React.Component<Props, State> {
       >
         <div style={{ ...this.props.style }} className={this.props.className}>
       <div >
-          <svg viewBox={`${-this.props.left} ${-this.props.top} ${window.innerWidth} ${window.innerHeight}`} style={{position:"absolute", top:-this.props.top, left:-this.props.left, 
-          width:window.innerWidth, height:window.innerHeight, 
-          background:"pink"}}>
+          <svg viewBox={`${-this.props.left/this.props.scale} ${-this.props.top/this.props.scale} ${window.innerWidth/this.props.scale} ${window.innerHeight/this.props.scale}`} style={{position:"absolute", 
+          top:-this.props.top/this.props.scale, left:-this.props.left/this.props.scale, 
+          width:window.innerWidth/this.props.scale, height:window.innerHeight/this.props.scale}}>
             <defs>{this.generateAllArrowMarkers()}</defs>
             
             {SvgArrows}
