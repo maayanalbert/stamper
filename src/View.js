@@ -7,7 +7,7 @@ import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
 import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
-// import { ArcherContainer, ArcherElement } from "react-archer";
+
 import ArcherContainer from "./react-archer/src/ArcherContainer.js";
 import ArcherElement from "./react-archer/src/ArcherElement.js";
 
@@ -1851,9 +1851,6 @@ _stopLooping =setTimeout(() => {
     }
 
     var maxCoords = this.getMaxCoords();
-const rootStyle = { display: 'flex', justifyContent: 'center' };
-const rowStyle = { margin: '200px 0', display: 'flex', justifyContent: 'space-between', }
-const boxStyle = { padding: '10px', border: '1px solid black', };
 
     return (
       <div>
@@ -1869,46 +1866,13 @@ const boxStyle = { padding: '10px', border: '1px solid black', };
             }}
           >
             {this.renderGridLines()}
-            <ArcherContainer>
+            <ArcherContainer scale={1/this.state.scale}>
+            <div  style={{width:this.getMaxCoords().x,height:this.getMaxCoords().y, background:"black" }} >hi</div>
               {Object.values(this.state.stampElems)}
+                       {consoleElem}
             </ArcherContainer>
-            {consoleElem}
+   
 
-            <div
-              style={{
-    background:"pink", 
-
-
-  
-              }}
-            >
-               <ArcherContainer strokeColor='red' scale={1/this.state.scale}>
-   <div style={{position:"absolute", left:10, top:50}}> 
-          <ArcherElement
-            id="root"
-            relations={[{
-              targetId: 'element2',
-              targetAnchor: 'left',
-              sourceAnchor: 'right',
-            }]}
-          >
-            <div>Element 1</div>
-          </ArcherElement>
-          </div>
-        <div style={{width:500, height:500}}>_</div>
-
-   <div style={{position:"absolute", left:400, top:100}}>
-          <ArcherElement
-            id="element2"
-            relations={[]}
-          >
-            <div >Element 2</div>
-          </ArcherElement>
-
-    </div>
-    
-      </ArcherContainer>
-            </div>
           </div>
         </div>
 

@@ -29,9 +29,13 @@ import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
 
+
+import ArcherContainer from "./../../../react-archer/src/ArcherContainer.js";
+import ArcherElement from "./../../../react-archer/src/ArcherElement.js";
+
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import { ArcherContainer, ArcherElement } from "react-archer";
+
 
 
 var userAgent = navigator.userAgent.toLowerCase();
