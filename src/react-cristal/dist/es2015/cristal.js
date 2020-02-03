@@ -216,12 +216,22 @@ var Cristal = (function(_super) {
     };
 
     _this.getPosition = function(movementX, movementY) {
+      if(_this.props.getScale){
       var scale = _this.props.getScale();
+      }else{
+        var scale = 1
+      }
+
       var newX = _this.state.ghostX + movementX;
       var newY = _this.state.ghostY + movementY;
 
       this.setState({ ghostX: newX, ghostY: newY });
+      if(_this.props.getSnapMargin){
       var snapMargin = _this.props.getSnapMargin();
+      }else{
+        var snapMargin = 0
+      }
+
       if (snapMargin === 0) {
         return { x: newX, y: newY };
       } else {
@@ -250,8 +260,11 @@ var Cristal = (function(_super) {
       }
       var ghostY = Math.max(newHeight, minHeight);
       var onResize = _this.props.onResize;
-
+if(_this.props.getSnapMargin){
       var snapMargin = _this.props.getSnapMargin();
+      }else{
+        var snapMargin = 0
+      }
       if (snapMargin === 0) {
         var resizeBlocked = onResize(
           widthDiff,
@@ -298,7 +311,11 @@ var Cristal = (function(_super) {
 
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
+      if(_this.props.getScale){
       var scale = _this.props.getScale();
+      }else{
+        var scale = 1
+      }
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
@@ -341,7 +358,12 @@ var Cristal = (function(_super) {
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
+            if(_this.props.getScale){
       var scale = _this.props.getScale();
+      }else{
+        var scale = 1
+      }
+
       var _a = _this.state,
         isDragging = _a.isDragging,
         currentX = _a.x,
@@ -510,7 +532,11 @@ var Cristal = (function(_super) {
 
       if (!isResizable) return;
 
+      if(_this.props.getScale){
       var scale = _this.props.getScale();
+      }else{
+        var scale = 1
+      }
       var height = _this.state.height;
       var width = _this.state.width;
       var thickness = 5;
@@ -699,7 +725,8 @@ var Cristal = (function(_super) {
       return null;
     }
 
-    var uniqueClass = classVal + _this.props.parentID.toString();
+
+    var uniqueClass = classVal + _this.props.parentID;
     var mouseOverCallback = () => {
       $("." + uniqueClass).css({ opacity: "1" });
     };
@@ -868,12 +895,12 @@ var Cristal = (function(_super) {
 
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
-    if (this.props.headerHidden) {
-      HeaderComponent = null;
+    if (this.props.invisible) {
+      return (<span/>)
     }
 
     var relations = []
-    if(this.props.getLinesOn()){
+    if(this.props.getLinesOn && this.props.getLinesOn()){
       relations = getLineRelations(this)
     }
     var allContent = (

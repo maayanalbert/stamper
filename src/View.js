@@ -1971,11 +1971,21 @@ _stopLooping =setTimeout(() => {
             <ArcherContainer scale={this.state.scale} top={this.state.originY} left={this.state.originX}>
               {Object.values(this.state.stampElems)}
                        {consoleElem}
+
+        <Cristal
+          invisible
+        >
+  
+        </Cristal>
+
+                       
             </ArcherContainer>
    
 
+
           </div>
         </div>
+
 
         <ControlBar
        
