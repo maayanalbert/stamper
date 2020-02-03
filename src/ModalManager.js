@@ -315,10 +315,12 @@ export default class ModalManager extends Component {
 
           var allWorlds = []
       worlds.map(item => allWorlds.push({key:item.name, name:item.name}))
-      allWorlds.push({})
+     
       this.getOnlineWorlds((onlineWorlds) => {
-      
-
+        if(onlineWorlds.length > 0){
+           allWorlds.push({})
+        }
+       
         allWorlds = allWorlds.concat(onlineWorlds)
         callback(allWorlds)
       } )
@@ -1035,6 +1037,7 @@ checkPublishWorldName(){
 
   getOnlineWorlds(callback){
 
+
     var gh = new GitHub({token:this.oauthToken})
 
     var repo = gh.getRepo("p5stamper", "worlds")
@@ -1067,9 +1070,11 @@ checkPublishWorldName(){
       }
     }
 
-
-
+      if(result.length === 0){
+        this.setState({onlineWorldDict:{}}, () => callback([]))
+      }
       result.map((item) => {
+
         this.getWorldPublishTime(item.name, (time) => timeCallback(time, item.name))
 
       })

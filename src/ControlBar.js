@@ -788,9 +788,12 @@ function noiseWave() {
         this.setState({worldDropDowns:dropDownData})
         return
       }
-    dropDownData.push({})
+      dropDownData.push({})
+
 
     this.props.modalManagerRef.current.getWorldNamesAndKeys((allWorlds) => {
+
+
       allWorlds.map(item => {
         dropDownData.push({name:item.name,
           callback:() => this.props.modalManagerRef.current.getWorldObject(item.key, true, 

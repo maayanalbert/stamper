@@ -763,8 +763,7 @@ if(_this.props.getSnapMargin){
           trigger="hover"
           placement="top"
           overlay={
-            <Tooltip id="alert" className="picker-style-tooltip" style={{ fontSize: 12,   "font-family": "Montserrat, sans-serif",
-  "font-weight": 300}}>
+            <Tooltip id="alert" className="picker-style-tooltip" >
               {tooltipText}
             </Tooltip>
           }
