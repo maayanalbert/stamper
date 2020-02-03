@@ -296,8 +296,13 @@ export default class ModalManager extends Component {
 
     ipc &&
       ipc.on("resetView", (event, data) => {
-
+        if(data.worldKey){
           this.getWorldObject(data.worldKey, true, (stamperObject) => stamperObject && this.props.loadStamperObject(stamperObject) )
+        }else{
+          this.props.loadStamperObject(starter)
+        }
+
+        
 
       });
 
@@ -836,6 +841,9 @@ export default class ModalManager extends Component {
   }
 
   worldFileNameToKey(fileName){
+        if(!fileName){
+      return ""
+    }
     if(fileName.endsWith(".json")){
       return fileName.substring(0, fileName.length - ".json".length)
     }else{
@@ -844,6 +852,9 @@ export default class ModalManager extends Component {
   }
 
   worldKeyToNameAuthor(key){
+    if(!key){
+      return {name:"", author:""}
+    }
     var keyArr = key.split("_").join(" ").split("~")
     if(keyArr < 2){
       throw "improperly configured key"
