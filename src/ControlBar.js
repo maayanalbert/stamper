@@ -327,7 +327,7 @@ function noiseWave() {
 
     return (
       <div
-        style={{ opacity: overalOpacity }}
+        style={{ opacity: overalOpacity, width:this.state.sideBarWidth }}
         class="d-flex justify-content-between p-1 pl-2 pr-3"
       >
         <div

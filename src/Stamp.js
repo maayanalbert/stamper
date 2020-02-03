@@ -317,13 +317,18 @@ export default class FunctionStamp extends Component {
     if (this.props.isTxtFile || this.props.isIndex) {
       var mimeType = mime.lookup(this.state.name);
       if (!mimeType || mimeType.split("/").length === 0) {
-        return;
-      }
+        var mode = ""
+  
+      }else{
       var mimeTypeArr = mimeType.split("/");
       var mode = mimeTypeArr[mimeTypeArr.length - 1];
+
+      }
+
     } else {
       var mode = "javascript";
     }
+
 
     var shadow = ""
 
@@ -496,6 +501,11 @@ nameColor = "pink";
     if(this.props.isMediaFile){
       displayName = this.stripExtension(displayName)
     }
+
+    var backgroundColor = "bg-white"
+    if(0 in this.state.errorLines){
+      backgroundColor = "bg-warningOrange"
+    }
     return (
       <div>
          <p hidden={!this.props.isMediaFile}
@@ -509,12 +519,14 @@ nameColor = "pink";
             if(this.props.isMediaFile){
               newName = this.addExtension(newName, this.state.name)
             }
-            this.setState({name:newName})
+            this.setState({name:newName, editsMade:true})
             window.postMessage({type:"edited"}, '*');
+
           }}
+
           style={{ background: "transparent" }}
           value={displayName}
-          class={"text-" + nameColor + " name"}
+          class={"text-" + nameColor + " name " + backgroundColor}
         />
 
 
@@ -532,7 +544,7 @@ nameColor = "pink";
           }}
           style={{ background: "transparent" }}
           value={this.state.args}
-          class={"text-" + argsColor + " args"}
+          class={"text-" + argsColor + " args " + backgroundColor}
         />
       </div>
     );
@@ -862,9 +874,6 @@ setTimeout(() => {
 
   render() {
     var headerColor = "bg-white";
-    if (0 in this.state.errorLines) {
-      headerColor = "bg-warningOrange";
-    }
 
     var border = "border border-borderGrey";
 
