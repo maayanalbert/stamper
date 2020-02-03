@@ -87,7 +87,10 @@ export default class FunctionStamp extends Component {
       editorBottomShadow:false,
       ghostX:starterIframeWidth,
       ghostY:starterIframeHeight,
-      iframeDimensTransition:""
+      iframeDimensTransition:"",
+      mediaAssetHeight:null,
+      mediaAssetWidth:null
+
     };
 
     this.cristalRef = React.createRef();
@@ -562,6 +565,21 @@ nameColor = "pink";
       return;
     }
     if (mimeType.startsWith("image")) {
+      if(!this.state.imageWidth){
+      var img = new Image(); 
+
+      img.onload = function(){
+        console.log(img.width)
+        this.setState({imageWidth:img.width, imageHeight:img.height})
+      }
+
+      img.onload = img.onload.bind(this)
+
+      img.src = this.state.code; 
+
+    }
+
+
       return <img src={this.state.code} />;
     } else if (mimeType.startsWith("audio")) {
       return (
@@ -688,8 +706,14 @@ setTimeout(() => {
           }}
           handle={(<span className="react-resizable-handle react-resizable-handle-se" 
             onDoubleClick={() => {
+
+              if(this.state.imageWidth){
+                            this.manualIframeResize(this.state.imageWidth, this.state.imageHeight)
+              }else{
               var dimens = this.props.getP5CanvasDimensions()
-              this.manualIframeResize(dimens.width, dimens.height)
+                            this.manualIframeResize(dimens.width, dimens.height)
+              }
+
             }}/>)}
         >
           <div>
