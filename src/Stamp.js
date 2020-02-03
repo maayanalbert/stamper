@@ -148,7 +148,7 @@ export default class FunctionStamp extends Component {
     var mimeType = mime.lookup(this.state.name);
 
     if (!mimeType || mimeType.split("/").length === 0) {
-      // throw error
+      callback()
       return;
     }
     var mimeTypeArr = mimeType.split("/");
@@ -450,8 +450,10 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
   }
 
   compileCallback() {
+
     if (this.state.editsMade) {
       var compileActions = () => {
+
         this.props.requestCompile(this.props.id);
         window.postMessage({type:"edited"}, '*');
         this.setState({ editsMade: false, runningBorder: true }, () =>
