@@ -294,11 +294,11 @@ function noiseWave() {
 
   renderPicker(item) {
     if (item.status) {
-      var iconType = globals.VisibilityIcon;
+      var iconType = item.toggleOnIcon
       var iconNameCallback = () =>
         centerCallback(this.state.sideBarWidth, this.topBarHeight);
     } else {
-      var iconType = globals.VisibilityOffIcon;
+      var iconType = item.toggleOffIcon
       var iconNameCallback = null;
     }
 
@@ -317,11 +317,12 @@ function noiseWave() {
 
     if(item.icon === globals.EmptyIcon){
 
-      var iconType = globals.ExpandMoreIcon
+      var iconType = item.toggleOnIcon
       if(item.status === false){
-        var iconType = globals.ExpandLessIcon
+        var iconType = item.toggleOffIcon
       }
     }
+
 
 
 
@@ -368,6 +369,10 @@ function noiseWave() {
     this.props.pickerData.map((item, index) => {
 
 
+      if(item.isSetting){
+        pickers.push(this.renderSettingsPicker(item))
+        return
+      }
  
       pickers.push(
      
@@ -415,19 +420,24 @@ function noiseWave() {
     );
   }
 
-    renderSettingsPickers(){
-
-
-      var pickers =  this.props.settingsPicker.map( item => 
-
-
-        (
+  renderSettingsPicker(item){
+    return         (
                   <div
               class="border-bottom border-borderGrey bg-grey"
             >
               {this.renderPicker(item)}
 
-            </div>))
+            </div>)
+  }
+
+    renderSettingsPickers(){
+
+
+      var pickers =  this.props.settingsPicker.map( item => 
+         this.renderSettingsPicker(item)
+
+
+)
 
 
 

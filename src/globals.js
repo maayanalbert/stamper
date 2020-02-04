@@ -25,11 +25,16 @@ import CommentIcon from "./icons/message-square.svg";
 import InfoIcon from "./icons/info.svg";
 import PermanentWorldIcon from "./icons/star.svg";
 
+import SettingOnIcon from "./icons/check-square.svg";
+import SettingOffIcon from "./icons/square.svg";
+
 import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
 import EmptyIcon from "./icons/empty.svg";
 
 export const globals = {
+  SettingOnIcon:SettingOnIcon,
+  SettingOffIcon:SettingOffIcon,
   ExpandLessIcon:ExpandLessIcon,
   EmptyIcon:EmptyIcon,
   GridIcon:GridIcon,

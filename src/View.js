@@ -1723,10 +1723,11 @@ _stopLooping =setTimeout(() => {
 
     window.postMessage({ type: "edited" }, "*");
 
+        if(result.source.index === 0 || result.destination.index === 0){return}
     var stampOrder = Object.assign([], this.state.stampOrder);
 
-    const [removed] = stampOrder.splice(result.source.index, 1);
-    stampOrder.splice(result.destination.index, 0, removed);
+    const [removed] = stampOrder.splice(result.source.index-1, 1);
+    stampOrder.splice(result.destination.index-1, 0, removed);
 
     this.setState({ stampOrder: [] }, () => {
       this.setLayerPicker();
@@ -1823,7 +1824,9 @@ _stopLooping =setTimeout(() => {
       },
 
       id: this.getUniqueID(),
-      isSetting: true
+      isSetting: true      ,
+      toggleOnIcon:globals.SettingOnIcon,
+      toggleOffIcon:globals.SettingOffIcon
     });
 
     pickerData.push({
@@ -1837,8 +1840,20 @@ _stopLooping =setTimeout(() => {
         );
       },
       id: this.getUniqueID(),
-      isSetting: true
+      isSetting: true,
+      toggleOnIcon:globals.SettingOnIcon,
+      toggleOffIcon:globals.SettingOffIcon
     });
+
+
+
+    this.setState({ settingsPicker: pickerData });
+  }
+
+  setLayerPicker() {
+    this.setSettingsPicker();
+
+        var pickerData = [];
 
     if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
       var consoleRef = this.state.consoleStamp.ref.current;
@@ -1850,17 +1865,13 @@ _stopLooping =setTimeout(() => {
           this.centerOnStamp(consoleRef.props.id, xOff, yOff),
         hideCallback: () => this.toggleHide(consoleRef),
         id: consoleRef.props.id,
-        isSetting: true
+        isSetting: true,
+      toggleOnIcon:globals.VisibilityIcon,
+      toggleOffIcon:globals.VisibilityOffIcon
       });
-    }
+    }    
 
-    this.setState({ settingsPicker: pickerData });
-  }
 
-  setLayerPicker() {
-    this.setSettingsPicker();
-
-    var pickerData = [];
 
     this.state.stampOrder.map(id => {
       if (id in this.state.stampRefs) {
@@ -1884,7 +1895,9 @@ _stopLooping =setTimeout(() => {
         hideCallback: () => this.toggleHide(stampRef),
         id: stampRef.props.id,
         isConsole: false,
-        hasError: Object.keys(stampRef.state.errorLines).length > 0
+        hasError: Object.keys(stampRef.state.errorLines).length > 0,
+      toggleOnIcon:globals.VisibilityIcon,
+      toggleOffIcon:globals.VisibilityOffIcon
       });
     });
 

@@ -3,7 +3,7 @@
   "repository": "https://github.com/maayanalbert/p5stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.7.2",
@@ -58,6 +58,7 @@
     "electron": "^7.1.9",
     "electron-builder": "^21.2.0",
     "electron-devtools-installer": "^2.2.4",
+    "electron-packager": "^14.2.0",
     "file-loader": "^5.0.2",
     "file-saver": "^2.0.2",
     "gh-pages": "^2.2.0",
