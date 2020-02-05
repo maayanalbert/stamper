@@ -101,28 +101,8 @@ export default class ModalManager extends Component {
   getUrlWorldKey(){
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    return urlParams.get("example")
-    // var url = window.location.href
+    return urlParams.get("e")
 
-    //   if(url.startsWith("http://")){
-    //     url = url.substring("http://".length)
-    //   } else if(url.startsWith("https://")){
-    //     url = url.substring("https://".length)
-    //   }
-
-    //         if(!url.startsWith(this.domain)){
-    //           return ""
-    //         }
-
-
-    //     url = url.substring(this.domain.length)
-    //     if(url.startsWith("/")){
-    //       url = url.substring(1)
-    //     }
-  
-    //     if(url.endsWith("/")){
-    //       url =url.substring(0, url.length -1)
-    //     }
 
       
   
@@ -174,6 +154,7 @@ export default class ModalManager extends Component {
 
   loadStoredStamperObject(){
     var stored = localStorage.getItem("storedStamper");
+
 
     if (stored === null) {
       this.props.loadStamperObject(starter);
@@ -313,7 +294,44 @@ export default class ModalManager extends Component {
 
     this.createInputElement();
 
-    window.addEventListener("beforeunload", this.sendSaveData);
+    // window.addEventListener("beforeunload", function (e){
+    //   this.sendSaveData()
+    //   localStorage.setItem("e", JSON.stringify(e))
+    // });
+
+//     window.addEventListener('beforeunload', function (e) {
+//   // Cancel the event
+//   // this.sendSaveData()
+//   // if(this.props.getWorldData().worldEdited){
+//   e.preventDefault();
+//   // Chrome requires returnValue to be set
+//   e.returnValue = '';
+//   // }
+
+// });
+
+window.onbeforeunload = null;
+
+// window.addEventListener('beforeunload', function (e) {
+//   // Cancel the event
+//   e.preventDefault();
+//   // Chrome requires returnValue to be set
+//   e.returnValue = '';
+// });
+
+
+  }
+
+  protectAgainstClosed(e){
+    console.log(e)
+e.preventDefault()
+
+    var zip = new JSZip();
+ zip.file("file", JSON.stringify(e), { base64: true });
+
+    zip.generateAsync({ type: "blob" }).then(function(content) {
+      saveAs(content, "stamper_sketch.zip");
+    });
   }
 
   getWorldNamesAndKeys(callback = () => null){
@@ -883,6 +901,7 @@ export default class ModalManager extends Component {
     var worldData = this.props.getWorldData();
     var localWorldAuthor = localStorage.getItem("localWorldAuthor");
 
+
     var publishModalName = "";
     if (worldData.worldKey) {
       publishModalName = this.worldKeyToNameAuthor(worldData.worldKey).name;
@@ -1189,7 +1208,7 @@ callback(-1, fileName)
 
     return (               <input class="picker picker form-control form-control-sm mt-1 mb-1"
 
-      value={this.domain + "/?example=" + this.props.getWorldData().worldKey}/>
+      value={this.domain + "/?e=" + this.props.getWorldData().worldKey}/>
 
       )
   }

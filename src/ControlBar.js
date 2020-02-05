@@ -806,8 +806,12 @@ function noiseWave() {
 
       allWorlds.map(item => {
         dropDownData.push({name:item.name,
-          callback:() => this.props.modalManagerRef.current.getWorldObject(item.key, true, 
-            (so) => this.props.modalManagerRef.current.loadWithOverwriteProtection(so))
+          callback:() =>{
+            window.open(item.key, "_blank")
+
+           // this.props.modalManagerRef.current.getWorldObject(item.key, true, 
+           //  (so) => this.props.modalManagerRef.current.loadWithOverwriteProtection(so))
+          }
         })
         this.setState({worldDropDowns:dropDownData})
       })
