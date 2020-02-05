@@ -703,8 +703,8 @@ if(_this.props.getSnapMargin){
 
       return {
         targetId: "line_" + line.end,
-        targetAnchor: targetAnchor,
-        sourceAnchor: sourceAnchor,
+        targetAnchor: "left",
+        sourceAnchor: "right",
         label:line.label,
         style:line.style
       };
