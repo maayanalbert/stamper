@@ -72,7 +72,7 @@ export default class ModalManager extends Component {
       // can be unsubmitted, success, failure, loading
     };
     this.receiveMessage = this.receiveMessage.bind(this)
-    this.domain = "maayanalbert.github.io/p5stamper"
+    this.domain = "maayanalbert.github.io/p5stamper-secret"
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.checkFiles = this.checkFiles.bind(this);

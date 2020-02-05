@@ -85,7 +85,7 @@
   },
   "main": "public/electron.js",
   "homepage1": "./",
-  "homepage": "http://maayanalbert.github.io/p5stamper",
+  "homepage": "http://maayanalbert.github.io/p5stamper-secret",
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",
