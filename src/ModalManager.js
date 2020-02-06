@@ -120,6 +120,7 @@ export default class ModalManager extends Component {
       
 
         var urlWorldKey = this.getUrlWorldKey()
+        console.log(urlWorldKey)
  
         if(urlWorldKey){
         
@@ -151,6 +152,7 @@ export default class ModalManager extends Component {
 
 
   }
+
 
   loadStoredStamperObject(){
     var stored = localStorage.getItem("storedStamper");
@@ -310,15 +312,25 @@ export default class ModalManager extends Component {
 
 // });
 
-window.onbeforeunload = null;
+// window.onbeforeunload = null;
 
-// window.addEventListener('beforeunload', function (e) {
-//   // Cancel the event
-//   e.preventDefault();
-//   // Chrome requires returnValue to be set
-//   e.returnValue = '';
-// });
+window.addEventListener('beforeunload', function (e) {
+  e.preventDefault()
+  return "You have attempted to leave this page. Are you sure?";
+  //       if (!window.confirm('Are you sure you want to leave this page? You have unsaved changes.')) {
+  //       return false;
+  //     }
+  // // Cancel the event
+  // e.preventDefault();
+  // // Chrome requires returnValue to be set
+  // e.returnValue = '';
+});
 
+
+    // window.onbeforeunload = confirmExit;
+    // function confirmExit() {
+    //     return "You have attempted to leave this page. Are you sure?";
+    // }
 
   }
 
@@ -854,6 +866,13 @@ e.preventDefault()
       });
   }
 
+  worldKeyToUrl(key){
+ 
+      return "https://" + this.domain + "/?e=" + key
+   
+
+  }
+
   worldKeyToFileName(key){
     return key + ".json"
   }
@@ -1208,10 +1227,12 @@ callback(-1, fileName)
 
     return (               <input class="picker picker form-control form-control-sm mt-1 mb-1"
 
-      value={this.domain + "/?e=" + this.props.getWorldData().worldKey}/>
+      value={this.worldKeyToUrl( this.props.getWorldData().worldKey)}/>
 
       )
   }
+
+
 
 
 
