@@ -337,91 +337,89 @@ export default class View extends Component {
             var callback = () =>
               this.recompileIfEnoughStamps(stamperObject.stamps.length);
             this.addConsoleStamp(stamperObject.console);
-            var stampData = stamperObject.stamps
-            if(stamperObject.stamps.length > 0 && !stamperObject.stamps[0].x){
-              stampData = this.getAutoLayout(stamperObject.stamps, stamperObject.js)
+            var stampData = stamperObject.stamps;
+            if (stamperObject.stamps.length > 0 && !stamperObject.stamps[0].x) {
+              stampData = this.getAutoLayout(
+                stamperObject.stamps,
+                stamperObject.js
+              );
             }
 
-            stampData.map(data => this.addStamp(data, callback))
-
+            stampData.map(data => this.addStamp(data, callback));
           }
         );
       }
     );
   }
 
-  addRawJavascript(rawJS){
+  addRawJavascript(rawJS) {
+    var stamperObject = parser.jsToStamps(rawJS);
+    var curNumStamps = this.getNumStamps();
 
-      var stamperObject = parser.jsToStamps(rawJS);
-      var curNumStamps = this.getNumStamps();
+    var callback = () => {
+      window.postMessage({ type: "edited" }, "*");
+      this.recompileIfEnoughStamps(
+        stamperObject.stamps.length + curNumStamps.stamps
+      );
+    };
 
-      var callback = () => {
-        window.postMessage({type:"edited"}, '*')
-        this.recompileIfEnoughStamps(
-          stamperObject.stamps.length + curNumStamps.stamps
-        );
-      };
+    var stampData = this.getAutoLayout(
+      stamperObject.stamps,
+      this.getExportableCode() + "\n" + rawJS
+    );
 
-      var stampData = this.getAutoLayout(stamperObject.stamps, this.getExportableCode() + "\n" + rawJS)
-
-      stampData.map(data => this.addStamp(data, callback))
+    stampData.map(data => this.addStamp(data, callback));
   }
 
-  getAutoLayout(stampsData, rawJS){
-    if(!rawJS){
-      rawJS = ""
+  getAutoLayout(stampsData, rawJS) {
+    if (!rawJS) {
+      rawJS = "";
     }
     var xPos = this.setInitialPosition("x");
     var yPos = this.setInitialPosition("y");
 
-    var initialXPos = xPos
-    var maxHeight = -1
-    var layoutedStampsData = []
+    var initialXPos = xPos;
+    var maxHeight = -1;
+    var layoutedStampsData = [];
 
-    for(var i = 0; i < stampsData.length; i++){
-      var data = stampsData[i]
-      data = this.getFilledInStampData(data)
-      var iframeDimens = this.getP5CanvasDimensions(rawJS)
-      data.iframeWidth = iframeDimens.width
-      data.iframeHeight = iframeDimens.height
+    for (var i = 0; i < stampsData.length; i++) {
+      var data = stampsData[i];
+      data = this.getFilledInStampData(data);
+      var iframeDimens = this.getP5CanvasDimensions(rawJS);
+      data.iframeWidth = iframeDimens.width;
+      data.iframeHeight = iframeDimens.height;
 
-      if(!data.isBlob && !data.isTxtFile){
-        data.editorHeight = Math.max(data.editorHeight, data.iframeHeight - globals.brHeight)
+      if (!data.isBlob && !data.isTxtFile) {
+        data.editorHeight = Math.max(
+          data.editorHeight,
+          data.iframeHeight - globals.brHeight
+        );
       }
-      var cristalDimens = this.getCristalDimens(data)
+      var cristalDimens = this.getCristalDimens(data);
 
-      data.x = xPos
-      data.y = yPos
+      data.x = xPos;
+      data.y = yPos;
 
+      var absoluteEndPoint =
+        xPos + cristalDimens.width + globals.autoLayoutMargin;
+      var endPointRelativeToScreen =
+        (absoluteEndPoint - this.state.originX) * this.state.scale;
 
-      var absoluteEndPoint = xPos + cristalDimens.width + globals.autoLayoutMargin
-      var endPointRelativeToScreen = (absoluteEndPoint - this.state.originX)*this.state.scale
-
-      if(endPointRelativeToScreen >= window.innerWidth){
-    
-        xPos = initialXPos
-        yPos = yPos + maxHeight + globals.autoLayoutMargin
-        maxHeight = -1
-         data.x = xPos
-        data.y = yPos    
-
+      if (endPointRelativeToScreen >= window.innerWidth) {
+        xPos = initialXPos;
+        yPos = yPos + maxHeight + globals.autoLayoutMargin;
+        maxHeight = -1;
+        data.x = xPos;
+        data.y = yPos;
       }
 
-      xPos += cristalDimens.width + globals.autoLayoutMargin
-      maxHeight = Math.max(maxHeight, cristalDimens.height)
+      xPos += cristalDimens.width + globals.autoLayoutMargin;
+      maxHeight = Math.max(maxHeight, cristalDimens.height);
 
-
-
-
-      layoutedStampsData.push(data)
-
-
+      layoutedStampsData.push(data);
     }
 
-
-    return layoutedStampsData
-
-
+    return layoutedStampsData;
   }
 
   getIframeErrorCallBack(ranges, offset = 0) {
@@ -475,39 +473,32 @@ function logToConsole(message, lineno){
     }`;
   }
 
-  getP5CanvasDimensions(code = this.getExportableCode()){
-
-    var defaultDimens = {width: 100,height:100}
-    var createCanvasStart = code.indexOf("createCanvas(")
-    if(createCanvasStart < 0){
-      return defaultDimens
+  getP5CanvasDimensions(code = this.getExportableCode()) {
+    var defaultDimens = { width: 100, height: 100 };
+    var createCanvasStart = code.indexOf("createCanvas(");
+    if (createCanvasStart < 0) {
+      return defaultDimens;
     }
 
+    var start = createCanvasStart + "createCanvas(".length;
 
-
-    var start = createCanvasStart + "createCanvas(".length
-
-
-
-    var end = code.indexOf(")", start)
-    if(end < 0){
-      return defaultDimens
+    var end = code.indexOf(")", start);
+    if (end < 0) {
+      return defaultDimens;
     }
 
-    var paramsArr = code.substr(start, end - start).split(",")
-    if(paramsArr.length != 2){
-      return defaultDimens
+    var paramsArr = code.substr(start, end - start).split(",");
+    if (paramsArr.length != 2) {
+      return defaultDimens;
     }
 
+    var width = Number(paramsArr[0]);
+    var height = Number(paramsArr[1]);
+    if (!width || !height) {
+      return defaultDimens;
+    }
 
-    var width = Number(paramsArr[0])
-    var height = Number(paramsArr[1])
-    if(!width || !height){
-      return defaultDimens
-    } 
-
-    return {width:width, height:height}
-
+    return { width: width, height: height };
   }
 
   loadAssets(htmlCode) {
@@ -688,7 +679,7 @@ function logToConsole(message, lineno){
       .substr(2, 9);
   }
 
-  getFilledInStampData(data){
+  getFilledInStampData(data) {
     var defaults = {
       name: "sketch",
       code: "rect(50, 50, 50, 50)",
@@ -709,16 +700,24 @@ function logToConsole(message, lineno){
       codeSize: globals.codeSize
     };
 
-    if(!data.iframeWidth && !data.iframeHeight && !data.isIndex && !data.isTxtFile && !data.isMediaFile){
-      if(data.isBlob){
-        var seenCode = data.code.toString()
-      }else{
-        var seenCode = `function ${data.name.toString()}(${data.args.toString()}){\n  ${data.code.toString()}\n}`
+    if (
+      !data.iframeWidth &&
+      !data.iframeHeight &&
+      !data.isIndex &&
+      !data.isTxtFile &&
+      !data.isMediaFile
+    ) {
+      if (data.isBlob) {
+        var seenCode = data.code.toString();
+      } else {
+        var seenCode = `function ${data.name.toString()}(${data.args.toString()}){\n  ${data.code.toString()}\n}`;
       }
 
-      var iframeDimens = this.getP5CanvasDimensions(this.getExportableCode() + "\n"+seenCode)
-      data.iframeWidth = iframeDimens.width
-      data.iframeHeight = iframeDimens.height
+      var iframeDimens = this.getP5CanvasDimensions(
+        this.getExportableCode() + "\n" + seenCode
+      );
+      data.iframeWidth = iframeDimens.width;
+      data.iframeHeight = iframeDimens.height;
     }
 
     Object.keys(defaults).map(setting => {
@@ -727,11 +726,10 @@ function logToConsole(message, lineno){
       }
     });
 
-    return defaults    
+    return defaults;
   }
 
   addStamp(data, callback = () => null) {
-
     data = this.getFilledInStampData(data);
 
     ///
@@ -752,7 +750,7 @@ function logToConsole(message, lineno){
         starterArgs={data.args}
         starterName={data.name}
         errorLines={{}}
-        getCristalDimens = {this.getCristalDimens.bind(this)}
+        getCristalDimens={this.getCristalDimens.bind(this)}
         setLineData={this.setLineData.bind(this)}
         starterEditorWidth={data.editorWidth}
         starterEditorHeight={data.editorHeight}
@@ -1579,7 +1577,7 @@ _stopLooping =setTimeout(() => {
       worldPublishTime: this.state.worldPublishTime,
       snapToGrid: this.state.snapToGrid,
       linesOn: this.state.linesOn,
-      js:this.getExportableCode()
+      js: this.getExportableCode()
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1723,11 +1721,13 @@ _stopLooping =setTimeout(() => {
 
     window.postMessage({ type: "edited" }, "*");
 
-        if(result.source.index === 0 || result.destination.index === 0){return}
+    if (result.source.index === 0 || result.destination.index === 0) {
+      return;
+    }
     var stampOrder = Object.assign([], this.state.stampOrder);
 
-    const [removed] = stampOrder.splice(result.source.index-1, 1);
-    stampOrder.splice(result.destination.index-1, 0, removed);
+    const [removed] = stampOrder.splice(result.source.index - 1, 1);
+    stampOrder.splice(result.destination.index - 1, 0, removed);
 
     this.setState({ stampOrder: [] }, () => {
       this.setLayerPicker();
@@ -1824,9 +1824,9 @@ _stopLooping =setTimeout(() => {
       },
 
       id: this.getUniqueID(),
-      isSetting: true      ,
-      toggleOnIcon:globals.SettingOnIcon,
-      toggleOffIcon:globals.SettingOffIcon
+      isSetting: true,
+      toggleOnIcon: globals.SettingOnIcon,
+      toggleOffIcon: globals.SettingOffIcon
     });
 
     pickerData.push({
@@ -1841,11 +1841,9 @@ _stopLooping =setTimeout(() => {
       },
       id: this.getUniqueID(),
       isSetting: true,
-      toggleOnIcon:globals.SettingOnIcon,
-      toggleOffIcon:globals.SettingOffIcon
+      toggleOnIcon: globals.SettingOnIcon,
+      toggleOffIcon: globals.SettingOffIcon
     });
-
-
 
     this.setState({ settingsPicker: pickerData });
   }
@@ -1853,7 +1851,7 @@ _stopLooping =setTimeout(() => {
   setLayerPicker() {
     this.setSettingsPicker();
 
-        var pickerData = [];
+    var pickerData = [];
 
     if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
       var consoleRef = this.state.consoleStamp.ref.current;
@@ -1866,12 +1864,10 @@ _stopLooping =setTimeout(() => {
         hideCallback: () => this.toggleHide(consoleRef),
         id: consoleRef.props.id,
         isSetting: true,
-      toggleOnIcon:globals.VisibilityIcon,
-      toggleOffIcon:globals.VisibilityOffIcon
+        toggleOnIcon: globals.VisibilityIcon,
+        toggleOffIcon: globals.VisibilityOffIcon
       });
-    }    
-
-
+    }
 
     this.state.stampOrder.map(id => {
       if (id in this.state.stampRefs) {
@@ -1896,8 +1892,8 @@ _stopLooping =setTimeout(() => {
         id: stampRef.props.id,
         isConsole: false,
         hasError: Object.keys(stampRef.state.errorLines).length > 0,
-      toggleOnIcon:globals.VisibilityIcon,
-      toggleOffIcon:globals.VisibilityOffIcon
+        toggleOnIcon: globals.VisibilityIcon,
+        toggleOffIcon: globals.VisibilityOffIcon
       });
     });
 
@@ -1940,8 +1936,8 @@ _stopLooping =setTimeout(() => {
   //          // <div  style={{width:this.getMaxCoords().x,height:this.getMaxCoords().y, background:"black" }} >hi</div>
   // }
 
-  getCristalDimens(data){
-        var iframeWidth = data.iframeWidth;
+  getCristalDimens(data) {
+    var iframeWidth = data.iframeWidth;
     if (data.isTxtFile || data.isBlob) {
       iframeWidth = 0;
     }
@@ -1953,8 +1949,11 @@ _stopLooping =setTimeout(() => {
       initialHeight = data.editorHeight + 60;
     }
 
-    return {width: iframeWidth + data.editorWidth + 42, height:initialHeight}
-  }  
+    return {
+      width: iframeWidth + data.editorWidth + 42,
+      height: initialHeight
+    };
+  }
 
   render() {
     if (this.state.consoleStamp) {
@@ -1974,34 +1973,24 @@ _stopLooping =setTimeout(() => {
               position: "absolute",
               left: this.state.originX,
               top: this.state.originY,
-              transform: "scale(" + this.state.scale + ")", 
-
+              transform: "scale(" + this.state.scale + ")"
             }}
           >
-          <div>
-            {this.renderGridLines()}
-            </div>
-            <ArcherContainer scale={this.state.scale} top={this.state.originY} left={this.state.originX}>
+            <div>{this.renderGridLines()}</div>
+            <ArcherContainer
+              scale={this.state.scale}
+              top={this.state.originY}
+              left={this.state.originX}
+            >
               {Object.values(this.state.stampElems)}
-                       {consoleElem}
+              {consoleElem}
 
-        <Cristal
-          invisible
-        >
-  
-        </Cristal>
-
-                       
+              <Cristal invisible></Cristal>
             </ArcherContainer>
-   
-
-
           </div>
         </div>
 
-
         <ControlBar
-       
           getNumStamps={this.getNumStamps.bind(this)}
           requestCompile={this.requestCompile.bind(this)}
           pickerData={this.state.pickerData}
