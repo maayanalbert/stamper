@@ -38,11 +38,11 @@ type State = {
 
 const defaultSvgContainerStyle = {
   position: 'absolute',
-  width: "100%",
-  height: "100%",
-  top:0,
+  width: '100%',
+  height: '100%',
+  top: 0,
   left: 0,
-  background:"black"
+  background: 'black',
 };
 
 function rectToPoint(rect: ClientRect) {
@@ -160,13 +160,13 @@ export class ArcherContainer extends React.Component<Props, State> {
     const rect = this.getRectFromRef(this.state.refs[index]);
 
     if (!rect) {
-      return new Point(0, 0);
+      return null;
     }
     const absolutePosition = computeCoordinatesFromAnchorPosition(position, rect);
 
     var retPos = absolutePosition.substract(parentCoordinates);
-    retPos.x = retPos.x / this.props.scale
-    retPos.y = retPos.y / this.props.scale
+    retPos.x = retPos.x / this.props.scale;
+    retPos.y = retPos.y / this.props.scale;
 
     return retPos;
   };
@@ -240,19 +240,62 @@ export class ArcherContainer extends React.Component<Props, State> {
 
       const offset = this.props.offset || 0;
 
-      const startingAnchorOrientation = source.anchor;
-      const startingPoint = this.getPointCoordinatesFromAnchorPosition(
-        source.anchor,
+      var startingRect = this.getRectFromRef(this.state.refs[source.id]);
+      var endingRect = this.getRectFromRef(this.state.refs[target.id]);
+
+      if (!startingRect || !endingRect) {
+        return null;
+      }
+
+      var startingAnchorOrientation = source.anchor;
+      var startingPoint = this.getPointCoordinatesFromAnchorPosition(
+        'middle',
         source.id,
         parentCoordinates,
-      )
+      );
 
-      const endingAnchorOrientation = target.anchor;
-      const endingPoint = this.getPointCoordinatesFromAnchorPosition(
+      var endingAnchorOrientation = target.anchor;
+      var endingPoint = this.getPointCoordinatesFromAnchorPosition(
         target.anchor,
         target.id,
         parentCoordinates,
       );
+
+      var xDiff = startingPoint.x - endingPoint.x;
+      var yDiff = startingPoint.y - endingPoint.y;
+
+      if (Math.abs(yDiff) > Math.abs(xDiff)) {
+        if (yDiff > 0) {
+          source.anchor = 'top';
+        } else {
+          source.anchor = 'bottom';
+        }
+      } else {
+        if (xDiff < 0) {
+          source.anchor = 'right';
+        } else {
+          source.anchor = 'left';
+        }
+      }
+
+      startingAnchorOrientation = source.anchor;
+      startingPoint = this.getPointCoordinatesFromAnchorPosition(
+        source.anchor,
+        source.id,
+        parentCoordinates,
+      );
+
+      // if (source.anchor === 'top' || source.anchor === 'bottom') {
+      //   startingPoint.x += relativeStartOffset;
+      // } else {
+      //   startingPoint.y += relativeStartOffset;
+      // }
+
+      // if (target.anchor === 'top' || target.anchor === 'bottom') {
+      //   endingPoint.x += relativeEndOffset;
+      // } else {
+      //   endingPoint.y += relativeEndOffset;
+      // }
 
       return (
         <SvgArrow
@@ -332,17 +375,24 @@ export class ArcherContainer extends React.Component<Props, State> {
         }}
       >
         <div style={{ ...this.props.style }} className={this.props.className}>
-      <div >
-          <svg viewBox={`${-this.props.left/this.props.scale} ${-this.props.top/this.props.scale} ${window.innerWidth/this.props.scale} ${window.innerHeight/this.props.scale}`} style={{position:"absolute", 
-          top:-this.props.top/this.props.scale, left:-this.props.left/this.props.scale, 
-          width:window.innerWidth/this.props.scale, height:window.innerHeight/this.props.scale}}>
-            <defs>{this.generateAllArrowMarkers()}</defs>
-            
-            {SvgArrows}
-     
-          </svg>
-       
-</div>
+          <div>
+            <svg
+              viewBox={`${-this.props.left / this.props.scale} ${-this.props.top /
+                this.props.scale} ${window.innerWidth / this.props.scale} ${window.innerHeight /
+                this.props.scale}`}
+              style={{
+                position: 'absolute',
+                top: -this.props.top / this.props.scale,
+                left: -this.props.left / this.props.scale,
+                width: window.innerWidth / this.props.scale,
+                height: window.innerHeight / this.props.scale,
+              }}
+            >
+              <defs>{this.generateAllArrowMarkers()}</defs>
+
+              {SvgArrows}
+            </svg>
+          </div>
           <div style={{ height: '100%' }} ref={this.storeParent}>
             {this.props.children}
           </div>

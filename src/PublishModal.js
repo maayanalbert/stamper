@@ -61,7 +61,6 @@ export default class ModalManager extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props.publishModalName);
     this.setState({
       publishNameAuthorExists: this.props.checkPublishWorldName(
         this.state.publishModalName,

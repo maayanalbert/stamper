@@ -14,7 +14,6 @@ const log = require("electron-log");
 const path = require("path");
 const isDev = require("electron-is-dev");
 
-
 const FileManager = require("./FileManager.js");
 const defaultMenu = require("electron-default-menu");
 
@@ -22,8 +21,7 @@ let mainWindow;
 let fileManager;
 let manualQuit = false;
 let manualClose = false;
-let worldNames = ["starter", "empty", "particles"]
-
+let worldNames = ["starter", "empty", "particles"];
 
 function createWindow() {
   manualClose = false;
@@ -53,11 +51,12 @@ function createWindow() {
     ipcMain.removeAllListeners("save");
     ipcMain.removeAllListeners("updatePath");
     ipcMain: null;
+    fileManager.watcher.close();
   });
 
-  mainWindow.on("blur", (e) => {
-    mainWindow.send("requestSave")
-  })
+  mainWindow.on("blur", e => {
+    mainWindow.send("requestSave");
+  });
 
   mainWindow.on("close", event => {
     if (manualClose === false && manualQuit === false) {
@@ -76,31 +75,23 @@ function createWindow() {
     fileManager = new FileManager(mainWindow);
     fileManager.name = "Untitled";
     mainWindow.setTitle(fileManager.name);
-    mainWindow.webContents.send("getWorlds")
+    mainWindow.webContents.send("getWorlds");
 
     ipcMain.on("sendWorlds", (event, data) => {
-
-
-        var worldButtons = data.map( world => 
-
-          {
-
-           if(!world.name){
-            return { type: "separator" }
-           } 
-          return {
-            label:world.name, 
-            click(){
-          fileManager.onNewProject(world.key)
-            }
-          }
+      var worldButtons = data.map(world => {
+        if (!world.name) {
+          return { type: "separator" };
         }
+        return {
+          label: world.name,
+          click() {
+            fileManager.onNewProject(world.key);
+          }
+        };
+      });
 
-        )
-
-        setMenu(worldButtons)
-    })
-
+      setMenu(worldButtons);
+    });
   });
 }
 
@@ -153,7 +144,7 @@ function setMenu(worldButtons = []) {
       },
       {
         label: "Open example...",
-        submenu:worldButtons
+        submenu: worldButtons
       },
       { type: "separator" },
 
@@ -176,21 +167,19 @@ function setMenu(worldButtons = []) {
         click() {
           if (fileManager.path) {
             shell.openItem(fileManager.path);
-          }else{
-                  const options = {
+          } else {
+            const options = {
+              buttons: ["Ok"],
+              message: "This project isn't saved anywhere yet."
+            };
 
-        buttons: ["Ok"],
-        message: "This project isn't saved anywhere yet.",
-      };
-
-      dialog.showMessageBox(null, options)
+            dialog.showMessageBox(null, options);
           }
         },
         accelerator: "Cmd+K"
-      },
+      }
     ]
   });
-
 
   menu[5].submenu = [
     {
@@ -218,7 +207,6 @@ function setMenu(worldButtons = []) {
       }
     }
   ];
-
 
   menu[3].submenu.push({ type: "separator" });
   menu[3].submenu.push({

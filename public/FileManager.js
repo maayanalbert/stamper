@@ -24,27 +24,25 @@ module.exports = class FileManager {
 
     this.pendingCallback = () => null;
     this.edited = false;
-    this.watcher = null
+    this.watcher = null;
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
     });
 
     ipcMain.on("updatePath", (event, data) => {
-  
       this.path = data.path;
       this.name = data.name;
       this.fileDict = data.fileDict;
       this.mainWindow.setTitle(this.name);
       this.watcher = chokidar.watch(this.path, {
-          ignored: /[\/\\]\./,
-          persistent: true
+        ignored: /[\/\\]\./,
+        persistent: true
       });
 
       this.watcher
-      .on("raw", this.fileChange.bind(this))
-      .on('error', error => log(`Watcher error: ${error}`))
-
+        .on("raw", this.fileChange.bind(this))
+        .on("error", error => log(`Watcher error: ${error}`));
     });
 
     ipcMain.on("edited", event => {
@@ -54,62 +52,55 @@ module.exports = class FileManager {
     });
   }
 
-  isExteriorChange(event, path){
-     if(event === "root-changed"){
-      return true
+  isExteriorChange(event, path) {
+    if (event === "root-changed") {
+      return true;
     }
 
-    var fileName = path.substring(path.indexOf(this.path) + this.path.length)
-    var file = this.fileDict[fileName]
-    if(file){
-      var existingContent = file.content
-      if(file.type === "media"){
-        existingContent = this.uriToText(existingContent)
+    var fileName = path.substring(path.indexOf(this.path) + this.path.length);
+    var file = this.fileDict[fileName];
+    if (file) {
+      var existingContent = file.content;
+      if (file.type === "media") {
+        existingContent = this.uriToText(existingContent);
       }
-    }else{
-      var existingContent = undefined
+    } else {
+      var existingContent = undefined;
     }
 
-
-    var newContent = jetpack.read(path)
-    return newContent != existingContent
-
-
+    var newContent = jetpack.read(path);
+    return newContent != existingContent;
   }
 
-  fileChange(event, path, detail){
+  fileChange(event, path, detail) {
+    console.log("FILECHANGE");
 
-    if(this.isExteriorChange(event, path)){
+    if (this.isExteriorChange(event, path)) {
+      console.log("IS EXTERIOR CHANGE");
       this.mainWindow.send("exteriorChanges");
-      this.resetFiles()
+      this.resetFiles();
     }
-
   }
 
-  actuallyResetFiles(){
-        this.path = undefined;
-        this.name = "Untitled";
-        this.fileDict = {};
-        this.edited = false;
-        this.mainWindow.setTitle(this.name);
-        this.watcher = null    
+  actuallyResetFiles() {
+    this.path = undefined;
+    this.name = "Untitled";
+    this.fileDict = {};
+    this.edited = false;
+    this.mainWindow.setTitle(this.name);
+    this.watcher = null;
   }
-
-
 
   resetFiles() {
+    this.watcher &&
+      this.watcher.close().then(() => {
+        this.actuallyResetFiles();
+      });
 
-      this.watcher && this.watcher.close().then( () => {
-        this.actuallyResetFiles()
-      })
-
-      !this.watcher && this.actuallyResetFiles()
-
-
+    !this.watcher && this.actuallyResetFiles();
   }
 
   onNewProject(worldKey) {
-   
     this.protectUnsaved(() => this.openNewProject(worldKey));
   }
 
@@ -137,11 +128,9 @@ module.exports = class FileManager {
   }
 
   openNewProject(worldKey) {
-
     this.resetFiles();
 
-
-    this.mainWindow.webContents.send("resetView", {worldKey:worldKey});
+    this.mainWindow.webContents.send("resetView", { worldKey: worldKey });
   }
 
   onSaveCommand() {
@@ -153,12 +142,11 @@ module.exports = class FileManager {
   }
 
   onOpenCommand() {
-
     this.protectUnsaved(this.openProject.bind(this));
   }
 
-  openProject(){
-      this.mainWindow.webContents.send("requestUpload");  
+  openProject() {
+    this.mainWindow.webContents.send("requestUpload");
   }
 
   onSaveAsCommand() {
@@ -172,14 +160,12 @@ module.exports = class FileManager {
     });
   }
 
-  uriToText(uri){
+  uriToText(uri) {
+    var idx = uri.indexOf("base64,") + "base64,".length;
+    var headerlessUri = uri.substring(idx);
 
-          var idx = uri.indexOf("base64,") + "base64,".length;
-          var headerlessUri = uri.substring(idx);
-
-          var buf = new Buffer(headerlessUri, "base64");
-          return buf
-
+    var buf = new Buffer(headerlessUri, "base64");
+    return buf;
   }
 
   saveFiles(newFileDict) {

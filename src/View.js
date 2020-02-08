@@ -844,12 +844,7 @@ function logToConsole(message, lineno){
     fileDict["sketch.js"] = { content: this.getExportableCode(), type: "text" };
     var stamperObject = this.getStamperObject();
 
-    stamperObject.compressedJs = LZUTF8.compress(
-      fileDict["sketch.js"].content,
-      {
-        outputEncoding: "StorageBinaryString"
-      }
-    );
+    stamperObject.js = fileDict["sketch.js"].content;
 
     fileDict["stamper.js"] = {
       content: stamperHeader + JSON.stringify(stamperObject),
@@ -1310,9 +1305,9 @@ function logToConsole(message, lineno){
     var strokeColor = this.getLineColor(type, true);
     var style = {
       strokeColor: strokeColor,
-      strokeWidth: 15,
-      arrowLength: 2.5,
-      arrowThickness: 2.5
+      strokeWidth: 5,
+      arrowLength: 4,
+      arrowThickness: 4
     };
     return style;
   }
@@ -1370,7 +1365,31 @@ function logToConsole(message, lineno){
         lineDict[lineKey] = 0;
       }
       lineDict[lineKey] += 1;
+
       return lineDict[lineKey] === 1 && line.start != line.end;
+    });
+
+    var relativeOffsetUnit = 10;
+
+    // this.state.stampOrder.map(id => {
+    //   var startIsId = lineData.filter(line => line.start === id);
+    //   var endIsId = lineData.filter(line => line.end === id);
+
+    //   startIsId.map((line, index) => {
+    //     var medianVal = 0.5 * (startIsId.length - 1);
+    //     line.relativeStartOffset = (index - medianVal) * relativeOffsetUnit;
+    //   });
+
+    //   endIsId.map((line, index) => {
+    //     var medianVal = 0.5 * (startIsId.length - 1);
+    //     line.relativeEndOffset = (index - medianVal) * relativeOffsetUnit;
+    //   });
+    // });
+
+    lineData.map(line => {
+      line.targetAnchor = "left";
+      line.sourceAnchor = "bottom";
+      line.targetId = "line_" + line.end;
     });
 
     return lineData;
@@ -1589,13 +1608,6 @@ _stopLooping =setTimeout(() => {
     return data;
   }
 
-  // onStartZoom() {
-  //   this.setState({ actualLinesOn: this.state.linesOn, linesOn: false }, () =>
-  //     this.setLineData()
-  //   );
-  //   this.onStopMove();
-  // }
-
   onStartMove() {
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1604,13 +1616,6 @@ _stopLooping =setTimeout(() => {
       stamp.setIframeDisabled(true);
     }
   }
-
-  // onStopZoom() {
-  //   this.setState({ linesOn: this.state.actualLinesOn }, () =>
-  //     this.setLineData()
-  //   );
-  //   this.onStopMove();
-  // }
 
   onStopMove() {
     this.supplyLineData();

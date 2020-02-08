@@ -647,9 +647,7 @@ export default class ModalManager extends Component {
     if (stamperObject === undefined) {
       var oldJs = undefined;
     } else {
-      var oldJs = LZUTF8.decompress(stamperObject.compressedJs, {
-        inputEncoding: "StorageBinaryString"
-      });
+      var oldJs = stamperObject.js;
     }
 
     if (oldJs === js) {

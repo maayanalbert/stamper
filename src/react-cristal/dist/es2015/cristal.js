@@ -24,19 +24,15 @@ import {
 import { Stacker } from "./stacker";
 import styled from "styled-components";
 
-
 import "./../../../App.scss";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./../../../globals.js";
-
 
 import ArcherContainer from "./../../../react-archer/src/ArcherContainer.js";
 import ArcherElement from "./../../../react-archer/src/ArcherElement.js";
 
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-
-
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -144,10 +140,8 @@ var Cristal = (function(_super) {
 
       _this.setState({ width: width, height: height, originalHeight: height });
       _this.setInitialPosition({ width: width, height: height });
-
     };
     _this.setInitialPosition = function(size) {
-     
       var initialPosition = _this.props.initialPosition;
 
       if (!initialPosition) return;
@@ -216,20 +210,20 @@ var Cristal = (function(_super) {
     };
 
     _this.getPosition = function(movementX, movementY) {
-      if(_this.props.getScale){
-      var scale = _this.props.getScale();
-      }else{
-        var scale = 1
+      if (_this.props.getScale) {
+        var scale = _this.props.getScale();
+      } else {
+        var scale = 1;
       }
 
       var newX = _this.state.ghostX + movementX;
       var newY = _this.state.ghostY + movementY;
 
       this.setState({ ghostX: newX, ghostY: newY });
-      if(_this.props.getSnapMargin){
-      var snapMargin = _this.props.getSnapMargin();
-      }else{
-        var snapMargin = 0
+      if (_this.props.getSnapMargin) {
+        var snapMargin = _this.props.getSnapMargin();
+      } else {
+        var snapMargin = 0;
       }
 
       if (snapMargin === 0) {
@@ -260,10 +254,10 @@ var Cristal = (function(_super) {
       }
       var ghostY = Math.max(newHeight, minHeight);
       var onResize = _this.props.onResize;
-if(_this.props.getSnapMargin){
-      var snapMargin = _this.props.getSnapMargin();
-      }else{
-        var snapMargin = 0
+      if (_this.props.getSnapMargin) {
+        var snapMargin = _this.props.getSnapMargin();
+      } else {
+        var snapMargin = 0;
       }
       if (snapMargin === 0) {
         var resizeBlocked = onResize(
@@ -311,10 +305,10 @@ if(_this.props.getSnapMargin){
 
     _this.onMouseMove = function(e) {
       var isResizing = _this.isResizing;
-      if(_this.props.getScale){
-      var scale = _this.props.getScale();
-      }else{
-        var scale = 1
+      if (_this.props.getScale) {
+        var scale = _this.props.getScale();
+      } else {
+        var scale = 1;
       }
       var _a = _this.state,
         isDragging = _a.isDragging,
@@ -358,10 +352,10 @@ if(_this.props.getSnapMargin){
 
     _this.resizeCristal = function(e) {
       var isResizing = _this.isResizing;
-            if(_this.props.getScale){
-      var scale = _this.props.getScale();
-      }else{
-        var scale = 1
+      if (_this.props.getScale) {
+        var scale = _this.props.getScale();
+      } else {
+        var scale = 1;
       }
 
       var _a = _this.state,
@@ -532,10 +526,10 @@ if(_this.props.getSnapMargin){
 
       if (!isResizable) return;
 
-      if(_this.props.getScale){
-      var scale = _this.props.getScale();
-      }else{
-        var scale = 1
+      if (_this.props.getScale) {
+        var scale = _this.props.getScale();
+      } else {
+        var scale = 1;
       }
       var height = _this.state.height;
       var width = _this.state.width;
@@ -651,7 +645,6 @@ if(_this.props.getSnapMargin){
   });
 
   function getLineRelations(_this) {
-
     var _a = _this.state,
       x = _a.x,
       y = _a.y,
@@ -659,58 +652,57 @@ if(_this.props.getSnapMargin){
       height = _a.height,
       isDragging = _a.isDragging,
       zIndex = _a.zIndex;
-    if(_this.props.lineData){
-      var lineData = _this.props.lineData
-    }else{
-      var lineData = []
+    if (_this.props.lineData) {
+      var lineData = _this.props.lineData;
+    } else {
+      var lineData = [];
     }
-
 
     var lineRelations = lineData.map(line => {
       var targetAnchor;
       var sourceAnchor;
-      var sourceX = x + width/2
-      var sourceY = y + height/2
-      var targetX = parseInt($("#vertex_" + line.end).css("left"), 10) + parseInt($("#vertex_" + line.end).css("width"), 10)/2 
-      var targetY = parseInt($("#vertex_" + line.end).css("top"), 10)+ parseInt($("#vertex_" + line.end).css("height"), 10)/2 
+      var sourceX = x + width / 2;
+      var sourceY = y + height / 2;
+      var targetX =
+        parseInt($("#vertex_" + line.end).css("left"), 10) +
+        parseInt($("#vertex_" + line.end).css("width"), 10) / 2;
+      var targetY =
+        parseInt($("#vertex_" + line.end).css("top"), 10) +
+        parseInt($("#vertex_" + line.end).css("height"), 10) / 2;
 
-      var xDiff = sourceX - targetX
-      var yDiff = sourceY - targetY
+      var xDiff = sourceX - targetX;
+      var yDiff = sourceY - targetY;
 
-      if(!targetX){
-        return null
-      }
-  
-
-      if(Math.abs(yDiff) > Math.abs(xDiff)){
-        if(yDiff > 0){
-          targetAnchor = "bottom"
-          sourceAnchor = "top"
-        }else{
-          targetAnchor = "top"
-          sourceAnchor = "bottom"
-        }
-      }else{
-        if(xDiff < 0){
-          targetAnchor = "left"
-          sourceAnchor = "right"
-        }else{
-          targetAnchor = "right"
-          sourceAnchor = "left"
-        }
+      if (!targetX) {
+        return null;
       }
 
+      if (Math.abs(yDiff) > Math.abs(xDiff)) {
+        if (yDiff > 0) {
+          targetAnchor = "bottom";
+          sourceAnchor = "top";
+        } else {
+          targetAnchor = "top";
+          sourceAnchor = "bottom";
+        }
+      } else {
+        if (xDiff < 0) {
+          targetAnchor = "left";
+          sourceAnchor = "right";
+        } else {
+          targetAnchor = "right";
+          sourceAnchor = "left";
+        }
+      }
 
-      return {
-        targetId: "line_" + line.end,
-        targetAnchor: "left",
-        sourceAnchor: "right",
-        label:line.label,
-        style:line.style
-      };
+      line.targetAnchor = targetAnchor;
+      line.sourceAnchor = sourceAnchor;
+      line.targetId = "line_" + line.end;
+
+      return line;
     });
 
-    return lineRelations.filter(line => line)
+    return lineRelations.filter(line => line);
   }
 
   function createIcon(
@@ -724,7 +716,6 @@ if(_this.props.getSnapMargin){
     if (hiddenFlag) {
       return null;
     }
-
 
     var uniqueClass = classVal + _this.props.parentID;
     var mouseOverCallback = () => {
@@ -763,7 +754,7 @@ if(_this.props.getSnapMargin){
           trigger="hover"
           placement="top"
           overlay={
-            <Tooltip id="alert" className="picker-style-tooltip" >
+            <Tooltip id="alert" className="picker-style-tooltip">
               {tooltipText}
             </Tooltip>
           }
@@ -883,7 +874,7 @@ if(_this.props.getSnapMargin){
     var style = {
       left: x,
       top: y,
-      margin:0,
+      margin: 0,
       width: width,
       height: height,
       zIndex: zIndex,
@@ -895,30 +886,24 @@ if(_this.props.getSnapMargin){
     var HeaderComponent = this.header;
     var ContentComponent = this.content;
     if (this.props.invisible) {
-      return (<span/>)
+      return <span />;
     }
 
-    var relations = []
-    if(this.props.getLinesOn && this.props.getLinesOn()){
-      relations = getLineRelations(this)
+    var relations = [];
+    if (this.props.getLinesOn && this.props.getLinesOn()) {
+      relations = this.props.lineData;
     }
     var allContent = (
-          <ArcherElement
-            id={"line_" + this.props.parentID}
-            relations={relations}
-          >
-      {HeaderComponent}
-      {ContentComponent}
-          </ArcherElement>
-
-    )
-
-
+      <ArcherElement id={"line_" + this.props.parentID} relations={relations}>
+        {HeaderComponent}
+        {ContentComponent}
+      </ArcherElement>
+    );
 
     var cristalComponent = React.createElement(
       Wrapper,
       {
-        id:"vertex_" + this.props.parentID,
+        id: "vertex_" + this.props.parentID,
         style: style,
         ref: this.saveWrapperRef,
         isActive: isActive,
@@ -930,10 +915,7 @@ if(_this.props.getSnapMargin){
       this.renderResizeHandles()
     );
 
-
-
-    return cristalComponent
-
+    return cristalComponent;
   };
   Cristal.defaultProps = {
     children: null,

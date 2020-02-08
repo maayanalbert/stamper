@@ -60,12 +60,12 @@ export function computeStartingAnchorPosition(
   if (startingAnchorOrientation === 'top' || startingAnchorOrientation === 'bottom') {
     return {
       xAnchor1: xStart,
-      yAnchor1: yStart + (yEnd - yStart) / 2,
+      yAnchor1: yStart + Math.abs(yEnd - yStart) / 2,
     };
   }
   if (startingAnchorOrientation === 'left' || startingAnchorOrientation === 'right') {
     return {
-      xAnchor1: xStart + (xEnd - xStart) / 2,
+      xAnchor1: xStart + Math.abs(xEnd - xStart) / 2,
       yAnchor1: yStart,
     };
   }
@@ -83,12 +83,12 @@ export function computeEndingAnchorPosition(
   if (endingAnchorOrientation === 'top' || endingAnchorOrientation === 'bottom') {
     return {
       xAnchor2: xEnd,
-      yAnchor2: yEnd - (yEnd - yStart) / 2,
+      yAnchor2: yEnd - Math.abs(yEnd - yStart) / 2,
     };
   }
   if (endingAnchorOrientation === 'left' || endingAnchorOrientation === 'right') {
     return {
-      xAnchor2: xEnd - (xEnd - xStart) / 2,
+      xAnchor2: xEnd - Math.abs(xEnd - xStart) / 2,
       yAnchor2: yEnd,
     };
   }
