@@ -1387,8 +1387,8 @@ function logToConsole(message, lineno){
     // });
 
     lineData.map(line => {
-      line.targetAnchor = "left";
-      line.sourceAnchor = "bottom";
+      line.targetAnchor = "middle";
+      line.sourceAnchor = "middle";
       line.targetId = "line_" + line.end;
     });
 

@@ -225,6 +225,30 @@ export class ArcherContainer extends React.Component<Props, State> {
   computeArrows = (): React$Node => {
     const parentCoordinates = this.getParentCoordinates();
 
+    var sourceToTargets = this.getSourceToTargets();
+    var idDict = {};
+    sourceToTargets.map(data => {
+      idDict[data.source.id] = '';
+      idDict[data.target.id] = '';
+    });
+
+    console.log(idDict);
+
+    Object.keys(idDict).map(id => {
+      var startIsId = sourceToTargets.filter(data => data.source.id === id);
+      var endIsId = sourceToTargets.filter(data => data.target.id === id);
+
+      // startIsId.map((line, index) => {
+      //   var medianVal = 0.5 * (startIsId.length - 1);
+      //   line.relativeStartOffset = (index - medianVal) * relativeOffsetUnit;
+      // });
+
+      // endIsId.map((line, index) => {
+      //   var medianVal = 0.5 * (startIsId.length - 1);
+      //   line.relativeEndOffset = (index - medianVal) * relativeOffsetUnit;
+      // });
+    });
+
     return this.getSourceToTargets().map(({ source, target, label, style }: SourceToTargetType) => {
       const strokeColor = (style && style.strokeColor) || this.props.strokeColor;
 
@@ -256,7 +280,7 @@ export class ArcherContainer extends React.Component<Props, State> {
 
       var endingAnchorOrientation = target.anchor;
       var endingPoint = this.getPointCoordinatesFromAnchorPosition(
-        target.anchor,
+        'middle',
         target.id,
         parentCoordinates,
       );
@@ -266,17 +290,31 @@ export class ArcherContainer extends React.Component<Props, State> {
 
       if (Math.abs(yDiff) > Math.abs(xDiff)) {
         if (yDiff > 0) {
+          target.anchor = 'bottom';
           source.anchor = 'top';
         } else {
+          target.anchor = 'top';
           source.anchor = 'bottom';
         }
       } else {
         if (xDiff < 0) {
+          target.anchor = 'left';
           source.anchor = 'right';
         } else {
+          target.anchor = 'right';
           source.anchor = 'left';
         }
       }
+
+      source.anchor = 'right';
+      target.anchor = 'left';
+
+      endingAnchorOrientation = target.anchor;
+      endingPoint = this.getPointCoordinatesFromAnchorPosition(
+        target.anchor,
+        target.id,
+        parentCoordinates,
+      );
 
       startingAnchorOrientation = source.anchor;
       startingPoint = this.getPointCoordinatesFromAnchorPosition(
