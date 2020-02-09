@@ -39,6 +39,7 @@ var GitHub = require("github-api");
 const { detect } = require("detect-browser");
 var deepEqual = require("deep-equal");
 const browser = detect();
+var mime = require("mime-types");
 
 var userAgent = navigator.userAgent.toLowerCase();
 if (userAgent.indexOf(" electron/") > -1) {
@@ -73,7 +74,7 @@ export default class ModalManager extends Component {
     this.domain = "http://localhost:3000";
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
-    this.checkFiles = this.checkFiles.bind(this);
+    this.receiveFiles = this.receiveFiles.bind(this);
     this.hideModal = this.hideModal.bind(this);
     this.hidePublishInfoModal = this.hidePublishInfoModal.bind(this);
     this.sendSaveData = this.sendSaveData.bind(this);
@@ -189,27 +190,40 @@ export default class ModalManager extends Component {
     this.loadInitialStamperObject();
     let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
     this.setState({ saveInterval: saveInterval });
+    // ipc &&
+    //   ipc.on("requestUpload", event => {
+    //     this.requestUpload();
+    //     var buttons = [];
+    //     buttons.push({
+    //       text: "open",
+    //       color: "outline-primary",
+    //       callback: () => {
+    //         this.requestUpload();
+    //       }
+    //     });
+
+    //     this.setState({
+    //       modalVisible: true,
+    //       modalHeader: "Please select a p5.js sketch folder.",
+    //       modalContent:
+    //         "It must have an index.html and sketch.js in the root. It doesn't need to have been created in Stamper.",
+    //       modalButtons: buttons
+    //     });
+    //   });
+
     ipc &&
-      ipc.on("requestUpload", event => {
-        this.requestUpload();
-        var buttons = [];
-        buttons.push({
-          text: "open",
-          color: "outline-primary",
-          callback: () => {
-            this.requestUpload();
-          }
+      ipc.on("openDirectory", (event, data) => {
+        var fileObjs = [];
+        data.rawFileList.map(fileInfo => {
+          var mimeType = mime.lookup(fileInfo.name);
+          var fileObj = new File([fileInfo.buffer], fileInfo.name, {
+            type: mimeType
+          });
+          fileObjs.push(fileObj);
         });
-
-        this.setState({
-          modalVisible: true,
-          modalHeader: "Please select a p5.js sketch folder.",
-          modalContent:
-            "It must have an index.html and sketch.js in the root. It doesn't need to have been created in Stamper.",
-          modalButtons: buttons
-        });
+        console.log(fileObjs);
+        this.checkAndOpenFiles(fileObjs);
       });
-
     ipc &&
       ipc.on("exteriorChanges", event => {
         var buttons = [];
@@ -319,7 +333,7 @@ export default class ModalManager extends Component {
   }
 
   deleteInputElement() {
-    this.state.inputElem.removeEventListener("change", this.checkFiles);
+    this.state.inputElem.removeEventListener("change", this.receiveFiles);
     document.getElementById("root").removeChild(this.state.inputElem);
   }
 
@@ -350,7 +364,7 @@ export default class ModalManager extends Component {
     styleAttr.value = "true";
     inputElem.setAttributeNode(styleAttr);
 
-    inputElem.addEventListener("change", this.checkFiles);
+    inputElem.addEventListener("change", this.receiveFiles);
 
     document.getElementById("root").appendChild(inputElem);
 
@@ -383,7 +397,7 @@ export default class ModalManager extends Component {
   componentWillUnmout() {
     window.removeEventListener("message", this.receiveMessage);
     window.removeEventListener("beforeunload", this.sendSaveData);
-    this.state.inputElem.removeEventListener("change", this.checkFiles);
+    this.state.inputElem.removeEventListener("change", this.receiveFiles);
     clearInterval(this.state.saveInterval);
     this.setState({ saveInterval: null });
   }
@@ -406,10 +420,14 @@ export default class ModalManager extends Component {
 
   readFile(file, fileDict, callback) {
     var reader = new FileReader();
-    var nameArr = file.webkitRelativePath.split("/");
-    var fileName = "";
-    if (nameArr.length > 0) {
-      fileName = nameArr.slice(1, nameArr.length).join("/");
+    if (file.webkitRelativePath != "") {
+      var nameArr = file.webkitRelativePath.split("/");
+      var fileName = "";
+      if (nameArr.length > 0) {
+        fileName = nameArr.slice(1, nameArr.length).join("/");
+      }
+    } else {
+      fileName = file.name;
     }
 
     if (this.state.cdnLibs && file.name in this.libs) {
@@ -417,7 +435,7 @@ export default class ModalManager extends Component {
       return;
     }
 
-    if (file.type.startsWith("text")) {
+    if (file.type.startsWith("text") || file.type.startsWith("application")) {
       var fileType = "text";
     } else {
       var fileType = "media";
@@ -434,7 +452,7 @@ export default class ModalManager extends Component {
     };
 
     try {
-      if (file.type.startsWith("text")) {
+      if (fileType === "text") {
         reader.readAsText(file);
       } else {
         reader.readAsDataURL(file);
@@ -517,22 +535,26 @@ export default class ModalManager extends Component {
     }
   }
 
-  checkFiles(e) {
-    console.log(e.target.files);
+  receiveFiles(e) {
+    this.checkAndOpenFiles(e.target.files);
+  }
+  checkAndOpenFiles(initialFiles) {
     var askedAboutCdn = false;
     this.setState({ askedAboutCdn: askedAboutCdn });
 
     var files = [];
     var containsLib = false;
-    for (var i = 0; i < e.target.files.length; i++) {
-      if (e.target.files[i].name in this.libs) {
+    for (var i = 0; i < initialFiles.length; i++) {
+      var usingName = initialFiles[i].name.split("/").pop();
+      if (usingName in this.libs) {
         containsLib = true;
       }
-      if (e.target.files[i].name.startsWith(".") === false) {
-        files.push(e.target.files[i]);
+      if (usingName.startsWith(".") === false) {
+        files.push(initialFiles[i]);
       }
     }
 
+    console.log(files);
     this.deleteInputElement();
     this.createInputElement();
 
@@ -791,22 +813,9 @@ export default class ModalManager extends Component {
     });
 
     stamperObject.stamps = fnData;
-
-    var sketchPath = "";
-    var sketchName = "";
-    if (ipc) {
-      var sketchPathArr = fileDict["index.html"].path.split("/");
-      sketchPathArr.pop();
-
-      sketchPath = sketchPathArr.join("/") + "/";
-      sketchName = sketchPathArr.pop();
-    }
-
     this.props.loadStamperObject(stamperObject);
     ipc &&
       ipc.send("updatePath", {
-        path: sketchPath,
-        name: sketchName,
         fileDict: fileDict
       });
   }

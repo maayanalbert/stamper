@@ -25,18 +25,26 @@ module.exports = class FileManager {
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
+    this.exteriorChangeTimeout = null;
 
     this.pendingCallback = () => null;
     this.edited = false;
     this.watcher = null;
+    this.tempPath = "";
 
     ipcMain.on("save", (event, files) => {
       this.saveFiles(files);
     });
 
     ipcMain.on("updatePath", (event, data) => {
-      this.path = data.path;
-      this.name = data.name;
+      this.path = this.tempPath;
+
+      var pathArr = this.path.split("/");
+      if (pathArr.length >= 2) {
+        pathArr.pop();
+        this.name = pathArr.pop();
+      }
+
       this.fileDict = data.fileDict;
       this.mainWindow.setTitle(this.name);
       this.watcher = chokidar.watch(this.path, {
@@ -57,10 +65,9 @@ module.exports = class FileManager {
   }
 
   isExteriorChange(event, path) {
-    if (event === "root-changed") {
-      return true;
+    if (!path) {
+      return;
     }
-
     var fileName = path.substring(path.indexOf(this.path) + this.path.length);
     var file = this.fileDict[fileName];
     if (file) {
@@ -79,11 +86,21 @@ module.exports = class FileManager {
   fileChange(event, path, detail) {
     console.log("FILECHANGE");
 
-    if (this.isExteriorChange(event, path)) {
-      console.log("IS EXTERIOR CHANGE");
+    if (event === "root-changed") {
       this.mainWindow.send("exteriorChanges");
       this.resetFiles();
+      clearTimeout(this.exteriorChangeTimeout);
+      return;
     }
+    if (this.exteriorChangeTimeout) {
+      clearTimeout(this.exteriorChangeTimeout);
+    }
+
+    this.exteriorChangeTimeout = setTimeout(s => {
+      if (this.isExteriorChange(event, path)) {
+        this.importFilesFromPath(this.path);
+      }
+    }, 250);
   }
 
   actuallyResetFiles() {
@@ -149,31 +166,23 @@ module.exports = class FileManager {
     this.protectUnsaved(this.openProject.bind(this));
   }
 
-  getFileDictFromPath(path) {
-    recursive(path, function(err, files) {
-      // `files` is an array of file paths
-      files.map(singleFilePath => {
-        DataURI(singleFilePath)
-          .then(content => console.log(content))
-          //=> "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-          .catch(err => {
-            throw err;
+  importFilesFromPath(path) {
+    recursive(path, (err, files) => {
+      var rawFileList = [];
+      var callback = () => {
+        if (rawFileList.length === files.length) {
+          this.mainWindow.webContents.send("openDirectory", {
+            rawFileList: rawFileList
           });
+        }
+      };
 
-        // jetpack.readAsync(singleFilePath, "buffer").then(data => {
-        //   var name = singleFilePath.substring(filePath.length);
-        //   var mimeType = mime.lookup(name);
-        //   if (mimeType.startsWith("text")) {
-        //     var fileType = "text";
-        //   } else {
-        //     var fileType = "media";
-        //   }
-
-        //   if(fileType === "media"){
-        //     // var content =
-        //   }
-
-        // });
+      files.map(singleFilePath => {
+        jetpack.readAsync(singleFilePath, "buffer").then(buffer => {
+          var name = singleFilePath.substring(path.length);
+          rawFileList.push({ name: name, buffer: buffer });
+          callback();
+        });
       });
     });
   }
@@ -187,7 +196,8 @@ module.exports = class FileManager {
       }
 
       var filePath = data.filePaths[0] + "/";
-      this.getFileDictFromPath(filePath);
+      this.importFilesFromPath(filePath);
+      this.tempPath = filePath;
     });
   }
 

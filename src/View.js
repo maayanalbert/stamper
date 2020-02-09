@@ -1870,8 +1870,6 @@ _stopLooping =setTimeout(() => {
         }
       }
 
-      name += "_" + id;
-
       pickerData.push({
         name: name,
         icon: stampRef.getIcon(),

@@ -14,8 +14,6 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
-
-
 import { Resizable, ResizableBox } from "react-resizable";
 
 var mime = require("mime-types");
@@ -82,15 +80,14 @@ export default class FunctionStamp extends Component {
       exportableCode: "",
       codeSize: this.props.starterCodeSize,
       dataUri: "",
-      lineData:[],
-      editorTopShadow:false,
-      editorBottomShadow:false,
-      ghostX:starterIframeWidth,
-      ghostY:starterIframeHeight,
-      iframeDimensTransition:"",
-      mediaAssetHeight:null,
-      mediaAssetWidth:null
-
+      lineData: [],
+      editorTopShadow: false,
+      editorBottomShadow: false,
+      ghostX: starterIframeWidth,
+      ghostY: starterIframeHeight,
+      iframeDimensTransition: "",
+      mediaAssetHeight: null,
+      mediaAssetWidth: null
     };
 
     this.cristalRef = React.createRef();
@@ -100,10 +97,14 @@ export default class FunctionStamp extends Component {
   }
 
   toggleHide(callback) {
-    window.postMessage({type:"edited"}, '*');
+    window.postMessage({ type: "edited" }, "*");
     if (this.state.hidden) {
       this.setState(
-        { hidden: false, iframeHeight: this.state.iframeHeight, zIndex:undefined },
+        {
+          hidden: false,
+          iframeHeight: this.state.iframeHeight,
+          zIndex: undefined
+        },
         callback
       );
     } else {
@@ -151,7 +152,7 @@ export default class FunctionStamp extends Component {
     var mimeType = mime.lookup(this.state.name);
 
     if (!mimeType || mimeType.split("/").length === 0) {
-      callback()
+      callback();
       return;
     }
     var mimeTypeArr = mimeType.split("/");
@@ -186,16 +187,15 @@ export default class FunctionStamp extends Component {
     );
   }
 
-  setLineData( lineData = []){
-    this.setState({lineData:lineData})
+  setLineData(lineData = []) {
+    this.setState({ lineData: lineData });
   }
 
   clearErrorsAndUpdate(newErrors = []) {
- 
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 
-    this.setState({ errorLines: newErrorLines}, () => {
+    this.setState({ errorLines: newErrorLines }, () => {
       var iframeCode = "";
       var exportableCode = "";
 
@@ -236,35 +236,36 @@ export default class FunctionStamp extends Component {
       });
   }
 
-  getIframeDimensionFromGhost(movementX, movementY){
+  getIframeDimensionFromGhost(movementX, movementY) {
     var snapMargin = this.props.getSnapMargin();
-       var newX = this.state.ghostX + movementX;
-      var newY = this.state.ghostY + movementY;
-      this.setState({ ghostX: newX, ghostY: newY });
-      var snapMargin = this.props.getSnapMargin();
+    var newX = this.state.ghostX + movementX;
+    var newY = this.state.ghostY + movementY;
+    this.setState({ ghostX: newX, ghostY: newY });
+    var snapMargin = this.props.getSnapMargin();
 
-      if (snapMargin === 0) {
-        return { movementX: movementX, movementY: movementY };
-      } else {
-        var roundX = Math.round(newX / snapMargin) * snapMargin;
-        var roundY = Math.round(newY / snapMargin) * snapMargin;
-        return { movementX: roundX - this.state.iframeWidth, movementY: roundY -this.state.iframeHeight };
-      }
-
+    if (snapMargin === 0) {
+      return { movementX: movementX, movementY: movementY };
+    } else {
+      var roundX = Math.round(newX / snapMargin) * snapMargin;
+      var roundY = Math.round(newY / snapMargin) * snapMargin;
+      return {
+        movementX: roundX - this.state.iframeWidth,
+        movementY: roundY - this.state.iframeHeight
+      };
+    }
   }
 
   updateIframeDimensions(movementX = 0, movementY = 0) {
+    var newDimensions = this.getIframeDimensionFromGhost(movementX, movementY);
 
-    var newDimensions = this.getIframeDimensionFromGhost(movementX, movementY)
-
-    if(newDimensions.movementX === 0 && newDimensions.movementY === 0){
-      return
+    if (newDimensions.movementX === 0 && newDimensions.movementY === 0) {
+      return;
     }
 
-    movementX = newDimensions.movementX
-    movementY = newDimensions.movementY
+    movementX = newDimensions.movementX;
+    movementY = newDimensions.movementY;
 
-    window.postMessage({type:"edited"}, '*')
+    window.postMessage({ type: "edited" }, "*");
 
     var width = this.state.iframeWidth + movementX;
     var height = this.state.iframeHeight + movementY;
@@ -297,8 +298,6 @@ export default class FunctionStamp extends Component {
   }
 
   renderEditor() {
-
-
     var markers = [];
     for (var i in this.state.errorLines) {
       if (i != 0) {
@@ -320,27 +319,24 @@ export default class FunctionStamp extends Component {
     if (this.props.isTxtFile || this.props.isIndex) {
       var mimeType = mime.lookup(this.state.name);
       if (!mimeType || mimeType.split("/").length === 0) {
-        var mode = ""
-  
-      }else{
-      var mimeTypeArr = mimeType.split("/");
-      var mode = mimeTypeArr[mimeTypeArr.length - 1];
-
+        var mode = "";
+      } else {
+        var mimeTypeArr = mimeType.split("/");
+        var mode = mimeTypeArr[mimeTypeArr.length - 1];
       }
-
     } else {
       var mode = "javascript";
     }
 
+    var shadow = "";
 
-    var shadow = ""
-
-    if(this.state.editorBottomShadow && this.state.editorTopShadow){
-shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 0, 0, .3)"
-    }else     if(this.state.editorTopShadow){
-      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3)"
-    }else    if(this.state.editorBottomShadow){
-      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .3)"
+    if (this.state.editorBottomShadow && this.state.editorTopShadow) {
+      shadow =
+        "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 0, 0, .3)";
+    } else if (this.state.editorTopShadow) {
+      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3)";
+    } else if (this.state.editorBottomShadow) {
+      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .3)";
     }
 
     return (
@@ -356,25 +352,21 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
             width: this.state.editorWidth,
             height: this.state.editorHeight,
             background: "transparent",
-            boxShadow:  shadow
+            boxShadow: shadow
           }}
           className="code"
           mode={mode}
           theme={theme}
           onChange={(value, editor) => {
             this.setState({ code: value, editsMade: true });
-            window.postMessage({type:"edited"}, '*');
-
+            window.postMessage({ type: "edited" }, "*");
           }}
           name={"name" + this.props.id.toString()}
-       
-          onLoad={(editor) => {
-
-                    this.setEditorShadow(editor.renderer.scrollBar)
-   editor.on('change', (arg, editor) => {
-      this.setEditorShadow(editor.renderer.scrollBar)
-    });
-
+          onLoad={editor => {
+            this.setEditorShadow(editor.renderer.scrollBar);
+            editor.on("change", (arg, editor) => {
+              this.setEditorShadow(editor.renderer.scrollBar);
+            });
           }}
           fontSize={this.state.codeSize}
           showPrintMargin={false}
@@ -383,14 +375,10 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
           highlightActiveLine={false}
           value={this.state.code}
           ref={this.editorRef}
-          onScroll={(editor) => {
-
-        this.setEditorScrolling(true)
-        this.setEditorShadow(editor.renderer.scrollBar)
-          }
-
-
-    }
+          onScroll={editor => {
+            this.setEditorScrolling(true);
+            this.setEditorShadow(editor.renderer.scrollBar);
+          }}
           setOptions={{
             enableBasicAutocompletion: false,
             enableLiveAutocompletion: false,
@@ -398,67 +386,69 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
             showLineNumbers: false,
             tabSize: 2,
             hasCssTransforms: true,
-            fontFamily:"Inconsolata"
+            fontFamily: "Inconsolata"
           }}
         />
       </div>
     );
   }
 
-  setEditorShadow(scrollBar){
+  setEditorShadow(scrollBar) {
+    var editorTopShadow = false;
+    var editorBottomShadow = false;
 
-    var editorTopShadow = false
-    var editorBottomShadow = false
-
-    if(scrollBar.scrollTop -5 > 0){
-      editorTopShadow = true
+    if (scrollBar.scrollTop - 5 > 0) {
+      editorTopShadow = true;
     }
 
-    if(scrollBar.scrollTop + this.state.editorHeight + 5< scrollBar.scrollHeight){
-      editorBottomShadow = true
+    if (
+      scrollBar.scrollTop + this.state.editorHeight + 5 <
+      scrollBar.scrollHeight
+    ) {
+      editorBottomShadow = true;
     }
 
-
-    this.setState({editorTopShadow:editorTopShadow, editorBottomShadow:editorBottomShadow})
+    this.setState({
+      editorTopShadow: editorTopShadow,
+      editorBottomShadow: editorBottomShadow
+    });
   }
 
-  stripExtension(name){
-    var nameArr = name.split(".")
-    if(nameArr.length < 2){
-      return name
-    }else{
-      nameArr.pop()
-      return nameArr.join(".")
+  stripExtension(name) {
+    var nameArr = name.split(".");
+    if (nameArr.length < 2) {
+      return name;
+    } else {
+      nameArr.pop();
+      return nameArr.join(".");
     }
   }
 
-  getExtension(name){
-    var nameArr = name.split(".")
-    if(nameArr.length < 2){
-      return ""
-    }else{
-      var ext = nameArr.pop()
-      return ext
-    }    
+  getExtension(name) {
+    var nameArr = name.split(".");
+    if (nameArr.length < 2) {
+      return "";
+    } else {
+      var ext = nameArr.pop();
+      return ext;
+    }
   }
 
-  addExtension(name, nameWithExtension){
-    var nameArr = nameWithExtension.split(".")
-    if(nameArr.length < 2){
-      return name
-    }else{
-      var ext = nameArr.pop()
-      return name + "." + ext
+  addExtension(name, nameWithExtension) {
+    var nameArr = nameWithExtension.split(".");
+    if (nameArr.length < 2) {
+      return name;
+    } else {
+      var ext = nameArr.pop();
+      return name + "." + ext;
     }
   }
 
   compileCallback() {
-
     if (this.state.editsMade) {
       var compileActions = () => {
-
         this.props.requestCompile(this.props.id);
-        window.postMessage({type:"edited"}, '*');
+        window.postMessage({ type: "edited" }, "*");
         this.setState({ editsMade: false, runningBorder: true }, () =>
           setTimeout(() => {
             this.setState({ runningBorder: false });
@@ -483,9 +473,8 @@ shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 
     var nameColor = "blue";
     if (this.state.name in globals.builtIns) {
       nameColor = "pink";
-    } else if(this.state.name in globals.listeners){
-nameColor = "pink";
-
+    } else if (this.state.name in globals.listeners) {
+      nameColor = "pink";
     } else if (
       this.props.isIndex ||
       this.props.isTxtFile ||
@@ -502,38 +491,40 @@ nameColor = "pink";
       namePlaceholder = "";
     }
 
-    var displayName = this.state.name
-    if(this.props.isMediaFile){
-      displayName = this.stripExtension(displayName)
+    var displayName = this.state.name;
+    if (this.props.isMediaFile) {
+      displayName = this.stripExtension(displayName);
     }
 
-    var backgroundColor = "bg-white"
-    if(0 in this.state.errorLines){
-      backgroundColor = "bg-warningOrange"
+    var backgroundColor = "bg-white";
+    if (0 in this.state.errorLines) {
+      backgroundColor = "bg-warningOrange";
     }
     return (
       <div>
-         <p hidden={!this.props.isMediaFile}
-         className={"text-lightGreyText name"} style={{position:"absolute", top:49, left:19}}>{this.state.name}</p>
+        <p
+          hidden={!this.props.isMediaFile}
+          className={"text-lightGreyText name"}
+          style={{ position: "absolute", top: 49, left: 19 }}
+        >
+          {this.state.name}
+        </p>
         <input
           placeholder={namePlaceholder}
           disabled={this.props.isIndex}
           onChange={event => {
             var newName = event.target.value;
 
-            if(this.props.isMediaFile){
-              newName = this.addExtension(newName, this.state.name)
+            if (this.props.isMediaFile) {
+              newName = this.addExtension(newName, this.state.name);
             }
-            this.setState({name:newName, editsMade:true})
-            window.postMessage({type:"edited"}, '*');
-
+            this.setState({ name: newName, editsMade: true });
+            window.postMessage({ type: "edited" }, "*");
           }}
-
           style={{ background: "transparent" }}
           value={displayName}
           class={"text-" + nameColor + " name " + backgroundColor}
         />
-
 
         <br />
 
@@ -545,7 +536,7 @@ nameColor = "pink";
           }
           onChange={event => {
             this.setState({ args: event.target.value, editsMade: true });
-            window.postMessage({type:"edited"}, '*');
+            window.postMessage({ type: "edited" }, "*");
           }}
           style={{ background: "transparent" }}
           value={this.state.args}
@@ -565,20 +556,18 @@ nameColor = "pink";
       return;
     }
     if (mimeType.startsWith("image")) {
-      if(!this.state.imageWidth){
-      var img = new Image(); 
+      if (!this.state.imageWidth) {
+        var img = new Image();
 
-      img.onload = function(){
-        console.log(img.width)
-        this.setState({imageWidth:img.width, imageHeight:img.height})
+        img.onload = function() {
+          console.log(img.width);
+          this.setState({ imageWidth: img.width, imageHeight: img.height });
+        };
+
+        img.onload = img.onload.bind(this);
+
+        img.src = this.state.code;
       }
-
-      img.onload = img.onload.bind(this)
-
-      img.src = this.state.code; 
-
-    }
-
 
       return <img src={this.state.code} />;
     } else if (mimeType.startsWith("audio")) {
@@ -593,39 +582,44 @@ nameColor = "pink";
           <source src={this.state.code} type={mimeType} />
         </video>
       );
-    }else{
+    } else {
       return (
-        <div className={"bg-borderGrey pt-5 d-flex justify-content-center"} style={{width: this.state.iframeWidth, 
-        height: this.state.iframeHeight}}>
-      {React.createElement("img", {
-      style:  {width: 100, 
-        height: 100,
-        opacity:.5 },
-      src: globals.MediaAssetIcon
-    })}
-      </div>
-      )
-
-
+        <div
+          className={"bg-borderGrey pt-5 d-flex justify-content-center"}
+          style={{
+            width: this.state.iframeWidth,
+            height: this.state.iframeHeight
+          }}
+        >
+          {React.createElement("img", {
+            style: { width: 100, height: 100, opacity: 0.5 },
+            src: globals.MediaAssetIcon
+          })}
+        </div>
+      );
     }
   }
 
-  manualIframeResize(width, height){
+  manualIframeResize(width, height) {
+    // this.setState({iframeWidth:dimens.width, iframeHeight:dimens.height, resizingIframe:true}, setTimeout(() =>
+    //       this.setState({resizingIframe:false}), 250))
 
-          // this.setState({iframeWidth:dimens.width, iframeHeight:dimens.height, resizingIframe:true}, setTimeout(() => 
-          //       this.setState({resizingIframe:false}), 250))
+    setTimeout(() => {
+      this.setState({ iframeDimensTransition: "" });
+    }, 1200);
 
-setTimeout(() => {
-      this.setState({iframeDimensTransition:""})
-    }, 1200)
+    setTimeout(() => {
+      this.setState({
+        resizingIframe: false,
+        iframeDimensTransition: "opacity 1s ease-out"
+      });
+    }, 200);
 
-setTimeout(() => {
-      this.setState({resizingIframe:false,  iframeDimensTransition:"opacity 1s ease-out"})
-    }, 200)
-
-
-  this.setState({resizingIframe:true})
-    this.updateIframeDimensions(width-this.state.iframeWidth, height-this.state.iframeHeight)
+    this.setState({ resizingIframe: true });
+    this.updateIframeDimensions(
+      width - this.state.iframeWidth,
+      height - this.state.iframeHeight
+    );
   }
 
   renderIframe() {
@@ -634,24 +628,22 @@ setTimeout(() => {
       loopingOpacity = 0.5;
     }
 
-    if(this.state.resizingIframe){
-      var iframeDimensOpacity = .5
-    }else{
-      var iframeDimensOpacity = 0
+    if (this.state.resizingIframe) {
+      var iframeDimensOpacity = 0.5;
+    } else {
+      var iframeDimensOpacity = 0;
     }
-
 
     return (
       <div>
         <div
-     
           style={{
             position: "absolute",
             fontSize: globals.codeSize,
             opacity: iframeDimensOpacity,
             top: globals.fnTitleHeight - 5,
             right: 25,
-            transition:this.state.iframeDimensTransition
+            transition: this.state.iframeDimensTransition
           }}
           class="text-greyText "
         >
@@ -674,29 +666,34 @@ setTimeout(() => {
           {"paused"}
         </div>
 
-
         <Resizable
           className="ml-1 bg-white shadow"
           onResize={e => {
-
             this.updateIframeDimensions(
               e.movementX / this.props.getScale(),
               e.movementY / this.props.getScale()
             );
           }}
           onResizeStart={() => {
-  
             this.props.onStartMove();
             this.setState({ resizingIframe: true });
-            this.setState({ghostX:this.state.iframeWidth, ghostY:this.state.iframeHeight})
+            this.setState({
+              ghostX: this.state.iframeWidth,
+              ghostY: this.state.iframeHeight
+            });
           }}
           onResizeStop={e => {
-
-            this.setState({ghostX:this.state.iframeWidth, ghostY:this.state.iframeHeight})
+            this.setState({
+              ghostX: this.state.iframeWidth,
+              ghostY: this.state.iframeHeight
+            });
             this.props.onStopMove();
             this.setState({ resizingIframe: false });
-            var newSize = this.props.getCristalDimens(this.getData())
-            this.cristalRef.current.manualSetSize(newSize.width, newSize.height)
+            var newSize = this.props.getCristalDimens(this.getData());
+            this.cristalRef.current.manualSetSize(
+              newSize.width,
+              newSize.height
+            );
           }}
           onMouseOver={this.compileCallback.bind(this)}
           style={{
@@ -704,17 +701,22 @@ setTimeout(() => {
             zIndex: 5,
             border: "none"
           }}
-          handle={(<span className="react-resizable-handle react-resizable-handle-se" 
-            onDoubleClick={() => {
-
-              if(this.state.imageWidth){
-                            this.manualIframeResize(this.state.imageWidth, this.state.imageHeight)
-              }else{
-              var dimens = this.props.getP5CanvasDimensions()
-                            this.manualIframeResize(dimens.width, dimens.height)
-              }
-
-            }}/>)}
+          handle={
+            <span
+              className="react-resizable-handle react-resizable-handle-se"
+              onDoubleClick={() => {
+                if (this.state.imageWidth) {
+                  this.manualIframeResize(
+                    this.state.imageWidth,
+                    this.state.imageHeight
+                  );
+                } else {
+                  var dimens = this.props.getP5CanvasDimensions();
+                  this.manualIframeResize(dimens.width, dimens.height);
+                }
+              }}
+            />
+          }
         >
           <div>
             <div
@@ -732,7 +734,7 @@ setTimeout(() => {
               style={{
                 height: this.state.iframeHeight,
                 width: this.state.iframeWidth,
-                zIndex:-1
+                zIndex: -1
               }}
             >
               {this.renderMediaAsset()}
@@ -784,7 +786,7 @@ setTimeout(() => {
   }
 
   copyAndOpt(isOpt = false) {
-    window.postMessage({type:"edited"}, '*')
+    window.postMessage({ type: "edited" }, "*");
     if (this.props.isIndex) {
       return;
     }
@@ -823,13 +825,10 @@ setTimeout(() => {
     var newName = this.props.addStamp(data, callback);
   }
 
-
-
   getData() {
-
-    var name = this.state.name
-    if(this.props.isBlob){
-      name = this.props.getFirstLine(this.state.code)
+    var name = this.state.name;
+    if (this.props.isBlob) {
+      name = this.props.getFirstLine(this.state.code);
     }
 
     var data = {
@@ -850,7 +849,7 @@ setTimeout(() => {
       zIndex: this.state.zIndex,
       isBlob: this.props.isBlob,
       codeSize: this.state.codeSize,
-      icon:this.getIcon()
+      icon: this.getIcon()
     };
 
     return data;
@@ -865,15 +864,12 @@ setTimeout(() => {
     }
 
     if (change) {
-    
-
       this.setState({
         editorHeight: height,
         editorWidth: width,
         x: x
       });
       this.editorRef.current.editor.resize();
-
     }
   }
 
@@ -889,7 +885,7 @@ setTimeout(() => {
       icon = globals.ImageStampIcon;
     } else if (this.state.isSpecialFn) {
       if (globals.specialFns[this.state.name]) {
-        icon =globals.BuiltInStampIcon;
+        icon = globals.BuiltInStampIcon;
       } else {
         icon = globals.ListenerStampIcon;
       }
@@ -937,29 +933,26 @@ setTimeout(() => {
       <div>
         <Cristal
           zIndex={this.state.zIndex}
-          onZChange={s => 
-
-            {
-            this.setState({ zIndex: s.zIndex }, () =>   this.props.setLineData())
-          
-            }}
-
-
+          onZChange={s => {
+            this.setState({ zIndex: s.zIndex }, () => this.props.setLineData());
+          }}
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}
           initialSize={this.props.getCristalDimens(this.getData())}
           ref={this.cristalRef}
           isResizable={!this.props.isMediaFile}
           onStartResize={() => {
-            this.props.onStartMove()
-                        this.setEditorShadow(this.editorRef.current.editor.renderer.scrollBar)
+            this.props.onStartMove();
+            this.setEditorShadow(
+              this.editorRef.current.editor.renderer.scrollBar
+            );
           }}
-
           onStopResize={() => {
-            this.props.onStopMove()
-                        this.setEditorShadow(this.editorRef.current.editor.renderer.scrollBar)
+            this.props.onStopMove();
+            this.setEditorShadow(
+              this.editorRef.current.editor.renderer.scrollBar
+            );
           }}
-
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
           onClose={() => this.props.onDelete(this.props.id)}
@@ -979,13 +972,12 @@ setTimeout(() => {
             this.props.id
           }
           onResize={this.resizeEditor.bind(this)}
-
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
           parentID={this.props.id}
           showCodeSize={this.props.isBlob}
           onCodeSize={() => {
-            window.postMessage({type:"edited"}, '*')
+            window.postMessage({ type: "edited" }, "*");
             if (this.state.codeSize === globals.codeSize) {
               this.setState({ codeSize: globals.bigCodeSize });
             } else {
@@ -1012,7 +1004,7 @@ setTimeout(() => {
             <div class="p-2">
               <div hidden={this.props.isBlob}>{this.renderFunctionName()}</div>
 
-              <div class="row m-0 mt-2" style={{flexWrap:"nowrap"}}>
+              <div class="row m-0 mt-2" style={{ flexWrap: "nowrap" }}>
                 {this.renderEditor()}
 
                 {this.renderIframe()}
