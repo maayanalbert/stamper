@@ -1371,21 +1371,6 @@ function logToConsole(message, lineno){
 
     var relativeOffsetUnit = 10;
 
-    // this.state.stampOrder.map(id => {
-    //   var startIsId = lineData.filter(line => line.start === id);
-    //   var endIsId = lineData.filter(line => line.end === id);
-
-    //   startIsId.map((line, index) => {
-    //     var medianVal = 0.5 * (startIsId.length - 1);
-    //     line.relativeStartOffset = (index - medianVal) * relativeOffsetUnit;
-    //   });
-
-    //   endIsId.map((line, index) => {
-    //     var medianVal = 0.5 * (startIsId.length - 1);
-    //     line.relativeEndOffset = (index - medianVal) * relativeOffsetUnit;
-    //   });
-    // });
-
     lineData.map(line => {
       line.targetAnchor = "middle";
       line.sourceAnchor = "middle";
@@ -1984,6 +1969,7 @@ _stopLooping =setTimeout(() => {
               scale={this.state.scale}
               top={this.state.originY}
               left={this.state.originX}
+              relativeOffsetSize={25}
             >
               {Object.values(this.state.stampElems)}
               {consoleElem}

@@ -222,10 +222,121 @@ export class ArcherContainer extends React.Component<Props, State> {
     return [].concat.apply([], jaggedSourceToTargets);
   };
 
+  setRelativeOffsets = (sourceToTargets, anchor, parentCoordinates, id) => {
+    console.log(this);
+    var relevantSourceToTargets = sourceToTargets.filter(
+      data =>
+        (data.source.id === id && data.source.anchor === anchor) ||
+        (data.target.id === id && data.target.anchor === anchor),
+    );
+
+    var otherLocationPosList = [];
+    var otherLocationPosDict = {};
+
+    relevantSourceToTargets.map(data => {
+      if (data.source.id === id) {
+        var otherLocation = this.getPointCoordinatesFromAnchorPosition(
+          'middle',
+          data.target.id,
+          parentCoordinates,
+        );
+      }
+
+      if (data.target.id === id) {
+        var otherLocation = this.getPointCoordinatesFromAnchorPosition(
+          'middle',
+          data.source.id,
+          parentCoordinates,
+        );
+      }
+
+      if (anchor === 'top' || anchor === 'bottom') {
+        otherLocationPosList.push(otherLocation.x);
+        otherLocationPosDict[otherLocation.x] = data;
+      } else {
+        otherLocationPosList.push(otherLocation.y);
+        otherLocationPosDict[otherLocation.y] = data;
+      }
+
+      otherLocationPosList.sort();
+      otherLocationPosList.map((pos, index) => {
+        var data = otherLocationPosDict[pos];
+        var medianVal = 0.5 * (otherLocationPosList.length - 1);
+        if (data.source.id === id) {
+          data.relativeSourceOffset = (index - medianVal) * this.props.relativeOffsetSize;
+        } else {
+          data.relativeTargetOffset = (index - medianVal) * this.props.relativeOffsetSize;
+        }
+      });
+    });
+  };
+
+  getComputedAnchors = (source, target, parentCoordinates) => {
+    var startingAnchorOrientation = source.anchor;
+    var startingPoint = this.getPointCoordinatesFromAnchorPosition(
+      'middle',
+      source.id,
+      parentCoordinates,
+    );
+
+    var endingAnchorOrientation = target.anchor;
+    var endingPoint = this.getPointCoordinatesFromAnchorPosition(
+      'middle',
+      target.id,
+      parentCoordinates,
+    );
+
+    var xDiff = startingPoint.x - endingPoint.x;
+    var yDiff = startingPoint.y - endingPoint.y;
+
+    var computedSourceAnchor;
+    var computedTargetAnchor;
+
+    if (Math.abs(yDiff) > Math.abs(xDiff)) {
+      if (yDiff > 0) {
+        computedTargetAnchor = 'bottom';
+        computedSourceAnchor = 'top';
+      } else {
+        computedTargetAnchor = 'top';
+        computedSourceAnchor = 'bottom';
+      }
+    } else {
+      if (xDiff < 0) {
+        computedTargetAnchor = 'left';
+        computedSourceAnchor = 'right';
+      } else {
+        computedTargetAnchor = 'right';
+        computedSourceAnchor = 'left';
+      }
+    }
+
+    var newSource = Object.assign({}, source);
+    var newTarget = Object.assign({}, target);
+
+    if (source.anchor === 'middle') {
+      newSource.anchor = computedSourceAnchor;
+    }
+
+    if (target.anchor === 'middle') {
+      newTarget.anchor = computedTargetAnchor;
+    }
+
+    return { source: newSource, target: newTarget };
+  };
+
   computeArrows = (): React$Node => {
     const parentCoordinates = this.getParentCoordinates();
 
     var sourceToTargets = this.getSourceToTargets();
+
+    sourceToTargets = sourceToTargets.map(data => {
+      var result = this.getComputedAnchors(data.source, data.target, parentCoordinates);
+      data = Object.assign({}, data);
+      data.source = result.source;
+      data.target = result.target;
+      return data;
+    });
+
     var idDict = {};
     sourceToTargets.map(data => {
       idDict[data.source.id] = '';
@@ -233,21 +344,19 @@ export class ArcherContainer extends React.Component<Props, State> {
     });
 
     Object.keys(idDict).map(id => {
-      var startIsId = sourceToTargets.filter(data => data.source.id === id);
-      var endIsId = sourceToTargets.filter(data => data.target.id === id);
-
-      // startIsId.map((line, index) => {
-      //   var medianVal = 0.5 * (startIsId.length - 1);
-      //   line.relativeStartOffset = (index - medianVal) * relativeOffsetUnit;
-      // });
-
-      // endIsId.map((line, index) => {
-      //   var medianVal = 0.5 * (startIsId.length - 1);
-      //   line.relativeEndOffset = (index - medianVal) * relativeOffsetUnit;
-      // });
+      this.setRelativeOffsets(sourceToTargets, 'left', parentCoordinates, id);
+      this.setRelativeOffsets(sourceToTargets, 'right', parentCoordinates, id);
+      this.setRelativeOffsets(sourceToTargets, 'top', parentCoordinates, id);
+      this.setRelativeOffsets(sourceToTargets, 'bottom', parentCoordinates, id);
     });
 
-    return this.getSourceToTargets().map(({ source, target, label, style }: SourceToTargetType) => {
+    return sourceToTargets.map(data => {
+      var source = data.source;
+      var target = data.target;
+      var label = data.label;
+      var style = data.style;
+      var relativeSourceOffset = data.relativeSourceOffset;
+      var relativeTargetOffset = data.relativeTargetOffset;
       const strokeColor = (style && style.strokeColor) || this.props.strokeColor;
 
       const arrowLength = (style && style.arrowLength) || this.props.arrowLength;
@@ -269,82 +378,36 @@ export class ArcherContainer extends React.Component<Props, State> {
         return null;
       }
 
-      var startingAnchorOrientation = source.anchor;
-      var startingPoint = this.getPointCoordinatesFromAnchorPosition(
-        'middle',
-        source.id,
-        parentCoordinates,
-      );
+      var result = this.getComputedAnchors(source, target, parentCoordinates);
+
+      target = result.target;
+      source = result.source;
 
       var endingAnchorOrientation = target.anchor;
       var endingPoint = this.getPointCoordinatesFromAnchorPosition(
-        'middle',
+        target.anchor,
         target.id,
         parentCoordinates,
       );
 
-      var xDiff = startingPoint.x - endingPoint.x;
-      var yDiff = startingPoint.y - endingPoint.y;
-
-      var computedSourceAnchor;
-      var computedTargetAnchor;
-
-      if (Math.abs(yDiff) > Math.abs(xDiff)) {
-        if (yDiff > 0) {
-          computedTargetAnchor = 'bottom';
-          computedSourceAnchor = 'top';
-        } else {
-          computedTargetAnchor = 'top';
-          computedSourceAnchor = 'bottom';
-        }
-      } else {
-        if (xDiff < 0) {
-          computedTargetAnchor = 'left';
-          computedSourceAnchor = 'right';
-        } else {
-          computedTargetAnchor = 'right';
-          computedSourceAnchor = 'left';
-        }
-      }
-
-      var drawnSourceAnchor = source.anchor;
-      if (source.anchor === 'middle') {
-        drawnSourceAnchor = computedSourceAnchor;
-      }
-
-      var drawnTargetAnchor = target.anchor;
-      if (target.anchor === 'middle') {
-        drawnTargetAnchor = computedTargetAnchor;
-      }
-
-      // source.anchor = 'left';
-      // target.anchor = 'bottom';
-
-      endingAnchorOrientation = drawnTargetAnchor;
-      endingPoint = this.getPointCoordinatesFromAnchorPosition(
-        drawnTargetAnchor,
-        target.id,
-        parentCoordinates,
-      );
-
-      startingAnchorOrientation = drawnSourceAnchor;
-      startingPoint = this.getPointCoordinatesFromAnchorPosition(
-        drawnSourceAnchor,
+      var startingAnchorOrientation = source.anchor;
+      var startingPoint = this.getPointCoordinatesFromAnchorPosition(
+        source.anchor,
         source.id,
         parentCoordinates,
       );
 
-      // if (source.anchor === 'top' || source.anchor === 'bottom') {
-      //   startingPoint.x += relativeStartOffset;
-      // } else {
-      //   startingPoint.y += relativeStartOffset;
-      // }
+      if (source.anchor === 'top' || source.anchor === 'bottom') {
+        startingPoint.x += relativeSourceOffset;
+      } else {
+        startingPoint.y += relativeSourceOffset;
+      }
 
-      // if (target.anchor === 'top' || target.anchor === 'bottom') {
-      //   endingPoint.x += relativeEndOffset;
-      // } else {
-      //   endingPoint.y += relativeEndOffset;
-      // }
+      if (target.anchor === 'top' || target.anchor === 'bottom') {
+        endingPoint.x += relativeTargetOffset;
+      } else {
+        endingPoint.y += relativeTargetOffset;
+      }
 
       return (
         <SvgArrow
