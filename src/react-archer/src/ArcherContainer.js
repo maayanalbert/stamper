@@ -224,6 +224,10 @@ export class ArcherContainer extends React.Component<Props, State> {
 
   getDist = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
+  p5NumberMap = (value, in_min, in_max, out_min, out_max) => {
+    return ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+  };
+
   setRelativeOffsets = (sourceToTargets, anchor, parentCoordinates, id) => {
     var relevantSourceToTargets = sourceToTargets.filter(
       data =>
@@ -241,6 +245,12 @@ export class ArcherContainer extends React.Component<Props, State> {
           data.target.id,
           parentCoordinates,
         );
+
+        var location = this.getPointCoordinatesFromAnchorPosition(
+          'middle',
+          data.source.id,
+          parentCoordinates,
+        );
       }
 
       if (data.target.id === id) {
@@ -249,24 +259,77 @@ export class ArcherContainer extends React.Component<Props, State> {
           data.source.id,
           parentCoordinates,
         );
+
+        var location = this.getPointCoordinatesFromAnchorPosition(
+          'middle',
+          data.target.id,
+          parentCoordinates,
+        );
       }
 
-      if (anchor === 'top' || anchor === 'bottom') {
-        otherLocationPosList.push(otherLocation.x);
-        otherLocationPosDict[otherLocation.x] = data;
-      } else {
-        otherLocationPosList.push(otherLocation.y);
-        otherLocationPosDict[otherLocation.y] = data;
+      var opposite = -1 * (location.y - otherLocation.y);
+      var adjacent = -1 * (location.x - otherLocation.x);
+      var theta = Math.atan(opposite / adjacent);
+      var thetaDegrees = (theta * 180) / Math.PI;
+
+      if (opposite > 0 && adjacent > 0) {
       }
 
-      otherLocationPosList.sort();
+      if (opposite < 0 && adjacent > 0) {
+        thetaDegrees = this.p5NumberMap(thetaDegrees, 0, -90, 0, 90);
+      } else if (opposite < 0 && adjacent < 0) {
+        thetaDegrees = this.p5NumberMap(thetaDegrees, 90, 0, 90, 180);
+      } else if (opposite > 0 && adjacent < 0) {
+        thetaDegrees = this.p5NumberMap(thetaDegrees, 0, -90, 180, 270);
+      } else if (opposite > 0 && adjacent > 0) {
+        thetaDegrees = this.p5NumberMap(thetaDegrees, 90, 0, 270, 360);
+      }
+
+      if (anchor === 'right' && thetaDegrees >= 270) {
+        thetaDegrees -= 360;
+      }
+
+      // console.log(thetaDegrees);
+
+      var negationFactor;
+
+      if (anchor === 'bottom') {
+        negationFactor = 1;
+        thetaDegrees = (thetaDegrees + 270) % 360;
+      } else if (anchor === 'left') {
+        negationFactor = 1;
+        thetaDegrees = (thetaDegrees + 0) % 360;
+      } else if (anchor === 'top') {
+        thetaDegrees = (thetaDegrees + 90) % 360;
+        negationFactor = -1;
+      } else if (anchor === 'right') {
+        thetaDegrees = (thetaDegrees + 180) % 360;
+        negationFactor = -1;
+      }
+
+      otherLocationPosList.push(thetaDegrees);
+      otherLocationPosDict[thetaDegrees] = data;
+
+      // var negationFactor;
+      // if (anchor === 'top' || anchor === 'right') {
+      //   negationFactor = -1;
+      // } else if (anchor === 'left' || anchor === 'bottom') {
+      //   negationFactor = 1;
+      // }
+
+      otherLocationPosList.sort(function(a, b) {
+        return a - b;
+      });
+      console.log(otherLocationPosList);
       otherLocationPosList.map((pos, index) => {
         var data = otherLocationPosDict[pos];
         var medianVal = 0.5 * (otherLocationPosList.length - 1);
         if (data.source.id === id) {
-          data.relativeSourceOffset = (index - medianVal) * this.props.relativeOffsetSize;
+          data.relativeSourceOffset =
+            (index - medianVal) * this.props.relativeOffsetSize * negationFactor;
         } else {
-          data.relativeTargetOffset = (index - medianVal) * this.props.relativeOffsetSize;
+          data.relativeTargetOffset =
+            (index - medianVal) * this.props.relativeOffsetSize * negationFactor;
         }
       });
     });
@@ -330,6 +393,22 @@ export class ArcherContainer extends React.Component<Props, State> {
 
     var sourceToTargets = this.getSourceToTargets();
 
+    sourceToTargets = sourceToTargets.filter(data => {
+      var startingPoint = this.getPointCoordinatesFromAnchorPosition(
+        'middle',
+        data.source.id,
+        parentCoordinates,
+      );
+
+      var endingPoint = this.getPointCoordinatesFromAnchorPosition(
+        'middle',
+        data.target.id,
+        parentCoordinates,
+      );
+
+      return startingPoint && endingPoint;
+    });
+
     sourceToTargets = sourceToTargets.map(data => {
       var result = this.getComputedAnchors(data.source, data.target, parentCoordinates);
       data = Object.assign({}, data);
@@ -372,18 +451,6 @@ export class ArcherContainer extends React.Component<Props, State> {
 
       const offset = this.props.offset || 0;
 
-      var startingRect = this.getRectFromRef(this.state.refs[source.id]);
-      var endingRect = this.getRectFromRef(this.state.refs[target.id]);
-
-      if (!startingRect || !endingRect) {
-        return null;
-      }
-
-      var result = this.getComputedAnchors(source, target, parentCoordinates);
-
-      target = result.target;
-      source = result.source;
-
       var endingAnchorOrientation = target.anchor;
       var endingPoint = this.getPointCoordinatesFromAnchorPosition(
         target.anchor,
@@ -401,13 +468,13 @@ export class ArcherContainer extends React.Component<Props, State> {
       if (source.anchor === 'top' || source.anchor === 'bottom') {
         startingPoint.x += relativeSourceOffset;
       } else {
-        startingPoint.y -= relativeSourceOffset;
+        startingPoint.y += relativeSourceOffset;
       }
 
       if (target.anchor === 'top' || target.anchor === 'bottom') {
         endingPoint.x += relativeTargetOffset;
       } else {
-        endingPoint.y -= relativeTargetOffset;
+        endingPoint.y += relativeTargetOffset;
       }
 
       return (

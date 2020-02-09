@@ -1373,7 +1373,7 @@ function logToConsole(message, lineno){
 
     lineData.map(line => {
       line.targetAnchor = "middle";
-      line.sourceAnchor = "middle";
+      line.sourceAnchor = "right";
       line.targetId = "line_" + line.end;
     });
 
@@ -1869,6 +1869,8 @@ _stopLooping =setTimeout(() => {
           var name = stampRef.state.name;
         }
       }
+
+      name += "_" + id;
 
       pickerData.push({
         name: name,
