@@ -58,14 +58,16 @@ export function computeStartingAnchorPosition(
   startingAnchorOrientation: AnchorPositionType,
 ): { xAnchor1: number, yAnchor1: number } {
   if (startingAnchorOrientation === 'top' || startingAnchorOrientation === 'bottom') {
+    const absFactor = startingAnchorOrientation === 'bottom' ? 1 : -1;
     return {
       xAnchor1: xStart,
-      yAnchor1: yStart + Math.abs(yEnd - yStart) / 2,
+      yAnchor1: yStart + (absFactor * Math.abs(yEnd - yStart)) / 2,
     };
   }
   if (startingAnchorOrientation === 'left' || startingAnchorOrientation === 'right') {
+    const absFactor = startingAnchorOrientation === 'right' ? 1 : -1;
     return {
-      xAnchor1: xStart + Math.abs(xEnd - xStart) / 2,
+      xAnchor1: xStart + (absFactor * Math.abs(xEnd - xStart)) / 2,
       yAnchor1: yStart,
     };
   }
@@ -81,14 +83,16 @@ export function computeEndingAnchorPosition(
   endingAnchorOrientation: AnchorPositionType,
 ): { xAnchor2: number, yAnchor2: number } {
   if (endingAnchorOrientation === 'top' || endingAnchorOrientation === 'bottom') {
+    const absFactor = endingAnchorOrientation === 'bottom' ? 1 : -1;
     return {
       xAnchor2: xEnd,
-      yAnchor2: yEnd - Math.abs(yEnd - yStart) / 2,
+      yAnchor2: yEnd + (absFactor * Math.abs(yEnd - yStart)) / 2,
     };
   }
   if (endingAnchorOrientation === 'left' || endingAnchorOrientation === 'right') {
+    const absFactor = endingAnchorOrientation === 'right' ? 1 : -1;
     return {
-      xAnchor2: xEnd - Math.abs(xEnd - xStart) / 2,
+      xAnchor2: xEnd + (absFactor * Math.abs(xEnd - xStart)) / 2,
       yAnchor2: yEnd,
     };
   }

@@ -1618,7 +1618,6 @@ _stopLooping =setTimeout(() => {
   }
 
   onStopMove() {
-    this.supplyLineData();
     this.setState({ mouseWheelTimeout: null });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
@@ -1678,7 +1677,6 @@ _stopLooping =setTimeout(() => {
 
   toggleHide(stampRef) {
     stampRef.toggleHide(() => {
-      this.supplyLineData();
       this.setLayerPicker();
     });
   }
