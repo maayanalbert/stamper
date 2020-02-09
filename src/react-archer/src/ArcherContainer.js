@@ -222,8 +222,9 @@ export class ArcherContainer extends React.Component<Props, State> {
     return [].concat.apply([], jaggedSourceToTargets);
   };
 
+  getDist = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
   setRelativeOffsets = (sourceToTargets, anchor, parentCoordinates, id) => {
-    console.log(this);
     var relevantSourceToTargets = sourceToTargets.filter(
       data =>
         (data.source.id === id && data.source.anchor === anchor) ||
@@ -400,13 +401,13 @@ export class ArcherContainer extends React.Component<Props, State> {
       if (source.anchor === 'top' || source.anchor === 'bottom') {
         startingPoint.x += relativeSourceOffset;
       } else {
-        startingPoint.y += relativeSourceOffset;
+        startingPoint.y -= relativeSourceOffset;
       }
 
       if (target.anchor === 'top' || target.anchor === 'bottom') {
         endingPoint.x += relativeTargetOffset;
       } else {
-        endingPoint.y += relativeTargetOffset;
+        endingPoint.y -= relativeTargetOffset;
       }
 
       return (
