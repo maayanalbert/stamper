@@ -289,8 +289,6 @@ export class ArcherContainer extends React.Component<Props, State> {
         thetaDegrees -= 360;
       }
 
-      // console.log(thetaDegrees);
-
       var negationFactor;
 
       if (anchor === 'bottom') {
@@ -320,7 +318,7 @@ export class ArcherContainer extends React.Component<Props, State> {
       otherLocationPosList.sort(function(a, b) {
         return a - b;
       });
-      console.log(otherLocationPosList);
+
       otherLocationPosList.map((pos, index) => {
         var data = otherLocationPosDict[pos];
         var medianVal = 0.5 * (otherLocationPosList.length - 1);

@@ -424,6 +424,7 @@ export default class ModalManager extends Component {
     }
 
     reader.onload = function(e) {
+      console.log(e.target.result);
       fileDict[fileName] = {
         content: e.target.result,
         type: fileType,

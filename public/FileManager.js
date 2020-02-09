@@ -1,6 +1,9 @@
 const log = require("electron-log");
 const jetpack = require("fs-jetpack");
 var chokidar = require("chokidar");
+var mime = require("mime-types");
+const fs = require("fs");
+var recursive = require("recursive-readdir");
 
 var _ = require("lodash");
 const {
@@ -14,6 +17,7 @@ const {
 } = require("electron");
 var parser = require("./parser.js");
 var LZUTF8 = require("lzutf8");
+const DataURI = require("datauri").promise;
 
 module.exports = class FileManager {
   constructor(mainWindow) {
@@ -145,8 +149,46 @@ module.exports = class FileManager {
     this.protectUnsaved(this.openProject.bind(this));
   }
 
+  getFileDictFromPath(path) {
+    recursive(path, function(err, files) {
+      // `files` is an array of file paths
+      files.map(singleFilePath => {
+        DataURI(singleFilePath)
+          .then(content => console.log(content))
+          //=> "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+          .catch(err => {
+            throw err;
+          });
+
+        // jetpack.readAsync(singleFilePath, "buffer").then(data => {
+        //   var name = singleFilePath.substring(filePath.length);
+        //   var mimeType = mime.lookup(name);
+        //   if (mimeType.startsWith("text")) {
+        //     var fileType = "text";
+        //   } else {
+        //     var fileType = "media";
+        //   }
+
+        //   if(fileType === "media"){
+        //     // var content =
+        //   }
+
+        // });
+      });
+    });
+  }
+
   openProject() {
-    this.mainWindow.webContents.send("requestUpload");
+    // this.mainWindow.webContents.send("requestUpload");
+
+    dialog.showOpenDialog({ properties: ["openDirectory"] }).then(data => {
+      if (data.filePaths.length < 1) {
+        return;
+      }
+
+      var filePath = data.filePaths[0] + "/";
+      this.getFileDictFromPath(filePath);
+    });
   }
 
   onSaveAsCommand() {
@@ -167,6 +209,10 @@ module.exports = class FileManager {
     var buf = new Buffer(headerlessUri, "base64");
     return buf;
   }
+
+  // bufferToURi(buffer){
+  //     `data:${mimeType};base64,`
+  // }
 
   saveFiles(newFileDict) {
     console.log(this.path);

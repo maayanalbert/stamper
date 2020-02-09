@@ -1373,7 +1373,7 @@ function logToConsole(message, lineno){
 
     lineData.map(line => {
       line.targetAnchor = "middle";
-      line.sourceAnchor = "right";
+      line.sourceAnchor = "middle";
       line.targetId = "line_" + line.end;
     });
 
