@@ -87,7 +87,8 @@ export default class View extends Component {
       settingsPicker: [],
       lineData: [],
       deletedStamps: [],
-      actualLinesOn: false
+      actualLinesOn: false,
+      lastLineData: []
     };
     this.counterMutex = new Mutex();
     this.modalManagerRef = React.createRef();
@@ -879,8 +880,50 @@ function logToConsole(message, lineno){
     });
   }
 
+  compileSingleStamp(id, duplicateNamedStamps) {
+    var stamp = this.state.stampRefs[id];
+    var stampRef = stamp.current;
+    if (stampRef) {
+      var newErrors = [];
+      if (
+        stampRef.props.id in duplicateNamedStamps &&
+        stampRef.props.isIndex === false
+      ) {
+        newErrors.push(0);
+      }
+
+      stampRef.clearErrorsAndUpdate(newErrors);
+    }
+  }
+
+  lineDataToGraph(lineData) {
+    var graph = {};
+
+    lineData.map(line => {
+      if (!(line.start in graph)) {
+        graph[line.start] = [];
+      }
+
+      if (!(line.end in graph)) {
+        graph[line.end] = [];
+      }
+
+      graph[line.start].push(line.end);
+    });
+
+    return graph;
+  }
+
   requestCompile(id) {
+    var oldGraph = this.lineDataToGraph(
+      Object.assign([], this.state.lastLineData)
+    );
+    var newGraph = this.lineDataToGraph(this.getLineData());
+
+    this.setState({ lastLineData: this.getLineData() });
     this.setLineData(id);
+
+    var seen = {};
 
     this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
 
@@ -890,21 +933,39 @@ function logToConsole(message, lineno){
 
     this.checkForSetup();
 
-    this.state.stampOrder.map(id => {
-      var stamp = this.state.stampRefs[id];
-      var stampRef = stamp.current;
-      if (stampRef) {
-        var newErrors = [];
-        if (
-          stampRef.props.id in duplicateNamedStamps &&
-          stampRef.props.isIndex === false
-        ) {
-          newErrors.push(0);
-        }
+    if (!id) {
+      this.state.stampOrder.map(id => {
+        this.compileSingleStamp(id, duplicateNamedStamps);
+      });
+    } else {
+      if (id in this.state.stampRefs && this.isFnStamp(id)) {
+        var compileStampRef = this.state.stampRefs[id].current;
+        this.state.stampOrder.map(otherID => {
+          var stampRef = this.state.stampRefs[otherID].current;
+          if (compileStampRef.state.name === stampRef.state.name) {
+            this.compileSingleStamp(id, duplicateNamedStamps);
 
-        stampRef.clearErrorsAndUpdate(newErrors);
+            seen[id] = "";
+          }
+        });
       }
-    });
+      this.recursiveCompile(id, oldGraph, seen, duplicateNamedStamps);
+      this.recursiveCompile(id, newGraph, seen, duplicateNamedStamps);
+    }
+  }
+
+  recursiveCompile(id, graph, seen, duplicateNamedStamps) {
+    if (!(id in seen)) {
+      seen[id] = "";
+      if (id in this.state.stampRefs) {
+        this.compileSingleStamp(id, duplicateNamedStamps);
+      }
+    }
+
+    graph[id] &&
+      graph[id].map(otherID =>
+        this.recursiveCompile(otherID, graph, seen, duplicateNamedStamps)
+      );
   }
 
   recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
@@ -1869,6 +1930,8 @@ _stopLooping =setTimeout(() => {
           var name = stampRef.state.name;
         }
       }
+
+      name += "_" + id;
 
       pickerData.push({
         name: name,
