@@ -51,7 +51,6 @@ function createWindow() {
     ipcMain.removeAllListeners("save");
     ipcMain.removeAllListeners("updatePath");
     ipcMain: null;
-    fileManager.watcher.close();
   });
 
   mainWindow.on("blur", e => {
@@ -66,6 +65,8 @@ function createWindow() {
         manualClose = true;
         mainWindow.close();
       });
+    } else {
+      fileManager.watcher.close();
     }
   });
 

@@ -198,6 +198,7 @@ export default class FunctionStamp extends Component {
     this.setState({ errorLines: newErrorLines }, () => {
       var iframeCode = "";
       var exportableCode = "";
+      this.props.setLayerPicker();
 
       if (this.props.isBlob) {
         exportableCode = this.props.getExportableCode();
@@ -332,11 +333,11 @@ export default class FunctionStamp extends Component {
 
     if (this.state.editorBottomShadow && this.state.editorTopShadow) {
       shadow =
-        "inset 0 7px 6px -8px rgba(0, 0, 0, .3), inset 0 -7px 6px -8px rgba(0, 0, 0, .3)";
+        "inset 0 7px 6px -8px rgba(0, 0, 0, .15), inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
     } else if (this.state.editorTopShadow) {
-      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .3)";
+      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .15)";
     } else if (this.state.editorBottomShadow) {
-      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .3)";
+      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
     }
 
     return (
@@ -560,7 +561,6 @@ export default class FunctionStamp extends Component {
         var img = new Image();
 
         img.onload = function() {
-          console.log(img.width);
           this.setState({ imageWidth: img.width, imageHeight: img.height });
         };
 

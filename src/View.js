@@ -918,16 +918,14 @@ function logToConsole(message, lineno){
     var oldGraph = this.lineDataToGraph(
       Object.assign([], this.state.lastLineData)
     );
-    var newGraph = this.lineDataToGraph(this.getLineData());
+    var newGraph = this.lineDataToGraph(this.getLineData(true));
 
-    this.setState({ lastLineData: this.getLineData() });
+    this.setState({ lastLineData: this.getLineData(true) });
     this.setLineData(id);
 
     var seen = {};
 
     this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
-
-    this.setLayerPicker();
 
     var duplicateNamedStamps = this.checkAllNames();
 
@@ -938,17 +936,26 @@ function logToConsole(message, lineno){
         this.compileSingleStamp(id, duplicateNamedStamps);
       });
     } else {
-      if (id in this.state.stampRefs && this.isFnStamp(id)) {
-        var compileStampRef = this.state.stampRefs[id].current;
-        this.state.stampOrder.map(otherID => {
-          var stampRef = this.state.stampRefs[otherID].current;
-          if (compileStampRef.state.name === stampRef.state.name) {
-            this.compileSingleStamp(id, duplicateNamedStamps);
+      var compileStampName;
 
-            seen[id] = "";
-          }
-        });
+      if (id in this.state.stampRefs) {
+        compileStampName = this.state.stampRefs[id].current.state.name;
+      } else {
+        if (this.state.deletedStamps.length > 0) {
+          compileStampName = this.state.deletedStamps[
+            this.state.deletedStamps.length - 1
+          ].name;
+        }
       }
+
+      this.state.stampOrder.map(otherID => {
+        var stampRef = this.state.stampRefs[otherID].current;
+        if (compileStampName === stampRef.state.name) {
+          this.compileSingleStamp(otherID, duplicateNamedStamps);
+          seen[otherID] = "";
+        }
+      });
+
       this.recursiveCompile(id, oldGraph, seen, duplicateNamedStamps);
       this.recursiveCompile(id, newGraph, seen, duplicateNamedStamps);
     }
@@ -1189,7 +1196,7 @@ function logToConsole(message, lineno){
       var usingID = undeclaredItem.id;
       var declaringID = declaredDict[variable];
 
-      if (declaringID && usingID && this.isFnStamp(usingID)) {
+      if (declaringID && usingID) {
         if (!(usingID + "_" + declaringID in lineDict)) {
           lineDict[usingID + "_" + declaringID] = [];
         }
@@ -1433,8 +1440,8 @@ function logToConsole(message, lineno){
     var relativeOffsetUnit = 10;
 
     lineData.map(line => {
-      line.targetAnchor = "middle";
-      line.sourceAnchor = "middle";
+      line.targetAnchor = "top";
+      line.sourceAnchor = "bottom";
       line.targetId = "line_" + line.end;
     });
 
@@ -1931,7 +1938,7 @@ _stopLooping =setTimeout(() => {
         }
       }
 
-      name += "_" + id;
+      // name += "_" + id;
 
       pickerData.push({
         name: name,
@@ -1997,7 +2004,7 @@ _stopLooping =setTimeout(() => {
     if (data.isMediaFile) {
       initialHeight = data.iframeHeight + globals.fnTitleHeight + 35;
     } else if (data.isBlob) {
-      initialHeight = data.editorHeight + 60;
+      initialHeight = data.editorHeight + 80;
     }
 
     return {
