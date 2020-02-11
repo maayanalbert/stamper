@@ -1917,7 +1917,7 @@ _stopLooping =setTimeout(() => {
     while (x < width + x0) {
       gridLines.push(
         <span
-          className="border-borderGrey"
+          className="border-borderLightGrey"
           style={{
             position: "absolute",
             top: roundedY0,
@@ -1937,7 +1937,7 @@ _stopLooping =setTimeout(() => {
     while (y < height + y0) {
       gridLines.push(
         <span
-          className="border-borderGrey"
+          className="border-borderLightGrey"
           style={{
             position: "absolute",
             top: y,
