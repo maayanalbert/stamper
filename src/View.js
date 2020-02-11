@@ -88,7 +88,8 @@ export default class View extends Component {
       lineData: [],
       deletedStamps: [],
       actualLinesOn: false,
-      lastLineData: []
+      lastLineData: [],
+      highlightedLines: {}
     };
     this.counterMutex = new Mutex();
 
@@ -313,12 +314,16 @@ export default class View extends Component {
         worldKey: null,
         worldEdited: false,
         worldPublishTime: null,
+        highlightedLines: {},
 
         snapToGrid: false,
         linesOn: false,
         deletedStamps: []
       },
       () => {
+        if (!stamperObject.highlightedLines) {
+          stamperObject.highlightedLines = {};
+        }
         this.setState(
           {
             scale: stamperObject.scale,
@@ -328,6 +333,7 @@ export default class View extends Component {
             worldKey: stamperObject.worldKey,
             worldEdited: stamperObject.worldEdited == true,
             worldPublishTime: stamperObject.worldPublishTime,
+            highlightedLines: stamperObject.highlightedLines,
 
             snapToGrid: stamperObject.snapToGrid == true,
             linesOn: stamperObject.linesOn == true
@@ -697,7 +703,8 @@ function logToConsole(message, lineno){
       hidden: false,
       zIndex: undefined,
       codeSize: globals.codeSize,
-      lineHighLightingStatus: "none"
+      lineHighLightingStatus: "none",
+      id: this.getUniqueID()
     };
 
     if (
@@ -735,7 +742,6 @@ function logToConsole(message, lineno){
     ///
 
     var ref = React.createRef();
-    var stampID = this.getUniqueID();
 
     var elem = (
       <Stamp
@@ -761,7 +767,7 @@ function logToConsole(message, lineno){
         initialPosition={{ x: data.x, y: data.y }}
         starterCodeSize={data.codeSize}
         getFirstLine={this.getFirstLine.bind(this)}
-        id={stampID}
+        id={data.id}
         starterLineHighLightingStatus={data.lineHighLightingStatus}
         getP5CanvasDimensions={this.getP5CanvasDimensions.bind(this)}
         setLayerPicker={this.setLayerPicker.bind(this)}
@@ -786,10 +792,10 @@ function logToConsole(message, lineno){
     );
 
     if (data.isIndex) {
-      this.setState({ htmlID: stampID });
+      this.setState({ htmlID: data.id });
     }
 
-    this.addStampToState(ref, elem, stampID, callback);
+    this.addStampToState(ref, elem, data.id, callback);
   }
 
   async addStampToState(ref, elem, id, callback) {
@@ -1391,7 +1397,7 @@ function logToConsole(message, lineno){
     } else if (type === "listener") {
       return "rgba(218,16,96, " + opacity + ")";
     } else {
-      return "rgba(190,190,190, " + opacity + ")";
+      return "rgba(170,170,170, " + opacity + ")";
     }
   }
 
@@ -1407,10 +1413,7 @@ function logToConsole(message, lineno){
   }
 
   getLineRelation(start, end, type, label) {
-    var isHighlighted =
-      this.state.stampRefs[start].current.state.lineHighLightingStatus ===
-        "on" &&
-      this.state.stampRefs[end].current.state.lineHighLightingStatus === "on";
+    var isHighlighted = start + "_" + end in this.state.highlightedLines;
 
     if (!label) {
       label = type;
@@ -1458,14 +1461,17 @@ function logToConsole(message, lineno){
     this.state.stampOrder.map(id => {
       this.state.stampRefs[id].current.setLineHighlighted("off");
     });
-    this.recursivelyHighlight(id, graph);
-  }
-
-  recursivelyHighlight(id, graph) {
-    console.log(id);
-    console.log(graph);
     this.state.stampRefs[id].current.setLineHighlighted("on");
-    graph[id].map(otherID => this.recursivelyHighlight(otherID, graph));
+
+    var highlightedLines = {};
+    graph[id].map(otherID => {
+      highlightedLines[id + "_" + otherID] = "";
+      this.state.stampRefs[otherID].current.setLineHighlighted("on");
+    });
+
+    this.setState({ highlightedLines: highlightedLines }, () =>
+      this.setLineData()
+    );
   }
 
   onMouseOverLine(sourceAndTarget) {
@@ -1476,12 +1482,21 @@ function logToConsole(message, lineno){
     });
     this.state.stampRefs[startStampId].current.setLineHighlighted("on");
     this.state.stampRefs[endStampId].current.setLineHighlighted("on");
+
+    var lineName = startStampId + "_" + endStampId;
+    var highlightedLines = {};
+    highlightedLines[lineName] = "";
+    this.setState({ highlightedLines: highlightedLines }, () => {
+      this.setLineData();
+    });
   }
 
   onMouseOutLine() {
     this.state.stampOrder.map(id => {
       this.state.stampRefs[id].current.setLineHighlighted("none");
     });
+
+    this.setState({ highlightedLines: {} }, () => this.setLineData());
   }
 
   getLineData() {
@@ -1723,7 +1738,8 @@ _stopLooping =setTimeout(() => {
       worldPublishTime: this.state.worldPublishTime,
       snapToGrid: this.state.snapToGrid,
       linesOn: this.state.linesOn,
-      js: this.getExportableCode()
+      js: this.getExportableCode(),
+      highlightedLines: this.state.highlightedLines
     };
     this.state.stampOrder.map(stampID => {
       if (stampID != id) {
@@ -1944,9 +1960,7 @@ _stopLooping =setTimeout(() => {
       this.setLineData();
     });
 
-    this.state.stampOrder.map(id => {
-      this.state.stampRefs[id].current.setLineHighlighted("none");
-    });
+    this.onMouseOutLine();
   }
 
   setSettingsPicker() {

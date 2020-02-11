@@ -841,6 +841,7 @@ export default class FunctionStamp extends Component {
     }
 
     var data = {
+      id: this.props.id,
       name: name,
       code: this.state.code,
       args: this.state.args,
@@ -905,9 +906,7 @@ export default class FunctionStamp extends Component {
   }
 
   setLineHighlighted(lineHighLightingStatus) {
-    this.setState({ lineHighLightingStatus: lineHighLightingStatus }, () =>
-      this.props.setLineData()
-    );
+    this.setState({ lineHighLightingStatus: lineHighLightingStatus });
   }
 
   render() {
