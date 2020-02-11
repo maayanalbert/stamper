@@ -830,7 +830,7 @@ export default class FunctionStamp extends Component {
         this.cristalRef.current.changeZIndex();
       };
     }
-
+    delete data.id;
     var newName = this.props.addStamp(data, callback);
   }
 
@@ -960,7 +960,7 @@ export default class FunctionStamp extends Component {
           opacity={cristalOpacity}
           zIndex={this.state.zIndex}
           onZChange={s => {
-            this.setState({ zIndex: s.zIndex }, () => this.props.setLineData());
+            this.setState({ zIndex: s.zIndex });
           }}
           getScale={this.props.getScale}
           getSnapMargin={this.props.getSnapMargin}

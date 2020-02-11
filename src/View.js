@@ -128,27 +128,17 @@ export default class View extends Component {
 
     ipc &&
       ipc.on("zoomIn", () => {
-        this.zoom(
-          this.state.scale * 2,
-          centerX,
-          centerY,
-          this.setLineData.bind(this)
-        );
+        this.zoom(this.state.scale * 2, centerX, centerY);
       });
 
     ipc &&
       ipc.on("zoomOut", () => {
-        this.zoom(
-          this.state.scale * 0.5,
-          centerX,
-          centerY,
-          this.setLineData.bind(this)
-        );
+        this.zoom(this.state.scale * 0.5, centerX, centerY);
       });
 
     ipc &&
       ipc.on("zoomActual", () => {
-        this.zoom(1, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(1, centerX, centerY);
       });
   }
 
@@ -171,23 +161,13 @@ export default class View extends Component {
     if (this.state.downKey === this.cmd || this.state.downKey === this.ctrl) {
       if (e.keyCode === this.zero) {
         e.preventDefault();
-        this.zoom(1, centerX, centerY, this.setLineData.bind(this));
+        this.zoom(1, centerX, centerY);
       } else if (e.keyCode === this.plus) {
         e.preventDefault();
-        this.zoom(
-          this.state.scale * 2,
-          centerX,
-          centerY,
-          this.setLineData.bind(this)
-        );
+        this.zoom(this.state.scale * 2, centerX, centerY);
       } else if (e.keyCode === this.minus) {
         e.preventDefault();
-        this.zoom(
-          this.state.scale * 0.5,
-          centerX,
-          centerY,
-          this.setLineData.bind(this)
-        );
+        this.zoom(this.state.scale * 0.5, centerX, centerY);
       }
     } else if (this.state.downKey === this.shft) {
       if (e.keyCode === this.g) {
@@ -875,9 +855,12 @@ function logToConsole(message, lineno){
     return fileDict;
   }
 
-  setLineData(id) {
+  setLineData(callback = () => null) {
     var lineData = this.getLineData();
-    this.setState({ lineData: lineData }, () => this.supplyLineData());
+    this.setState({ lineData: lineData }, () => {
+      this.supplyLineData();
+      callback();
+    });
   }
 
   supplyLineData() {
@@ -906,7 +889,7 @@ function logToConsole(message, lineno){
     }
   }
 
-  lineDataToGraph(lineData) {
+  lineDataToGraph(lineData, reversed = false) {
     var graph = {};
 
     lineData.map(line => {
@@ -917,111 +900,24 @@ function logToConsole(message, lineno){
       if (!(line.end in graph)) {
         graph[line.end] = [];
       }
-
-      graph[line.start].push(line.end);
+      if (reversed) {
+        graph[line.end].push(line.start);
+      } else {
+        graph[line.start].push(line.end);
+      }
     });
 
     return graph;
   }
 
   requestCompile(id) {
-    var oldGraph = this.lineDataToGraph(
-      Object.assign([], this.state.lastLineData)
-    );
-    var newGraph = this.lineDataToGraph(this.getLineData(true));
+    this.setLineData(() => {
+      var duplicateNamedStamps = this.checkAllNames();
 
-    this.setState({ lastLineData: this.getLineData(true) });
-    this.setLineData(id);
-
-    var seen = {};
-
-    this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
-
-    var duplicateNamedStamps = this.checkAllNames();
-
-    this.checkForSetup();
-
-    if (!id) {
       this.state.stampOrder.map(id => {
         this.compileSingleStamp(id, duplicateNamedStamps);
       });
-    } else {
-      var compileStampName;
-
-      if (id in this.state.stampRefs) {
-        compileStampName = this.state.stampRefs[id].current.state.name;
-      } else {
-        if (this.state.deletedStamps.length > 0) {
-          compileStampName = this.state.deletedStamps[
-            this.state.deletedStamps.length - 1
-          ].name;
-        }
-      }
-
-      this.state.stampOrder.map(otherID => {
-        var stampRef = this.state.stampRefs[otherID].current;
-        if (compileStampName === stampRef.state.name) {
-          this.compileSingleStamp(otherID, duplicateNamedStamps);
-          seen[otherID] = "";
-        }
-      });
-
-      this.recursiveCompile(id, oldGraph, seen, duplicateNamedStamps);
-      this.recursiveCompile(id, newGraph, seen, duplicateNamedStamps);
-    }
-  }
-
-  recursiveCompile(id, graph, seen, duplicateNamedStamps) {
-    if (!(id in seen)) {
-      seen[id] = "";
-      if (id in this.state.stampRefs) {
-        this.compileSingleStamp(id, duplicateNamedStamps);
-      }
-    }
-
-    graph[id] &&
-      graph[id].map(otherID =>
-        this.recursiveCompile(otherID, graph, seen, duplicateNamedStamps)
-      );
-  }
-
-  recursiveCompileStamp(id, seen, traversalGraph, duplicateNamedStamps) {
-    if (id in seen) {
-      return;
-    } else {
-      seen[id] = "";
-    }
-
-    if (id in this.state.stampRefs) {
-      var stampRef = this.state.stampRefs[id].current;
-    } else {
-      return;
-    }
-
-    if (stampRef) {
-      var newErrors = [];
-
-      if (
-        stampRef.props.id in duplicateNamedStamps &&
-        stampRef.props.isIndex === false
-      ) {
-        newErrors.push(0);
-      }
-
-      stampRef.clearErrorsAndUpdate(newErrors);
-
-      if (id in traversalGraph === false) {
-        return;
-      }
-      traversalGraph[id].map(id =>
-        this.recursiveCompileStamp(
-          id,
-          seen,
-          traversalGraph,
-          duplicateNamedStamps
-        )
-      );
-    }
+    });
   }
 
   disablePan(status) {
@@ -1456,7 +1352,7 @@ function logToConsole(message, lineno){
   }
 
   setDependencyLineHighlightings(id) {
-    var graph = this.lineDataToGraph(this.getLineData(id));
+    var graph = this.lineDataToGraph(this.state.lineData);
 
     this.state.stampOrder.map(id => {
       this.state.stampRefs[id].current.setLineHighlighted("off");
@@ -1537,11 +1433,21 @@ function logToConsole(message, lineno){
     return lineData;
   }
 
+  getInfluencingStamps(id, graph, seen) {
+    seen[id] = "";
+    graph[id].map(otherID => this.getInfluencingStamps(otherID, graph, seen));
+  }
+
   getRunnableCode(overalID) {
     var runnableCode = [];
     var ranges = [];
     var curLine = 1;
     var code;
+
+    var lineGraph = this.lineDataToGraph(this.state.lineData, true);
+
+    var influencingStamps = {};
+    this.getInfluencingStamps(overalID, lineGraph, influencingStamps);
 
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id];
@@ -1559,7 +1465,10 @@ function logToConsole(message, lineno){
           this.isListener(stamp.current.state.name) &&
           (this.state.stampRefs[overalID].current.state.name === "setup" ||
             this.state.stampRefs[overalID].current.state.name === "preload")
-        )
+        ) &&
+        (id in influencingStamps ||
+          stamp.current.state.name ===
+            this.state.stampRefs[overalID].current.state.name)
       ) {
         var state = stamp.current.state;
         if (stamp.current.props.isBlob) {
@@ -1959,7 +1868,6 @@ _stopLooping =setTimeout(() => {
   toggleLinesOn() {
     this.setState({ linesOn: !this.state.linesOn }, () => {
       this.setLayerPicker();
-      this.setLineData();
     });
 
     this.onMouseOutLine();
