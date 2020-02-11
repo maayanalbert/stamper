@@ -87,7 +87,9 @@ export default class FunctionStamp extends Component {
       ghostY: starterIframeHeight,
       iframeDimensTransition: "",
       mediaAssetHeight: null,
-      mediaAssetWidth: null
+      mediaAssetWidth: null,
+      lineHighLightingStatus: "none"
+      // on, off, none
     };
 
     this.cristalRef = React.createRef();
@@ -894,6 +896,12 @@ export default class FunctionStamp extends Component {
     return icon;
   }
 
+  setLineHighlighted(lineHighLightingStatus) {
+    this.setState({ lineHighLightingStatus: lineHighLightingStatus }, () =>
+      this.props.setLineData()
+    );
+  }
+
   render() {
     var headerColor = "bg-white";
 
@@ -929,9 +937,20 @@ export default class FunctionStamp extends Component {
       initialHeight = this.state.editorHeight + 60;
     }
 
+    var cristalOpacity = 1;
+    var shadowSize = "shadow-sm";
+    if (this.state.lineHighLightingStatus === "off") {
+      cristalOpacity = 0.5;
+    }
+
+    if (this.state.lineHighLightingStatus === "on") {
+      shadowSize = "shadow-lg";
+    }
+
     return (
-      <div>
+      <div style={{ opacity: cristalOpacity }}>
         <Cristal
+          opacity={cristalOpacity}
           zIndex={this.state.zIndex}
           onZChange={s => {
             this.setState({ zIndex: s.zIndex }, () => this.props.setLineData());
@@ -964,7 +983,9 @@ export default class FunctionStamp extends Component {
           initialPosition={{ x: this.state.x, y: this.state.y }}
           lineData={this.state.lineData}
           className={
-            "stamp shadow-sm " +
+            "stamp " +
+            shadowSize +
+            " " +
             bgColor +
             " " +
             border +

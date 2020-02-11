@@ -91,6 +91,7 @@ export default class View extends Component {
       lastLineData: []
     };
     this.counterMutex = new Mutex();
+
     this.modalManagerRef = React.createRef();
 
     this.onWheel = this.onWheel.bind(this);
@@ -192,10 +193,7 @@ export default class View extends Component {
         var snapToGrid = this.state.snapToGrid;
         this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
       } else if (e.keyCode === this.l) {
-        this.setState({ linesOn: !this.state.linesOn }, () => {
-          this.setLayerPicker();
-          this.setLineData();
-        });
+        this.toggleLinesOn();
       }
     } else {
       this.setState({ downKey: e.keyCode });
@@ -1215,13 +1213,12 @@ function logToConsole(message, lineno){
     });
 
     var lineData = Object.keys(lineDict).map(lineKey => {
-      return {
-        end: lineKey.split("_")[0],
-        start: lineKey.split("_")[1],
-        type: "js",
-        label: this.getLineLabel(lineDict[lineKey].join(", "), "js"),
-        style: this.getLineStyle("js")
-      };
+      return this.getLineRelation(
+        lineKey.split("_")[1],
+        lineKey.split("_")[0],
+        "js",
+        lineDict[lineKey].join(", ")
+      );
     });
 
     return lineData;
@@ -1255,16 +1252,7 @@ function logToConsole(message, lineno){
         return;
       }
       listenerIDs.map(listenerID => {
-        lineData.push({
-          end: id,
-          start: listenerID,
-          type: "listener",
-          label: this.getLineLabel(
-            this.state.stampRefs[listenerID].current.state.name,
-            "listener"
-          ),
-          style: this.getLineStyle("listener")
-        });
+        lineData.push(this.getLineRelation(listenerID, id, "listener"));
       });
     });
 
@@ -1290,13 +1278,7 @@ function logToConsole(message, lineno){
           setupID != id &&
           this.state.stampRefs[id].current.state.name != "preload"
         ) {
-          lineData.push({
-            end: id,
-            start: setupID,
-            type: "setup",
-            label: this.getLineLabel("setup", "setup"),
-            style: this.getLineStyle("setup")
-          });
+          lineData.push(this.getLineRelation(setupID, id, "setup"));
         }
       });
     }
@@ -1319,13 +1301,7 @@ function logToConsole(message, lineno){
     if (preloadID) {
       this.state.stampOrder.map(id => {
         if (this.isFnStamp(id) && preloadID != id) {
-          lineData.push({
-            end: id,
-            start: preloadID,
-            type: "preload",
-            label: this.getLineLabel("preload", "preload"),
-            style: this.getLineStyle("preload")
-          });
+          lineData.push(this.getLineRelation(preloadID, id, "preload"));
         }
       });
     }
@@ -1356,13 +1332,7 @@ function logToConsole(message, lineno){
       }
       this.state.stampOrder.map(id => {
         if (this.isFnStamp(id)) {
-          lineData.push({
-            start: indexID,
-            end: id,
-            type: "index",
-            label: this.getLineLabel("index", "index"),
-            style: this.getLineStyle("index")
-          });
+          lineData.push(this.getLineRelation(indexID, id, "index"));
         }
       });
     }
@@ -1378,14 +1348,20 @@ function logToConsole(message, lineno){
     );
   }
 
-  getLineLabel(text, type) {
+  getLineLabel(text, type, isHighlighted) {
+    var backgroundColor = "transparent";
+    var textColor = this.getLineColor(type);
+    if (isHighlighted) {
+      backgroundColor = this.getLineColor(type);
+      textColor = "white";
+    }
     var label = (
       <div
         className={"name rounded p-2"}
         style={{
           transform: "scale(" + 0.8 + ")",
-          color: this.getLineColor(type),
-          backgroundColor: "transparent"
+          color: textColor,
+          backgroundColor: backgroundColor
         }}
       >
         {text}
@@ -1411,8 +1387,8 @@ function logToConsole(message, lineno){
     }
   }
 
-  getLineStyle(type) {
-    var strokeColor = this.getLineColor(type, true);
+  getLineStyle(type, isHighlighted) {
+    var strokeColor = this.getLineColor(type, !isHighlighted);
     var style = {
       strokeColor: strokeColor,
       strokeWidth: 5,
@@ -1420,6 +1396,24 @@ function logToConsole(message, lineno){
       arrowThickness: 4
     };
     return style;
+  }
+
+  getLineRelation(start, end, type, label) {
+    var isHighlighted =
+      this.state.stampRefs[start].current.state.lineHighLightingStatus ===
+        "on" &&
+      this.state.stampRefs[end].current.state.lineHighLightingStatus === "on";
+
+    if (!label) {
+      label = type;
+    }
+    return {
+      end: end,
+      start: start,
+      type: type,
+      label: this.getLineLabel(label, type, isHighlighted),
+      style: this.getLineStyle(type, isHighlighted)
+    };
   }
 
   getFileLineData() {
@@ -1440,18 +1434,30 @@ function logToConsole(message, lineno){
       var stampRef = this.state.stampRefs[id].current;
       Object.keys(fileIdDict).map(fileName => {
         if (this.fileIsReferenced(stampRef.state.code, fileName)) {
-          lineData.push({
-            end: id,
-            start: fileIdDict[fileName],
-            type: "file",
-            label: this.getLineLabel(fileName, "file"),
-            style: this.getLineStyle("file")
-          });
+          lineData.push(
+            this.getLineRelation(fileIdDict[fileName], id, "file", fileName)
+          );
         }
       });
     });
 
     return lineData;
+  }
+
+  onMouseOverLine(sourceAndTarget) {
+    var startStampId = sourceAndTarget.source.id.split("_").pop();
+    var endStampId = sourceAndTarget.target.id.split("_").pop();
+    this.state.stampOrder.map(id => {
+      this.state.stampRefs[id].current.setLineHighlighted("off");
+    });
+    this.state.stampRefs[startStampId].current.setLineHighlighted("on");
+    this.state.stampRefs[endStampId].current.setLineHighlighted("on");
+  }
+
+  onMouseOutLine(sourceAndTarget) {
+    this.state.stampOrder.map(id => {
+      this.state.stampRefs[id].current.setLineHighlighted("none");
+    });
   }
 
   getLineData() {
@@ -1908,6 +1914,17 @@ _stopLooping =setTimeout(() => {
     return gridLines;
   }
 
+  toggleLinesOn() {
+    this.setState({ linesOn: !this.state.linesOn }, () => {
+      this.setLayerPicker();
+      this.setLineData();
+    });
+
+    this.state.stampOrder.map(id => {
+      this.state.stampRefs[id].current.setLineHighlighted("none");
+    });
+  }
+
   setSettingsPicker() {
     var pickerData = [];
 
@@ -1917,10 +1934,7 @@ _stopLooping =setTimeout(() => {
       icon: globals.LinesIcon,
 
       hideCallback: () => {
-        this.setState({ linesOn: !this.state.linesOn }, () => {
-          this.setLayerPicker();
-          this.setLineData();
-        });
+        this.toggleLinesOn();
       },
 
       id: this.getUniqueID(),
@@ -2068,7 +2082,11 @@ _stopLooping =setTimeout(() => {
 
     return (
       <div>
-        <div class="row bg-grey" style={{ height: "100vh" }}>
+        <div
+          class="row bg-grey"
+          style={{ height: "100vh" }}
+          onClick={this.onMouseOutLine.bind(this)}
+        >
           <div
             className="allStamps"
             style={{
@@ -2080,6 +2098,8 @@ _stopLooping =setTimeout(() => {
           >
             <div>{this.renderGridLines()}</div>
             <ArcherContainer
+              onMouseOver={this.onMouseOverLine.bind(this)}
+              onMouseOut={this.onMouseOutLine.bind(this)}
               scale={this.state.scale}
               top={this.state.originY}
               left={this.state.originX}

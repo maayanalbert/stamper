@@ -178,6 +178,8 @@ const SvgArrow = ({
   arrowMarkerId,
   noCurves,
   offset,
+  onMouseOver,
+  onMouseOut,
 }: Props) => {
   const actualArrowLength = arrowLength * 2;
 
@@ -232,12 +234,13 @@ const SvgArrow = ({
   );
 
   return (
-    <g>
+    <g onDoubleClick={() => onMouseOver()}>
       <path
         d={pathString}
-        style={{ fill: 'none', stroke: strokeColor, strokeWidth, strokeDasharray }}
+        style={{ fill: 'none', stroke: strokeColor, strokeWidth: strokeWidth, strokeDasharray }}
         markerEnd={`url(${window.location.href.split('#')[0]}#${arrowMarkerId})`}
       />
+
       {arrowLabel && (
         <foreignObject
           x={xLabel}
