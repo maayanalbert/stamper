@@ -1362,9 +1362,9 @@ function logToConsole(message, lineno){
 
   getLineLabel(text, type, isHighlighted) {
     var backgroundColor = "transparent";
-    var textColor = this.getLineColor(type);
+    var textColor = this.getLineColor(type, 0.7);
     if (isHighlighted) {
-      backgroundColor = this.getLineColor(type);
+      backgroundColor = this.getLineColor(type, 1);
       textColor = "white";
     }
     var label = (
@@ -1385,11 +1385,7 @@ function logToConsole(message, lineno){
     return label;
   }
 
-  getLineColor(type, seeThru = false) {
-    var opacity = "1";
-    if (seeThru) {
-      opacity = ".2";
-    }
+  getLineColor(type, opacity) {
     if (type === "file") {
       return "rgba(140,154, 53, " + opacity + ")";
     } else if (type === "js") {
@@ -1402,7 +1398,11 @@ function logToConsole(message, lineno){
   }
 
   getLineStyle(type, isHighlighted) {
-    var strokeColor = this.getLineColor(type, !isHighlighted);
+    var colorOpacity = 0.1;
+    if (isHighlighted) {
+      colorOpacity = 1;
+    }
+    var strokeColor = this.getLineColor(type, colorOpacity);
     var style = {
       strokeColor: strokeColor,
       strokeWidth: 5,
