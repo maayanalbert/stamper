@@ -1464,10 +1464,11 @@ function logToConsole(message, lineno){
     this.state.stampRefs[id].current.setLineHighlighted("on");
 
     var highlightedLines = {};
-    graph[id].map(otherID => {
-      highlightedLines[id + "_" + otherID] = "";
-      this.state.stampRefs[otherID].current.setLineHighlighted("on");
-    });
+    graph[id] &&
+      graph[id].map(otherID => {
+        highlightedLines[id + "_" + otherID] = "";
+        this.state.stampRefs[otherID].current.setLineHighlighted("on");
+      });
 
     this.setState({ highlightedLines: highlightedLines }, () =>
       this.setLineData()
