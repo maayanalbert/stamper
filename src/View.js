@@ -1362,7 +1362,7 @@ function logToConsole(message, lineno){
 
   getLineLabel(text, type, isHighlighted) {
     var backgroundColor = "transparent";
-    var textColor = this.getLineColor(type, 0.7);
+    var textColor = this.getLineColor(type, 0.9);
     if (isHighlighted) {
       backgroundColor = this.getLineColor(type, 1);
       textColor = "white";
@@ -1398,7 +1398,7 @@ function logToConsole(message, lineno){
   }
 
   getLineStyle(type, isHighlighted) {
-    var colorOpacity = 0.1;
+    var colorOpacity = 0.15;
     if (isHighlighted) {
       colorOpacity = 1;
     }
