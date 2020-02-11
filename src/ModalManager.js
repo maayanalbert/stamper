@@ -71,7 +71,7 @@ export default class ModalManager extends Component {
     };
     this.protectAgainstClosed = this.protectAgainstClosed.bind(this);
     this.receiveMessage = this.receiveMessage.bind(this);
-    this.domain = "http://localhost:3000";
+    this.domain = "https://p5stamper.com";
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.receiveFiles = this.receiveFiles.bind(this);
