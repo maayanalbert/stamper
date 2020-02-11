@@ -55,6 +55,8 @@ export default class FunctionStamp extends Component {
       starterIframeHeight = 0;
     }
 
+    var lineHighLightingStatus = "none";
+
     this.state = {
       code: this.props.starterCode,
       name: starterName,
@@ -88,7 +90,7 @@ export default class FunctionStamp extends Component {
       iframeDimensTransition: "",
       mediaAssetHeight: null,
       mediaAssetWidth: null,
-      lineHighLightingStatus: "none"
+      lineHighLightingStatus: this.props.starterLineHighLightingStatus
       // on, off, none
     };
 
@@ -851,7 +853,8 @@ export default class FunctionStamp extends Component {
       zIndex: this.state.zIndex,
       isBlob: this.props.isBlob,
       codeSize: this.state.codeSize,
-      icon: this.getIcon()
+      icon: this.getIcon(),
+      lineHighLightingStatus: this.state.lineHighLightingStatus
     };
 
     return data;

@@ -1,6 +1,3 @@
-
-
-
 .react-resizable {
   position: relative;
 }
@@ -11,7 +8,7 @@
   background-repeat: no-repeat;
   background-origin: content-box;
   box-sizing: border-box;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+");
   background-position: bottom right;
   padding: 0 3px 3px 0;
 }
@@ -67,50 +64,34 @@
   transform: rotate(45deg);
 }
 
-
-
-
-
-
-
-
-@import url('https://fonts.googleapis.com/css?family=Inconsolata|Montserrat:300,400&display=swap');
-
+@import url("https://fonts.googleapis.com/css?family=Inconsolata|Montserrat:300,400&display=swap");
 
 $size: 225;
 $placeholder: rgb(200, 200, 200);
 
 * {
-font-family: 'Inconsolata', monospace;
-  }
+  font-family: "Inconsolata", monospace;
+}
 
 $theme-colors: (
-
-
-
-warningOrangeDark: rgba(215, 155, 0, 1),
+  warningOrangeDark: rgba(215, 155, 0, 1),
   warningOrange: rgba(250, 220, 160, 1),
-
-  lightGrey:           rgb(245,245,245),
-  grey:           rgb(240,240,240),
-  pink:           rgb(218,16,96),
-  listener:       rgb(138, 95, 208),
-  blue:           rgb(70,160,206),
-  borderGrey:     rgb(215,215,215),
-  jsArea:         rgb(245, 248, 252),
-  greyText:       rgb(90, 90, 90),
-  greyIcon:       rgb(0, 0, 0),
-  lightGreyText:  rgb(125, 125, 125),
-  htmlCssArea:    rgb(252,249,245),
-  htmlCssName:   rgb(86,162, 155),
+  lightGrey: rgb(245, 245, 245),
+  grey: rgb(240, 240, 240),
+  pink: rgb(218, 16, 96),
+  listener: rgb(138, 95, 208),
+  blue: rgb(70, 160, 206),
+  borderGrey: rgb(215, 215, 215),
+  jsArea: rgb(245, 248, 252),
+  greyText: rgb(90, 90, 90),
+  greyIcon: rgb(0, 0, 0),
+  lightGreyText: rgb(125, 125, 125),
+  htmlCssArea: rgb(252, 249, 245),
+  htmlCssName: rgb(86, 162, 155),
   borderDarkGrey: rgb(175, 175, 175),
-  debug:        rgba(0, 0, 0, .1),
-  seeThroughWhite:        rgba(255, 255, 255, .7),
-
-
-
-
-/*  background:rgb(215,215,215),
+  debug: rgba(0, 0, 0, 0.1),
+  seeThroughWhite: rgba(255, 255, 255, 0.7),
+  /*  background:rgb(215,215,215),
   jsArea:rgb(145, 155, 158),
   fnName:rgb(69,139,205),
   specialFnName:rgb(220,60,110),
@@ -119,107 +100,101 @@ warningOrangeDark: rgba(215, 155, 0, 1),
   htmlArea:rgb(145, 155, 158)*/
 );
 
-
-
-html, body {
-overflow: hidden;
-overscroll-behavior: none;
-
-
-
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
-.marker{
+.marker {
   position: absolute;
 
-    width: 100% !important;
-    border-radius: unset !important;
-    left: 0 !important;
+  width: 100% !important;
+  border-radius: unset !important;
+  left: 0 !important;
 }
 
-.name{
-  font-family: 'Montserrat', sans-serif;
+.name {
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
-  border:none;
-  outline:none;
+  border: none;
+  outline: none;
   font-weight: bold;
   position: relative;
   width: 100%;
   font-size: 20px;
 }
 
-.btn{
-font-family: 'Montserrat', sans-serif;
-/*  font-weight: 400;*/
+.btn {
+  font-family: "Montserrat", sans-serif;
+  /*  font-weight: 400;*/
 }
 
+.picker {
+  font-family: "Montserrat", sans-serif !important;
+  font-weight: 300;
+  font-size: 12px;
+  user-select: none;
+  cursor: default;
+}
 
-
-.picker{
-  font-family: 'Montserrat', sans-serif !important;
+.picker-style-tooltip > .tooltip-inner {
+  font-family: "Montserrat", sans-serif !important;
   font-weight: 300;
   font-size: 12px;
   cursor: default;
 }
 
-.picker-style-tooltip > .tooltip-inner{
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 300;
-  font-size: 12px;
-  cursor: default;
-}
-
-.pickerBold{
-  font-family: 'Montserrat', sans-serif;
+.pickerBold {
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
   font-size: 12px;
   cursor: default;
 }
 
-.modal{
-  font-family: 'Montserrat', sans-serif;
+.modal {
+  font-family: "Montserrat", sans-serif;
   font-weight: 300;
   font-size: 12px;
   cursor: default;
 }
 
-.modalBold{
-  font-family: 'Montserrat', sans-serif;
+.modalBold {
+  font-family: "Montserrat", sans-serif;
   font-weight: 300;
   font-size: 12px;
   cursor: default;
 }
 
-
-.args{
-  border:none;
-  outline:none;
+.args {
+  border: none;
+  outline: none;
   position: relative;
   font-size: 16px;
   width: 100%;
 }
 
-
-.stamp{
-  transition: border .3s ease-out;
+.stamp {
+  transition: border 0.3s ease-out;
 }
 
-
-::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: $placeholder;
   opacity: 1; /* Firefox */
 }
 
-:-ms-input-placeholder { /* Internet Explorer 10-11 */
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
   color: $placeholder;
 }
 
-::-ms-input-placeholder { /* Microsoft Edge */
+::-ms-input-placeholder {
+  /* Microsoft Edge */
   color: $placeholder;
 }
 
-
-$tooltip-bg:                        rgb(0,0,0);
-$tooltip-arrow-color:               rgb(0,0,0);
+$tooltip-bg: rgb(0, 0, 0);
+$tooltip-arrow-color: rgb(0, 0, 0);
 
 @import "../node_modules/bootstrap/scss/bootstrap";

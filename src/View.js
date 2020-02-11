@@ -696,7 +696,8 @@ function logToConsole(message, lineno){
       isBlob: false,
       hidden: false,
       zIndex: undefined,
-      codeSize: globals.codeSize
+      codeSize: globals.codeSize,
+      lineHighLightingStatus: "none"
     };
 
     if (
@@ -757,6 +758,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         getFirstLine={this.getFirstLine.bind(this)}
         id={stampID}
+        starterLineHighLightingStatus={data.lineHighLightingStatus}
         getP5CanvasDimensions={this.getP5CanvasDimensions.bind(this)}
         setLayerPicker={this.setLayerPicker.bind(this)}
         deleteFrame={this.deleteFrame}
@@ -1361,7 +1363,9 @@ function logToConsole(message, lineno){
         style={{
           transform: "scale(" + 0.8 + ")",
           color: textColor,
-          backgroundColor: backgroundColor
+          backgroundColor: backgroundColor,
+          cursor: "default",
+          userSelect: "none"
         }}
       >
         {text}
