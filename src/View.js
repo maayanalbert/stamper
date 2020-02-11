@@ -1183,9 +1183,19 @@ function logToConsole(message, lineno){
       var variables = parser.getVariables(code);
       if (variables) {
         variables.declared.map(variable => (declaredDict[variable] = id));
-        variables.undeclared.map(variable =>
-          undeclaredArr.push({ variable: variable, id: id })
-        );
+        variables.undeclared.map(variable => {
+          var noWhiteSpace = code.replace(/\s/g, "");
+          var varEndIndex = noWhiteSpace.indexOf(variable) + variable.length;
+
+          if (
+            noWhiteSpace.length > varEndIndex &&
+            noWhiteSpace[varEndIndex] === "("
+          ) {
+            variable += "()";
+          }
+
+          undeclaredArr.push({ variable: variable, id: id });
+        });
       }
     });
 
@@ -1194,7 +1204,7 @@ function logToConsole(message, lineno){
     undeclaredArr.map(undeclaredItem => {
       var variable = undeclaredItem.variable;
       var usingID = undeclaredItem.id;
-      var declaringID = declaredDict[variable];
+      var declaringID = declaredDict[variable.split("()").join("")];
 
       if (declaringID && usingID) {
         if (!(usingID + "_" + declaringID in lineDict)) {
@@ -1239,7 +1249,8 @@ function logToConsole(message, lineno){
       if (
         this.isListener(stampRef.state.name) ||
         !this.isFnStamp(id) ||
-        stampRef.state.name === "setup"
+        stampRef.state.name === "setup" ||
+        stampRef.state.name === "preload"
       ) {
         return;
       }
@@ -1274,13 +1285,46 @@ function logToConsole(message, lineno){
 
     if (setupID) {
       this.state.stampOrder.map(id => {
-        if (this.isFnStamp(id) && setupID != id) {
+        if (
+          this.isFnStamp(id) &&
+          setupID != id &&
+          this.state.stampRefs[id].current.state.name != "preload"
+        ) {
           lineData.push({
             end: id,
             start: setupID,
             type: "setup",
             label: this.getLineLabel("setup", "setup"),
             style: this.getLineStyle("setup")
+          });
+        }
+      });
+    }
+
+    return lineData;
+  }
+
+  getPreloadLineData() {
+    var lineData = [];
+    var preloadID;
+
+    for (var i = 0; i < this.state.stampOrder.length; i++) {
+      var id = this.state.stampOrder[i];
+      var stampRef = this.state.stampRefs[id].current;
+      if (stampRef.state.name === "preload") {
+        preloadID = id;
+      }
+    }
+
+    if (preloadID) {
+      this.state.stampOrder.map(id => {
+        if (this.isFnStamp(id) && preloadID != id) {
+          lineData.push({
+            end: id,
+            start: preloadID,
+            type: "preload",
+            label: this.getLineLabel("preload", "preload"),
+            style: this.getLineStyle("preload")
           });
         }
       });
@@ -1362,9 +1406,7 @@ function logToConsole(message, lineno){
       return "rgba(70,160,206, " + opacity + ")";
     } else if (type === "listener") {
       return "rgba(218,16,96, " + opacity + ")";
-    } else if (type === "setup") {
-      return "rgba(190,190,190, " + opacity + ")";
-    } else if (type === "index") {
+    } else {
       return "rgba(190,190,190, " + opacity + ")";
     }
   }
@@ -1422,6 +1464,7 @@ function logToConsole(message, lineno){
     lineData = lineData.concat(this.getSetupLineData());
 
     lineData = lineData.concat(this.getIndexLineData());
+    lineData = lineData.concat(this.getPreloadLineData());
 
     lineData = lineData.concat(this.getFileLineData());
 
@@ -1440,8 +1483,8 @@ function logToConsole(message, lineno){
     var relativeOffsetUnit = 10;
 
     lineData.map(line => {
-      line.targetAnchor = "top";
-      line.sourceAnchor = "bottom";
+      line.targetAnchor = "middle";
+      line.sourceAnchor = "middle";
       line.targetId = "line_" + line.end;
     });
 
@@ -1468,7 +1511,8 @@ function logToConsole(message, lineno){
         ) &&
         !(
           this.isListener(stamp.current.state.name) &&
-          this.state.stampRefs[overalID].current.state.name === "setup"
+          (this.state.stampRefs[overalID].current.state.name === "setup" ||
+            this.state.stampRefs[overalID].current.state.name === "preload")
         )
       ) {
         var state = stamp.current.state;
@@ -1501,7 +1545,7 @@ function logToConsole(message, lineno){
       overalID in this.state.stampRefs == false ||
       this.state.stampRefs[overalID].current === null
     ) {
-      return runnableCode.join("");
+      return { ranges: ranges, runnableCode: runnableCode.join("") };
     }
 
     var stampRef = this.state.stampRefs[overalID].current;
@@ -1516,7 +1560,7 @@ function logToConsole(message, lineno){
         curLine,
         true
       );
-    } else if (state.name === "setup") {
+    } else if (state.name === "setup" || state.name === "preload") {
       // do nothing
     } else {
       code = `function draw(){\n${state.name}()\n}`;
