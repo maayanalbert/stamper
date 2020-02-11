@@ -76,7 +76,7 @@ export default class View extends Component {
       downKey: -1,
       panDisabled: false,
       stampOrder: [],
-
+      isMoving: false,
       worldKey: null,
       worldPublishTime: null,
       worldEdited: false,
@@ -1752,6 +1752,7 @@ _stopLooping =setTimeout(() => {
   }
 
   onStartMove() {
+    this.setState({ isMoving: true });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
       var stamp = stampRefs[i].current;
@@ -1761,7 +1762,7 @@ _stopLooping =setTimeout(() => {
   }
 
   onStopMove() {
-    this.setState({ mouseWheelTimeout: null });
+    this.setState({ mouseWheelTimeout: null, isMoving: false });
     var stampRefs = this.state.stampRefs;
     for (var i in stampRefs) {
       var stamp = stampRefs[i].current;
@@ -2123,7 +2124,9 @@ _stopLooping =setTimeout(() => {
         <div
           class="row bg-grey"
           style={{ height: "100vh" }}
-          onClick={() => this.state.linesOn && this.onMouseOutLine()}
+          onMouseUp={() =>
+            this.state.linesOn && !this.state.isMoving && this.onMouseOutLine()
+          }
         >
           <div
             className="allStamps"
