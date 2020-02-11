@@ -740,6 +740,10 @@ function logToConsole(message, lineno){
     var elem = (
       <Stamp
         ref={ref}
+        setDependencyLineHighlightings={this.setDependencyLineHighlightings.bind(
+          this
+        )}
+        onMouseOutLine={this.onMouseOutLine.bind(this)}
         isIndex={data.isIndex}
         isTxtFile={data.isTxtFile}
         isMediaFile={data.isMediaFile}
@@ -1448,6 +1452,22 @@ function logToConsole(message, lineno){
     return lineData;
   }
 
+  setDependencyLineHighlightings(id) {
+    var graph = this.lineDataToGraph(this.getLineData(id));
+
+    this.state.stampOrder.map(id => {
+      this.state.stampRefs[id].current.setLineHighlighted("off");
+    });
+    this.recursivelyHighlight(id, graph);
+  }
+
+  recursivelyHighlight(id, graph) {
+    console.log(id);
+    console.log(graph);
+    this.state.stampRefs[id].current.setLineHighlighted("on");
+    graph[id].map(otherID => this.recursivelyHighlight(otherID, graph));
+  }
+
   onMouseOverLine(sourceAndTarget) {
     var startStampId = sourceAndTarget.source.id.split("_").pop();
     var endStampId = sourceAndTarget.target.id.split("_").pop();
@@ -1458,7 +1478,7 @@ function logToConsole(message, lineno){
     this.state.stampRefs[endStampId].current.setLineHighlighted("on");
   }
 
-  onMouseOutLine(sourceAndTarget) {
+  onMouseOutLine() {
     this.state.stampOrder.map(id => {
       this.state.stampRefs[id].current.setLineHighlighted("none");
     });
@@ -2089,7 +2109,7 @@ _stopLooping =setTimeout(() => {
         <div
           class="row bg-grey"
           style={{ height: "100vh" }}
-          onClick={this.onMouseOutLine.bind(this)}
+          onClick={() => this.state.linesOn && this.onMouseOutLine()}
         >
           <div
             className="allStamps"

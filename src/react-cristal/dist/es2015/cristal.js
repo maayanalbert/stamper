@@ -183,7 +183,7 @@ var Cristal = (function(_super) {
       }
     };
 
-    _this.onMouseDown = function() {
+    _this.onMouseDown = function(e) {
       var isDraggable = _this.props.isDraggable;
       if (!isDraggable) return;
 
@@ -900,6 +900,11 @@ var Cristal = (function(_super) {
       </ArcherElement>
     );
 
+    var onDoubleClick = () => null;
+    if (this.props.onDoubleClick) {
+      onDoubleClick = this.props.onDoubleClick;
+    }
+
     var cristalComponent = React.createElement(
       Wrapper,
       {
@@ -909,7 +914,8 @@ var Cristal = (function(_super) {
         isActive: isActive,
         className: className + " rounded " + this.props.wrapperName,
         onMouseDown: this.changeZIndex,
-        overflow: "hidden"
+        overflow: "hidden",
+        onDoubleClick: onDoubleClick
       },
       allContent,
       this.renderResizeHandles()

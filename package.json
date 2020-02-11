@@ -66,6 +66,7 @@
     "file-saver": "^2.0.2",
     "gh-pages": "^2.2.0",
     "jquery": "^3.4.1",
+    "mark.js": "^8.11.1",
     "mutex": "^1.0.4",
     "node-sass": "^4.13.0",
     "npm-check-updates": "^3.2.2",

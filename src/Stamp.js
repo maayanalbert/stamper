@@ -363,8 +363,8 @@ export default class FunctionStamp extends Component {
           mode={mode}
           theme={theme}
           onChange={(value, editor) => {
-            this.setState({ code: value, editsMade: true });
-            window.postMessage({ type: "edited" }, "*");
+            this.setState({ code: value });
+            this.onEditsMade();
           }}
           name={"name" + this.props.id.toString()}
           onLoad={editor => {
@@ -469,6 +469,11 @@ export default class FunctionStamp extends Component {
     }
   }
 
+  onEditsMade() {
+    this.setState({ editsMade: true });
+    window.postMessage({ type: "edited" }, "*");
+  }
+
   renderFunctionName() {
     var displayName = "";
     if (this.state.name != this.props.starterName) {
@@ -501,7 +506,7 @@ export default class FunctionStamp extends Component {
       displayName = this.stripExtension(displayName);
     }
 
-    var backgroundColor = "bg-white";
+    var backgroundColor = "bg-transparent";
     if (0 in this.state.errorLines) {
       backgroundColor = "bg-warningOrange";
     }
@@ -523,8 +528,8 @@ export default class FunctionStamp extends Component {
             if (this.props.isMediaFile) {
               newName = this.addExtension(newName, this.state.name);
             }
-            this.setState({ name: newName, editsMade: true });
-            window.postMessage({ type: "edited" }, "*");
+            this.setState({ name: newName });
+            this.onEditsMade();
           }}
           style={{ background: "transparent" }}
           value={displayName}
@@ -540,8 +545,8 @@ export default class FunctionStamp extends Component {
             this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile
           }
           onChange={event => {
-            this.setState({ args: event.target.value, editsMade: true });
-            window.postMessage({ type: "edited" }, "*");
+            this.setState({ args: event.target.value });
+            this.onEditsMade();
           }}
           style={{ background: "transparent" }}
           value={this.state.args}
@@ -975,6 +980,10 @@ export default class FunctionStamp extends Component {
               this.editorRef.current.editor.renderer.scrollBar
             );
           }}
+          onDoubleClick={() =>
+            this.props.getLinesOn() &&
+            this.props.setDependencyLineHighlightings(this.props.id)
+          }
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
           onClose={() => this.props.onDelete(this.props.id)}
