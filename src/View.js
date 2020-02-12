@@ -675,7 +675,7 @@ function logToConsole(message, lineno){
       editorWidth: globals.defaultEditorWidth,
       editorHeight: globals.defaultEditorHeight - globals.brHeight,
       iframeWidth: globals.defaultIframeWidth,
-      iframeHeight: globals.defaultEditorHeight,
+      iframeHeight: globals.defaultIframeHeight,
       isIndex: false,
       isTxtFile: false,
       isMediaFile: false,
@@ -2008,7 +2008,7 @@ _stopLooping =setTimeout(() => {
 
     var initialHeight = data.editorHeight + globals.fnTitleHeight + 60;
     if (data.isMediaFile) {
-      initialHeight = data.iframeHeight + globals.fnTitleHeight + 35;
+      initialHeight = data.iframeHeight + globals.fnTitleHeight + 40;
     } else if (data.isBlob) {
       initialHeight = data.editorHeight + 80;
     }
