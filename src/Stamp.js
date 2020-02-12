@@ -335,13 +335,15 @@ export default class FunctionStamp extends Component {
 
     var shadow = "";
 
+    var topShadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .15)";
+    var bottomShadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
+
     if (this.state.editorBottomShadow && this.state.editorTopShadow) {
-      shadow =
-        "inset 0 7px 6px -8px rgba(0, 0, 0, .15), inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
+      shadow = topShadow + "," + bottomShadow;
     } else if (this.state.editorTopShadow) {
-      shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .15)";
+      shadow = topShadow;
     } else if (this.state.editorBottomShadow) {
-      shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
+      shadow = bottomShadow;
     }
 
     return (

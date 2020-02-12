@@ -1435,7 +1435,11 @@ function logToConsole(message, lineno){
 
   getInfluencingStamps(id, graph, seen) {
     seen[id] = "";
-    graph[id].map(otherID => this.getInfluencingStamps(otherID, graph, seen));
+    graph[id].map(otherID => {
+      if (!(otherID in seen)) {
+        this.getInfluencingStamps(otherID, graph, seen);
+      }
+    });
   }
 
   getRunnableCode(overalID) {
@@ -1445,6 +1449,7 @@ function logToConsole(message, lineno){
     var code;
 
     var lineGraph = this.lineDataToGraph(this.state.lineData, true);
+    console.log(lineGraph);
 
     var influencingStamps = {};
     this.getInfluencingStamps(overalID, lineGraph, influencingStamps);
@@ -1468,7 +1473,8 @@ function logToConsole(message, lineno){
         ) &&
         (id in influencingStamps ||
           stamp.current.state.name ===
-            this.state.stampRefs[overalID].current.state.name)
+            this.state.stampRefs[overalID].current.state.name ||
+          stamp.current.props.isBlob)
       ) {
         var state = stamp.current.state;
         if (stamp.current.props.isBlob) {
