@@ -1066,10 +1066,43 @@ function logToConsole(message, lineno){
   //   this.setState({ lines: lines });
   // }
 
+  addToVariableClusters(code, variableClusters) {
+    try {
+      variableClusters.push(parser.getVariables(code));
+    } catch (e) {
+      code.split("\n\n").map(codePg => {
+        try {
+          variableClusters.push(parser.getVariables(codePg));
+        } catch (e) {
+          codePg.split("\n").map(codeLine => {
+            try {
+              variableClusters.push(parser.getVariables(codeLine));
+            } catch (e) {
+              codeLine.split(" ").map(codeSentance => {
+                try {
+                  variableClusters.push(parser.getVariables(codeSentance));
+                } catch (e) {
+                  codeSentance.split(/[^A-Za-z]/).map(codeWord => {
+                    try {
+                      variableClusters.push(parser.getVariables(codeWord));
+                    } catch (e) {
+                      variableClusters.push(parser.getVariables(""));
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+
   getJSLineData() {
     var declaredDict = {};
     var undeclaredArr = [];
     var lineData = [];
+    var variableClusters = [];
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
@@ -1083,40 +1116,27 @@ function logToConsole(message, lineno){
         return;
       } else if (stampRef.props.isBlob) {
         var code = state.code;
-        try {
-          var variables = parser.getVariables(code);
-        } catch (e) {
-          var variables = parser.getVariables("");
-        }
       } else {
         var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-
-        try {
-          var variables = parser.getVariables(code);
-        } catch (e) {
-          try {
-            var variables = parser.getVariables(
-              `function ${state.name}(${state.args}){}`
-            );
-          } catch (e) {
-            var variables = parser.getVariables("");
-          }
-        }
       }
 
-      variables.declared.map(variable => (declaredDict[variable] = id));
-      variables.undeclared.map(variable => {
-        var noWhiteSpace = code.replace(/\s/g, "");
-        var varEndIndex = noWhiteSpace.indexOf(variable) + variable.length;
+      this.addToVariableClusters(code, variableClusters);
 
-        if (
-          noWhiteSpace.length > varEndIndex &&
-          noWhiteSpace[varEndIndex] === "("
-        ) {
-          variable += "()";
-        }
+      variableClusters.map(variableCluster => {
+        variableCluster.declared.map(variable => (declaredDict[variable] = id));
+        variableCluster.undeclared.map(variable => {
+          var noWhiteSpace = code.replace(/\s/g, "");
+          var varEndIndex = noWhiteSpace.indexOf(variable) + variable.length;
 
-        undeclaredArr.push({ variable: variable, id: id });
+          if (
+            noWhiteSpace.length > varEndIndex &&
+            noWhiteSpace[varEndIndex] === "("
+          ) {
+            variable += "()";
+          }
+
+          undeclaredArr.push({ variable: variable, id: id });
+        });
       });
     });
 
@@ -1464,7 +1484,6 @@ function logToConsole(message, lineno){
     var code;
 
     var lineGraph = this.lineDataToGraph(this.state.lineData, true);
-    console.log(lineGraph);
 
     var influencingStamps = {};
     this.getInfluencingStamps(overalID, lineGraph, influencingStamps);
@@ -1488,8 +1507,7 @@ function logToConsole(message, lineno){
         ) &&
         (id in influencingStamps ||
           stamp.current.state.name ===
-            this.state.stampRefs[overalID].current.state.name ||
-          stamp.current.props.isBlob)
+            this.state.stampRefs[overalID].current.state.name)
       ) {
         var state = stamp.current.state;
         if (stamp.current.props.isBlob) {
