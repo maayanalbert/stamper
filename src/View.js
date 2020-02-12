@@ -1083,26 +1083,41 @@ function logToConsole(message, lineno){
         return;
       } else if (stampRef.props.isBlob) {
         var code = state.code;
+        try {
+          var variables = parser.getVariables(code);
+        } catch (e) {
+          var variables = parser.getVariables("");
+        }
       } else {
         var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
-      }
-      var variables = parser.getVariables(code);
-      if (variables) {
-        variables.declared.map(variable => (declaredDict[variable] = id));
-        variables.undeclared.map(variable => {
-          var noWhiteSpace = code.replace(/\s/g, "");
-          var varEndIndex = noWhiteSpace.indexOf(variable) + variable.length;
 
-          if (
-            noWhiteSpace.length > varEndIndex &&
-            noWhiteSpace[varEndIndex] === "("
-          ) {
-            variable += "()";
+        try {
+          var variables = parser.getVariables(code);
+        } catch (e) {
+          try {
+            var variables = parser.getVariables(
+              `function ${state.name}(${state.args}){}`
+            );
+          } catch (e) {
+            var variables = parser.getVariables("");
           }
-
-          undeclaredArr.push({ variable: variable, id: id });
-        });
+        }
       }
+
+      variables.declared.map(variable => (declaredDict[variable] = id));
+      variables.undeclared.map(variable => {
+        var noWhiteSpace = code.replace(/\s/g, "");
+        var varEndIndex = noWhiteSpace.indexOf(variable) + variable.length;
+
+        if (
+          noWhiteSpace.length > varEndIndex &&
+          noWhiteSpace[varEndIndex] === "("
+        ) {
+          variable += "()";
+        }
+
+        undeclaredArr.push({ variable: variable, id: id });
+      });
     });
 
     var lineDict = {};
