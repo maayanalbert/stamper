@@ -20,12 +20,13 @@ var LZUTF8 = require("lzutf8");
 const DataURI = require("datauri").promise;
 
 module.exports = class FileManager {
-  constructor(window, createWindow) {
+  constructor(window, createWindow, pathIsAlreadyOpened) {
     this.window = window;
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
     this.exteriorChangeTimeout = null;
+    this.pathIsAlreadyOpened = pathIsAlreadyOpened;
 
     this.pendingCallback = () => null;
     this.edited = false;
@@ -33,31 +34,42 @@ module.exports = class FileManager {
 
     this.createWindow = createWindow;
 
-    ipcMain.on("save", (event, files) => {
-      if (event.sender != this.window.webContents) {
-        return;
-      }
-      // console.log("SAVING WINDOW");
-      this.saveFiles(files);
-    });
+    this.onSaveMessageBound = this.onSaveLMessage.bind(this);
+    this.onUpdatePathMessageBound = this.onUpdatePathMessage.bind(this);
+    this.onEditedMessageBound = this.onEditedMessage.bind(this);
 
-    ipcMain.on("updatePath", (event, data) => {
-      if (event.sender != this.window.webContents) {
-        return;
-      }
+    ipcMain.on("save", this.onSaveMessageBound);
 
-      this.hookUpToDirectory(data.path, data.fileDict);
-    });
-    ipcMain.on("edited", event => {
-      if (event.sender != this.window.webContents) {
-        return;
-      }
-      console.log("EDITING WINDOW");
+    ipcMain.on("updatePath", this.onUpdatePathMessageBound);
+    ipcMain.on("edited", this.onEditedMessageBound);
+  }
 
-      this.edited = true;
+  onSaveLMessage(event, files) {
+    if (event.sender != this.window.webContents) {
+      return;
+    }
+    // console.log("SAVING WINDOW");
+    this.saveFiles(files);
+  }
 
-      this.window.setTitle(this.name + " - Edited");
-    });
+  onUpdatePathMessage(event, data) {
+    if (event.sender != this.window.webContents) {
+      return;
+    }
+
+    this.hookUpToDirectory(data.path, data.fileDict);
+  }
+
+  onEditedMessage(event) {
+    console.log("EDITED?????");
+    if (event.sender != this.window.webContents) {
+      return;
+    }
+    console.log("EDITING WINDOW");
+
+    this.edited = true;
+
+    this.window.setTitle(this.name + " - Edited");
   }
 
   hookUpToDirectory(path, fileDict = {}) {
@@ -70,6 +82,7 @@ module.exports = class FileManager {
     }
 
     this.fileDict = fileDict;
+    console.log("HOOK UP TO DIRECTORY", this.name);
     this.window.setTitle(this.name);
     this.watcher = chokidar.watch(this.path, {
       ignored: /[\/\\]\./,
@@ -83,7 +96,7 @@ module.exports = class FileManager {
   }
 
   isExteriorChange(event, path) {
-    if (!path) {
+    if (!path || !this.path) {
       return;
     }
     console.log("IS EXTERIOR CHANGE");
@@ -128,6 +141,7 @@ module.exports = class FileManager {
     this.name = "Untitled";
     this.fileDict = {};
     this.edited = false;
+    console.log("ACTUALLY RESET FILES", this.name);
     this.window.setTitle(this.name);
     this.watcher = null;
     callback();
@@ -170,8 +184,6 @@ module.exports = class FileManager {
   }
 
   openNewProject(worldKey) {
-    this.resetFiles();
-
     this.createWindow(window =>
       window.webContents.send("openWorld", { worldKey: worldKey })
     );
@@ -189,36 +201,51 @@ module.exports = class FileManager {
     this.openProject();
   }
 
-  importFilesFromPath(path, openNewWindow = true) {
-    recursive(path, (err, files) => {
-      var rawFileList = [];
-      var callback = () => {
-        if (rawFileList.length === files.length) {
-          console.log("NEW WINDOW");
-          if (openNewWindow) {
-            this.createWindow(window =>
-              window.webContents.send("openDirectory", {
-                rawFileList: rawFileList,
-                path: path
-              })
-            );
-          } else {
-            this.window.webContents.send("openDirectory", {
+  readAndSendFiles(files, path, openNewWindow) {
+    var rawFileList = [];
+    var callback = () => {
+      if (rawFileList.length === files.length) {
+        if (openNewWindow) {
+          this.createWindow(window =>
+            window.webContents.send("openDirectory", {
               rawFileList: rawFileList,
               path: path
-            });
-          }
+            })
+          );
+        } else {
+          this.window.webContents.send("openDirectory", {
+            rawFileList: rawFileList,
+            path: path
+          });
         }
-      };
+      }
+    };
 
-      files.map(singleFilePath => {
-        jetpack.readAsync(singleFilePath, "buffer").then(buffer => {
-          var name = singleFilePath.substring(path.length);
-          rawFileList.push({ name: name, buffer: buffer });
-          callback();
-        });
+    files.map(singleFilePath => {
+      jetpack.readAsync(singleFilePath, "buffer").then(buffer => {
+        var name = singleFilePath.substring(path.length);
+        rawFileList.push({ name: name, buffer: buffer });
+        callback();
       });
     });
+  }
+
+  importFilesFromPath(path, openNewWindow = true) {
+    recursive(path).then(
+      files => this.readAndSendFiles(files, path, openNewWindow),
+      function(error) {
+        const options = {
+          type: "question",
+          buttons: ["Ok"],
+          defaultId: 0,
+          message:
+            "It looks like we had trouble reading the files in that directory.",
+          detail: "Please try another directory."
+        };
+
+        dialog.showMessageBox(null, options);
+      }
+    );
   }
 
   openProject() {
@@ -229,7 +256,13 @@ module.exports = class FileManager {
         return;
       }
 
-      var filePath = data.filePaths[0] + "/";
+      var path = data.filePaths[0] + "/";
+
+      if (this.pathIsAlreadyOpened(path)) {
+        return;
+      }
+
+      var filePath = path;
       this.importFilesFromPath(filePath);
     });
   }
@@ -258,8 +291,6 @@ module.exports = class FileManager {
   // }
 
   saveFiles(newFileDict) {
-    console.log(this.path);
-
     if (this.path === undefined) {
       return;
     }

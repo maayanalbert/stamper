@@ -17,16 +17,39 @@ const isDev = require("electron-is-dev");
 const FileManager = require("./FileManager.js");
 const defaultMenu = require("electron-default-menu");
 
-let windows = {};
+let fileManagerDict = {};
+let windowDict = {};
 
 let fileManager;
-let manualClose = false;
+
 let worldNames = ["starter", "empty", "particles"];
+let manualCloseDict = {};
 let focusedWindow = null;
 let worldButtons = [];
 
-function createWindow(callback = () => null, name, path) {
-  manualClose = false;
+function pathIsAlreadyOpened(path) {
+  console.log("PATH IS ALREAYD OPENED");
+  console.log(path);
+  for (var i = 0; i < Object.keys(fileManagerDict).length; i++) {
+    var id = Object.keys(fileManagerDict)[i].toString();
+
+    console.log("WFT IS HAPPENING", id, fileManagerDict[id].path, path);
+
+    if (
+      fileManagerDict[id] &&
+      fileManagerDict[id].path === path &&
+      path != undefined
+    ) {
+      windowDict[id] && windowDict[id].focus();
+      return true;
+    }
+  }
+  return false;
+}
+
+function createWindow(callback = () => null) {
+  var identicalPath = false;
+
   autoUpdater.checkForUpdates();
 
   window = new BrowserWindow({
@@ -39,9 +62,11 @@ function createWindow(callback = () => null, name, path) {
     minHeight: 300,
     minWidth: 450
   });
-  var fileManager = new FileManager(window, createWindow, name, path);
+  var fileManager = new FileManager(window, createWindow, pathIsAlreadyOpened);
 
-  windows[window.id] = fileManager;
+  fileManagerDict[window.id] = fileManager;
+  manualCloseDict[window.id] = false;
+  windowDict[window.id] = window;
   window.maximize();
   window.show();
   window.loadURL(
@@ -49,31 +74,45 @@ function createWindow(callback = () => null, name, path) {
       ? "http://localhost:3000"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
-  window.on("closed", () => {
-    Menu.setApplicationMenu(Menu.buildFromTemplate([]));
+  window.on("closed", event => {
+    // manualCloseDict[event.sender.id] = null;
+    // fileManagerDict[event.sender.id] = null;
+    // windowDict[event.sender.id] = null;
+
     window = null;
-    ipcMain.removeAllListeners("edited");
-    ipcMain.removeAllListeners("save");
-    ipcMain.removeAllListeners("updatePath");
-    ipcMain: null;
   });
 
   window.on("blur", e => {
-    window.send("requestSave");
+    window && window.send("requestSave");
   });
 
   window.on("focus", e => {
+    console.log("FOCUSING", fileManagerDict[e.sender.id].name);
     focusedWindow = e.sender;
   });
 
   window.on("close", event => {
-    if (manualClose === false) {
+    if (manualCloseDict[event.sender.id] === false) {
       event.preventDefault();
 
       fileManager.protectUnsaved(() => {
-        manualClose = true;
-        fileManager.watcher.close();
-        window.close();
+        manualCloseDict[event.sender.id] = true;
+        fileManagerDict[event.sender.id].watcher &&
+          fileManagerDict[event.sender.id].watcher.close();
+        ipcMain.removeListener(
+          "edited",
+          fileManagerDict[event.sender.id].onEditedMessageBound
+        );
+        ipcMain.removeListener(
+          "save",
+          fileManagerDict[event.sender.id].onSaveMessageBound
+        );
+        ipcMain.removeListener(
+          "updatePath",
+          fileManagerDict[event.sender.id].onUpdatePathMessageBound
+        );
+
+        event.sender.close();
       });
     }
   });
@@ -106,13 +145,16 @@ function createWindow(callback = () => null, name, path) {
 app.on("ready", () => createWindow());
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  Menu.setApplicationMenu(Menu.buildFromTemplate([]));
+
+  ipcMain: null;
+  // if (process.platform !== "darwin") {
+  //   app.quit();
+  // }
 });
 
 // app.on("activate", () => {
-//   if (Object.keys(windows).length === 0) {
+//   if (Object.keys(fileManagerDict).length === 0) {
 //     createWindow();
 //   }
 // });
@@ -130,7 +172,7 @@ function setMenu(worldButtons = []) {
       {
         label: "New",
         click() {
-          windows[getFocusedWindow().id].onNewProject();
+          fileManagerDict[getFocusedWindow().id].onNewProject();
         },
         accelerator: "Cmd+N"
       },
@@ -138,7 +180,7 @@ function setMenu(worldButtons = []) {
       {
         label: "Open",
         click() {
-          windows[getFocusedWindow().id].onOpenCommand();
+          fileManagerDict[getFocusedWindow().id].onOpenCommand();
         },
         accelerator: "Cmd+O"
       },
@@ -151,22 +193,22 @@ function setMenu(worldButtons = []) {
       {
         label: "Save",
         click() {
-          windows[getFocusedWindow().id].onSaveCommand();
+          fileManagerDict[getFocusedWindow().id].onSaveCommand();
         },
         accelerator: "Cmd+S"
       },
       {
         label: "Save As...",
         click() {
-          windows[getFocusedWindow().id].onSaveAsCommand();
+          fileManagerDict[getFocusedWindow().id].onSaveAsCommand();
         },
         accelerator: "Shift+Cmd+S"
       },
       {
         label: "Show current directory...",
         click() {
-          if (windows[getFocusedWindow().id].path) {
-            shell.openItem(windows[getFocusedWindow().id].path);
+          if (fileManagerDict[getFocusedWindow().id].path) {
+            shell.openItem(fileManagerDict[getFocusedWindow().id].path);
           } else {
             const options = {
               buttons: ["Ok"],
