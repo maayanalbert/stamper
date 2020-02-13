@@ -729,7 +729,7 @@ function logToConsole(message, lineno){
         setDependencyLineHighlightings={this.setDependencyLineHighlightings.bind(
           this
         )}
-        onMouseOutLine={this.onMouseOutLine.bind(this)}
+        unHighlightAllLines={this.unHighlightAllLines.bind(this)}
         isIndex={data.isIndex}
         isTxtFile={data.isTxtFile}
         isMediaFile={data.isMediaFile}
@@ -1066,7 +1066,7 @@ function logToConsole(message, lineno){
   //   this.setState({ lines: lines });
   // }
 
-  addToVariableClusters(code, variableClusters) {
+  addBlobToVariableClusters(code, variableClusters) {
     try {
       variableClusters.push(parser.getVariables(code));
     } catch (e) {
@@ -1078,17 +1078,11 @@ function logToConsole(message, lineno){
             try {
               variableClusters.push(parser.getVariables(codeLine));
             } catch (e) {
-              codeLine.split(" ").map(codeSentance => {
+              codeLine.split(/[^A-Za-z\s]/).map(codeSentance => {
                 try {
                   variableClusters.push(parser.getVariables(codeSentance));
                 } catch (e) {
-                  codeSentance.split(/[^A-Za-z]/).map(codeWord => {
-                    try {
-                      variableClusters.push(parser.getVariables(codeWord));
-                    } catch (e) {
-                      variableClusters.push(parser.getVariables(""));
-                    }
-                  });
+                  variableClusters.push(parser.getVariables(""));
                 }
               });
             }
@@ -1102,10 +1096,10 @@ function logToConsole(message, lineno){
     var declaredDict = {};
     var undeclaredArr = [];
     var lineData = [];
-    var variableClusters = [];
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
+      var variableClusters = [];
 
       var state = stampRef.state;
       if (
@@ -1116,11 +1110,20 @@ function logToConsole(message, lineno){
         return;
       } else if (stampRef.props.isBlob) {
         var code = state.code;
+        this.addBlobToVariableClusters(code, variableClusters);
       } else {
         var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+        try {
+          variableClusters.push(parser.getVariables(code));
+        } catch (e) {
+          try {
+            var code = `function ${state.name}(${state.args}){}`;
+            variableClusters.push(parser.getVariables(code));
+          } catch (e) {
+            variableClusters.push(parser.getVariables(""));
+          }
+        }
       }
-
-      this.addToVariableClusters(code, variableClusters);
 
       variableClusters.map(variableCluster => {
         variableCluster.declared.map(variable => (declaredDict[variable] = id));
@@ -1406,7 +1409,7 @@ function logToConsole(message, lineno){
     );
   }
 
-  onMouseOverLine(sourceAndTarget) {
+  onLineSelection(sourceAndTarget) {
     var startStampId = sourceAndTarget.source.id.split("_").pop();
     var endStampId = sourceAndTarget.target.id.split("_").pop();
     this.state.stampOrder.map(id => {
@@ -1423,7 +1426,7 @@ function logToConsole(message, lineno){
     });
   }
 
-  onMouseOutLine() {
+  unHighlightAllLines() {
     this.state.stampOrder.map(id => {
       this.state.stampRefs[id].current.setLineHighlighted("none");
     });
@@ -1909,7 +1912,7 @@ _stopLooping =setTimeout(() => {
       this.setLayerPicker();
     });
 
-    this.onMouseOutLine();
+    this.unHighlightAllLines();
   }
 
   setSettingsPicker() {
@@ -1983,7 +1986,7 @@ _stopLooping =setTimeout(() => {
         }
       }
 
-      // name += "_" + id;
+      name += "_" + id;
 
       pickerData.push({
         name: name,
@@ -2073,7 +2076,9 @@ _stopLooping =setTimeout(() => {
           class="row bg-grey"
           style={{ height: "100vh" }}
           onMouseUp={() =>
-            this.state.linesOn && !this.state.isMoving && this.onMouseOutLine()
+            this.state.linesOn &&
+            !this.state.isMoving &&
+            this.unHighlightAllLines()
           }
         >
           <div
@@ -2087,8 +2092,7 @@ _stopLooping =setTimeout(() => {
           >
             <div>{this.renderGridLines()}</div>
             <ArcherContainer
-              onMouseOver={this.onMouseOverLine.bind(this)}
-              onMouseOut={this.onMouseOutLine.bind(this)}
+              onLineSelection={this.onLineSelection.bind(this)}
               scale={this.state.scale}
               top={this.state.originY}
               left={this.state.originX}

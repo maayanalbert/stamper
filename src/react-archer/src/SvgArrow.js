@@ -178,8 +178,7 @@ const SvgArrow = ({
   arrowMarkerId,
   noCurves,
   offset,
-  onMouseOver,
-  onMouseOut,
+  onLineSelection,
 }: Props) => {
   const actualArrowLength = arrowLength * 2;
 
@@ -234,7 +233,7 @@ const SvgArrow = ({
   );
 
   return (
-    <g onDoubleClick={() => onMouseOver()}>
+    <g onDoubleClick={() => onLineSelection()}>
       <path
         d={pathString}
         style={{ fill: 'none', stroke: strokeColor, strokeWidth: strokeWidth, strokeDasharray }}

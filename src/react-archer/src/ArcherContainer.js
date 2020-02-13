@@ -475,20 +475,14 @@ export class ArcherContainer extends React.Component<Props, State> {
         endingPoint.y += relativeTargetOffset;
       }
 
-      var onMouseOver = this.props.onMouseOver;
-      if (!this.props.onMouseOver) {
-        onMouseOver = () => null;
-      }
-
-      var onMouseOut = this.props.onMouseOut;
-      if (!this.props.onMouseOut) {
-        onMouseOut = () => null;
+      var onLineSelection = this.props.onLineSelection;
+      if (!this.props.onLineSelection) {
+        onLineSelection = () => null;
       }
 
       return (
         <SvgArrow
-          onMouseOver={() => onMouseOver({ source: source, target: target })}
-          onMouseOut={() => onMouseOut({ source: source, target: target })}
+          onLineSelection={() => onLineSelection({ source: source, target: target })}
           key={JSON.stringify({ source, target })}
           startingPoint={startingPoint}
           startingAnchorOrientation={startingAnchorOrientation}
