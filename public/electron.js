@@ -75,15 +75,12 @@ function createWindow(callback = () => null) {
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
   window.on("closed", event => {
-    // manualCloseDict[event.sender.id] = null;
-    // fileManagerDict[event.sender.id] = null;
-    // windowDict[event.sender.id] = null;
-
     window = null;
   });
 
   window.on("blur", e => {
-    window && window.send("requestSave");
+    console.log("BLURRING", e.sender);
+    e.sender && e.sender.send("requestSave");
   });
 
   window.on("focus", e => {
@@ -111,6 +108,9 @@ function createWindow(callback = () => null) {
           "updatePath",
           fileManagerDict[event.sender.id].onUpdatePathMessageBound
         );
+        delete manualCloseDict[event.sender.id];
+        delete fileManagerDict[event.sender.id];
+        delete windowDict[event.sender.id];
 
         event.sender.close();
       });
