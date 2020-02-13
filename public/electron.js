@@ -27,13 +27,11 @@ let manualCloseDict = {};
 let focusedWindow = null;
 let worldButtons = [];
 
+let quitIntended = false;
+
 function pathIsAlreadyOpened(path) {
-  console.log("PATH IS ALREAYD OPENED");
-  console.log(path);
   for (var i = 0; i < Object.keys(fileManagerDict).length; i++) {
     var id = Object.keys(fileManagerDict)[i].toString();
-
-    console.log("WFT IS HAPPENING", id, fileManagerDict[id].path, path);
 
     if (
       fileManagerDict[id] &&
@@ -79,12 +77,10 @@ function createWindow(callback = () => null) {
   });
 
   window.on("blur", e => {
-    console.log("BLURRING", e.sender);
     e.sender && e.sender.send("requestSave");
   });
 
   window.on("focus", e => {
-    console.log("FOCUSING", fileManagerDict[e.sender.id].name);
     focusedWindow = e.sender;
   });
 
@@ -92,28 +88,31 @@ function createWindow(callback = () => null) {
     if (manualCloseDict[event.sender.id] === false) {
       event.preventDefault();
 
-      fileManager.protectUnsaved(() => {
-        manualCloseDict[event.sender.id] = true;
-        fileManagerDict[event.sender.id].watcher &&
-          fileManagerDict[event.sender.id].watcher.close();
-        ipcMain.removeListener(
-          "edited",
-          fileManagerDict[event.sender.id].onEditedMessageBound
-        );
-        ipcMain.removeListener(
-          "save",
-          fileManagerDict[event.sender.id].onSaveMessageBound
-        );
-        ipcMain.removeListener(
-          "updatePath",
-          fileManagerDict[event.sender.id].onUpdatePathMessageBound
-        );
-        delete manualCloseDict[event.sender.id];
-        delete fileManagerDict[event.sender.id];
-        delete windowDict[event.sender.id];
+      fileManager.protectUnsaved(
+        () => {
+          manualCloseDict[event.sender.id] = true;
+          fileManagerDict[event.sender.id].watcher &&
+            fileManagerDict[event.sender.id].watcher.close();
+          ipcMain.removeListener(
+            "edited",
+            fileManagerDict[event.sender.id].onEditedMessageBound
+          );
+          ipcMain.removeListener(
+            "save",
+            fileManagerDict[event.sender.id].onSaveMessageBound
+          );
+          ipcMain.removeListener(
+            "updatePath",
+            fileManagerDict[event.sender.id].onUpdatePathMessageBound
+          );
+          delete manualCloseDict[event.sender.id];
+          delete fileManagerDict[event.sender.id];
+          delete windowDict[event.sender.id];
 
-        event.sender.close();
-      });
+          event.sender.close();
+        },
+        () => (quitIntended = false)
+      );
     }
   });
 
@@ -142,9 +141,16 @@ function createWindow(callback = () => null) {
   });
 }
 
+app.on("before-quit", () => {
+  quitIntended = true;
+});
+
 app.on("ready", () => createWindow());
 
 app.on("window-all-closed", () => {
+  if (quitIntended) {
+    app.quit();
+  }
   Menu.setApplicationMenu(Menu.buildFromTemplate([]));
 
   ipcMain: null;
@@ -153,11 +159,18 @@ app.on("window-all-closed", () => {
   // }
 });
 
-// app.on("activate", () => {
-//   if (Object.keys(fileManagerDict).length === 0) {
-//     createWindow();
-//   }
-// });
+app.on("activate", () => {
+  quitIntended = false;
+  if (Object.keys(fileManagerDict).length === 0) {
+    createWindow();
+  }
+});
+
+app.on("will-finish-launching", function() {
+  app.on("open-file", (e, path) => {
+    console.log("OPEN FILE LISTENER", e, path);
+  });
+});
 
 function getFocusedWindow() {
   return focusedWindow;

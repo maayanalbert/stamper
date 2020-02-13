@@ -15,6 +15,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
 import { Resizable, ResizableBox } from "react-resizable";
+import Mark from "mark.js";
 
 var mime = require("mime-types");
 
@@ -346,6 +347,19 @@ export default class FunctionStamp extends Component {
       shadow = bottomShadow;
     }
 
+    // markers.push({
+    //   startRow: 0,
+    //   endRow: 10,
+    //   startCol: 5,
+    //   endCol: 6,
+    //   type: "background",
+    //   className: "bg-warningOrange"
+    // });
+
+    // var context = document.querySelector(".toBeMarked");
+    // var instance = new Mark(context);
+    // instance.mark("var");
+
     return (
       <div
         onMouseOut={() => {
@@ -361,7 +375,7 @@ export default class FunctionStamp extends Component {
             background: "transparent",
             boxShadow: shadow
           }}
-          className="code"
+          className="code toBeMarked"
           mode={mode}
           theme={theme}
           onChange={(value, editor) => {

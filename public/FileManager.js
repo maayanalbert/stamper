@@ -48,7 +48,7 @@ module.exports = class FileManager {
     if (event.sender != this.window.webContents) {
       return;
     }
-    // console.log("SAVING WINDOW");
+
     this.saveFiles(files);
   }
 
@@ -61,11 +61,9 @@ module.exports = class FileManager {
   }
 
   onEditedMessage(event) {
-    console.log("EDITED?????");
     if (event.sender != this.window.webContents) {
       return;
     }
-    console.log("EDITING WINDOW");
 
     this.edited = true;
 
@@ -82,14 +80,13 @@ module.exports = class FileManager {
     }
 
     this.fileDict = fileDict;
-    console.log("HOOK UP TO DIRECTORY", this.name);
+
     this.window.setTitle(this.name);
     this.watcher = chokidar.watch(this.path, {
       ignored: /[\/\\]\./,
       persistent: true
     });
-    console.log("PHATH HERE");
-    console.log(this.path);
+
     this.watcher
       .on("raw", this.fileChange.bind(this))
       .on("error", error => log(`Watcher error: ${error}`));
@@ -99,8 +96,7 @@ module.exports = class FileManager {
     if (!path || !this.path) {
       return;
     }
-    console.log("IS EXTERIOR CHANGE");
-    console.log(path);
+
     var fileName = path.substring(path.indexOf(this.path) + this.path.length);
     var file = this.fileDict[fileName];
     if (file) {
@@ -117,8 +113,6 @@ module.exports = class FileManager {
   }
 
   fileChange(event, path, detail) {
-    console.log("FILECHANGE");
-
     if (event === "root-changed") {
       this.window.send("exteriorChanges");
       this.resetFiles();
@@ -141,7 +135,7 @@ module.exports = class FileManager {
     this.name = "Untitled";
     this.fileDict = {};
     this.edited = false;
-    console.log("ACTUALLY RESET FILES", this.name);
+
     this.window.setTitle(this.name);
     this.watcher = null;
     callback();
@@ -160,7 +154,7 @@ module.exports = class FileManager {
     this.openNewProject(worldKey);
   }
 
-  protectUnsaved(yesCallBack = () => null) {
+  protectUnsaved(yesCallBack = () => null, noCallBack = () => null) {
     if (this.edited === false) {
       yesCallBack();
     } else if (this.path) {
@@ -178,6 +172,8 @@ module.exports = class FileManager {
       dialog.showMessageBox(null, options).then(data => {
         if (data.response === 0) {
           yesCallBack();
+        } else {
+          noCallBack();
         }
       });
     }
