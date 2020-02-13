@@ -17,17 +17,19 @@ const isDev = require("electron-is-dev");
 const FileManager = require("./FileManager.js");
 const defaultMenu = require("electron-default-menu");
 
-let mainWindow;
+let windows = {};
+
 let fileManager;
-let manualQuit = false;
 let manualClose = false;
 let worldNames = ["starter", "empty", "particles"];
+let focusedWindow = null;
+let worldButtons = [];
 
-function createWindow() {
+function createWindow(callback = () => null, name, path) {
   manualClose = false;
   autoUpdater.checkForUpdates();
 
-  mainWindow = new BrowserWindow({
+  window = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       "web-security": false,
@@ -37,49 +39,54 @@ function createWindow() {
     minHeight: 300,
     minWidth: 450
   });
-  mainWindow.maximize();
-  mainWindow.show();
-  mainWindow.loadURL(
+  var fileManager = new FileManager(window, createWindow, name, path);
+
+  windows[window.id] = fileManager;
+  window.maximize();
+  window.show();
+  window.loadURL(
     isDev
       ? "http://localhost:3000"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
-  mainWindow.on("closed", () => {
+  window.on("closed", () => {
     Menu.setApplicationMenu(Menu.buildFromTemplate([]));
-    mainWindow = null;
+    window = null;
     ipcMain.removeAllListeners("edited");
     ipcMain.removeAllListeners("save");
     ipcMain.removeAllListeners("updatePath");
     ipcMain: null;
   });
 
-  mainWindow.on("blur", e => {
-    mainWindow.send("requestSave");
+  window.on("blur", e => {
+    window.send("requestSave");
   });
 
-  mainWindow.on("close", event => {
-    if (manualClose === false && manualQuit === false) {
+  window.on("focus", e => {
+    focusedWindow = e.sender;
+  });
+
+  window.on("close", event => {
+    if (manualClose === false) {
       event.preventDefault();
 
       fileManager.protectUnsaved(() => {
         manualClose = true;
-        mainWindow.close();
+        fileManager.watcher.close();
+        window.close();
       });
-    } else {
-      fileManager.watcher.close();
     }
   });
 
   setMenu();
 
-  mainWindow.webContents.once("dom-ready", () => {
-    fileManager = new FileManager(mainWindow);
-    fileManager.name = "Untitled";
-    mainWindow.setTitle(fileManager.name);
-    mainWindow.webContents.send("getWorlds");
+  window.webContents.once("dom-ready", () => {
+    window.webContents.send("getWorlds");
+    window.setTitle(fileManager.name);
+    callback(window);
 
     ipcMain.on("sendWorlds", (event, data) => {
-      var worldButtons = data.map(world => {
+      worldButtons = data.map(world => {
         if (!world.name) {
           return { type: "separator" };
         }
@@ -96,17 +103,7 @@ function createWindow() {
   });
 }
 
-app.on("ready", createWindow);
-app.on("before-quit", event => {
-  if (manualQuit === false) {
-    event.preventDefault();
-
-    fileManager.protectUnsaved(() => {
-      manualQuit = true;
-      app.quit();
-    });
-  }
-});
+app.on("ready", () => createWindow());
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -114,13 +111,15 @@ app.on("window-all-closed", () => {
   }
 });
 
-app.on("activate", () => {
-  manualQuit = false;
+// app.on("activate", () => {
+//   if (Object.keys(windows).length === 0) {
+//     createWindow();
+//   }
+// });
 
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
+function getFocusedWindow() {
+  return focusedWindow;
+}
 
 function setMenu(worldButtons = []) {
   var menu = defaultMenu(app, shell);
@@ -131,7 +130,7 @@ function setMenu(worldButtons = []) {
       {
         label: "New",
         click() {
-          fileManager.onNewProject();
+          windows[getFocusedWindow().id].onNewProject();
         },
         accelerator: "Cmd+N"
       },
@@ -139,7 +138,7 @@ function setMenu(worldButtons = []) {
       {
         label: "Open",
         click() {
-          fileManager.onOpenCommand();
+          windows[getFocusedWindow().id].onOpenCommand();
         },
         accelerator: "Cmd+O"
       },
@@ -152,22 +151,22 @@ function setMenu(worldButtons = []) {
       {
         label: "Save",
         click() {
-          fileManager.onSaveCommand();
+          windows[getFocusedWindow().id].onSaveCommand();
         },
         accelerator: "Cmd+S"
       },
       {
         label: "Save As...",
         click() {
-          fileManager.onSaveAsCommand();
+          windows[getFocusedWindow().id].onSaveAsCommand();
         },
         accelerator: "Shift+Cmd+S"
       },
       {
         label: "Show current directory...",
         click() {
-          if (fileManager.path) {
-            shell.openItem(fileManager.path);
+          if (windows[getFocusedWindow().id].path) {
+            shell.openItem(windows[getFocusedWindow().id].path);
           } else {
             const options = {
               buttons: ["Ok"],
@@ -213,7 +212,7 @@ function setMenu(worldButtons = []) {
   menu[3].submenu.push({
     label: "Zoom In",
     click(e) {
-      mainWindow.webContents.send("zoomIn");
+      getFocusedWindow().webContents.send("zoomIn");
     },
     accelerator: "Cmd+plus"
   });
@@ -221,7 +220,7 @@ function setMenu(worldButtons = []) {
   menu[3].submenu.push({
     label: "Zoom Out",
     click(e) {
-      mainWindow.webContents.send("zoomOut");
+      getFocusedWindow().webContents.send("zoomOut");
     },
     accelerator: "Cmd+numsub"
   });
@@ -229,7 +228,7 @@ function setMenu(worldButtons = []) {
   menu[3].submenu.push({
     label: "Actual Size",
     click(e) {
-      mainWindow.webContents.send("zoomActual");
+      getFocusedWindow().webContents.send("zoomActual");
     },
     accelerator: "Cmd+0"
   });

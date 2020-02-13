@@ -1986,7 +1986,7 @@ _stopLooping =setTimeout(() => {
         }
       }
 
-      name += "_" + id;
+      // name += "_" + id;
 
       pickerData.push({
         name: name,

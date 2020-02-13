@@ -20,8 +20,8 @@ var LZUTF8 = require("lzutf8");
 const DataURI = require("datauri").promise;
 
 module.exports = class FileManager {
-  constructor(mainWindow) {
-    this.mainWindow = mainWindow;
+  constructor(window, createWindow) {
+    this.window = window;
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
@@ -30,44 +30,64 @@ module.exports = class FileManager {
     this.pendingCallback = () => null;
     this.edited = false;
     this.watcher = null;
-    this.tempPath = "";
+
+    this.createWindow = createWindow;
 
     ipcMain.on("save", (event, files) => {
+      if (event.sender != this.window.webContents) {
+        return;
+      }
+      // console.log("SAVING WINDOW");
       this.saveFiles(files);
     });
 
     ipcMain.on("updatePath", (event, data) => {
-      this.path = this.tempPath;
-
-      var pathArr = this.path.split("/");
-      if (pathArr.length >= 2) {
-        pathArr.pop();
-        this.name = pathArr.pop();
+      if (event.sender != this.window.webContents) {
+        return;
       }
 
-      this.fileDict = data.fileDict;
-      this.mainWindow.setTitle(this.name);
-      this.watcher = chokidar.watch(this.path, {
-        ignored: /[\/\\]\./,
-        persistent: true
-      });
-
-      this.watcher
-        .on("raw", this.fileChange.bind(this))
-        .on("error", error => log(`Watcher error: ${error}`));
+      this.hookUpToDirectory(data.path, data.fileDict);
     });
-
     ipcMain.on("edited", event => {
+      if (event.sender != this.window.webContents) {
+        return;
+      }
+      console.log("EDITING WINDOW");
+
       this.edited = true;
 
-      this.mainWindow.setTitle(this.name + " - Edited");
+      this.window.setTitle(this.name + " - Edited");
     });
+  }
+
+  hookUpToDirectory(path, fileDict = {}) {
+    this.path = path;
+
+    var pathArr = this.path.split("/");
+    if (pathArr.length >= 2) {
+      pathArr.pop();
+      this.name = pathArr.pop();
+    }
+
+    this.fileDict = fileDict;
+    this.window.setTitle(this.name);
+    this.watcher = chokidar.watch(this.path, {
+      ignored: /[\/\\]\./,
+      persistent: true
+    });
+    console.log("PHATH HERE");
+    console.log(this.path);
+    this.watcher
+      .on("raw", this.fileChange.bind(this))
+      .on("error", error => log(`Watcher error: ${error}`));
   }
 
   isExteriorChange(event, path) {
     if (!path) {
       return;
     }
+    console.log("IS EXTERIOR CHANGE");
+    console.log(path);
     var fileName = path.substring(path.indexOf(this.path) + this.path.length);
     var file = this.fileDict[fileName];
     if (file) {
@@ -87,7 +107,7 @@ module.exports = class FileManager {
     console.log("FILECHANGE");
 
     if (event === "root-changed") {
-      this.mainWindow.send("exteriorChanges");
+      this.window.send("exteriorChanges");
       this.resetFiles();
       clearTimeout(this.exteriorChangeTimeout);
       return;
@@ -98,38 +118,39 @@ module.exports = class FileManager {
 
     this.exteriorChangeTimeout = setTimeout(s => {
       if (this.isExteriorChange(event, path)) {
-        this.importFilesFromPath(this.path);
+        this.importFilesFromPath(this.path, false);
       }
     }, 250);
   }
 
-  actuallyResetFiles() {
+  actuallyResetFiles(callback) {
     this.path = undefined;
     this.name = "Untitled";
     this.fileDict = {};
     this.edited = false;
-    this.mainWindow.setTitle(this.name);
+    this.window.setTitle(this.name);
     this.watcher = null;
+    callback();
   }
 
-  resetFiles() {
+  resetFiles(callback = () => null) {
     this.watcher &&
       this.watcher.close().then(() => {
-        this.actuallyResetFiles();
+        this.actuallyResetFiles(callback);
       });
 
-    !this.watcher && this.actuallyResetFiles();
+    !this.watcher && this.actuallyResetFiles(callback);
   }
 
   onNewProject(worldKey) {
-    this.protectUnsaved(() => this.openNewProject(worldKey));
+    this.openNewProject(worldKey);
   }
 
   protectUnsaved(yesCallBack = () => null) {
     if (this.edited === false) {
       yesCallBack();
     } else if (this.path) {
-      this.mainWindow.send("requestSave");
+      this.window.send("requestSave");
       this.pendingCallback = yesCallBack;
     } else {
       const options = {
@@ -151,29 +172,42 @@ module.exports = class FileManager {
   openNewProject(worldKey) {
     this.resetFiles();
 
-    this.mainWindow.webContents.send("resetView", { worldKey: worldKey });
+    this.createWindow(window =>
+      window.webContents.send("openWorld", { worldKey: worldKey })
+    );
   }
 
   onSaveCommand() {
     if (this.path === undefined) {
       this.onSaveAsCommand();
     } else {
-      this.mainWindow.send("requestSave");
+      this.window.send("requestSave");
     }
   }
 
   onOpenCommand() {
-    this.protectUnsaved(this.openProject.bind(this));
+    this.openProject();
   }
 
-  importFilesFromPath(path) {
+  importFilesFromPath(path, openNewWindow = true) {
     recursive(path, (err, files) => {
       var rawFileList = [];
       var callback = () => {
         if (rawFileList.length === files.length) {
-          this.mainWindow.webContents.send("openDirectory", {
-            rawFileList: rawFileList
-          });
+          console.log("NEW WINDOW");
+          if (openNewWindow) {
+            this.createWindow(window =>
+              window.webContents.send("openDirectory", {
+                rawFileList: rawFileList,
+                path: path
+              })
+            );
+          } else {
+            this.window.webContents.send("openDirectory", {
+              rawFileList: rawFileList,
+              path: path
+            });
+          }
         }
       };
 
@@ -188,7 +222,7 @@ module.exports = class FileManager {
   }
 
   openProject() {
-    // this.mainWindow.webContents.send("requestUpload");
+    // this.window.webContents.send("requestUpload");
 
     dialog.showOpenDialog({ properties: ["openDirectory"] }).then(data => {
       if (data.filePaths.length < 1) {
@@ -197,17 +231,16 @@ module.exports = class FileManager {
 
       var filePath = data.filePaths[0] + "/";
       this.importFilesFromPath(filePath);
-      this.tempPath = filePath;
     });
   }
 
   onSaveAsCommand() {
-    dialog.showSaveDialog(this.mainWindow).then(result => {
+    dialog.showSaveDialog(this.window).then(result => {
       if (result.canceled === false) {
-        this.name = result.filePath.replace(/^.*[\\\/]/, "");
-        this.path = result.filePath + "/";
-
-        this.mainWindow.send("requestSave");
+        this.resetFiles(() => {
+          this.hookUpToDirectory(result.filePath + "/");
+          this.window.send("requestSave");
+        });
       }
     });
   }
@@ -271,7 +304,7 @@ module.exports = class FileManager {
     // this.stamper = files.stamper;
     // this.js = files.js;
     // this.css = files.css;
-    this.mainWindow.setTitle(this.name);
+    this.window.setTitle(this.name);
     this.edited = false;
 
     // jetpack.writeAsync(this.path + "/sketch.js", this.js);
@@ -286,7 +319,7 @@ module.exports = class FileManager {
   }
 
   // writeToView() {
-  //   this.mainWindow.webContents.send("writeToView", {
+  //   this.window.webContents.send("writeToView", {
   //     stamper: this.stamper
   //   });
   // }

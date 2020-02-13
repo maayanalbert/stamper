@@ -221,9 +221,10 @@ export default class ModalManager extends Component {
           });
           fileObjs.push(fileObj);
         });
-        console.log(fileObjs);
-        this.checkAndOpenFiles(fileObjs);
+
+        this.checkAndOpenFiles(fileObjs, data.path);
       });
+
     ipc &&
       ipc.on("exteriorChanges", event => {
         var buttons = [];
@@ -252,7 +253,7 @@ export default class ModalManager extends Component {
       });
 
     ipc &&
-      ipc.on("resetView", (event, data) => {
+      ipc.on("openWorld", (event, data) => {
         if (data.worldKey) {
           this.getWorldObject(
             data.worldKey,
@@ -519,11 +520,11 @@ export default class ModalManager extends Component {
     });
   }
 
-  readFiles(files) {
+  readFiles(files, path) {
     var fileDict = {};
     var callback = () => {
       if (Object.keys(fileDict).length === files.length) {
-        this.stampifyFiles(fileDict);
+        this.stampifyFiles(fileDict, path);
       }
     };
     for (var i = 0; i < files.length; i++) {
@@ -538,7 +539,7 @@ export default class ModalManager extends Component {
   receiveFiles(e) {
     this.checkAndOpenFiles(e.target.files);
   }
-  checkAndOpenFiles(initialFiles) {
+  checkAndOpenFiles(initialFiles, path) {
     var askedAboutCdn = false;
     this.setState({ askedAboutCdn: askedAboutCdn });
 
@@ -554,7 +555,6 @@ export default class ModalManager extends Component {
       }
     }
 
-    console.log(files);
     this.deleteInputElement();
     this.createInputElement();
 
@@ -585,7 +585,7 @@ export default class ModalManager extends Component {
         modalButtons: buttons
       });
     } else {
-      this.readFiles(files);
+      this.readFiles(files, path);
     }
   }
 
@@ -816,7 +816,8 @@ export default class ModalManager extends Component {
     this.props.loadStamperObject(stamperObject);
     ipc &&
       ipc.send("updatePath", {
-        fileDict: fileDict
+        fileDict: fileDict,
+        path: path
       });
   }
 
