@@ -748,6 +748,7 @@ function logToConsole(message, lineno){
         starterCodeSize={data.codeSize}
         getFirstLine={this.getFirstLine.bind(this)}
         id={data.id}
+        getHighlightedLines={this.getHighlightedLines.bind(this)}
         starterLineHighLightingStatus={data.lineHighLightingStatus}
         getP5CanvasDimensions={this.getP5CanvasDimensions.bind(this)}
         setLayerPicker={this.setLayerPicker.bind(this)}
@@ -2054,6 +2055,10 @@ _stopLooping =setTimeout(() => {
       worldPublishTime: this.state.worldPublishTime,
       worldEdited: this.state.worldEdited
     };
+  }
+
+  getHighlightedLines() {
+    return this.state.highlightedLines;
   }
 
   // getMaxCoords() {

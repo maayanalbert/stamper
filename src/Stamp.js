@@ -145,6 +145,9 @@ export default class FunctionStamp extends Component {
     this.checkName();
     this.setDataUri(() => this.props.requestCompile(this.props.id));
     window.addEventListener("message", this.updateLooping);
+
+    var highlightedLines = this.props.getHighlightedLines();
+    this.setIdentifierMarkers(highlightedLines);
   }
 
   componentWillUnmount() {
@@ -971,9 +974,9 @@ export default class FunctionStamp extends Component {
     return positions;
   }
 
-  setIdentifierMarkers(lineHighLightingStatus, highlightedLines) {
+  setIdentifierMarkers(highlightedLines) {
     var identifierMarkers = [];
-    if (lineHighLightingStatus === "on") {
+    if (this.state.lineHighLightingStatus === "on") {
       var identifierData = [];
       Object.values(highlightedLines).map(line => {
         if (line.start === this.props.id || line.end === this.props.id) {
@@ -994,7 +997,8 @@ export default class FunctionStamp extends Component {
         textPositions.map(pos => {
           var marker = Object.assign({}, pos);
 
-          marker.className = this.getIdentifierClass(data.type);
+          marker.className =
+            this.getLineClassColor(data.type) + " referenceMarker";
           marker.type = "text";
           identifierMarkers.push(marker);
         });
@@ -1003,7 +1007,7 @@ export default class FunctionStamp extends Component {
     this.setState({ identifierMarkers: identifierMarkers });
   }
 
-  getIdentifierClass(type) {
+  getLineClassColor(type) {
     var color = "";
     if (type === "file") {
       color = "fileLine";
@@ -1014,14 +1018,18 @@ export default class FunctionStamp extends Component {
     } else {
       color = "systemLine";
     }
-    return `bg-${color} referenceMarker`;
+    return `bg-${color}`;
   }
 
   setLineHighlighted(lineHighLightingStatus, highlightedLines) {
-    this.setIdentifierMarkers(lineHighLightingStatus, highlightedLines);
-    this.setState({
-      lineHighLightingStatus: lineHighLightingStatus
-    });
+    this.setState(
+      {
+        lineHighLightingStatus: lineHighLightingStatus
+      },
+      () => {
+        this.setIdentifierMarkers(highlightedLines);
+      }
+    );
   }
 
   render() {
