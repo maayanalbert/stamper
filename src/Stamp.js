@@ -538,7 +538,7 @@ export default class FunctionStamp extends Component {
     this.state.identifierMarkers.map(mark => {
       if (mark.startRow === -1) {
         if (mark.startCol - "function ".length < this.state.name.length) {
-          nameBackground = mark.className.split(" ")[0];
+          // nameBackground = mark.className.split(" ")[0];
         } else {
           argsBackground = mark.className.split(" ")[0];
         }
@@ -954,6 +954,8 @@ export default class FunctionStamp extends Component {
         return [{ startRow: -1, endRow: -1, startCol: 0, endCol: text.length }];
       }
     }
+    var letters = /^[a-zA-Z]+$/;
+    var lettersNumbers = /^[0-9a-zA-Z]+$/;
     var positions = [];
     var curCol = 0;
     var curRow = 0;
@@ -966,7 +968,10 @@ export default class FunctionStamp extends Component {
     for (var i = 0; i < code.length; i++) {
       if (
         code.length >= i + text.length &&
-        code.substr(i, text.length) === text
+        code.substr(i, text.length) === text &&
+        (i - 1 < 0 || !code[i - 1].match(letters)) &&
+        (i + text.length >= code.length ||
+          !code[i + text.length].match(lettersNumbers))
       ) {
         positions.push({
           startRow: curRow,
