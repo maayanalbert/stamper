@@ -130,12 +130,16 @@ body {
   overscroll-behavior: none;
 }
 
-.marker {
+.errorMarker {
   position: absolute;
 
   width: 100% !important;
   border-radius: unset !important;
   left: 0 !important;
+}
+
+.referenceMarker {
+  position: absolute;
 }
 
 .name {

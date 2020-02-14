@@ -88,7 +88,7 @@ export default class View extends Component {
       lineData: [],
       deletedStamps: [],
       actualLinesOn: false,
-      lastLineData: [],
+
       highlightedLines: {}
     };
     this.counterMutex = new Mutex();
@@ -1346,18 +1346,19 @@ function logToConsole(message, lineno){
     return style;
   }
 
-  getLineRelation(start, end, type, label) {
+  getLineRelation(start, end, type, labelText) {
     var isHighlighted = start + "_" + end in this.state.highlightedLines;
 
-    if (!label) {
-      label = type;
+    if (!labelText) {
+      labelText = type;
     }
     return {
       end: end,
       start: start,
       type: type,
-      label: this.getLineLabel(label, type, isHighlighted),
-      style: this.getLineStyle(type, isHighlighted)
+      label: this.getLineLabel(labelText, type, isHighlighted),
+      style: this.getLineStyle(type, isHighlighted),
+      labelText: labelText
     };
   }
 
@@ -1389,46 +1390,81 @@ function logToConsole(message, lineno){
     return lineData;
   }
 
+  fillInHighlightedLineData(highlightedLines) {
+    this.state.lineData.map(line => {
+      var lineId = line.start + "_" + line.end;
+      if (lineId in highlightedLines) {
+        highlightedLines[lineId] = line;
+      }
+    });
+  }
+
   setDependencyLineHighlightings(id) {
     var graph = this.lineDataToGraph(this.state.lineData);
-
-    this.state.stampOrder.map(id => {
-      this.state.stampRefs[id].current.setLineHighlighted("off");
-    });
-    this.state.stampRefs[id].current.setLineHighlighted("on");
 
     var highlightedLines = {};
     graph[id] &&
       graph[id].map(otherID => {
         highlightedLines[id + "_" + otherID] = "";
-        this.state.stampRefs[otherID].current.setLineHighlighted("on");
       });
 
-    this.setState({ highlightedLines: highlightedLines }, () =>
-      this.setLineData()
-    );
+    this.fillInHighlightedLineData(highlightedLines);
+
+    this.setState({ highlightedLines: highlightedLines }, () => {
+      this.setLineData();
+
+      this.state.stampOrder.map(id => {
+        this.state.stampRefs[id].current.setLineHighlighted(
+          "off",
+          highlightedLines
+        );
+      });
+      this.state.stampRefs[id].current.setLineHighlighted(
+        "on",
+        highlightedLines
+      );
+      graph[id] &&
+        graph[id].map(otherID => {
+          this.state.stampRefs[otherID].current.setLineHighlighted(
+            "on",
+            highlightedLines
+          );
+        });
+    });
   }
 
   onLineSelection(sourceAndTarget) {
     var startStampId = sourceAndTarget.source.id.split("_").pop();
     var endStampId = sourceAndTarget.target.id.split("_").pop();
-    this.state.stampOrder.map(id => {
-      this.state.stampRefs[id].current.setLineHighlighted("off");
-    });
-    this.state.stampRefs[startStampId].current.setLineHighlighted("on");
-    this.state.stampRefs[endStampId].current.setLineHighlighted("on");
 
     var lineName = startStampId + "_" + endStampId;
     var highlightedLines = {};
     highlightedLines[lineName] = "";
+
+    this.fillInHighlightedLineData(highlightedLines);
+
     this.setState({ highlightedLines: highlightedLines }, () => {
       this.setLineData();
+      this.state.stampOrder.map(id => {
+        this.state.stampRefs[id].current.setLineHighlighted(
+          "off",
+          highlightedLines
+        );
+      });
+      this.state.stampRefs[startStampId].current.setLineHighlighted(
+        "on",
+        highlightedLines
+      );
+      this.state.stampRefs[endStampId].current.setLineHighlighted(
+        "on",
+        highlightedLines
+      );
     });
   }
 
   unHighlightAllLines() {
     this.state.stampOrder.map(id => {
-      this.state.stampRefs[id].current.setLineHighlighted("none");
+      this.state.stampRefs[id].current.setLineHighlighted("none", {});
     });
 
     this.setState({ highlightedLines: {} }, () => this.setLineData());

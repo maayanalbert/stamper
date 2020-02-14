@@ -91,7 +91,8 @@ export default class FunctionStamp extends Component {
       iframeDimensTransition: "",
       mediaAssetHeight: null,
       mediaAssetWidth: null,
-      lineHighLightingStatus: this.props.starterLineHighLightingStatus
+      lineHighLightingStatus: this.props.starterLineHighLightingStatus,
+      identifierMarkers: []
       // on, off, none
     };
 
@@ -309,9 +310,11 @@ export default class FunctionStamp extends Component {
       if (i != 0) {
         markers.push({
           startRow: i - 1,
-          endRow: i,
-          type: "background",
-          className: "bg-warningOrange marker"
+          endRow: i - 1,
+          startCol: 0,
+          endCol: 1,
+          type: "text",
+          className: "bg-warningOrange errorMarker"
         });
       }
     }
@@ -348,12 +351,12 @@ export default class FunctionStamp extends Component {
     }
 
     // markers.push({
-    //   startRow: 0,
-    //   endRow: 10,
+    //   startRow: 3,
+    //   endRow: 3,
     //   startCol: 5,
-    //   endCol: 6,
-    //   type: "background",
-    //   className: "bg-warningOrange"
+    //   endCol: 10,
+    //   type: "text",
+    //   className: "bg-pink referenceMarker"
     // });
 
     // var context = document.querySelector(".toBeMarked");
@@ -368,7 +371,7 @@ export default class FunctionStamp extends Component {
       >
         <br hidden={this.props.isBlob} />
         <AceEditor
-          markers={markers}
+          markers={markers.concat(this.state.identifierMarkers)}
           style={{
             width: this.state.editorWidth,
             height: this.state.editorHeight,
@@ -898,6 +901,14 @@ export default class FunctionStamp extends Component {
       });
       this.editorRef.current.editor.resize();
     }
+    // var range = new Range(2, 4, 5, 10);
+    // var session = this.editorRef.current.editor.getSession();
+    // range.start = session.doc.createAnchor(range.start);
+    // range.end = session.doc.createAnchor(range.end);
+
+    // var id = session.addMarker(range, "bg-backgrounOrange");
+
+    this.editorRef.current.editor.resize();
   }
 
   getIcon() {
@@ -921,8 +932,87 @@ export default class FunctionStamp extends Component {
     return icon;
   }
 
-  setLineHighlighted(lineHighLightingStatus) {
-    this.setState({ lineHighLightingStatus: lineHighLightingStatus });
+  getTextPositions(text) {
+    if (this.state.isIndex || this.state.isTxtFile || this.state.isMediaFile) {
+      if (text === this.state.title) {
+        return [{ startRow: -1, endRow: -1, startCol: 0, endCol: text.length }];
+      }
+    }
+    var positions = [];
+    var curCol = 0;
+    var curRow = 0;
+    var code = this.state.code;
+    if (!this.state.isBlob) {
+      curRow = -1;
+      code = `function ${this.state.title}(${this.state.args}){\n${this.state.code}\n}`;
+    }
+
+    for (var i = 0; i < code.length; i++) {
+      if (
+        code.length >= i + text.length &&
+        code.substr(i, text.length) === text
+      ) {
+        positions.push({
+          startRow: curRow,
+          endRow: curRow,
+          startCol: curCol,
+          endCol: curCol + text.length
+        });
+      }
+
+      if (code[i] === "\n") {
+        curRow += 1;
+        curCol = 0;
+      } else {
+        curCol += 1;
+      }
+    }
+
+    return positions;
+  }
+
+  setIdentifierMarkers(lineHighLightingStatus, highlightedLines) {
+    var identifierMarkers = [];
+    if (lineHighLightingStatus === "on") {
+      var identifierData = [];
+      Object.values(highlightedLines).map(line => {
+        if (line.start === this.props.id || line.end === this.props.id) {
+          var identifiers = line.labelText
+            .split(", ")
+            .join("()")
+            .split("()")
+            .filter(text => text != "");
+
+          identifiers.map(identifier =>
+            identifierData.push({ identifier: identifier, type: line.type })
+          );
+        }
+      });
+      var identifierMarkers = [];
+      identifierData.map(data => {
+        var textPositions = this.getTextPositions(data.identifier);
+        textPositions.map(pos => {
+          var marker = Object.assign({}, pos);
+
+          marker.className = this.lineTypeToClass(data.type);
+          marker.type = "text";
+          identifierMarkers.push(marker);
+        });
+      });
+
+      this.setState({ identifierMarkers: identifierMarkers });
+    }
+  }
+
+  lineTypeToClass(type) {
+    return "bg-pink referenceMarker";
+  }
+
+  setLineHighlighted(lineHighLightingStatus, highlightedLines) {
+    this.setIdentifierMarkers(lineHighLightingStatus, highlightedLines);
+    this.setState({
+      lineHighLightingStatus: lineHighLightingStatus
+    });
   }
 
   render() {
