@@ -528,10 +528,23 @@ export default class FunctionStamp extends Component {
       displayName = this.stripExtension(displayName);
     }
 
-    var backgroundColor = "bg-transparent";
+    var nameBackground = "bg-transparent";
+    var argsBackground = "bg-transparent";
     if (0 in this.state.errorLines) {
-      backgroundColor = "bg-warningOrange";
+      nameBackground = "bg-warningOrange";
+      argsBackground = "bg-warningOrange";
     }
+
+    this.state.identifierMarkers.map(mark => {
+      if (mark.startRow === -1) {
+        if (mark.startCol - "function ".length < this.state.name.length) {
+          nameBackground = mark.className.split(" ")[0];
+        } else {
+          argsBackground = mark.className.split(" ")[0];
+        }
+      }
+    });
+
     return (
       <div>
         <p
@@ -555,7 +568,7 @@ export default class FunctionStamp extends Component {
           }}
           style={{ background: "transparent" }}
           value={displayName}
-          class={"text-" + nameColor + " name " + backgroundColor}
+          class={"text-" + nameColor + " name " + nameBackground}
         />
 
         <br />
@@ -572,7 +585,7 @@ export default class FunctionStamp extends Component {
           }}
           style={{ background: "transparent" }}
           value={this.state.args}
-          class={"text-" + argsColor + " args " + backgroundColor}
+          class={"text-" + argsColor + " args " + argsBackground}
         />
       </div>
     );
@@ -947,7 +960,7 @@ export default class FunctionStamp extends Component {
     var code = this.state.code;
     if (!this.state.isBlob) {
       curRow = -1;
-      code = `function ${this.state.title}(${this.state.args}){\n${this.state.code}\n}`;
+      code = `function ${this.state.name}(${this.state.args}){\n${this.state.code}\n}`;
     }
 
     for (var i = 0; i < code.length; i++) {
@@ -998,7 +1011,7 @@ export default class FunctionStamp extends Component {
           var marker = Object.assign({}, pos);
 
           marker.className =
-            this.getLineClassColor(data.type) + " referenceMarker";
+            "bg-" + this.getLineClassColor(data.type) + " referenceMarker";
           marker.type = "text";
           identifierMarkers.push(marker);
         });
@@ -1018,7 +1031,7 @@ export default class FunctionStamp extends Component {
     } else {
       color = "systemLine";
     }
-    return `bg-${color}`;
+    return `${color}`;
   }
 
   setLineHighlighted(lineHighLightingStatus, highlightedLines) {
