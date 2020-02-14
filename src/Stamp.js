@@ -994,18 +994,27 @@ export default class FunctionStamp extends Component {
         textPositions.map(pos => {
           var marker = Object.assign({}, pos);
 
-          marker.className = this.lineTypeToClass(data.type);
+          marker.className = this.getIdentifierClass(data.type);
           marker.type = "text";
           identifierMarkers.push(marker);
         });
       });
-
-      this.setState({ identifierMarkers: identifierMarkers });
     }
+    this.setState({ identifierMarkers: identifierMarkers });
   }
 
-  lineTypeToClass(type) {
-    return "bg-pink referenceMarker";
+  getIdentifierClass(type) {
+    var color = "";
+    if (type === "file") {
+      color = "fileLine";
+    } else if (type === "js") {
+      color = "jsLine";
+    } else if (type === "listener") {
+      color = "listenerLine";
+    } else {
+      color = "systemLine";
+    }
+    return `bg-${color} referenceMarker`;
   }
 
   setLineHighlighted(lineHighLightingStatus, highlightedLines) {
