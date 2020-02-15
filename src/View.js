@@ -460,8 +460,8 @@ function logToConsole(message, lineno, type){
         var end = range.end
         var id = range.id
         var isFN = range.isFN
-        var isInRange = start + ${offset} < lineno + 1 && lineno -1 < end + ${offset}
-
+        var isInRange = start + ${offset} <= lineno && lineno <= end + ${offset}
+// 28 +80 <= 117 && 117 <= 40 + 80
         
         if(isInRange){
           adjLineNum = lineno - start - ${offset} + 1
@@ -471,6 +471,12 @@ function logToConsole(message, lineno, type){
           }
         }
       })
+    console.error(lineno)
+    console.error(${offset})
+  console.error(adjLineNum)
+  console.error(stampId)
+  console.error("${parentId}")
+    console.error(${strRanges})
       if(stampId){
         window.parent.postMessage({type:type, message:message, lineno:adjLineNum, id:stampId, parentId:"${parentId}"}, '*')
       }
@@ -538,6 +544,7 @@ function logToConsole(message, lineno, type){
       var ranges = [];
     } else {
       var codeData = this.getRunnableCode(id);
+
       var runnableCode = codeData.runnableCode;
 
       var ranges = codeData.ranges;
@@ -565,7 +572,8 @@ function logToConsole(message, lineno, type){
           type: "error",
           message:
             "Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.",
-          parentId: this.state.htmlID
+          parentId: this.state.htmlID,
+          id: this.state.htmlID
         },
         "*"
       );
@@ -601,7 +609,7 @@ function logToConsole(message, lineno, type){
 
     var html = parser.html();
     html = this.loadAssets(html);
-
+    console.log(html);
     return html;
   }
 
@@ -934,7 +942,8 @@ function logToConsole(message, lineno, type){
             {
               type: "error",
               message: `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your "${name}"s to something else.`,
-              parentId: stamp.current.props.id
+              parentId: stamp.current.props.id,
+              id: stamp.current.props.id
             },
             "*"
           );
@@ -1151,7 +1160,7 @@ function logToConsole(message, lineno, type){
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
       if (!stampRef) {
-        return;
+        return lineData;
       }
       if (this.isListener(stampRef.state.name)) {
         listenerIDs.push(stampRef.props.id);
@@ -1161,7 +1170,7 @@ function logToConsole(message, lineno, type){
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
       if (!stampRef) {
-        return;
+        return lineData;
       }
       if (
         this.isListener(stampRef.state.name) ||
@@ -1169,7 +1178,7 @@ function logToConsole(message, lineno, type){
         stampRef.state.name === "setup" ||
         stampRef.state.name === "preload"
       ) {
-        return;
+        return lineData;
       }
       listenerIDs.map(listenerID => {
         lineData.push(this.getLineRelation(listenerID, id, "listener"));
@@ -1185,8 +1194,9 @@ function logToConsole(message, lineno, type){
 
     for (var i = 0; i < this.state.stampOrder.length; i++) {
       var id = this.state.stampOrder[i];
+      var stampRef = this.state.stampRefs[id];
       if (!stampRef) {
-        return;
+        return lineData;
       }
       var stampRef = this.state.stampRefs[id].current;
       if (stampRef.state.name === "setup") {
@@ -1579,7 +1589,7 @@ function logToConsole(message, lineno, type){
       var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
       curLine = this.addCodeBlock(
         fullFun,
-        stampRef.props.id,
+        overalID,
         runnableCode,
         ranges,
         curLine,
@@ -1980,7 +1990,7 @@ _stopLooping =setTimeout(() => {
         }
       }
 
-      // name += "_" + id;
+      name += "_" + id;
 
       pickerData.push({
         name: name,

@@ -39,10 +39,17 @@ export default class StampConsole extends Component {
     ) {
       return;
     }
-    e.data.type != "debug" && console.log(e);
+
     // log logs this way too
     if (e.data.parentId != this.props.parentId) {
       return;
+    }
+    if (e.data.id === this.props.parentId && e.data.type === "error") {
+      this.props.addErrorLine(lineNum);
+    }
+    console.log(e, e.data.id, this.props.parentId);
+    if (e.data.id != this.props.parentId) {
+      e.data.type = "command";
     }
 
     this.logToConsole(e.data.message, e.data.type, e.data.parentId);
@@ -50,10 +57,6 @@ export default class StampConsole extends Component {
     var lineNum = e.data.lineno;
     var message = e.data.message;
     var id = e.data.id;
-
-    if (e.data.id === this.props.parentId) {
-      this.props.addErrorLine(lineNum);
-    }
   }
 
   componentDidMount() {
