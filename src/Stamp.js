@@ -94,7 +94,8 @@ export default class FunctionStamp extends Component {
       mediaAssetHeight: null,
       mediaAssetWidth: null,
       lineHighLightingStatus: this.props.starterLineHighLightingStatus,
-      identifierMarkers: []
+      identifierMarkers: [],
+      consoleVisible: this.props.starterConsoleVisible
       // on, off, none
     };
 
@@ -193,7 +194,7 @@ export default class FunctionStamp extends Component {
   addErrorLine(lineNum) {
     var errorLines = this.state.errorLines;
     errorLines[lineNum] = "";
-    this.setState({ errorLines: errorLines }, () =>
+    this.setState({ errorLines: errorLines, consoleVisible: true }, () =>
       this.props.setLayerPicker()
     );
   }
@@ -881,7 +882,8 @@ export default class FunctionStamp extends Component {
       isBlob: this.props.isBlob,
       codeSize: this.state.codeSize,
       icon: this.getIcon(),
-      lineHighLightingStatus: this.state.lineHighLightingStatus
+      lineHighLightingStatus: this.state.lineHighLightingStatus,
+      consoleVisible: this.state.consoleVisible
     };
 
     return data;
@@ -1033,6 +1035,7 @@ export default class FunctionStamp extends Component {
   renderConsole() {
     return (
       <div
+        hidden={!this.state.consoleVisible}
         className=""
         style={{
           zIndex: 2,
@@ -1152,6 +1155,14 @@ export default class FunctionStamp extends Component {
           icon={this.getIcon()}
           parentId={this.props.id}
           showCodeSize={this.props.isBlob}
+          onConsole={() =>
+            this.setState({ consoleVisible: !this.state.consoleVisible })
+          }
+          showConsole={
+            !this.props.isBlob &&
+            !this.props.isMediaFile &&
+            !this.props.isTxtFile
+          }
           onCodeSize={() => {
             window.postMessage({ type: "edited" }, "*");
             if (this.state.codeSize === globals.codeSize) {

@@ -39,7 +39,7 @@ export default class StampConsole extends Component {
     ) {
       return;
     }
-
+    e.data.type != "debug" && console.log(e);
     // log logs this way too
     if (e.data.parentId != this.props.parentId) {
       return;
@@ -159,15 +159,16 @@ export default class StampConsole extends Component {
               LOG_COLOR: "black",
               LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
               LOG_ERROR_BORDER: "transparent",
-              LOG_ERROR_COLOR: "rgba(0,0,0)",
+              LOG_ERROR_COLOR: "rgb(0,0,0)",
               BASE_FONT_FAMILY: "Inconsolata !important",
-              BASE_FONT_SIZE: 13,
+              BASE_FONT_SIZE: 11,
               LOG_COMMAND_COLOR: "rgba(150,150,150)",
               BASE_BACKGROUND_COLOR: "transparent",
               LOG_BORDER: "rgb(225,225,225)",
               LOG_COMMAND_ICON: "",
               LOG_ERROR_ICON: "",
-              LOG_DEBUG_ICON: ""
+              LOG_DEBUG_ICON: "",
+              LOG_DEBUG_COLOR: "rgb(70, 160, 206)"
             }}
             logs={renderedLogs}
             variant="light"

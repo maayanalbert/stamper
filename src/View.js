@@ -425,7 +425,9 @@ var getStackTrace = function() {
 
 
 console.log = function() {
-  var message = [...arguments].join(" ")
+
+  [...arguments].map(argument => {
+  var message = argument
 
 
   var stackArr = getStackTrace().stack.split("\\n")
@@ -436,6 +438,8 @@ console.log = function() {
   var lineno = Number(stackLine.pop())
 
   logToConsole(message, lineno, "log")
+  })
+
 }
 
 
@@ -556,10 +560,15 @@ function logToConsole(message, lineno, type){
 
     var htmlAsksForJs = parser(jsSelector).length > 0;
     if (htmlAsksForJs === false && this.state.htmlAsksForJs === true) {
-      // make this a message
-      // this.state.consoleStamp.ref.current.logToConsole(
-      //   `Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`
-      // );
+      window.postMessage(
+        {
+          type: "error",
+          message:
+            "Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.",
+          parentId: this.state.htmlID
+        },
+        "*"
+      );
       this.state.stampRefs[this.state.htmlID].current.addErrorLine(-1);
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
@@ -645,7 +654,8 @@ function logToConsole(message, lineno, type){
       zIndex: undefined,
       codeSize: globals.codeSize,
       lineHighLightingStatus: "none",
-      id: this.getUniqueID()
+      id: this.getUniqueID(),
+      consoleVisible: false
     };
 
     if (
@@ -729,6 +739,7 @@ function logToConsole(message, lineno, type){
         getScale={this.getScale.bind(this)}
         getLinesOn={() => this.state.linesOn}
         getSnapMargin={this.getSnapMargin.bind(this)}
+        starterConsoleVisible={data.consoleVisible}
       />
     );
 
@@ -859,7 +870,6 @@ function logToConsole(message, lineno, type){
   }
 
   requestCompile(id) {
-    // this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
     this.setLineData(() => {
       var duplicateNamedStamps = this.checkAllNames();
 
@@ -920,10 +930,14 @@ function logToConsole(message, lineno, type){
         if (nameDict[name] > 1) {
           duplicateNamedStamps[stamp.current.props.id] = "";
 
-          // make this a message
-          // this.state.consoleStamp.ref.current.logToConsole(
-          //   `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your ${name}s to something else.`
-          // );
+          window.postMessage(
+            {
+              type: "error",
+              message: `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your "${name}"s to something else.`,
+              parentId: stamp.current.props.id
+            },
+            "*"
+          );
         }
       }
     });
@@ -1052,7 +1066,9 @@ function logToConsole(message, lineno, type){
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
       var variableClusters = [];
-
+      if (!stampRef) {
+        return;
+      }
       var state = stampRef.state;
       if (
         stampRef.props.isMediaFile ||
@@ -1134,6 +1150,9 @@ function logToConsole(message, lineno, type){
     var lineData = [];
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       if (this.isListener(stampRef.state.name)) {
         listenerIDs.push(stampRef.props.id);
       }
@@ -1141,6 +1160,9 @@ function logToConsole(message, lineno, type){
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       if (
         this.isListener(stampRef.state.name) ||
         !this.isFnStamp(id) ||
@@ -1163,6 +1185,9 @@ function logToConsole(message, lineno, type){
 
     for (var i = 0; i < this.state.stampOrder.length; i++) {
       var id = this.state.stampOrder[i];
+      if (!stampRef) {
+        return;
+      }
       var stampRef = this.state.stampRefs[id].current;
       if (stampRef.state.name === "setup") {
         setupID = id;
@@ -1191,6 +1216,9 @@ function logToConsole(message, lineno, type){
     for (var i = 0; i < this.state.stampOrder.length; i++) {
       var id = this.state.stampOrder[i];
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       if (stampRef.state.name === "preload") {
         preloadID = id;
       }
@@ -1214,6 +1242,9 @@ function logToConsole(message, lineno, type){
     for (var i = 0; i < this.state.stampOrder.length; i++) {
       var id = this.state.stampOrder[i];
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       if (stampRef.props.isIndex) {
         indexID = id;
       }
@@ -1319,6 +1350,9 @@ function logToConsole(message, lineno, type){
     var lineData = [];
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       if (
         stampRef.props.isMediaFile ||
         stampRef.props.isTxtFile ||
@@ -1330,6 +1364,9 @@ function logToConsole(message, lineno, type){
 
     this.state.stampOrder.map(id => {
       var stampRef = this.state.stampRefs[id].current;
+      if (!stampRef) {
+        return;
+      }
       Object.keys(fileIdDict).map(fileName => {
         if (this.fileIsReferenced(stampRef.state.code, fileName)) {
           lineData.push(
@@ -1438,6 +1475,8 @@ function logToConsole(message, lineno, type){
 
     var lineDict = {};
 
+    lineData = lineData.filter(line => line);
+
     lineData = lineData.filter(line => {
       var lineKey = line.start + "_" + line.end;
       if (lineKey in lineDict === false) {
@@ -1461,11 +1500,12 @@ function logToConsole(message, lineno, type){
 
   getInfluencingStamps(id, graph, seen) {
     seen[id] = "";
-    graph[id].map(otherID => {
-      if (!(otherID in seen)) {
-        this.getInfluencingStamps(otherID, graph, seen);
-      }
-    });
+    graph[id] &&
+      graph[id].map(otherID => {
+        if (!(otherID in seen)) {
+          this.getInfluencingStamps(otherID, graph, seen);
+        }
+      });
   }
 
   getRunnableCode(overalID) {

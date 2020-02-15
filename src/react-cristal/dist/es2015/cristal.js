@@ -800,6 +800,14 @@ var Cristal = (function(_super) {
         "clear console"
       );
 
+      var consoleBtn = createIcon(
+        this,
+        globals.ConsoleStampIcon,
+        !_a.showConsole,
+        "mouseOnConsole",
+        _a.onConsole,
+        "toggle console visibility"
+      );
       if (_a.onMinimize) {
         var minimizeBtn = createIcon(
           this,
@@ -829,10 +837,12 @@ var Cristal = (function(_super) {
           class="row mt-1"
           style={{ position: "absolute", cursor: "auto", right: 18, top: 0 }}
         >
+          {consoleBtn}
           {makeBigIcon}
           {copyBtn}
           {closeBtn}
           {clearBtn}
+
           {minimizeBtn}
         </div>
       );
