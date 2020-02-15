@@ -170,11 +170,18 @@ body {
   cursor: default;
 }
 
+.error-style-tooltip > .tooltip-inner {
+  background: rgba(250, 220, 160, 1);
+  color: rgb(0, 0, 0);
+  cursor: text;
+}
+
 .picker-style-tooltip > .tooltip-inner {
   font-family: "Montserrat", sans-serif !important;
   font-weight: 300;
   font-size: 12px;
   cursor: default;
+  text-align: left;
 }
 
 .pickerBold {

@@ -32,31 +32,17 @@ export default class StampConsole extends Component {
   }
 
   receiveMessage(e) {
-    if (
-      e.data.type != "error" &&
-      e.data.type != "log" &&
-      e.data.type != "debug"
-    ) {
-      return;
-    }
-
-    // log logs this way too
-    if (e.data.parentId != this.props.parentId) {
-      return;
-    }
-    if (e.data.id === this.props.parentId && e.data.type === "error") {
-      this.props.addErrorLine(lineNum);
-    }
-    console.log(e, e.data.id, this.props.parentId);
     if (e.data.id != this.props.parentId) {
-      e.data.type = "command";
+      return;
     }
 
-    this.logToConsole(e.data.message, e.data.type, e.data.parentId);
+    if (e.data.type === "error") {
+      this.props.addErrorLine(e.data.lineno, e.data.message);
+    }
 
-    var lineNum = e.data.lineno;
-    var message = e.data.message;
-    var id = e.data.id;
+    if (e.data.type === "debug") {
+      this.logToConsole(e.data.message, e.data.type);
+    }
   }
 
   componentDidMount() {
@@ -72,14 +58,21 @@ export default class StampConsole extends Component {
     this.setState({ logs: [], lastFreq: 0 });
   }
 
+  autoScollDown() {
+    document.getElementById("bottomView") &&
+      document.getElementById("bottomView").scrollIntoView();
+    var consoleContainer = document.getElementById("consoleContainer");
+
+    if (consoleContainer) {
+      consoleContainer.scrollTop = consoleContainer.scrollHeight;
+    }
+  }
+
   checkLastLog(log) {
     var logs = this.state.logs;
     if (logs.length < 1) {
       this.setState({ logs: [log], lastFreq: 0 });
-      var consoleContainer = document.getElementById("consoleContainer");
-      if (consoleContainer) {
-        consoleContainer.scrollTop = consoleContainer.scrollHeight;
-      }
+      this.autoScollDown();
     } else {
       var lastLog = logs[logs.length - 1];
 
@@ -101,10 +94,7 @@ export default class StampConsole extends Component {
         }
         logs.push(log);
         this.setState({ logs: logs, lastFreq: 1 });
-        var consoleContainer = document.getElementById("consoleContainer");
-        if (consoleContainer) {
-          consoleContainer.scrollTop = consoleContainer.scrollHeight;
-        }
+        this.autoScollDown();
       }
     }
   }
@@ -131,52 +121,47 @@ export default class StampConsole extends Component {
         consoleContainer.scrollTop = consoleContainer.scrollHeight;
       }
     }
+    if (this.props.invisible) {
+      return <span />;
+    }
 
     return (
       <div
-        className="border border-borderGrey"
+        className={"border border-borderGrey"}
+        id="consoleContainer"
+        onMouseOver={() => this.props.setEditorScrolling(true)}
+        onMouseOut={() => this.props.setEditorScrolling(false)}
         style={{
           width: "100%",
-          height: "100%",
-          opacity: ".7"
+          maxHeight: "100%",
+          overflow: "hidden",
+          "overflow-y": "scroll",
+          "white-space": "nowrap",
+          position: "absolute",
+          bottom: 0,
+          opacity: 0.7,
+          userSelect: "text"
         }}
       >
-        <div
-          id="consoleContainer"
-          onMouseOver={() => this.props.setEditorScrolling(true)}
-          onMouseOut={() => this.props.setEditorScrolling(false)}
-          style={{
-            width: "100%",
-            maxHeight: "100%",
-            overflow: "hidden",
-            "overflow-y": "scroll",
-            "white-space": "nowrap",
-            position: "absolute",
-            bottom: 0,
-
-            userSelect: "text"
+        <Console
+          styles={{
+            LOG_COLOR: "black",
+            LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
+            LOG_ERROR_BORDER: "transparent",
+            LOG_ERROR_COLOR: "rgb(0,0,0)",
+            BASE_FONT_FAMILY: "Inconsolata !important",
+            BASE_FONT_SIZE: 11,
+            LOG_COMMAND_COLOR: "rgba(150,150,150)",
+            BASE_BACKGROUND_COLOR: "transparent",
+            LOG_BORDER: "rgb(225,225,225)",
+            LOG_COMMAND_ICON: "",
+            LOG_ERROR_ICON: "",
+            LOG_DEBUG_ICON: "",
+            LOG_DEBUG_COLOR: "rgb(70, 160, 206)"
           }}
-        >
-          <Console
-            styles={{
-              LOG_COLOR: "black",
-              LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
-              LOG_ERROR_BORDER: "transparent",
-              LOG_ERROR_COLOR: "rgb(0,0,0)",
-              BASE_FONT_FAMILY: "Inconsolata !important",
-              BASE_FONT_SIZE: 11,
-              LOG_COMMAND_COLOR: "rgba(150,150,150)",
-              BASE_BACKGROUND_COLOR: "transparent",
-              LOG_BORDER: "rgb(225,225,225)",
-              LOG_COMMAND_ICON: "",
-              LOG_ERROR_ICON: "",
-              LOG_DEBUG_ICON: "",
-              LOG_DEBUG_COLOR: "rgb(70, 160, 206)"
-            }}
-            logs={renderedLogs}
-            variant="light"
-          />
-        </div>
+          logs={renderedLogs}
+          variant="light"
+        />
       </div>
     );
   }

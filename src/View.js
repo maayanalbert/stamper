@@ -57,7 +57,7 @@ export default class View extends Component {
       htmlID: -1,
 
       setupExists: true,
-      htmlAsksForCss: true,
+
       htmlAsksForJs: true,
       lines: [],
       lineData: [],
@@ -406,62 +406,29 @@ export default class View extends Component {
     return layoutedStampsData;
   }
 
-  getIframeErrorCallBack(ranges, offset, parentId = null) {
+  getIframeErrorCallBack(ranges, offset = 0) {
     var strRanges = JSON.stringify(ranges);
     return `
-
+  // window.addEventListener('error', function(e) { 
+  //   console.log("addEventListener")
+  //     logToConsole(e.message, e.lineno)
+  //   }, false);
 window.onerror = function (message, url, lineno, colno) {
-
-  logToConsole(message, lineno, "error")
+  logToConsole(message, lineno)
 }
-
-
-
-var getStackTrace = function() {
-  var obj = {};
-  Error.captureStackTrace(obj, getStackTrace);
-  return obj;
-};
-
-
-console.log = function() {
-
-  [...arguments].map(argument => {
-  var message = argument
-
-
-  var stackArr = getStackTrace().stack.split("\\n")
-  stackArr.pop()
-  stackArr.pop()
-  var stackLine = stackArr.pop().split(":")
-  stackLine.pop()
-  var lineno = Number(stackLine.pop())
-
-  logToConsole(message, lineno, "log")
-  })
-
-}
-
-
-
-
-
-
-function logToConsole(message, lineno, type){
-
-
-
+// document.onwheel = function (e) {
+//   console.log(document)
+// }
+function logToConsole(message, lineno){
       var adjLineNum = -1
       var stampId
       var ranges = ${strRanges}
-
       ranges.map(range => {
         var start = range.start
         var end = range.end
         var id = range.id
         var isFN = range.isFN
-        var isInRange = start + ${offset} <= lineno && lineno <= end + ${offset}
-// 28 +80 <= 117 && 117 <= 40 + 80
+        var isInRange = start + ${offset} < lineno + 1 && lineno -1 < end + ${offset}
         
         if(isInRange){
           adjLineNum = lineno - start - ${offset} + 1
@@ -471,16 +438,9 @@ function logToConsole(message, lineno, type){
           }
         }
       })
-    console.error(lineno)
-    console.error(${offset})
-  console.error(adjLineNum)
-  console.error(stampId)
-  console.error("${parentId}")
-    console.error(${strRanges})
       if(stampId){
-        window.parent.postMessage({type:type, message:message, lineno:adjLineNum, id:stampId, parentId:"${parentId}"}, '*')
+      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
       }
-
     }`;
   }
 
@@ -566,18 +526,18 @@ function logToConsole(message, lineno, type){
     // const start = parser(jsSelector).get(0).startIndex;
 
     var htmlAsksForJs = parser(jsSelector).length > 0;
-    if (htmlAsksForJs === false && this.state.htmlAsksForJs === true) {
+    if (htmlAsksForJs === false) {
       window.postMessage(
         {
           type: "error",
           message:
             "Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.",
-          parentId: this.state.htmlID,
-          id: this.state.htmlID
+          id: this.state.htmlID,
+          lineno: 1
         },
         "*"
       );
-      this.state.stampRefs[this.state.htmlID].current.addErrorLine(-1);
+
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
       this.setState({ htmlAsksForJs: htmlAsksForJs });
@@ -609,14 +569,8 @@ function logToConsole(message, lineno, type){
 
     var html = parser.html();
     html = this.loadAssets(html);
-    console.log(html);
-    return html;
-  }
 
-  addErrorLine(lineNum, id) {
-    if (id in this.state.stampRefs) {
-      this.state.stampRefs[id].current.addErrorLine(lineNum);
-    }
+    return html;
   }
 
   setInitialPosition(dimension) {
@@ -840,19 +794,11 @@ function logToConsole(message, lineno, type){
     });
   }
 
-  compileSingleStamp(id, duplicateNamedStamps) {
+  compileSingleStamp(id) {
     var stamp = this.state.stampRefs[id];
     var stampRef = stamp.current;
     if (stampRef) {
-      var newErrors = [];
-      if (
-        stampRef.props.id in duplicateNamedStamps &&
-        stampRef.props.isIndex === false
-      ) {
-        newErrors.push(0);
-      }
-
-      stampRef.clearErrorsAndUpdate(newErrors);
+      stampRef.clearErrorsAndUpdate();
     }
   }
 
@@ -879,12 +825,11 @@ function logToConsole(message, lineno, type){
 
   requestCompile(id) {
     this.setLineData(() => {
-      var duplicateNamedStamps = this.checkAllNames();
-
       this.state.stampOrder.map(id => {
-        this.compileSingleStamp(id, duplicateNamedStamps);
+        this.compileSingleStamp(id);
       });
     });
+    this.checkAllNames();
   }
 
   disablePan(status) {
@@ -899,6 +844,9 @@ function logToConsole(message, lineno, type){
     var nameDict = {};
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id];
+      if (!stamp || !stamp.current) {
+        return;
+      }
       if (stamp.current.props.isBlob) {
         return;
       }
@@ -913,36 +861,53 @@ function logToConsole(message, lineno, type){
     var duplicateNamedStamps = {};
     this.state.stampOrder.map(id => {
       var stamp = this.state.stampRefs[id];
+      if (!stamp || !stamp.current) {
+        return;
+      }
       if (stamp.current.props.isBlob) {
         return;
       }
 
       if (stamp.current.props.isTxtFile || stamp.current.props.isMediaFile) {
         var mimeType = mime.lookup(stamp.current.state.name);
-        if (!mimeType) {
-          duplicateNamedStamps[stamp.current.props.id] = "";
 
-          // make this a message
-          // this.state.consoleStamp.ref.current.logToConsole(
-          //   `Stamper Error: The file extension '.${
-          //     stamp.current.state.name.split(".")[
-          //       stamp.current.state.name.split(".").length - 1
-          //     ]
-          //   }' is invalid.`
-          // );
+        if (stamp.current.stripExtension(stamp.current.state.name) === "") {
+          window.postMessage(
+            {
+              type: "error",
+              message: `Stamper Error: File names cannot be blank.`,
+              lineno: 0,
+              id: stamp.current.props.id
+            },
+            "*"
+          );
+        }
+
+        if (!mimeType) {
+          window.postMessage(
+            {
+              type: "error",
+              message: `Stamper Error: The file extension '.${
+                stamp.current.state.name.split(".")[
+                  stamp.current.state.name.split(".").length - 1
+                ]
+              }' is invalid.`,
+              lineno: 0,
+              id: stamp.current.props.id
+            },
+            "*"
+          );
         }
       }
       if (stamp.current) {
         var stampRef = stamp.current;
         var name = stamp.current.state.name;
         if (nameDict[name] > 1) {
-          duplicateNamedStamps[stamp.current.props.id] = "";
-
           window.postMessage(
             {
               type: "error",
               message: `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your "${name}"s to something else.`,
-              parentId: stamp.current.props.id,
+              lineno: 0,
               id: stamp.current.props.id
             },
             "*"
@@ -950,8 +915,6 @@ function logToConsole(message, lineno, type){
         }
       }
     });
-
-    return duplicateNamedStamps;
   }
 
   getExportableCode() {
@@ -1194,11 +1157,11 @@ function logToConsole(message, lineno, type){
 
     for (var i = 0; i < this.state.stampOrder.length; i++) {
       var id = this.state.stampOrder[i];
-      var stampRef = this.state.stampRefs[id];
-      if (!stampRef) {
+      if (!this.state.stampRefs[id] || !this.state.stampRefs[id].current) {
         return lineData;
       }
       var stampRef = this.state.stampRefs[id].current;
+
       if (stampRef.state.name === "setup") {
         setupID = id;
       }
@@ -1755,7 +1718,7 @@ _stopLooping =setTimeout(() => {
   }
 
   centerOnStamp(id, xOff, yOff) {
-    var stampRef;
+    var stampRef = this.state.stampRefs[id].current;
 
     if (stampRef) {
       var cristalRef = stampRef.cristalRef.current;

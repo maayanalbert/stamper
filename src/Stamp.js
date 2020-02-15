@@ -16,6 +16,9 @@ import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
 
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+
 import { Resizable, ResizableBox } from "react-resizable";
 import Mark from "mark.js";
 
@@ -191,10 +194,11 @@ export default class FunctionStamp extends Component {
     this.setState({ isSpecialFn: isSpecialFn });
   }
 
-  addErrorLine(lineNum) {
-    var errorLines = this.state.errorLines;
-    errorLines[lineNum] = "";
-    this.setState({ errorLines: errorLines, consoleVisible: true }, () =>
+  addErrorLine(lineNum, message) {
+    var errorLines = Object.assign({}, this.state.errorLines);
+    errorLines[lineNum] = message;
+
+    this.setState({ errorLines: errorLines }, () =>
       this.props.setLayerPicker()
     );
   }
@@ -203,7 +207,7 @@ export default class FunctionStamp extends Component {
     this.setState({ lineData: lineData });
   }
 
-  clearErrorsAndUpdate(newErrors = []) {
+  clearErrorsAndUpdate() {
     window.postMessage(
       {
         type: "debug",
@@ -213,14 +217,12 @@ export default class FunctionStamp extends Component {
       },
       "*"
     );
-    var newErrorLines = this.state.errorLines;
-    var newErrorLines = {};
 
-    this.setState({ errorLines: newErrorLines }, () => {
-      var iframeCode = "";
-      var exportableCode = "";
-      this.props.setLayerPicker();
+    var iframeCode = "";
+    var exportableCode = "";
+    this.props.setLayerPicker();
 
+    this.setState({ errorLines: {} }, () => {
       if (this.props.isBlob) {
         exportableCode = this.props.getExportableCode();
       } else if (
@@ -229,16 +231,13 @@ export default class FunctionStamp extends Component {
       ) {
         iframeCode = this.props.getHTML(this.props.id);
       }
-
+      this.props.setLayerPicker();
       this.setState({
         iframeCode: iframeCode,
         exportableCode: exportableCode,
         looping: true,
         loopingTransition: ""
       });
-      for (var i = 0; i < newErrors.length; i++) {
-        this.addErrorLine(newErrors[i]);
-      }
     });
   }
 
@@ -365,56 +364,76 @@ export default class FunctionStamp extends Component {
       shadow = bottomShadow;
     }
 
+    var errorTooltipText = "";
+    Object.keys(this.state.errorLines).map(line => {
+      if (line > 0) {
+        errorTooltipText += this.state.errorLines[line] + ` [line ${line}]\n`;
+      }
+    });
+    if (errorTooltipText === "") {
+      var errorTooltip = <span />;
+    } else {
+      var errorTooltip = (
+        <Tooltip className="picker-style-tooltip error-style-tooltip">
+          {errorTooltipText}
+        </Tooltip>
+      );
+    }
+
     return (
       <div
         onMouseOut={() => {
           this.setEditorScrolling(false);
         }}
       >
-        <br hidden={this.props.isBlob} />
-        <AceEditor
-          markers={markers.concat(this.state.identifierMarkers)}
-          style={{
-            width: this.state.editorWidth,
-            height: this.state.editorHeight,
-            background: "transparent",
-            boxShadow: shadow
-          }}
-          className="code toBeMarked"
-          mode={mode}
-          theme={theme}
-          onChange={(value, editor) => {
-            this.setState({ code: value });
-            this.onEditsMade();
-          }}
-          name={"name" + this.props.id.toString()}
-          onLoad={editor => {
-            this.setEditorShadow(editor.renderer.scrollBar);
-            editor.on("change", (arg, editor) => {
-              this.setEditorShadow(editor.renderer.scrollBar);
-            });
-          }}
-          fontSize={this.state.codeSize}
-          showPrintMargin={false}
-          wrapEnabled={true}
-          showGutter={false}
-          highlightActiveLine={false}
-          value={this.state.code}
-          ref={this.editorRef}
-          onScroll={editor => {
-            this.setEditorScrolling(true);
-            this.setEditorShadow(editor.renderer.scrollBar);
-          }}
-          setOptions={{
-            enableBasicAutocompletion: false,
-            enableLiveAutocompletion: false,
-            enableSnippets: false,
-            showLineNumbers: false,
-            tabSize: 2,
-            hasCssTransforms: true,
-            fontFamily: "Inconsolata"
-          }}
-        />
+        <OverlayTrigger trigger="hover" placement="left" overlay={errorTooltip}>
+          <div>
+            <br hidden={this.props.isBlob} />
+            <AceEditor
+              markers={markers.concat(this.state.identifierMarkers)}
+              style={{
+                width: this.state.editorWidth,
+                height: this.state.editorHeight,
+                background: "transparent",
+                boxShadow: shadow
+              }}
+              className="code toBeMarked"
+              mode={mode}
+              theme={theme}
+              onChange={(value, editor) => {
+                this.setState({ code: value });
+                this.onEditsMade();
+              }}
+              name={"name" + this.props.id.toString()}
+              onLoad={editor => {
+                this.setEditorShadow(editor.renderer.scrollBar);
+                editor.on("change", (arg, editor) => {
+                  this.setEditorShadow(editor.renderer.scrollBar);
+                });
+              }}
+              fontSize={this.state.codeSize}
+              showPrintMargin={false}
+              wrapEnabled={true}
+              showGutter={false}
+              highlightActiveLine={false}
+              value={this.state.code}
+              ref={this.editorRef}
+              onScroll={editor => {
+                this.setEditorScrolling(true);
+                this.setEditorShadow(editor.renderer.scrollBar);
+              }}
+              setOptions={{
+                enableBasicAutocompletion: false,
+                enableLiveAutocompletion: false,
+                enableSnippets: false,
+                showLineNumbers: false,
+                tabSize: 2,
+                hasCssTransforms: true,
+                fontFamily: "Inconsolata"
+              }}
+            />
+          </div>
+        </OverlayTrigger>
       </div>
     );
   }
@@ -532,6 +551,13 @@ export default class FunctionStamp extends Component {
     if (0 in this.state.errorLines) {
       nameBackground = "bg-warningOrange";
       argsBackground = "bg-warningOrange";
+      var errorTooltip = (
+        <Tooltip className="picker-style-tooltip error-style-tooltip">
+          {this.state.errorLines[0]}
+        </Tooltip>
+      );
+    } else {
+      var errorTooltip = <span />;
     }
 
     // this.state.identifierMarkers.map(mark => {
@@ -546,46 +572,52 @@ export default class FunctionStamp extends Component {
 
     return (
       <div>
-        <p
-          hidden={!this.props.isMediaFile}
-          className={"text-lightGreyText name"}
-          style={{ position: "absolute", top: 49, left: 19 }}
-        >
-          {this.state.name}
-        </p>
-        <input
-          placeholder={namePlaceholder}
-          disabled={this.props.isIndex}
-          onChange={event => {
-            var newName = event.target.value;
+        <OverlayTrigger trigger="hover" placement="left" overlay={errorTooltip}>
+          <div>
+            <p
+              hidden={!this.props.isMediaFile}
+              className={"text-lightGreyText name"}
+              style={{ position: "absolute", top: 49, left: 19 }}
+            >
+              {this.state.name}
+            </p>
+            <input
+              placeholder={namePlaceholder}
+              disabled={this.props.isIndex}
+              onChange={event => {
+                var newName = event.target.value;
 
-            if (this.props.isMediaFile) {
-              newName = this.addExtension(newName, this.state.name);
-            }
-            this.setState({ name: newName });
-            this.onEditsMade();
-          }}
-          style={{ background: "transparent" }}
-          value={displayName}
-          class={"text-" + nameColor + " name " + nameBackground}
-        />
+                if (this.props.isMediaFile) {
+                  newName = this.addExtension(newName, this.state.name);
+                }
+                this.setState({ name: newName });
+                this.onEditsMade();
+              }}
+              style={{ background: "transparent" }}
+              value={displayName}
+              class={"text-" + nameColor + " name " + nameBackground}
+            />
 
-        <br />
+            <br />
 
-        <input
-          // @cameron styling for arguments field
-          placeholder="arguments..."
-          disabled={
-            this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile
-          }
-          onChange={event => {
-            this.setState({ args: event.target.value });
-            this.onEditsMade();
-          }}
-          style={{ background: "transparent" }}
-          value={this.state.args}
-          class={"text-" + argsColor + " args " + argsBackground}
-        />
+            <input
+              // @cameron styling for arguments field
+              placeholder="arguments..."
+              disabled={
+                this.props.isIndex ||
+                this.props.isTxtFile ||
+                this.props.isMediaFile
+              }
+              onChange={event => {
+                this.setState({ args: event.target.value });
+                this.onEditsMade();
+              }}
+              style={{ background: "transparent" }}
+              value={this.state.args}
+              class={"text-" + argsColor + " args " + argsBackground}
+            />
+          </div>
+        </OverlayTrigger>
       </div>
     );
   }
@@ -1056,6 +1088,9 @@ export default class FunctionStamp extends Component {
           parentId={this.props.id}
           addErrorLine={this.addErrorLine.bind(this)}
           setEditorScrolling={this.setEditorScrolling.bind(this)}
+          invisible={
+            this.props.isBlob || this.props.isMediaFile || this.props.isTxtFile
+          }
         />
       </div>
     );
