@@ -203,6 +203,10 @@ export default class FunctionStamp extends Component {
   }
 
   clearErrorsAndUpdate(newErrors = []) {
+    window.postMessage(
+      { type: "debug", message: "Updated code", parentId: this.props.id },
+      "*"
+    );
     var newErrorLines = this.state.errorLines;
     var newErrorLines = {};
 

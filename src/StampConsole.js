@@ -134,7 +134,8 @@ export default class StampConsole extends Component {
         className="border border-borderGrey"
         style={{
           width: "100%",
-          height: "100%"
+          height: "100%",
+          opacity: ".7"
         }}
       >
         <div
@@ -158,13 +159,15 @@ export default class StampConsole extends Component {
               LOG_COLOR: "black",
               LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
               LOG_ERROR_BORDER: "transparent",
-              LOG_ERROR_COLOR: "rgba(102,102,102)",
+              LOG_ERROR_COLOR: "rgba(0,0,0)",
               BASE_FONT_FAMILY: "Inconsolata !important",
-              BASE_FONT_SIZE: 12,
+              BASE_FONT_SIZE: 13,
               LOG_COMMAND_COLOR: "rgba(150,150,150)",
               BASE_BACKGROUND_COLOR: "transparent",
               LOG_BORDER: "rgb(225,225,225)",
-              LOG_COMMAND_ICON: ""
+              LOG_COMMAND_ICON: "",
+              LOG_ERROR_ICON: "",
+              LOG_DEBUG_ICON: ""
             }}
             logs={renderedLogs}
             variant="light"
