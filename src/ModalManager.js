@@ -464,8 +464,7 @@ export default class ModalManager extends Component {
         modalVisible: true,
         modalHeader:
           "Oh no! It looks like we had trouble reading one of your files.",
-        modalContent:
-          "Check that your index.html, sketch.js, and style.css are properly configured.",
+        modalContent: "Check that your files are properly configured.",
         modalButtons: [
           { text: "ok", color: "outline-secondary", callback: this.hideModal }
         ]

@@ -37,6 +37,7 @@ export default class StampConsole extends Component {
     }
 
     if (e.data.type === "error") {
+      console.log(e);
       this.props.addErrorLine(e.data.lineno, e.data.message);
     }
 
@@ -146,7 +147,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
 
     return (
       <div
-        className={"border border-borderGrey"}
+        className={"border border-borderGrey bg-lightGrey"}
         style={{ width: "100%", height: "100%" }}
       >
         <div

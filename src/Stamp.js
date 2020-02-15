@@ -576,10 +576,20 @@ export default class FunctionStamp extends Component {
 
     var nameBackground = "bg-transparent";
     var argsBackground = "bg-transparent";
+    console.log(
+      this.state.name,
+      this.state.errorLines,
+      -1 in this.state.errorLines
+    );
     if (0 in this.state.errorLines) {
-      nameBackground = "bg-warningOrange";
       argsBackground = "bg-warningOrange";
     }
+
+    if (-1 in this.state.errorLines) {
+      nameBackground = "bg-warningOrange";
+    }
+
+    console.log(nameBackground);
 
     // this.state.identifierMarkers.map(mark => {
     //   if (mark.startRow === -1) {

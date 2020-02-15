@@ -416,9 +416,11 @@ window.onerror = function (message, url, lineno, colno) {
 
 
 function logToConsole(message, lineno){
+
       var adjLineNum = -1
       var stampId
       var ranges = ${strRanges}
+        console.log(ranges, lineno, ${offset})
       ranges.map(range => {
         var start = range.start
         var end = range.end
@@ -430,10 +432,11 @@ function logToConsole(message, lineno){
           adjLineNum = lineno - start - ${offset} + 1
           stampId = id
           if(range.isFn){
-            adjLineNum -= 1
+            adjLineNum -= 2
           }
         }
       })
+      console.log(adjLineNum, stampId)
       if(stampId){
       window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
       }
@@ -973,7 +976,13 @@ function logToConsole(message, lineno){
     var start = curLine;
     var end = curLine + this.getNumLines(code) - 1;
     runnableCode.push(code);
-    ranges.push({ start: start, end: end, id: id, isFn: isFn });
+    ranges.push({
+      start: start,
+      end: end,
+      id: id,
+      isFn: isFn,
+      code: code.split("\n")
+    });
     return end + 1;
   }
 
@@ -1521,7 +1530,7 @@ function logToConsole(message, lineno){
             false
           );
         } else {
-          var code = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+          var code = `function ${state.name}\n(${state.args}){\n${state.code}\n}`;
           curLine = this.addCodeBlock(
             code,
             stamp.current.props.id,
@@ -1544,7 +1553,7 @@ function logToConsole(message, lineno){
     var stampRef = this.state.stampRefs[overalID].current;
     var state = stampRef.state;
     if (state.name === "draw" || this.isListener(state.name)) {
-      var fullFun = `function ${state.name}(${state.args}){\n${state.code}\n}`;
+      var fullFun = `function ${state.name}\n(${state.args}){\n${state.code}\n}`;
       curLine = this.addCodeBlock(
         fullFun,
         overalID,
@@ -1556,7 +1565,7 @@ function logToConsole(message, lineno){
     } else if (state.name === "setup" || state.name === "preload") {
       // do nothing
     } else {
-      code = `function draw(){\n${state.name}()\n}`;
+      code = `function draw\n(){\n${state.name}()\n}`;
       curLine = this.addCodeBlock(
         code,
         stampRef.props.id,
