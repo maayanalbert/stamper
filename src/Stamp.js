@@ -15,7 +15,7 @@ import "ace-builds/src-noconflict/mode-html";
 import "ace-builds/src-noconflict/theme-solarized_light";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/javascript";
-
+import Overlay from "react-bootstrap/Overlay";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 
@@ -98,7 +98,10 @@ export default class FunctionStamp extends Component {
       mediaAssetWidth: null,
       lineHighLightingStatus: this.props.starterLineHighLightingStatus,
       identifierMarkers: [],
-      consoleVisible: this.props.starterConsoleVisible
+      consoleVisible: this.props.starterConsoleVisible,
+      mouseOnStamp: false,
+
+      mouseOnTooltip: false
       // on, off, none
     };
 
@@ -318,6 +321,33 @@ export default class FunctionStamp extends Component {
     }
   }
 
+  getErrorTooltip(text, forEditor = true) {
+    if (!text) {
+      return <span />;
+    }
+    if (this.props.isBlob || forEditor === false) {
+      var top = 48;
+    } else {
+      var top = globals.fnTitleHeight + 30;
+    }
+    return (
+      <div
+        className="rounded-left bg-warningOrange picker p-2"
+        style={{
+          position: "absolute",
+          left: -globals.tooltipWidth,
+          width: globals.tooltipWidth,
+          top: top,
+          cursor: "text",
+          userSelect: "text",
+          fontSize: 11
+        }}
+        hidden={!this.state.mouseOnStamp}
+      >
+        {text}
+      </div>
+    );
+  }
   renderEditor() {
     var markers = [];
     for (var i in this.state.errorLines) {
@@ -370,15 +400,6 @@ export default class FunctionStamp extends Component {
         errorTooltipText += this.state.errorLines[line] + ` [line ${line}]\n`;
       }
     });
-    if (errorTooltipText === "") {
-      var errorTooltip = <span />;
-    } else {
-      var errorTooltip = (
-        <Tooltip className="picker-style-tooltip error-style-tooltip">
-          {errorTooltipText}
-        </Tooltip>
-      );
-    }
 
     return (
       <div
@@ -386,54 +407,53 @@ export default class FunctionStamp extends Component {
           this.setEditorScrolling(false);
         }}
       >
-        <OverlayTrigger trigger="hover" placement="left" overlay={errorTooltip}>
-          <div>
-            <br hidden={this.props.isBlob} />
-            <AceEditor
-              markers={markers.concat(this.state.identifierMarkers)}
-              style={{
-                width: this.state.editorWidth,
-                height: this.state.editorHeight,
-                background: "transparent",
-                boxShadow: shadow
-              }}
-              className="code toBeMarked"
-              mode={mode}
-              theme={theme}
-              onChange={(value, editor) => {
-                this.setState({ code: value });
-                this.onEditsMade();
-              }}
-              name={"name" + this.props.id.toString()}
-              onLoad={editor => {
+        {this.getErrorTooltip(errorTooltipText)}
+        <div>
+          <br hidden={this.props.isBlob} />
+          <AceEditor
+            markers={markers.concat(this.state.identifierMarkers)}
+            style={{
+              width: this.state.editorWidth,
+              height: this.state.editorHeight,
+              background: "transparent",
+              boxShadow: shadow
+            }}
+            className="code toBeMarked"
+            mode={mode}
+            theme={theme}
+            onChange={(value, editor) => {
+              this.setState({ code: value });
+              this.onEditsMade();
+            }}
+            name={"name" + this.props.id.toString()}
+            onLoad={editor => {
+              this.setEditorShadow(editor.renderer.scrollBar);
+              editor.on("change", (arg, editor) => {
                 this.setEditorShadow(editor.renderer.scrollBar);
-                editor.on("change", (arg, editor) => {
-                  this.setEditorShadow(editor.renderer.scrollBar);
-                });
-              }}
-              fontSize={this.state.codeSize}
-              showPrintMargin={false}
-              wrapEnabled={true}
-              showGutter={false}
-              highlightActiveLine={false}
-              value={this.state.code}
-              ref={this.editorRef}
-              onScroll={editor => {
-                this.setEditorScrolling(true);
-                this.setEditorShadow(editor.renderer.scrollBar);
-              }}
-              setOptions={{
-                enableBasicAutocompletion: false,
-                enableLiveAutocompletion: false,
-                enableSnippets: false,
-                showLineNumbers: false,
-                tabSize: 2,
-                hasCssTransforms: true,
-                fontFamily: "Inconsolata"
-              }}
-            />
-          </div>
-        </OverlayTrigger>
+              });
+            }}
+            fontSize={this.state.codeSize}
+            showPrintMargin={false}
+            wrapEnabled={true}
+            showGutter={false}
+            highlightActiveLine={false}
+            value={this.state.code}
+            ref={this.editorRef}
+            onScroll={editor => {
+              this.setEditorScrolling(true);
+              this.setEditorShadow(editor.renderer.scrollBar);
+            }}
+            setOptions={{
+              enableBasicAutocompletion: false,
+              enableLiveAutocompletion: false,
+              enableSnippets: false,
+              showLineNumbers: false,
+              tabSize: 2,
+              hasCssTransforms: true,
+              fontFamily: "Inconsolata"
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -551,13 +571,6 @@ export default class FunctionStamp extends Component {
     if (0 in this.state.errorLines) {
       nameBackground = "bg-warningOrange";
       argsBackground = "bg-warningOrange";
-      var errorTooltip = (
-        <Tooltip className="picker-style-tooltip error-style-tooltip">
-          {this.state.errorLines[0]}
-        </Tooltip>
-      );
-    } else {
-      var errorTooltip = <span />;
     }
 
     // this.state.identifierMarkers.map(mark => {
@@ -572,52 +585,47 @@ export default class FunctionStamp extends Component {
 
     return (
       <div>
-        <OverlayTrigger trigger="hover" placement="left" overlay={errorTooltip}>
-          <div>
-            <p
-              hidden={!this.props.isMediaFile}
-              className={"text-lightGreyText name"}
-              style={{ position: "absolute", top: 49, left: 19 }}
-            >
-              {this.state.name}
-            </p>
-            <input
-              placeholder={namePlaceholder}
-              disabled={this.props.isIndex}
-              onChange={event => {
-                var newName = event.target.value;
+        {this.getErrorTooltip(this.state.errorLines[0], false)}
+        <p
+          hidden={!this.props.isMediaFile}
+          className={"text-lightGreyText name"}
+          style={{ position: "absolute", top: 49, left: 19 }}
+        >
+          {this.state.name}
+        </p>
+        <input
+          placeholder={namePlaceholder}
+          disabled={this.props.isIndex}
+          onChange={event => {
+            var newName = event.target.value;
 
-                if (this.props.isMediaFile) {
-                  newName = this.addExtension(newName, this.state.name);
-                }
-                this.setState({ name: newName });
-                this.onEditsMade();
-              }}
-              style={{ background: "transparent" }}
-              value={displayName}
-              class={"text-" + nameColor + " name " + nameBackground}
-            />
+            if (this.props.isMediaFile) {
+              newName = this.addExtension(newName, this.state.name);
+            }
+            this.setState({ name: newName });
+            this.onEditsMade();
+          }}
+          style={{ background: "transparent" }}
+          value={displayName}
+          class={"text-" + nameColor + " name " + nameBackground}
+        />
 
-            <br />
+        <br />
 
-            <input
-              // @cameron styling for arguments field
-              placeholder="arguments..."
-              disabled={
-                this.props.isIndex ||
-                this.props.isTxtFile ||
-                this.props.isMediaFile
-              }
-              onChange={event => {
-                this.setState({ args: event.target.value });
-                this.onEditsMade();
-              }}
-              style={{ background: "transparent" }}
-              value={this.state.args}
-              class={"text-" + argsColor + " args " + argsBackground}
-            />
-          </div>
-        </OverlayTrigger>
+        <input
+          // @cameron styling for arguments field
+          placeholder="arguments..."
+          disabled={
+            this.props.isIndex || this.props.isTxtFile || this.props.isMediaFile
+          }
+          onChange={event => {
+            this.setState({ args: event.target.value });
+            this.onEditsMade();
+          }}
+          style={{ background: "transparent" }}
+          value={this.state.args}
+          class={"text-" + argsColor + " args " + argsBackground}
+        />
       </div>
     );
   }
@@ -1170,6 +1178,8 @@ export default class FunctionStamp extends Component {
             this.props.getLinesOn() &&
             this.props.setDependencyLineHighlightings(this.props.id)
           }
+          onMouseOver={() => this.setState({ mouseOnStamp: true })}
+          onMouseOut={() => this.setState({ mouseOnStamp: false })}
           onStartMove={this.props.onStartMove}
           onStopMove={this.props.onStopMove}
           onClose={() => this.props.onDelete(this.props.id)}

@@ -612,6 +612,7 @@ var Cristal = (function(_super) {
     document.addEventListener("mouseup", this.onMouseUp);
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+
     document.addEventListener("wheel", this.onWheel, { passive: false });
     var iframeElem = document.getElementById("iframe" + this.props.parentId);
     if (iframeElem) {
@@ -925,7 +926,9 @@ var Cristal = (function(_super) {
         className: className + " rounded " + this.props.wrapperName,
         onMouseDown: this.changeZIndex,
         overflow: "hidden",
-        onDoubleClick: onDoubleClick
+        onDoubleClick: onDoubleClick,
+        onMouseOver: this.props.onMouseOver,
+        onMouseOut: this.props.onMouseOut
       },
       allContent,
       this.renderResizeHandles()

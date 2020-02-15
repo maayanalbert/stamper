@@ -33,6 +33,7 @@ import VisibilityOffIcon from "./icons/eye-off.svg";
 import EmptyIcon from "./icons/empty.svg";
 
 export const globals = {
+  tooltipWidth: 200,
   SettingOnIcon: SettingOnIcon,
   SettingOffIcon: SettingOffIcon,
   ExpandLessIcon: ExpandLessIcon,
