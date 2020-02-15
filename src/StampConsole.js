@@ -158,7 +158,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
           "white-space": "nowrap",
           position: "absolute",
           bottom: 0,
-          opacity: 0.7,
+          opacity: 1,
           userSelect: "text"
         }}
       >
@@ -169,7 +169,7 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
             LOG_ERROR_BORDER: "transparent",
             LOG_ERROR_COLOR: "rgb(0,0,0)",
             BASE_FONT_FAMILY: "Inconsolata !important",
-            BASE_FONT_SIZE: 11,
+            BASE_FONT_SIZE: 12,
             LOG_COMMAND_COLOR: "rgba(150,150,150)",
             BASE_BACKGROUND_COLOR: "transparent",
             LOG_BORDER: "rgb(225,225,225)",
