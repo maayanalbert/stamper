@@ -32,11 +32,16 @@ export default class StampConsole extends Component {
   }
 
   receiveMessage(e) {
-    // log logs this way too
-    if (e.data.parentId != this.props.parentId) {
+    if (
+      e.data.type != "error" &&
+      e.data.type != "log" &&
+      e.data.type != "debug"
+    ) {
       return;
     }
-    if (e.data.type != "error") {
+
+    // log logs this way too
+    if (e.data.parentId != this.props.parentId) {
       return;
     }
 
@@ -46,7 +51,9 @@ export default class StampConsole extends Component {
     var message = e.data.message;
     var id = e.data.id;
 
-    this.props.addErrorLine(lineNum);
+    if (e.data.id === this.props.parentId) {
+      this.props.addErrorLine(lineNum);
+    }
   }
 
   componentDidMount() {
@@ -124,36 +131,45 @@ export default class StampConsole extends Component {
 
     return (
       <div
-        id="consoleContainer"
-        onMouseOver={() => this.props.setEditorScrolling(true)}
-        onMouseOut={() => this.props.setEditorScrolling(false)}
+        className="border border-borderGrey"
         style={{
           width: "100%",
-          maxHeight: "100%",
-          overflow: "hidden",
-          "overflow-y": "scroll",
-          "white-space": "nowrap",
-          position: "absolute",
-          bottom: 0,
-          background: "black"
+          height: "100%"
         }}
       >
-        <Console
-          styles={{
-            LOG_COLOR: "black",
-            LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
-            LOG_ERROR_BORDER: "transparent",
-            LOG_ERROR_COLOR: "rgba(102,102,102)",
-            BASE_FONT_FAMILY: "Inconsolata",
-            BASE_FONT_SIZE: 10,
-            LOG_COMMAND_COLOR: "rgba(150,150,150)",
-            BASE_BACKGROUND_COLOR: "transparent",
-            LOG_BORDER: "rgb(225,225,225)",
-            LOG_COMMAND_ICON: ""
+        <div
+          id="consoleContainer"
+          onMouseOver={() => this.props.setEditorScrolling(true)}
+          onMouseOut={() => this.props.setEditorScrolling(false)}
+          style={{
+            width: "100%",
+            maxHeight: "100%",
+            overflow: "hidden",
+            "overflow-y": "scroll",
+            "white-space": "nowrap",
+            position: "absolute",
+            bottom: 0,
+
+            userSelect: "text"
           }}
-          logs={renderedLogs}
-          variant="light"
-        />
+        >
+          <Console
+            styles={{
+              LOG_COLOR: "black",
+              LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
+              LOG_ERROR_BORDER: "transparent",
+              LOG_ERROR_COLOR: "rgba(102,102,102)",
+              BASE_FONT_FAMILY: "Inconsolata !important",
+              BASE_FONT_SIZE: 12,
+              LOG_COMMAND_COLOR: "rgba(150,150,150)",
+              BASE_BACKGROUND_COLOR: "transparent",
+              LOG_BORDER: "rgb(225,225,225)",
+              LOG_COMMAND_ICON: ""
+            }}
+            logs={renderedLogs}
+            variant="light"
+          />
+        </div>
       </div>
     );
   }

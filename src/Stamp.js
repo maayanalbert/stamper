@@ -774,13 +774,6 @@ export default class FunctionStamp extends Component {
 
               <iframe
                 hidden={this.props.isMediaFile}
-                ref={iframeElem => {
-                  if (iframeElem) {
-                    this.props.addNewIframeConsole(
-                      iframeElem.contentWindow.console
-                    );
-                  }
-                }}
                 id={"iframe" + this.props.id}
                 scrolling="no"
                 style={{
@@ -1047,6 +1040,7 @@ export default class FunctionStamp extends Component {
         }}
       >
         <StampConsole
+          ref={this.consoleRef}
           parentId={this.props.id}
           addErrorLine={this.addErrorLine.bind(this)}
           setEditorScrolling={this.setEditorScrolling.bind(this)}

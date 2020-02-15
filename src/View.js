@@ -55,14 +55,14 @@ export default class View extends Component {
       scale: 1,
       counter: 0,
       htmlID: -1,
-      consoleStamp: null,
+
       setupExists: true,
       htmlAsksForCss: true,
       htmlAsksForJs: true,
       lines: [],
       lineData: [],
       traversalGraph: {},
-      consoleId: -1,
+
       numToggles: 0,
       originX: 0,
       originY: 0,
@@ -284,8 +284,7 @@ export default class View extends Component {
         counter: 0,
         htmlID: -1,
         scale: 1,
-        consoleStamp: null,
-        consoleId: -1,
+
         originX: 0,
         originY: 0,
         compiledBefore: false,
@@ -321,7 +320,7 @@ export default class View extends Component {
           () => {
             var callback = () =>
               this.recompileIfEnoughStamps(stamperObject.stamps.length);
-            this.addConsoleStamp(stamperObject.console);
+
             var stampData = stamperObject.stamps;
             if (stamperObject.stamps.length > 0 && !stamperObject.stamps[0].x) {
               stampData = this.getAutoLayout(
@@ -413,13 +412,39 @@ export default class View extends Component {
 
 window.onerror = function (message, url, lineno, colno) {
 
-  logToConsole(message, lineno)
+  logToConsole(message, lineno, "error")
+}
+
+
+
+var getStackTrace = function() {
+  var obj = {};
+  Error.captureStackTrace(obj, getStackTrace);
+  return obj;
+};
+
+
+console.log = function() {
+  var message = [...arguments].join(" ")
+
+
+  var stackArr = getStackTrace().stack.split("\\n")
+  stackArr.pop()
+  stackArr.pop()
+  var stackLine = stackArr.pop().split(":")
+  stackLine.pop()
+  var lineno = Number(stackLine.pop())
+
+  logToConsole(message, lineno, "log")
 }
 
 
 
 
-function logToConsole(message, lineno){
+
+
+function logToConsole(message, lineno, type){
+
 
 
       var adjLineNum = -1
@@ -443,7 +468,7 @@ function logToConsole(message, lineno){
         }
       })
       if(stampId){
-      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId, parentId:"${parentId}"}, '*')
+        window.parent.postMessage({type:type, message:message, lineno:adjLineNum, id:stampId, parentId:"${parentId}"}, '*')
       }
 
     }`;
@@ -594,62 +619,6 @@ function logToConsole(message, lineno){
     }
   }
 
-  addConsoleStamp(data) {
-    var defaults = {
-      x: this.setInitialPosition("x"),
-      y: this.setInitialPosition("y"),
-      consoleWidth: globals.defaultEditorWidth,
-      consoleHeight: globals.defaultVarEditorHeight,
-      hidden: false,
-      zIndex: undefined
-    };
-
-    Object.keys(defaults).map(setting => {
-      if (setting in data) {
-        defaults[setting] = data[setting];
-      }
-    });
-    data = defaults;
-
-    this.createConsoleStamp(data);
-  }
-
-  async createConsoleStamp(data) {
-    var x = data.x,
-      y = data.y,
-      consoleWidth = data.consoleWidth,
-      consoleHeight = data.consoleHeight;
-    const release = await this.counterMutex.acquire();
-    var counter = this.state.counter;
-    this.setState({ counter: counter + 1 }, () => release());
-
-    var ref = React.createRef();
-
-    var stampID = counter.toString();
-
-    var elem = (
-      <ConsoleStamp
-        ref={ref}
-        initialPosition={{ x: x, y: y }}
-        getLinesOn={() => this.state.linesOn}
-        id={stampID}
-        onStartMove={this.onStartMove.bind(this)}
-        onStopMove={this.onStopMove.bind(this)}
-        disablePan={this.disablePan.bind(this)}
-        starterConsoleWidth={consoleWidth}
-        starterConsoleHeight={consoleHeight}
-        addErrorLine={this.addErrorLine.bind(this)}
-        initialHidden={data.hidden}
-        getScale={this.getScale.bind(this)}
-        starterZIndex={data.zIndex}
-        getSnapMargin={this.getSnapMargin.bind(this)}
-      />
-    );
-
-    var consoleStamp = { elem: elem, ref: ref };
-    this.setState({ consoleStamp: consoleStamp, consoleId: stampID });
-  }
-
   getUniqueID() {
     return Math.random()
       .toString(36)
@@ -757,7 +726,6 @@ function logToConsole(message, lineno){
         iframeDisabled={data.iframeDisabled}
         requestCompile={this.requestCompile.bind(this)}
         getHTML={this.getHTML.bind(this)}
-        addNewIframeConsole={this.addNewIframeConsole.bind(this)}
         getScale={this.getScale.bind(this)}
         getLinesOn={() => this.state.linesOn}
         getSnapMargin={this.getSnapMargin.bind(this)}
@@ -792,13 +760,6 @@ function logToConsole(message, lineno){
         callback(id);
       }
     );
-  }
-
-  addNewIframeConsole(newConsole) {
-    if (this.state.consoleStamp === null) {
-      return;
-    }
-    this.state.consoleStamp.ref.current.addNewIframeConsole(newConsole);
   }
 
   checkForSetup() {
@@ -898,6 +859,7 @@ function logToConsole(message, lineno){
   }
 
   requestCompile(id) {
+    // this.state.consoleStamp.ref.current.logToConsole("Updated code", "debug");
     this.setLineData(() => {
       var duplicateNamedStamps = this.checkAllNames();
 
@@ -1699,16 +1661,10 @@ _stopLooping =setTimeout(() => {
     });
   }
 
-  refreshConsoleStamp(consoleStamp) {
-    var data = consoleStamp.ref.current.getData();
-    this.setState({ consoleStamp: null }, () => this.addConsoleStamp(data));
-  }
-
   getStamperObject(id) {
     var data = {
       stamps: [],
       scale: this.state.scale,
-      console: this.state.consoleStamp.ref.current.getData(),
       originX: this.state.originX,
       originY: this.state.originY,
       worldKey: this.state.worldKey,
@@ -1750,15 +1706,6 @@ _stopLooping =setTimeout(() => {
 
   centerOnStamp(id, xOff, yOff) {
     var stampRef;
-
-    if (id in this.state.stampRefs) {
-      stampRef = this.state.stampRefs[id].current;
-    } else if (
-      this.state.consoleStamp.ref.current &&
-      id === this.state.consoleStamp.ref.current.props.id
-    ) {
-      stampRef = this.state.consoleStamp.ref.current;
-    }
 
     if (stampRef) {
       var cristalRef = stampRef.cristalRef.current;
@@ -1846,13 +1793,10 @@ _stopLooping =setTimeout(() => {
 
     window.postMessage({ type: "edited" }, "*");
 
-    if (result.source.index === 0 || result.destination.index === 0) {
-      return;
-    }
     var stampOrder = Object.assign([], this.state.stampOrder);
 
-    const [removed] = stampOrder.splice(result.source.index - 1, 1);
-    stampOrder.splice(result.destination.index - 1, 0, removed);
+    const [removed] = stampOrder.splice(result.source.index, 1);
+    stampOrder.splice(result.destination.index, 0, removed);
 
     this.setState({ stampOrder: [] }, () => {
       this.setLayerPicker();
@@ -1983,22 +1927,6 @@ _stopLooping =setTimeout(() => {
 
     var pickerData = [];
 
-    if (this.state.consoleStamp && this.state.consoleStamp.ref.current) {
-      var consoleRef = this.state.consoleStamp.ref.current;
-      pickerData.push({
-        name: "console",
-        status: !consoleRef.state.hidden,
-        icon: consoleRef.getIcon(),
-        centerCallback: (xOff, yOff) =>
-          this.centerOnStamp(consoleRef.props.id, xOff, yOff),
-        hideCallback: () => this.toggleHide(consoleRef),
-        id: consoleRef.props.id,
-        isSetting: true,
-        toggleOnIcon: globals.VisibilityIcon,
-        toggleOffIcon: globals.VisibilityOffIcon
-      });
-    }
-
     this.state.stampOrder.map(id => {
       if (id in this.state.stampRefs) {
         var stampRef = this.state.stampRefs[id].current;
@@ -2092,12 +2020,6 @@ _stopLooping =setTimeout(() => {
   }
 
   render() {
-    if (this.state.consoleStamp) {
-      var consoleElem = this.state.consoleStamp.elem;
-    } else {
-      var consoleElem = null;
-    }
-
     // var maxCoords = this.getMaxCoords();
 
     return (
@@ -2129,7 +2051,6 @@ _stopLooping =setTimeout(() => {
               relativeOffsetSize={25}
             >
               {Object.values(this.state.stampElems)}
-              {consoleElem}
 
               <Cristal invisible></Cristal>
             </ArcherContainer>

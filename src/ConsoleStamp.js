@@ -172,9 +172,6 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
       return true;
     }
 
-    console.log("WIDTH", this.state.consoleWidth);
-    // console.log("HEIGHT", this.state.consoleHeight);
-
     if (change) {
       this.setState({
         consoleHeight: height,
