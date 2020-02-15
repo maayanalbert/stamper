@@ -147,40 +147,44 @@ For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#w
     return (
       <div
         className={"border border-borderGrey"}
-        id="consoleContainer"
-        onMouseOver={() => this.props.setEditorScrolling(true)}
-        onMouseOut={() => this.props.setEditorScrolling(false)}
-        style={{
-          width: "100%",
-          maxHeight: "100%",
-          overflow: "hidden",
-          "overflow-y": "scroll",
-          "white-space": "nowrap",
-          position: "absolute",
-          bottom: 0,
-          opacity: 1,
-          userSelect: "text"
-        }}
+        style={{ width: "100%", height: "100%" }}
       >
-        <Console
-          styles={{
-            LOG_COLOR: "black",
-            LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
-            LOG_ERROR_BORDER: "transparent",
-            LOG_ERROR_COLOR: "rgb(0,0,0)",
-            BASE_FONT_FAMILY: "Inconsolata !important",
-            BASE_FONT_SIZE: 12,
-            LOG_COMMAND_COLOR: "rgba(150,150,150)",
-            BASE_BACKGROUND_COLOR: "transparent",
-            LOG_BORDER: "rgb(225,225,225)",
-            LOG_COMMAND_ICON: "",
-            LOG_ERROR_ICON: "",
-            LOG_DEBUG_ICON: "",
-            LOG_DEBUG_COLOR: "rgb(70, 160, 206)"
+        <div
+          id="consoleContainer"
+          onMouseOver={() => this.props.setEditorScrolling(true)}
+          onMouseOut={() => this.props.setEditorScrolling(false)}
+          style={{
+            width: "100%",
+            maxHeight: "100%",
+            overflow: "hidden",
+            "overflow-y": "scroll",
+            "white-space": "nowrap",
+            position: "absolute",
+            bottom: 0,
+            opacity: 1,
+            userSelect: "text"
           }}
-          logs={renderedLogs}
-          variant="light"
-        />
+        >
+          <Console
+            styles={{
+              LOG_COLOR: "black",
+              LOG_ERROR_BACKGROUND: "rgba(255, 184, 0, .5)",
+              LOG_ERROR_BORDER: "transparent",
+              LOG_ERROR_COLOR: "rgb(0,0,0)",
+              BASE_FONT_FAMILY: "Inconsolata !important",
+              BASE_FONT_SIZE: 12,
+              LOG_COMMAND_COLOR: "rgba(150,150,150)",
+              BASE_BACKGROUND_COLOR: "transparent",
+              LOG_BORDER: "rgb(225,225,225)",
+              LOG_COMMAND_ICON: "",
+              LOG_ERROR_ICON: "",
+              LOG_DEBUG_ICON: "",
+              LOG_DEBUG_COLOR: "rgb(70, 160, 206)"
+            }}
+            logs={renderedLogs}
+            variant="light"
+          />
+        </div>
       </div>
     );
   }

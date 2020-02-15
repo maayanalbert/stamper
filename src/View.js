@@ -612,8 +612,7 @@ function logToConsole(message, lineno){
       zIndex: undefined,
       codeSize: globals.codeSize,
       lineHighLightingStatus: "none",
-      id: this.getUniqueID(),
-      consoleVisible: true
+      id: this.getUniqueID()
     };
 
     if (

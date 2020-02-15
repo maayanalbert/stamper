@@ -98,7 +98,7 @@ export default class FunctionStamp extends Component {
       mediaAssetWidth: null,
       lineHighLightingStatus: this.props.starterLineHighLightingStatus,
       identifierMarkers: [],
-      consoleVisible: this.props.starterConsoleVisible,
+
       mouseOnStamp: false,
 
       mouseOnTooltip: false
@@ -342,7 +342,8 @@ export default class FunctionStamp extends Component {
           top: top,
           cursor: "text",
           userSelect: "text",
-          fontSize: 11
+          fontSize: 11,
+          font: "Inconsolata"
         }}
         hidden={!this.state.mouseOnStamp}
       >
@@ -383,17 +384,11 @@ export default class FunctionStamp extends Component {
       var mode = "javascript";
     }
 
-    var shadow = "";
-
-    var topShadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .15)";
-    var bottomShadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
-
-    if (this.state.editorBottomShadow && this.state.editorTopShadow) {
-      shadow = topShadow + "," + bottomShadow;
-    } else if (this.state.editorTopShadow) {
-      shadow = topShadow;
+    var border = " border-borderGrey";
+    if (this.state.editorTopShadow) {
+      border += " border-top";
     } else if (this.state.editorBottomShadow) {
-      shadow = bottomShadow;
+      border += " border-bottom";
     }
 
     var errorTooltipText = "";
@@ -402,6 +397,17 @@ export default class FunctionStamp extends Component {
         errorTooltipText += this.state.errorLines[line] + ` [line ${line}]\n`;
       }
     });
+
+    // var shadow = "";
+
+    // if (this.state.editorBottomShadow && this.state.editorTopShadow) {
+    //   shadow =
+    //     "inset 0 7px 6px -8px rgba(0, 0, 0, .15), inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
+    // } else if (this.state.editorTopShadow) {
+    //   shadow = "inset 0 7px 6px -8px rgba(0, 0, 0, .15)";
+    // } else if (this.state.editorBottomShadow) {
+    //   shadow = "inset 0 -7px 6px -8px rgba(0, 0, 0, .15)";
+    // }
 
     return (
       <div
@@ -418,9 +424,9 @@ export default class FunctionStamp extends Component {
               width: this.state.editorWidth,
               height: this.state.editorHeight,
               background: "transparent",
-              boxShadow: shadow
+              boxShadow: ""
             }}
-            className="code toBeMarked"
+            className={border}
             mode={mode}
             theme={theme}
             onChange={(value, editor) => {
@@ -936,8 +942,7 @@ export default class FunctionStamp extends Component {
       isBlob: this.props.isBlob,
       codeSize: this.state.codeSize,
       icon: this.getIcon(),
-      lineHighLightingStatus: this.state.lineHighLightingStatus,
-      consoleVisible: this.state.consoleVisible
+      lineHighLightingStatus: this.state.lineHighLightingStatus
     };
 
     return data;
@@ -1089,7 +1094,6 @@ export default class FunctionStamp extends Component {
   renderConsole() {
     return (
       <div
-        hidden={!this.state.consoleVisible}
         className=""
         style={{
           zIndex: 2,
@@ -1215,7 +1219,7 @@ export default class FunctionStamp extends Component {
           parentId={this.props.id}
           showCodeSize={this.props.isBlob}
           onConsole={() =>
-            this.setState({ consoleVisible: !this.state.consoleVisible })
+            this.consoleRef.current && this.consoleRef.current.clearConsole()
           }
           showConsole={
             !this.props.isBlob &&

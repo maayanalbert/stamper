@@ -792,22 +792,14 @@ var Cristal = (function(_super) {
         onCopy,
         "copy stamp"
       );
-      var clearBtn = createIcon(
-        this,
-        globals.ClearConsoleIcon,
-        !_a.showClear,
-        "mousOnClear",
-        _a.onClear,
-        "clear console"
-      );
 
       var consoleBtn = createIcon(
         this,
-        globals.ConsoleStampIcon,
+        globals.ClearConsoleIcon,
         !_a.showConsole,
         "mouseOnConsole",
         _a.onConsole,
-        "toggle console visibility"
+        "clear console"
       );
       if (_a.onMinimize) {
         var minimizeBtn = createIcon(
@@ -842,7 +834,6 @@ var Cristal = (function(_super) {
           {makeBigIcon}
           {copyBtn}
           {closeBtn}
-          {clearBtn}
 
           {minimizeBtn}
         </div>
