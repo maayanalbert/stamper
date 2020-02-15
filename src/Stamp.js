@@ -5,6 +5,8 @@ import "ace-builds/webpack-resolver";
 import AceEditor from "react-ace";
 import pf, { globals, p5Lib } from "./globals.js";
 
+import StampConsole from "./StampConsole.js";
+
 import "./theme-p5.js";
 
 import "ace-builds/src-noconflict/mode-javascript";
@@ -353,19 +355,6 @@ export default class FunctionStamp extends Component {
       shadow = bottomShadow;
     }
 
-    // markers.push({
-    //   startRow: 3,
-    //   endRow: 3,
-    //   startCol: 5,
-    //   endCol: 10,
-    //   type: "text",
-    //   className: "bg-pink referenceMarker"
-    // });
-
-    // var context = document.querySelector(".toBeMarked");
-    // var instance = new Mark(context);
-    // instance.mark("var");
-
     return (
       <div
         onMouseOut={() => {
@@ -535,15 +524,15 @@ export default class FunctionStamp extends Component {
       argsBackground = "bg-warningOrange";
     }
 
-    this.state.identifierMarkers.map(mark => {
-      if (mark.startRow === -1) {
-        if (mark.startCol - "function ".length < this.state.name.length) {
-          // nameBackground = mark.className.split(" ")[0];
-        } else {
-          argsBackground = mark.className.split(" ")[0];
-        }
-      }
-    });
+    // this.state.identifierMarkers.map(mark => {
+    //   if (mark.startRow === -1) {
+    //     if (mark.startCol - "function ".length < this.state.name.length) {
+    //       // nameBackground = mark.className.split(" ")[0];
+    //     } else {
+    //       argsBackground = mark.className.split(" ")[0];
+    //     }
+    //   }
+    // });
 
     return (
       <div>
@@ -917,12 +906,6 @@ export default class FunctionStamp extends Component {
       });
       this.editorRef.current.editor.resize();
     }
-    // var range = new Range(2, 4, 5, 10);
-    // var session = this.editorRef.current.editor.getSession();
-    // range.start = session.doc.createAnchor(range.start);
-    // range.end = session.doc.createAnchor(range.end);
-
-    // var id = session.addMarker(range, "bg-backgrounOrange");
 
     this.editorRef.current.editor.resize();
   }
@@ -1050,6 +1033,28 @@ export default class FunctionStamp extends Component {
     );
   }
 
+  renderConsole() {
+    return (
+      <div
+        className=""
+        style={{
+          zIndex: 2,
+          position: "absolute",
+          top: globals.fnTitleHeight + 38,
+          left: 30 + this.state.editorWidth,
+          width: this.state.iframeWidth - 15,
+          height: this.state.editorHeight
+        }}
+      >
+        <StampConsole
+          parentId={this.props.id}
+          addErrorLine={this.addErrorLine.bind(this)}
+          setEditorScrolling={this.setEditorScrolling.bind(this)}
+        />
+      </div>
+    );
+  }
+
   render() {
     var headerColor = "bg-white";
 
@@ -1147,7 +1152,7 @@ export default class FunctionStamp extends Component {
           onResize={this.resizeEditor.bind(this)}
           onMove={s => this.setState({ x: s.x, y: s.y })}
           icon={this.getIcon()}
-          parentID={this.props.id}
+          parentId={this.props.id}
           showCodeSize={this.props.isBlob}
           onCodeSize={() => {
             window.postMessage({ type: "edited" }, "*");
@@ -1179,7 +1184,7 @@ export default class FunctionStamp extends Component {
 
               <div class="row m-0 mt-2" style={{ flexWrap: "nowrap" }}>
                 {this.renderEditor()}
-
+                {this.renderConsole()}
                 {this.renderIframe()}
               </div>
             </div>

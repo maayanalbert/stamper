@@ -407,13 +407,9 @@ export default class View extends Component {
     return layoutedStampsData;
   }
 
-  getIframeErrorCallBack(ranges, offset = 0) {
+  getIframeErrorCallBack(ranges, offset, parentId = null) {
     var strRanges = JSON.stringify(ranges);
     return `
-  // window.addEventListener('error', function(e) { 
-  //   console.log("addEventListener")
-  //     logToConsole(e.message, e.lineno)
-  //   }, false);
 
 window.onerror = function (message, url, lineno, colno) {
 
@@ -421,12 +417,7 @@ window.onerror = function (message, url, lineno, colno) {
 }
 
 
-// document.onwheel = function (e) {
 
-//   console.log(document)
-
-
-// }
 
 function logToConsole(message, lineno){
 
@@ -452,7 +443,7 @@ function logToConsole(message, lineno){
         }
       })
       if(stampId){
-      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
+      window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId, parentId:"${parentId}"}, '*')
       }
 
     }`;
@@ -540,9 +531,10 @@ function logToConsole(message, lineno){
 
     var htmlAsksForJs = parser(jsSelector).length > 0;
     if (htmlAsksForJs === false && this.state.htmlAsksForJs === true) {
-      this.state.consoleStamp.ref.current.logToConsole(
-        `Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`
-      );
+      // make this a message
+      // this.state.consoleStamp.ref.current.logToConsole(
+      //   `Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.`
+      // );
       this.state.stampRefs[this.state.htmlID].current.addErrorLine(-1);
       this.setState({ htmlAsksForJs: htmlAsksForJs });
     } else if (htmlAsksForJs === true && this.state.htmlAsksForJs === false) {
@@ -551,7 +543,7 @@ function logToConsole(message, lineno){
 
     parser("head").prepend(
       "<script class='errorListener' >" +
-        this.getIframeErrorCallBack(ranges) +
+        this.getIframeErrorCallBack(ranges, 0, id) +
         "</script>"
     );
 
@@ -568,7 +560,7 @@ function logToConsole(message, lineno){
 
     parser(".errorListener").replaceWith(
       `<script class='errorListener'>` +
-        this.getIframeErrorCallBack(ranges, linesToJs) +
+        this.getIframeErrorCallBack(ranges, linesToJs, id) +
         "</script>"
     );
     parser(jsSelector).replaceWith(jsBlock);
@@ -820,12 +812,6 @@ function logToConsole(message, lineno){
       }
     }
 
-    if (this.state.setupExists && newSetupExists === false) {
-      this.state.consoleStamp.ref.current.logToConsole(
-        `Stamper Error: You don't have a setup. This will constrain your canvas to a default width and height.`
-      );
-    }
-
     this.setState({ setupExists: newSetupExists });
 
     return newSetupExists;
@@ -955,13 +941,15 @@ function logToConsole(message, lineno){
         var mimeType = mime.lookup(stamp.current.state.name);
         if (!mimeType) {
           duplicateNamedStamps[stamp.current.props.id] = "";
-          this.state.consoleStamp.ref.current.logToConsole(
-            `Stamper Error: The file extension '.${
-              stamp.current.state.name.split(".")[
-                stamp.current.state.name.split(".").length - 1
-              ]
-            }' is invalid.`
-          );
+
+          // make this a message
+          // this.state.consoleStamp.ref.current.logToConsole(
+          //   `Stamper Error: The file extension '.${
+          //     stamp.current.state.name.split(".")[
+          //       stamp.current.state.name.split(".").length - 1
+          //     ]
+          //   }' is invalid.`
+          // );
         }
       }
       if (stamp.current) {
@@ -970,9 +958,10 @@ function logToConsole(message, lineno){
         if (nameDict[name] > 1) {
           duplicateNamedStamps[stamp.current.props.id] = "";
 
-          this.state.consoleStamp.ref.current.logToConsole(
-            `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your ${name}s to something else.`
-          );
+          // make this a message
+          // this.state.consoleStamp.ref.current.logToConsole(
+          //   `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your ${name}s to something else.`
+          // );
         }
       }
     });

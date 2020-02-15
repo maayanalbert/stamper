@@ -613,7 +613,7 @@ var Cristal = (function(_super) {
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("wheel", this.onWheel, { passive: false });
-    var iframeElem = document.getElementById("iframe" + this.props.parentID);
+    var iframeElem = document.getElementById("iframe" + this.props.parentId);
     if (iframeElem) {
       iframeElem.addEventListener("wheel", e => console.log(e));
     }
@@ -717,7 +717,7 @@ var Cristal = (function(_super) {
       return null;
     }
 
-    var uniqueClass = classVal + _this.props.parentID;
+    var uniqueClass = classVal + _this.props.parentId;
     var mouseOverCallback = () => {
       $("." + uniqueClass).css({ opacity: "1" });
     };
@@ -894,7 +894,7 @@ var Cristal = (function(_super) {
       relations = this.props.lineData;
     }
     var allContent = (
-      <ArcherElement id={"line_" + this.props.parentID} relations={relations}>
+      <ArcherElement id={"line_" + this.props.parentId} relations={relations}>
         {HeaderComponent}
         {ContentComponent}
       </ArcherElement>
@@ -908,7 +908,7 @@ var Cristal = (function(_super) {
     var cristalComponent = React.createElement(
       Wrapper,
       {
-        id: "vertex_" + this.props.parentID,
+        id: "vertex_" + this.props.parentId,
         style: style,
         ref: this.saveWrapperRef,
         isActive: isActive,
