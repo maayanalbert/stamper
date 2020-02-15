@@ -94,7 +94,7 @@ module.exports = class FileManager {
 
   isExteriorChange(event, path) {
     if (!path || !this.path) {
-      return;
+      return false;
     }
 
     var fileName = path.substring(path.indexOf(this.path) + this.path.length);
@@ -108,7 +108,15 @@ module.exports = class FileManager {
       var existingContent = undefined;
     }
 
-    var newContent = jetpack.read(path);
+    //var newContent = jetpack.read(path);
+    // jetpack.readAsync(path);
+    var newContent;
+    try {
+      newContent = jetpack.read("path");
+    } catch (e) {
+      return true;
+    }
+
     return newContent != existingContent;
   }
 
