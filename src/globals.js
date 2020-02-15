@@ -67,7 +67,7 @@ export const globals = {
   defaultEditorWidth: 200,
   defaultVarEditorHeight: 205,
   defaultIframeHeight: 200,
-  defaultEditorHeight: 205,
+  defaultEditorHeight: 225,
   defaultIframeWidth: 200,
   iframeMargin: 0,
   headerHeight: 30,

@@ -38,7 +38,7 @@ if (mouseIsPressed) {
   {
     name: "setup",
     args: "",
-    code: `createCanvas(${globals.defaultIframeWidth},${globals.defaultEditorHeight})
+    code: `createCanvas(${globals.defaultIframeWidth},${globals.defaultIframeHeight})
 background(100);`
   },
   { name: "preload", args: "", code: "img = loadImage('YOUR IMAGE');" }
