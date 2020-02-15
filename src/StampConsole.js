@@ -103,6 +103,25 @@ export default class StampConsole extends Component {
     this.checkLastLog({ method: method, data: [message] });
   }
 
+  addNewIframeConsole(newConsole) {
+    var p5LogError = `Did you just try to use p5.js's loop() function? If so, you may want to move it into your sketch's setup() function.
+For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#why-cant-i-assign-variables-using-p5-functions-and-variables-before-setup`;
+
+    var p5LogError2 = `Did you just try to use p5.js's noLoop() function? If so, you may want to move it into your sketch's setup() function.
+For more details, see: https://github.com/processing/p5.js/wiki/p5.js-overview#why-cant-i-assign-variables-using-p5-functions-and-variables-before-setup`;
+    Hook(newConsole, newLogs => {
+      newLogs.map(log => {
+        if (
+          log.method === "log" &&
+          log.data[0] != p5LogError &&
+          log.data[0] != p5LogError2
+        ) {
+          this.checkLastLog(log);
+        }
+      });
+    });
+  }
+
   render() {
     var renderedLogs = _.cloneDeep(this.state.logs);
     if (this.state.lastFreq > 1) {

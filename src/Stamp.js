@@ -107,6 +107,7 @@ export default class FunctionStamp extends Component {
 
     this.cristalRef = React.createRef();
     this.editorRef = React.createRef();
+    this.consoleRef = React.createRef();
 
     this.updateLooping = this.updateLooping.bind(this);
   }
@@ -211,16 +212,6 @@ export default class FunctionStamp extends Component {
   }
 
   clearErrorsAndUpdate() {
-    window.postMessage(
-      {
-        type: "debug",
-        message: "Updated code",
-        parentId: this.props.id,
-        id: this.props.id
-      },
-      "*"
-    );
-
     var iframeCode = "";
     var exportableCode = "";
     this.props.setLayerPicker();
@@ -235,6 +226,17 @@ export default class FunctionStamp extends Component {
         iframeCode = this.props.getHTML(this.props.id);
       }
       this.props.setLayerPicker();
+
+      if (iframeCode != this.state.iframeCode) {
+        window.postMessage(
+          {
+            type: "debug",
+            message: "Updated code",
+            id: this.props.id
+          },
+          "*"
+        );
+      }
       this.setState({
         iframeCode: iframeCode,
         exportableCode: exportableCode,
@@ -823,6 +825,13 @@ export default class FunctionStamp extends Component {
               {this.renderMediaAsset()}
 
               <iframe
+                ref={iframeElem => {
+                  iframeElem &&
+                    this.consoleRef &&
+                    this.consoleRef.current.addNewIframeConsole(
+                      iframeElem.contentWindow.console
+                    );
+                }}
                 hidden={this.props.isMediaFile}
                 id={"iframe" + this.props.id}
                 scrolling="no"

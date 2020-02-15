@@ -409,16 +409,12 @@ export default class View extends Component {
   getIframeErrorCallBack(ranges, offset = 0) {
     var strRanges = JSON.stringify(ranges);
     return `
-  // window.addEventListener('error', function(e) { 
-  //   console.log("addEventListener")
-  //     logToConsole(e.message, e.lineno)
-  //   }, false);
+
 window.onerror = function (message, url, lineno, colno) {
   logToConsole(message, lineno)
 }
-// document.onwheel = function (e) {
-//   console.log(document)
-// }
+
+
 function logToConsole(message, lineno){
       var adjLineNum = -1
       var stampId
@@ -617,7 +613,7 @@ function logToConsole(message, lineno){
       codeSize: globals.codeSize,
       lineHighLightingStatus: "none",
       id: this.getUniqueID(),
-      consoleVisible: false
+      consoleVisible: true
     };
 
     if (
