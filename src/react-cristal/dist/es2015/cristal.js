@@ -100,6 +100,7 @@ var Cristal = (function(_super) {
     _this.minus = 189;
     _this.zero = 48;
     _this.space = 32;
+    _this.shift = 16;
     _this.onWindowResize = function() {
       var _a = _this.state,
         x = _a.x,
@@ -907,6 +908,11 @@ var Cristal = (function(_super) {
       onDoubleClick = this.props.onDoubleClick;
     }
 
+    var title = "";
+    if (this.props.getLinesOn && this.props.getLinesOn()) {
+      title = "shift+click to highlight";
+    }
+
     var cristalComponent = React.createElement(
       Wrapper,
       {
@@ -919,7 +925,10 @@ var Cristal = (function(_super) {
         overflow: "hidden",
         onDoubleClick: onDoubleClick,
         onMouseOver: this.props.onMouseOver,
-        onMouseOut: this.props.onMouseOut
+        onMouseOut: this.props.onMouseOut,
+        title: title,
+        onClick: () =>
+          this.state.downKey === this.shift && this.props.onShiftClick()
       },
       allContent,
       this.renderResizeHandles()

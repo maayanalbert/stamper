@@ -92,7 +92,7 @@ export default class View extends Component {
       highlightedLines: {}
     };
     this.counterMutex = new Mutex();
-
+    this.alt = 18;
     this.modalManagerRef = React.createRef();
 
     this.onWheel = this.onWheel.bind(this);
@@ -170,12 +170,12 @@ export default class View extends Component {
         this.zoom(this.state.scale * 0.5, centerX, centerY);
       }
     } else if (this.state.downKey === this.shft) {
-      if (e.keyCode === this.g) {
-        var snapToGrid = this.state.snapToGrid;
-        this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
-      } else if (e.keyCode === this.l) {
-        this.toggleLinesOn();
-      }
+      // if (e.keyCode === this.g) {
+      //   var snapToGrid = this.state.snapToGrid;
+      //   this.setState({ snapToGrid: !snapToGrid }, () => this.setLayerPicker());
+      // } else if (e.keyCode === this.l) {
+      //   this.toggleLinesOn();
+      // }
     } else {
       this.setState({ downKey: e.keyCode });
     }
@@ -420,7 +420,7 @@ function logToConsole(message, lineno){
       var adjLineNum = -1
       var stampId
       var ranges = ${strRanges}
-        console.log(ranges, lineno, ${offset})
+
       ranges.map(range => {
         var start = range.start
         var end = range.end
@@ -436,7 +436,6 @@ function logToConsole(message, lineno){
           }
         }
       })
-      console.log(adjLineNum, stampId)
       if(stampId){
       window.parent.postMessage({type:"error", message:message, lineno:adjLineNum, id:stampId}, '*')
       }
@@ -1263,6 +1262,7 @@ function logToConsole(message, lineno){
     }
     var label = (
       <div
+        title={"shift+click to highlight"}
         className={"name rounded p-2"}
         style={{
           transform: "scale(" + 0.8 + ")",
@@ -1377,8 +1377,7 @@ function logToConsole(message, lineno){
     this.fillInHighlightedLineData(highlightedLines);
 
     this.setState({ highlightedLines: highlightedLines }, () => {
-      this.setLineData();
-
+      console.log("WTF IS GOING ON");
       this.state.stampOrder.map(id => {
         this.state.stampRefs[id].current.setLineHighlighted(
           "off",
@@ -1400,6 +1399,9 @@ function logToConsole(message, lineno){
   }
 
   onLineSelection(sourceAndTarget) {
+    if (!this.state.downKey === this.shift) {
+      return;
+    }
     var startStampId = sourceAndTarget.source.id.split("_").pop();
     var endStampId = sourceAndTarget.target.id.split("_").pop();
 
@@ -1906,7 +1908,7 @@ _stopLooping =setTimeout(() => {
     var pickerData = [];
 
     pickerData.push({
-      name: "lines  (⬆L)",
+      name: "lines",
       status: this.state.linesOn,
       icon: globals.LinesIcon,
 
@@ -1921,7 +1923,7 @@ _stopLooping =setTimeout(() => {
     });
 
     pickerData.push({
-      name: "snap to grid (⬆G)",
+      name: "snap to grid",
       status: this.state.snapToGrid,
       icon: globals.GridIcon,
 
@@ -1956,8 +1958,6 @@ _stopLooping =setTimeout(() => {
           var name = stampRef.state.name;
         }
       }
-
-      name += "_" + id;
 
       pickerData.push({
         name: name,

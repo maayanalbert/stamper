@@ -576,11 +576,7 @@ export default class FunctionStamp extends Component {
 
     var nameBackground = "bg-transparent";
     var argsBackground = "bg-transparent";
-    console.log(
-      this.state.name,
-      this.state.errorLines,
-      -1 in this.state.errorLines
-    );
+
     if (0 in this.state.errorLines) {
       argsBackground = "bg-warningOrange";
     }
@@ -588,8 +584,6 @@ export default class FunctionStamp extends Component {
     if (-1 in this.state.errorLines) {
       nameBackground = "bg-warningOrange";
     }
-
-    console.log(nameBackground);
 
     // this.state.identifierMarkers.map(mark => {
     //   if (mark.startRow === -1) {
@@ -1197,7 +1191,7 @@ export default class FunctionStamp extends Component {
               this.editorRef.current.editor.renderer.scrollBar
             );
           }}
-          onDoubleClick={() =>
+          onShiftClick={() =>
             this.props.getLinesOn() &&
             this.props.setDependencyLineHighlightings(this.props.id)
           }

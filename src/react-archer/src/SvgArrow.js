@@ -233,7 +233,7 @@ const SvgArrow = ({
   );
 
   return (
-    <g onDoubleClick={() => onLineSelection()}>
+    <g onClick={() => onLineSelection()}>
       <path
         d={pathString}
         style={{ fill: 'none', stroke: strokeColor, strokeWidth: strokeWidth, strokeDasharray }}
