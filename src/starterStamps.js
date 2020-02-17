@@ -12,7 +12,8 @@ export const worlds = [
   { name: "blank", data: blank },
   { name: "purble dots", data: purpleDots },
   { name: "image glitch", data: imageGlitch },
-  { name: "painter", data: painter }
+  { name: "painter", data: painter },
+  { name: "lines", data: lines }
 ];
 
 var asciiArt =
@@ -200,5 +201,3 @@ export const varBlob = { code: "var global1 = 1", isBlob: true };
 export default function DefaultExportPlaceholder() {
   return null;
 }
-
-
