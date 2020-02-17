@@ -3,13 +3,15 @@ import purpleDots from "./worlds/purpleDots.js";
 import blank from "./worlds/blank.js";
 import particles from "./worlds/particles.js";
 import imageGlitch from "./worlds/imageGlitch.js";
+import lines from "./worlds/lines.js";
 
 export const starter = blank;
 
 export const worlds = [
   { name: "blank", data: blank },
   { name: "purble dots", data: purpleDots },
-  { name: "image glitch", data: imageGlitch }
+  { name: "image glitch", data: imageGlitch },
+  { name: "lines", data: lines }
 ];
 
 var asciiArt =

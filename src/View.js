@@ -1377,7 +1377,7 @@ function logToConsole(message, lineno){
     this.fillInHighlightedLineData(highlightedLines);
 
     this.setState({ highlightedLines: highlightedLines }, () => {
-      console.log("WTF IS GOING ON");
+      this.setLineData();
       this.state.stampOrder.map(id => {
         this.state.stampRefs[id].current.setLineHighlighted(
           "off",
