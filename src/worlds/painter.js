@@ -20,7 +20,7 @@ export default {
 			zIndex: -1,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/layout.8a437d55.svg",
+			icon: "/static/media/layout.8a437d55.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -42,7 +42,7 @@ export default {
 			zIndex: -1,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/file.5bd43cb8.svg",
+			icon: "/static/media/file.5bd43cb8.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -64,7 +64,7 @@ export default {
 			zIndex: 828,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/tool.d68b9b61.svg",
+			icon: "/static/media/tool.d68b9b61.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -86,14 +86,14 @@ export default {
 			zIndex: 849,
 			isBlob: true,
 			codeSize: 28,
-			icon: "./static/media/globe.50d70b6d.svg",
+			icon: "/static/media/globe.50d70b6d.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
 			id: "z63p5s1jd",
 			name: "lineTool",
 			code:
-				"// draw a line\nstroke(200);\nstrokeWeight(1)\nline(x, y, lastX, lastY)\n  ",
+				"// draw a line\nstroke(200);\nstrokeWeight(1)\nline(x, y, lastX, lastY)",
 			args: "x=50, y=50, lastX = 0, lastY = 0",
 			x: -220,
 			y: 1700,
@@ -106,10 +106,10 @@ export default {
 			isMediaFile: false,
 			hidden: false,
 			exported: true,
-			zIndex: 854,
+			zIndex: 859,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/box.310d8273.svg",
+			icon: "/static/media/box.310d8273.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -129,10 +129,10 @@ export default {
 			isMediaFile: false,
 			hidden: false,
 			exported: true,
-			zIndex: 855,
+			zIndex: 860,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/box.310d8273.svg",
+			icon: "/static/media/box.310d8273.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -152,10 +152,10 @@ export default {
 			isMediaFile: false,
 			hidden: false,
 			exported: true,
-			zIndex: 856,
+			zIndex: 861,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/box.310d8273.svg",
+			icon: "/static/media/box.310d8273.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -178,15 +178,15 @@ export default {
 			zIndex: 857,
 			isBlob: true,
 			codeSize: 28,
-			icon: "./static/media/globe.50d70b6d.svg",
+			icon: "/static/media/globe.50d70b6d.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
 			id: "8as41qoym",
 			name: "painter",
 			code:
-				"// made a fading background\ncolorMode(RGB, 255, 255, 255, 1);\nbackground(0, 0, 0, .01);\n\n// darw using the mouse position\npaintingFn(mouseX, mouseY, pmouseX, pmouseY)\n",
-			args: "paintingFn = lineTool",
+				"// made a fading background\ncolorMode(RGB, 255, 255, 255, 1);\nbackground(0, 0, 0, .01);\n\n// paint using the mouse position\ntoolFn(mouseX, mouseY, pmouseX, pmouseY)",
+			args: "toolFn = lineTool",
 			x: -220,
 			y: 2260,
 			editorWidth: 318,
@@ -198,10 +198,10 @@ export default {
 			isMediaFile: false,
 			hidden: false,
 			exported: true,
-			zIndex: 845,
+			zIndex: 862,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/bell.86facacc.svg",
+			icon: "/static/media/box.310d8273.svg",
 			lineHighLightingStatus: "none"
 		},
 		{
@@ -221,10 +221,10 @@ export default {
 			isMediaFile: false,
 			hidden: false,
 			exported: true,
-			zIndex: 858,
+			zIndex: 863,
 			isBlob: false,
 			codeSize: 14,
-			icon: "./static/media/box.310d8273.svg",
+			icon: "/static/media/tool.d68b9b61.svg",
 			lineHighLightingStatus: "none"
 		}
 	],
@@ -238,6 +238,6 @@ export default {
 	snapToGrid: false,
 	linesOn: false,
 	js:
-		"function setup(){\n  createCanvas(200,200)\n}\n\n\n// different 'painting tools'\n\n\nfunction lineTool(x=50, y=50, lastX = 0, lastY = 0){\n  // draw a line\n  stroke(200);\n  strokeWeight(1)\n  line(x, y, lastX, lastY)\n    \n}\n\nfunction circleTool(x=50, y=50){\n  // generate a random size\n  var size = random(0, 20)\n  \n  // set the opacity\n  var opacity = map(size, 0, 20, 0, 255)\n  \n  // draw a circle   \n  fill(200, opacity)\n  noStroke()\n  ellipse(x,y,size, size)\n}\n\nfunction rectTool(x=50, y=50){\n  // generate a random size\n  var size = random(0, 20)\n  \n  // set the opacity\n  var opacity = map(size, 0, 20, 0, 255)\n  \n  // draw a rectangle\n  rectMode(CENTER)\n  fill(200, opacity)\n  noStroke()\n  rect(x,y,size, size)\n}\n\n\n// pass a tool function in as a parameter to 'paint' with that shape\n\n\nfunction painter(paintingFn = lineTool){\n  // made a fading background\n  colorMode(RGB, 255, 255, 255, 1);\n  background(0, 0, 0, .01);\n  \n  // darw using the mouse position\n  paintingFn(mouseX, mouseY, pmouseX, pmouseY)\n  \n}\n\nfunction draw(){\n  // try drawing with tools\n  \n  //painter(lineTool)\n  painter(circleTool)\n  // painter(rectTool)\n}\n",
+		"function setup(){\n  createCanvas(200,200)\n}\n\n\n// different 'painting tools'\n\n\nfunction lineTool(x=50, y=50, lastX = 0, lastY = 0){\n  // draw a line\n  stroke(200);\n  strokeWeight(1)\n  line(x, y, lastX, lastY)\n}\n\nfunction circleTool(x=50, y=50){\n  // generate a random size\n  var size = random(0, 20)\n  \n  // set the opacity\n  var opacity = map(size, 0, 20, 0, 255)\n  \n  // draw a circle   \n  fill(200, opacity)\n  noStroke()\n  ellipse(x,y,size, size)\n}\n\nfunction rectTool(x=50, y=50){\n  // generate a random size\n  var size = random(0, 20)\n  \n  // set the opacity\n  var opacity = map(size, 0, 20, 0, 255)\n  \n  // draw a rectangle\n  rectMode(CENTER)\n  fill(200, opacity)\n  noStroke()\n  rect(x,y,size, size)\n}\n\n\n// pass a tool function in as a parameter to 'paint' with that shape\n\n\nfunction painter(toolFn = lineTool){\n  // made a fading background\n  colorMode(RGB, 255, 255, 255, 1);\n  background(0, 0, 0, .01);\n  \n  // draw using the mouse position\n  toolFn(mouseX, mouseY, pmouseX, pmouseY)\n}\n\nfunction draw(){\n  // try drawing with different tools\n  \n  //painter(lineTool)\n  painter(circleTool)\n  // painter(rectTool)\n}\n",
 	highlightedLines: {}
 };
