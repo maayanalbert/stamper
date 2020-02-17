@@ -32,7 +32,6 @@ import pf1, {
   builtInFns,
   worlds,
   starter,
-  empty,
   stamperHeader
 } from "./starterStamps.js";
 var GitHub = require("github-api");

@@ -873,7 +873,7 @@ function logToConsole(message, lineno){
             {
               type: "error",
               message: `Stamper Error: File names cannot be blank.`,
-              lineno: 0,
+              lineno: -1,
               id: stamp.current.props.id
             },
             "*"
@@ -889,7 +889,7 @@ function logToConsole(message, lineno){
                   stamp.current.state.name.split(".").length - 1
                 ]
               }' is invalid.`,
-              lineno: 0,
+              lineno: -1,
               id: stamp.current.props.id
             },
             "*"
@@ -904,7 +904,7 @@ function logToConsole(message, lineno){
             {
               type: "error",
               message: `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your "${name}"s to something else.`,
-              lineno: 0,
+              lineno: -1,
               id: stamp.current.props.id
             },
             "*"

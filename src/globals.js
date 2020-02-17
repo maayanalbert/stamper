@@ -32,6 +32,8 @@ import VisibilityIcon from "./icons/eye.svg";
 import VisibilityOffIcon from "./icons/eye-off.svg";
 import EmptyIcon from "./icons/empty.svg";
 
+import ShareIcon from "./icons/share-2.svg";
+
 export const globals = {
   tooltipWidth: 200,
   SettingOnIcon: SettingOnIcon,
@@ -40,6 +42,7 @@ export const globals = {
   EmptyIcon: EmptyIcon,
   GridIcon: GridIcon,
   LinesIcon: LinesIcon,
+  ShareIcon: ShareIcon,
   ConsoleStampIcon: ConsoleStampIcon,
   FunctionStampIcon: FunctionStampIcon,
   FileStampIcon: FileStampIcon,
@@ -64,7 +67,7 @@ export const globals = {
   MinimzeIcon: MinimzeIcon,
   VisibilityIcon: VisibilityIcon,
   VisibilityOffIcon: VisibilityOffIcon,
-  defaultEditorWidth: 200,
+  defaultEditorWidth: 260,
   defaultVarEditorHeight: 205,
   defaultIframeHeight: 200,
   defaultEditorHeight: 225,

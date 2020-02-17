@@ -720,6 +720,30 @@ function noiseWave() {
         <span hidden={true} />
         <div className="pr-5 row">
           <TopButton
+            iconType={globals.ShareIcon}
+            uniqueClass="share"
+            iconCallback={null}
+            dropDownData={[
+              {
+                name: "publish current sketch",
+                callback: () =>
+                  this.props.modalManagerRef.current.requestPublish(),
+                icon: globals.UploadIcon
+              },
+              {
+                name: "get current publishing info",
+                callback: () =>
+                  this.props.modalManagerRef.current.requestPublishInfo(),
+                icon: globals.InfoIcon
+              }
+            ]}
+            tooltipText="share..."
+            disablePan={this.props.disablePan}
+            disableZoom={this.props.disableZoom}
+          />
+
+          <span style={{ width: this.spanWidth }} />
+          <TopButton
             iconType={globals.WorldsIcon}
             uniqueClass="worlds"
             iconCallback={null}
@@ -735,25 +759,12 @@ function noiseWave() {
   }
 
   setWorldDropDowns() {
-    var dropDownData = [
-      {
-        name: "publish current sketch",
-        callback: () => this.props.modalManagerRef.current.requestPublish(),
-        icon: globals.UploadIcon
-      }
-    ];
-
-    dropDownData.push({
-      name: "get current publishing info",
-      callback: () => this.props.modalManagerRef.current.requestPublishInfo(),
-      icon: globals.InfoIcon
-    });
+    var dropDownData = [];
 
     if (ipc) {
       this.setState({ worldDropDowns: dropDownData });
       return;
     }
-    dropDownData.push({});
 
     this.props.modalManagerRef.current.getWorldNamesAndKeys(allWorlds => {
       allWorlds.map(item => {
