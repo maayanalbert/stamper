@@ -744,7 +744,7 @@ function noiseWave() {
     ];
 
     dropDownData.push({
-      name: "get current example info",
+      name: "get current publishing info",
       callback: () => this.props.modalManagerRef.current.requestPublishInfo(),
       icon: globals.InfoIcon
     });

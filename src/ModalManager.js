@@ -71,7 +71,8 @@ export default class ModalManager extends Component {
     };
     this.protectAgainstClosed = this.protectAgainstClosed.bind(this);
     this.receiveMessage = this.receiveMessage.bind(this);
-    this.domain = "https://p5stamper.com";
+    this.domain = "http://localhost:3000"; //"https://p5stamper.com";
+
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";
     this.receiveFiles = this.receiveFiles.bind(this);
@@ -115,12 +116,12 @@ export default class ModalManager extends Component {
             if (stamperObject) {
               this.props.loadStamperObject(stamperObject);
             } else {
-              this.loadStoredStamperObject();
+              this.props.loadStamperObject(starter);
             }
           });
           return;
         } catch (error) {
-          this.loadStoredStamperObject();
+          this.props.loadStamperObject(starter);
           return;
         }
       }
@@ -443,7 +444,6 @@ export default class ModalManager extends Component {
     }
 
     reader.onload = function(e) {
-      console.log(e.target.result);
       fileDict[fileName] = {
         content: e.target.result,
         type: fileType,
@@ -914,31 +914,43 @@ export default class ModalManager extends Component {
 
     var key = this.worldNameAuthorToKey(name, author);
     var fileName = this.worldKeyToFileName(key);
-    this.props.setWorldData(
-      { worldKey: key, worldPublishTime: publishDate.toString() },
-      () => {
-        repo.writeFile(
-          "master",
-          fileName,
-          JSON.stringify(this.props.getStamperObject()),
-          "commited new world",
-          {},
-          (error, result, request) => {
-            if (error) {
-              console.log(error);
 
-              callback(error);
-              return;
-            }
-            localStorage.setItem("localWorldAuthor", author);
-            window.history.pushState({}, null, this.worldKeyToUrl(key));
+    var newWorldData = {
+      worldKey: key,
+      worldPublishTime: publishDate.toString(),
+      worldEdited: false
+    };
 
-            // window.location.search = $.param({ e: key });
-            callback();
-          }
-        );
+    var stamperObject = this.props.getStamperObject();
+    Object.assign(stamperObject, newWorldData);
+
+    console.log(stamperObject);
+
+    repo.writeFile(
+      "master",
+      fileName,
+      JSON.stringify(stamperObject),
+      "commited new world",
+      {},
+      (error, result, request) => {
+        if (error) {
+          console.log(error);
+
+          callback(error);
+          return;
+        }
+        localStorage.setItem("localWorldAuthor", author);
+        window.history.pushState({}, null, this.worldKeyToUrl(key));
+        this.props.setWorldData(newWorldData, callback);
       }
     );
+
+    // this.props.setWorldData(
+    //   { worldKey: key, worldPublishTime: publishDate.toString() },
+    //   () => {
+
+    //   }
+    // );
   }
 
   getOnlineWorlds(callback) {

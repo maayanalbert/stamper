@@ -1,9 +1,9 @@
 {
   "name": "Stamper",
-  "repository": "https://github.com/maayanalbert/p5stamper.git",
+  "repository": "https://github.com/maayanalbert/stamper.git",
   "description": "Artboard Oriented Programming",
   "author": "Maayan & Cam",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.7.2",
@@ -85,6 +85,21 @@
   "build": {
     "publish": {
       "provider": "github"
+    },
+    "productName": "Stamper",
+    "copyright": "Copyright © 2020 Maayan Albert",
+    "mac": {
+      "icon": "./public/icons/mac/icon.icns",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "./public/icons/png/256x256.png"
+    },
+    "files": [
+      "./public/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
     }
   },
   "main": "public/electron.js",
