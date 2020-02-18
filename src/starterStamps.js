@@ -10,12 +10,12 @@ import fontLoading from "./worlds/fontLoading.js";
 export const starter = blank;
 
 export const worlds = [
-  { name: "blank", data: blank },
-  { name: "purble dots", data: purpleDots },
-  { name: "image glitch", data: imageGlitch },
-  { name: "painter", data: painter },
-  { name: "lines", data: lines },
-  { name: "fontLoading", data: fontLoading }
+  { name: "Blank", data: blank },
+  { name: "HOW_TO:_The_Basics", data: purpleDots },
+  { name: "HOW_TO:_Passing_Functions_as_Arguments", data: painter },
+  { name: "HOW_TO:_Using_Assets", data: imageGlitch },
+  { name: "HOW_TO:_Editing_the_Index", data: fontLoading },
+  { name: "HOW_TO:_Understanding_Lines", data: lines }
 ];
 
 var asciiArt =

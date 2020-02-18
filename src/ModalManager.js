@@ -322,7 +322,12 @@ export default class ModalManager extends Component {
 
   getWorldNamesAndKeys(callback = () => null) {
     var allWorlds = [];
-    worlds.map(item => allWorlds.push({ key: item.name, name: item.name }));
+    worlds.map(item =>
+      allWorlds.push({
+        key: item.name,
+        name: this.worldKeyToNameAuthor(item.name).name
+      })
+    );
 
     this.getOnlineWorlds(onlineWorlds => {
       if (onlineWorlds.length > 0) {

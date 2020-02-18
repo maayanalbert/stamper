@@ -93,8 +93,8 @@ export default {
   scale: 1,
   originX: -521.5432232678384,
   originY: -319.6558852454648,
-  worldKey: "starter",
-  worldEdited: true,
+  worldKey: "Blank",
+  worldEdited: false,
   snapToGrid: false,
   linesOn: false,
   js:
