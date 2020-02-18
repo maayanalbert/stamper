@@ -67,7 +67,7 @@ export const globals = {
   MinimzeIcon: MinimzeIcon,
   VisibilityIcon: VisibilityIcon,
   VisibilityOffIcon: VisibilityOffIcon,
-  defaultEditorWidth: 260,
+  defaultEditorWidth: 300,
   defaultVarEditorHeight: 205,
   defaultIframeHeight: 200,
   defaultEditorHeight: 225,

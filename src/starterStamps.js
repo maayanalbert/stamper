@@ -99,10 +99,10 @@ text(key + ' ' + keyCode, 20, 70)`
     args: "",
     code: `background('yellow')
 fill('black')
+rectMode(CENTER)
 
 // display last pressed location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -111,10 +111,10 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('springgreen')
 fill('black')
+rectMode(CENTER)
 
 // display last released location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -123,10 +123,10 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('cyan')
 fill('black')
+rectMode(CENTER)
 
 // display last clicked location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -135,10 +135,10 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('cyan')
 fill('black')
+rectMode(CENTER)
 
 // display last double clicked location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -148,10 +148,10 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('yellow')
 fill('black')
+rectMode(CENTER)
 
 // display current location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -161,10 +161,10 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('springgreen')
 fill('black')
+rectMode(CENTER)
 
 // display last dragged location
 text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
 rect(mouseX, mouseY, 1, 20)
 rect(mouseX, mouseY, 20, 1)`
   },
@@ -174,12 +174,14 @@ rect(mouseX, mouseY, 20, 1)`
     args: "",
     code: `background('cyan')
 fill('black')
+rectMode(CENTER)
+
+// get a randomly generated offset
 var offsetX = random(-5, 5)
 var offsetY = random(-5, 5)
 
 // display last wheeled location
 text(mouseX + ', ' + mouseY, mouseX + 10 + offsetX, mouseY - 10 + offsetY)
-rectMode(CENTER)
 rect(mouseX+ offsetX, mouseY+ offsetY, 1, 20)
 rect(mouseX+ offsetX, mouseY+ offsetY, 20, 1)`
   }
