@@ -49,7 +49,7 @@ export default {
 			id: "iqmq852qf",
 			name: "renderText",
 			code:
-				"fill(255)\nnoStroke()\nbackground(0, 255, 255)\n\n// draw the text\ntextFont(fontName)\ntextSize(mouseX)  \ntext(fontName, mouseX, mouseY)\n\n",
+				"fill(255)\nnoStroke()\nbackground(250, 200, 0)\n\n// draw the text\ntextFont(fontName)\ntextSize(mouseX)  \ntext(fontName, mouseX, mouseY)\n\n",
 			args: 'fontName="Helvetica"',
 			x: 920,
 			y: 1360,
@@ -280,6 +280,6 @@ export default {
 	snapToGrid: false,
 	linesOn: false,
 	js:
-		"function renderText(fontName=\"Helvetica\"){\n  fill(255)\n  noStroke()\n  background(0, 255, 255)\n  \n  // draw the text\n  textFont(fontName)\n  textSize(mouseX)  \n  text(fontName, mouseX, mouseY)\n  \n  \n}\n\nfunction setup(){\n  createCanvas(400,200)\n}\n\nfunction drawAliceText(){\n  renderText(\"Alice\")\n  \n}\n\nfunction drawAileronText(){\n  renderText(\"Ailerons\")\n  \n  \n}\n\n\n// HOW TO: Editing the Index\n\n\n\n// Part 1: Similarly to normal p5 sketches, every Stamper project comes with an 'index.html' that you can use to import fonts, libraries, and packages.\n\n\n\n// Part 2: Here, we're importing two typefaces, 'Ailerons' using a local .otf file and 'Alice' using. a link to Google Sheets.\n\n\n\n// Part 3: Let's use this helper function 'renderText' to draw the two different types of fonts.\n\n\n\n// Notice how this sketch doesn't have a 'draw' function. That's alright, it just means that we'll have to add a 'draw' if we want something to show up when we run this on other IDE's.\n\n",
+		"function renderText(fontName=\"Helvetica\"){\n  fill(255)\n  noStroke()\n  background(250, 200, 0)\n  \n  // draw the text\n  textFont(fontName)\n  textSize(mouseX)  \n  text(fontName, mouseX, mouseY)\n  \n  \n}\n\nfunction setup(){\n  createCanvas(400,200)\n}\n\nfunction drawAliceText(){\n  renderText(\"Alice\")\n  \n}\n\nfunction drawAileronText(){\n  renderText(\"Ailerons\")\n  \n  \n}\n\n\n// HOW TO: Editing the Index\n\n\n\n// Part 1: Similarly to normal p5 sketches, every Stamper project comes with an 'index.html' that you can use to import fonts, libraries, and packages.\n\n\n\n// Part 2: Here, we're importing two typefaces, 'Ailerons' using a local .otf file and 'Alice' using. a link to Google Sheets.\n\n\n\n// Part 3: Let's use this helper function 'renderText' to draw the two different types of fonts.\n\n\n\n// Notice how this sketch doesn't have a 'draw' function. That's alright, it just means that we'll have to add a 'draw' if we want something to show up when we run this on other IDE's.\n\n",
 	highlightedLines: {}
 };
