@@ -499,7 +499,7 @@ export default class ModalManager extends Component {
         if (!fileType) {
           this.setState({
             modalVisible: true,
-            modalHeader: `${file.name} failed to upload.`,
+            modalHeader: `'${file.name}' failed to upload.`,
             modalContent: "You can't upload text files as a media asset",
             modalButtons: [
               {
@@ -579,7 +579,7 @@ export default class ModalManager extends Component {
         modalVisible: true,
         modalHeader: "Would you like to import p5's core libraries via CDN?",
         modalContent:
-          "The libraries are currently stored in large files in your sketch. This may cause Stamper to run slowly. Importing them via CDN won't cause them to behave differently but will speed up Stamper.",
+          "These libraries are currently stored in large files in your sketch. This may cause Stamper to run slowly. Unless you're using older libraries, importing them via CDN won't cause them to behave differently but will speed up Stamper.",
         modalButtons: buttons
       });
     } else {

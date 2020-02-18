@@ -171,8 +171,8 @@ module.exports = class FileManager {
     } else {
       const options = {
         type: "question",
-        buttons: ["Yes", "Cancel"],
-        defaultId: 0,
+        buttons: ["Close and lose my work", "Cancel"],
+        defaultId: 1,
         message: "This is an unsaved project",
         detail: "Are you sure you want to close it and lose your work?"
       };

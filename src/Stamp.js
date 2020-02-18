@@ -489,6 +489,7 @@ export default class FunctionStamp extends Component {
 
   stripExtension(name) {
     var nameArr = name.split(".");
+
     if (nameArr.length < 2) {
       return name;
     } else {
@@ -597,6 +598,7 @@ export default class FunctionStamp extends Component {
 
     return (
       <div>
+        {this.getErrorTooltip(this.state.errorLines[-1], false)}
         {this.getErrorTooltip(this.state.errorLines[0], false)}
         <p
           hidden={!this.props.isMediaFile}

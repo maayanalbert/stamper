@@ -529,7 +529,7 @@ function logToConsole(message, lineno){
         {
           type: "error",
           message:
-            "Stamper Error: Your index.html is missing a div for sketch.js. Make sure you're linking to sketch.js and not another sketch file.",
+            "Stamper Error: Please add '<script src='sketch.js'></script>' somehwere in your index so it can see your p5.js Stamps",
           id: this.state.htmlID,
           lineno: 1
         },
@@ -878,17 +878,13 @@ function logToConsole(message, lineno){
             },
             "*"
           );
-        }
-
-        if (!mimeType) {
+        } else if (!mimeType) {
           window.postMessage(
             {
               type: "error",
-              message: `Stamper Error: The file extension '.${
-                stamp.current.state.name.split(".")[
-                  stamp.current.state.name.split(".").length - 1
-                ]
-              }' is invalid.`,
+              message: `Stamper Error: The file extension '.${stamp.current.state.name.substr(
+                stamp.current.stripExtension(stamp.current.state.name).length
+              )}' is invalid.`,
               lineno: -1,
               id: stamp.current.props.id
             },
@@ -903,7 +899,7 @@ function logToConsole(message, lineno){
           window.postMessage(
             {
               type: "error",
-              message: `Stamper Error: Multiple Stamps shouldn't have the same name. Consider channging one of your "${name}"s to something else.`,
+              message: `Stamper Error: Multiple Stamps shouldn't both be named '${name}'.`,
               lineno: -1,
               id: stamp.current.props.id
             },
