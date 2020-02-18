@@ -54,9 +54,9 @@ export default class ModalManager extends Component {
     this.state = {
       modalButtons: [],
       modalVisible: !ipc && browser && browser.name != "chrome",
-      modalHeader: "Use Chrome please!",
+      modalHeader: "Use Chrome on a desktop please!",
       modalContent:
-        "Right now, the web version of Stamper is only supported in Google Chrome.",
+        "Right now, the web version of Stamper is only supported in Google Chrome for desktop.",
       saveInterval: null,
       cdnLibs: false,
       askedAboutCdn: false,
@@ -70,7 +70,8 @@ export default class ModalManager extends Component {
     };
     this.protectAgainstClosed = this.protectAgainstClosed.bind(this);
     this.receiveMessage = this.receiveMessage.bind(this);
-    this.domain = "https://p5stamper.com"; //"https://p5stamper.com";
+    // this.domain = "https://p5stamper.com";
+    this.domain = "http://localhost:3000";
 
     this.oauthToken = "65c5d1e11f91a9e1e565f0c2ca8248e9fc1d587c";
     this.githubUsername = "p5stamper";

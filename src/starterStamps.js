@@ -5,6 +5,7 @@ import particles from "./worlds/particles.js";
 import imageGlitch from "./worlds/imageGlitch.js";
 import lines from "./worlds/lines.js";
 import painter from "./worlds/painter.js";
+import fontLoading from "./worlds/fontLoading.js";
 
 export const starter = blank;
 
@@ -13,7 +14,8 @@ export const worlds = [
   { name: "purble dots", data: purpleDots },
   { name: "image glitch", data: imageGlitch },
   { name: "painter", data: painter },
-  { name: "lines", data: lines }
+  { name: "lines", data: lines },
+  { name: "fontLoading", data: fontLoading }
 ];
 
 var asciiArt =
@@ -43,103 +45,143 @@ export const builtInFns = [
     name: "draw",
     args: "",
     code: `colorMode(RGB, 255, 255, 255, 1);
-background(0, 0, 0, .01);
+background(0, 0, 0, .01)
 stroke(255);
 strokeWeight(1)
 
 if (mouseIsPressed) {
-  line(mouseX, mouseY, pmouseX, pmouseY);
+  line(mouseX, mouseY, pmouseX, pmouseY)
 }`
   },
   {
     name: "setup",
     args: "",
     code: `createCanvas(${globals.defaultIframeWidth},${globals.defaultIframeHeight})
-background(100);`
+background(100)`
   },
-  { name: "preload", args: "", code: "img = loadImage('YOUR IMAGE');" }
+  { name: "preload", args: "", code: "img = loadImage('YOUR IMAGE')" }
 ];
-
-var keyPressCode = `fill("black")
-textSize(50);
-
-// display last key pressed.
-text(key + ' ' + keyCode, 20, 70);`;
-
-var mousePressCode = `fill('black')
-
-// display last clicked location
-text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
-rectMode(CENTER)
-rect(mouseX, mouseY, 1, 20)
-rect(mouseX, mouseY, 20, 1)`;
 
 export const listenerFns = [
   {
     name: "keyPressed",
     args: "",
-    code: `background('yellow')\n` + keyPressCode
+    code: `background('yellow')
+fill("black")
+textSize(50)
+
+// display last key pressed
+text(key + ' ' + keyCode, 20, 70)`
   },
   {
     name: "keyReleased",
     args: "",
-    code: `background('springgreen')\n` + keyPressCode
+    code: `background('springgreen')
+fill("black")
+textSize(50)
+
+// display last key released
+text(key + ' ' + keyCode, 20, 70)`
   },
   {
     name: "keyTyped",
     args: "",
-    code: `background('cyan')\n` + keyPressCode
+    code: `background('cyan')
+fill("black")
+textSize(50);
+
+// display last key typed
+text(key + ' ' + keyCode, 20, 70)`
   },
   {},
   {
     name: "mousePressed",
     args: "",
-    code: `background('yellow')\n` + mousePressCode
+    code: `background('yellow')
+fill('black')
+
+// display last pressed location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
   {
     name: "mouseReleased",
     args: "",
-    code: `background('springgreen')\n` + mousePressCode
+    code: `background('springgreen')
+fill('black')
+
+// display last released location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
   {
     name: "mouseClicked",
     args: "",
-    code: `background('cyan')\n` + mousePressCode
+    code: `background('cyan')
+fill('black')
+
+// display last clicked location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
   {
     name: "doubleClicked",
     args: "",
-    code: `background('cyan')\n` + mousePressCode
+    code: `background('cyan')
+fill('black')
+
+// display last double clicked location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
   {},
   {
     name: "mouseMoved",
     args: "",
-    code: `background(0, 10)
-strokeWeight(0)
-fill(255)
-size = 2*random(0, width)/3
-ellipse(width/2,height/2,size, size)`
+    code: `background('yellow')
+fill('black')
+
+// display current location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
 
   {
     name: "mouseDragged",
     args: "",
-    code: `background(0, 10)
-strokeWeight(0)
-fill(255)
-size = 2*random(0, width)/3
-ellipse(width/2,height/2,size, size)`
+    code: `background('springgreen')
+fill('black')
+
+// display last dragged location
+text(mouseX + ', ' + mouseY, mouseX + 10, mouseY - 10)
+rectMode(CENTER)
+rect(mouseX, mouseY, 1, 20)
+rect(mouseX, mouseY, 20, 1)`
   },
   {},
   {
     name: "mouseWheel",
     args: "",
-    code: `background('yellow')
-strokeWeight(1)
-stroke("black")
-var y = random(0, height)
-line(0, y, width, y)`
+    code: `background('cyan')
+fill('black')
+var offsetX = random(-5, 5)
+var offsetY = random(-5, 5)
+
+// display last wheeled location
+text(mouseX + ', ' + mouseY, mouseX + 10 + offsetX, mouseY - 10 + offsetY)
+rectMode(CENTER)
+rect(mouseX+ offsetX, mouseY+ offsetY, 1, 20)
+rect(mouseX+ offsetX, mouseY+ offsetY, 20, 1)`
   }
 ];
 
