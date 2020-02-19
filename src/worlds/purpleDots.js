@@ -20,7 +20,7 @@ export default {
       zIndex: -1,
       isBlob: false,
       codeSize: 14,
-      icon: "/static/media/layout.8a437d55.svg",
+      icon: "./static/media/layout.8a437d55.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -42,7 +42,7 @@ export default {
       zIndex: -1,
       isBlob: false,
       codeSize: 14,
-      icon: "/static/media/file.5bd43cb8.svg",
+      icon: "./static/media/file.5bd43cb8.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -65,7 +65,7 @@ export default {
       zIndex: 751,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -87,12 +87,12 @@ export default {
       zIndex: 742,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
       id: "cjkdv45i9",
-      name: "lineTool",
+      name: "setup",
       code: "createCanvas(200, 200)\nbackground(175, 112, 248)\nnoStroke()",
       args: "x=50, y=50, lastX = 0, lastY = 0",
       x: 1220,
@@ -106,10 +106,10 @@ export default {
       isMediaFile: false,
       hidden: false,
       exported: true,
-      zIndex: 753,
+      zIndex: 759,
       isBlob: false,
       codeSize: 14,
-      icon: "/static/media/bell.86facacc.svg",
+      icon: "./static/media/box.310d8273.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -132,7 +132,7 @@ export default {
       zIndex: 757,
       isBlob: false,
       codeSize: 14,
-      icon: "/static/media/box.310d8273.svg",
+      icon: "./static/media/box.310d8273.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -155,7 +155,7 @@ export default {
       zIndex: 755,
       isBlob: false,
       codeSize: 14,
-      icon: "/static/media/tool.d68b9b61.svg",
+      icon: "./static/media/tool.d68b9b61.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -177,7 +177,7 @@ export default {
       zIndex: 739,
       isBlob: true,
       codeSize: 28,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -200,7 +200,7 @@ export default {
       zIndex: 741,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -223,7 +223,7 @@ export default {
       zIndex: 743,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -246,7 +246,7 @@ export default {
       zIndex: 745,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -269,7 +269,7 @@ export default {
       zIndex: 754,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -292,7 +292,7 @@ export default {
       zIndex: 756,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     },
     {
@@ -315,7 +315,7 @@ export default {
       zIndex: 758,
       isBlob: true,
       codeSize: 14,
-      icon: "/static/media/globe.50d70b6d.svg",
+      icon: "./static/media/globe.50d70b6d.svg",
       lineHighLightingStatus: "none"
     }
   ],
@@ -323,10 +323,10 @@ export default {
   originX: -122.25386956780108,
   originY: -25.154363526924953,
   worldKey: "HOW_TO:_The_Basics",
-  worldEdited: false,
+  worldEdited: true,
   snapToGrid: false,
   linesOn: false,
   js:
-    "\n/* Part 1: Before you is a siple Stamper sketch to teach you the basics. Before we get started, some things you should know:\n    - 1 Stamper project = 1 p5.js sketch\n    - You can open any p5.js sketch in Stamper\n    - You can save/download any Stamper project and open it up in your (second) favorite p5.js editor\n  \n*/\n\n\n\nvar xPos = 0\nvar maxSize = 20\n\n\nfunction lineTool(x=50, y=50, lastX = 0, lastY = 0){\n  createCanvas(200, 200)\n  background(175, 112, 248)\n  noStroke()\n}\n\nfunction sizeDot(x=mouseX, y=mouseY){\n  // generate a random size\n  var size = random(0, maxSize)\n  \n  // set the opacity\n  var opacity = map(size, 0, maxSize, 0, 255)\n  \n  // draw a dot   \n  fill(255, opacity)\n  ellipse(x,y,size, size)\n}\n\nfunction draw(){\n  // update xPos and background\n  background(175, 112, 248, 10)\n  xPos = (xPos +2) % width\n  \n  // draw a row of dots\n  for(var i = 0; i < height/maxSize; i++){\n    sizeDot(xPos, i*maxSize )\n  }\n}\n\n\n// HOW TO: The Basics\n\n\n\n// Part 2: Below are the two Stamp types you'll probably use most frequenly\n\n\n\n// This is a 'Global Stamp'. Anything you put in here will be visbile to all of the other Stamps in your program.\n\n\n\n/* Next up is the 'Function Stamp'. You can think of this Stamp as a function:\n    - Stamp title = function name\n    - Stamp subtitle = function arguments\n    - Stamp contents = function interior\n*/\n\n\n\n// Part 3: Here we're defining a helper function, 'sizeDot', to be used in our main function, 'draw'. \n\n\n\n// Notice how draw has a pink title? That's because it's a special built in p5 function. Normal functions have blue titles.\n\n\n\n// See how we're setting default arguments 'x=mouseX, y=mouseY'? Doing this ensures x and y default to the mouse position when no arguments are given. This is helpful when drawing. 'debug' view within the helper function. \n\n",
+    "\n/* Part 1: Before you is a siple Stamper sketch to teach you the basics. Before we get started, some things you should know:\n    - 1 Stamper project = 1 p5.js sketch\n    - You can open any p5.js sketch in Stamper\n    - You can save/download any Stamper project and open it up in your (second) favorite p5.js editor\n  \n*/\n\n\n\nvar xPos = 0\nvar maxSize = 20\n\n\nfunction setup(x=50, y=50, lastX = 0, lastY = 0){\n  createCanvas(200, 200)\n  background(175, 112, 248)\n  noStroke()\n}\n\nfunction sizeDot(x=mouseX, y=mouseY){\n  // generate a random size\n  var size = random(0, maxSize)\n  \n  // set the opacity\n  var opacity = map(size, 0, maxSize, 0, 255)\n  \n  // draw a dot   \n  fill(255, opacity)\n  ellipse(x,y,size, size)\n}\n\nfunction draw(){\n  // update xPos and background\n  background(175, 112, 248, 10)\n  xPos = (xPos +2) % width\n  \n  // draw a row of dots\n  for(var i = 0; i < height/maxSize; i++){\n    sizeDot(xPos, i*maxSize )\n  }\n}\n\n\n// HOW TO: The Basics\n\n\n\n// Part 2: Below are the two Stamp types you'll probably use most frequently.\n\n\n\n// This is a 'Global Stamp'. Anything you put in here will be visbile to all of the other Stamps in your program.\n\n\n\n/* Next up is the 'Function Stamp'. You can think of this Stamp as a function:\n    - Stamp title = function name\n    - Stamp subtitle = function arguments\n    - Stamp contents = function interior\n*/\n\n\n\n// Part 3: Here we're defining a helper function, 'sizeDot', to be used in our main function, 'draw'. \n\n\n\n// Notice how draw has a pink title? That's because it's a special built in p5 function. Normal functions have blue titles.\n\n\n\n// See how we're setting default arguments 'x=mouseX, y=mouseY'? Doing this ensures x and y default to the mouse position when no arguments are given. This is helpful when drawing. 'debug' view within the helper function. \n\n",
   highlightedLines: {}
 };
