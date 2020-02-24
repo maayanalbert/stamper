@@ -106,6 +106,7 @@ export default class View extends Component {
     this.newStampMargin = 20;
     this.space = 32;
     this.cmd = 91;
+    this.cmdR = 93;
     this.ctrl = 17;
     this.plus = 187;
     this.minus = 189;
@@ -158,7 +159,11 @@ export default class View extends Component {
 
     var centerX = window.innerWidth / 2 + this.state.topBarHeight;
     var centerY = window.innerHeight / 2 + this.state.sideBarWidth;
-    if (this.state.downKey === this.cmd || this.state.downKey === this.ctrl) {
+    if (
+      this.state.downKey === this.cmd ||
+      this.state.downKey === this.ctrl ||
+      this.state.downKey === this.cmdR
+    ) {
       if (e.keyCode === this.zero) {
         e.preventDefault();
         this.zoom(1, centerX, centerY);
@@ -1143,7 +1148,14 @@ function logToConsole(message, lineno){
         return lineData;
       }
       listenerIDs.map(listenerID => {
-        lineData.push(this.getLineRelation(listenerID, id, "listener"));
+        lineData.push(
+          this.getLineRelation(
+            listenerID,
+            id,
+            "listener",
+            this.state.stampRefs[listenerID].current.state.name
+          )
+        );
       });
     });
 

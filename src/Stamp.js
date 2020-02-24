@@ -281,15 +281,19 @@ export default class FunctionStamp extends Component {
     }
   }
 
-  updateIframeDimensions(movementX = 0, movementY = 0) {
-    var newDimensions = this.getIframeDimensionFromGhost(movementX, movementY);
-
-    if (newDimensions.movementX === 0 && newDimensions.movementY === 0) {
-      return;
+  updateIframeDimensions(movementX = 0, movementY = 0, willSnapToGrid = true) {
+    if (willSnapToGrid) {
+      var newDimensions = this.getIframeDimensionFromGhost(
+        movementX,
+        movementY
+      );
+      movementX = newDimensions.movementX;
+      movementY = newDimensions.movementY;
     }
 
-    movementX = newDimensions.movementX;
-    movementY = newDimensions.movementY;
+    if (movementX === 0 && movementY === 0) {
+      return;
+    }
 
     window.postMessage({ type: "edited" }, "*");
 
@@ -690,7 +694,7 @@ export default class FunctionStamp extends Component {
         >
           {React.createElement("img", {
             style: { width: 100, height: 100, opacity: 0.5 },
-            src: globals.MediaAssetIcon
+            src: globals.ImageStampIcon
           })}
         </div>
       );
@@ -715,7 +719,8 @@ export default class FunctionStamp extends Component {
     this.setState({ resizingIframe: true });
     this.updateIframeDimensions(
       width - this.state.iframeWidth,
-      height - this.state.iframeHeight
+      height - this.state.iframeHeight,
+      false
     );
   }
 

@@ -95,6 +95,7 @@ var Cristal = (function(_super) {
 
     _this.opt = 18;
     _this.cmd = 91;
+    _this.cmdR = 93;
     _this.ctrl = 17;
     _this.plus = 187;
     _this.minus = 189;
@@ -164,7 +165,8 @@ var Cristal = (function(_super) {
     _this.onKeyDown = function(e) {
       if (
         _this.state.downKey === _this.cmd ||
-        _this.state.downKey === _this.ctrl
+        _this.state.downKey === _this.ctrl ||
+        _this.state.downKey === _this.cmdR
       ) {
         if (e.keyCode === _this.zero) {
           e.preventDefault();
