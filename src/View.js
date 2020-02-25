@@ -5,7 +5,6 @@ import { saveAs } from "file-saver";
 import pf, { globals, p5Lib } from "./globals.js";
 import Stamp from "./Stamp.js";
 import ModalManager from "./ModalManager.js";
-import ConsoleStamp from "./ConsoleStamp.js";
 import ControlBar from "./ControlBar.js";
 
 import ArcherContainer from "./react-archer/src/ArcherContainer.js";

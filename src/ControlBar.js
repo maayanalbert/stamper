@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Cristal from "./react-cristal/dist/es2015/index.js";
 import $ from "jquery";
 import pf, { globals, p5Lib } from "./globals.js";
-import ConsoleStamp from "./ConsoleStamp.js";
 
 import { Mutex } from "async-mutex";
 import { Line } from "react-lineto";
