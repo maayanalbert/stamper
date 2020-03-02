@@ -418,6 +418,15 @@ window.onerror = function (message, url, lineno, colno) {
   logToConsole(message, lineno)
 }
 
+var preventEvent = (e) => {
+  e.preventDefault()
+}
+
+document.addEventListener('wheel', preventEvent, {passive: false})
+
+window.onbeforeunload = () =>{
+ document.removeEventListener("wheel", preventEvent)
+}
 
 function logToConsole(message, lineno){
 

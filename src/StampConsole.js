@@ -37,7 +37,6 @@ export default class StampConsole extends Component {
     }
 
     if (e.data.type === "error") {
-      console.log(e);
       this.props.addErrorLine(e.data.lineno, e.data.message);
     }
 
@@ -110,10 +109,12 @@ export default class StampConsole extends Component {
     var noLoopError = `Did you just try to use p5.js's noLoop() function?`;
     Hook(newConsole, newLogs => {
       newLogs.map(log => {
+        console.log(log.data[0]);
         if (
           log.method === "log" &&
-          log.data[0].startsWith(loopError) === false &&
-          log.data[0].startsWith(noLoopError) === false
+          (typeof log.data[0] != "string" ||
+            (log.data[0].startsWith(loopError) === false &&
+              log.data[0].startsWith(noLoopError) === false))
         ) {
           this.checkLastLog(log);
         }
