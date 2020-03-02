@@ -617,10 +617,6 @@ var Cristal = (function(_super) {
     document.addEventListener("keyup", this.onKeyUp);
 
     document.addEventListener("wheel", this.onWheel, { passive: false });
-    var iframeElem = document.getElementById("iframe" + this.props.parentId);
-    if (iframeElem) {
-      iframeElem.addEventListener("wheel", e => console.log(e));
-    }
 
     this.notifyZChange();
     // window.addEventListener('resize', this.onWindowResize);
