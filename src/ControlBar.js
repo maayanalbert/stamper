@@ -281,19 +281,25 @@ function noiseWave() {
   }
 
   renderPicker(item) {
+    var iconType;
+    var iconNameCallback;
     if (item.status) {
-      var iconType = item.toggleOnIcon;
-      var iconNameCallback = () =>
+      iconType = item.toggleOnIcon;
+      iconNameCallback = () =>
         centerCallback(this.state.sideBarWidth, this.topBarHeight);
     } else {
-      var iconType = item.toggleOffIcon;
-      var iconNameCallback = null;
+      iconType = item.toggleOffIcon;
+      iconNameCallback = null;
     }
 
     var overalOpacity = 1;
     var centerCallback = item.centerCallback;
 
-    if (item.status === false && item.icon != globals.EmptyIcon) {
+    if (
+      item.status === false &&
+      item.icon != globals.EmptyIcon &&
+      !item.isSetting
+    ) {
       overalOpacity = 0.5;
       centerCallback = () => null;
     }
