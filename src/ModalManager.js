@@ -903,13 +903,6 @@ export default class ModalManager extends Component {
         this.props.setWorldData(newWorldData, callback);
       }
     );
-
-    // this.props.setWorldData(
-    //   { worldKey: key, worldPublishTime: publishDate.toString() },
-    //   () => {
-
-    //   }
-    // );
   }
 
   getOnlineWorlds(callback) {
