@@ -57,7 +57,7 @@ export default class ModalManager extends Component {
       modalHeader: "Use Chrome on a desktop please!",
       modalContent:
         "Right now, the web version of Stamper is only supported in Google Chrome for desktop.",
-      saveInterval: null,
+      maintenanceInterval: null,
       cdnLibs: false,
       askedAboutCdn: false,
       inputElem: null,
@@ -189,28 +189,11 @@ export default class ModalManager extends Component {
     window.addEventListener("message", this.receiveMessage);
 
     this.loadInitialStamperObject();
-    let saveInterval = setInterval(this.sendSaveData.bind(this), 180000);
-    this.setState({ saveInterval: saveInterval });
-    // ipc &&
-    //   ipc.on("requestUpload", event => {
-    //     this.requestUpload();
-    //     var buttons = [];
-    //     buttons.push({
-    //       text: "open",
-    //       color: "outline-primary",
-    //       callback: () => {
-    //         this.requestUpload();
-    //       }
-    //     });
-
-    //     this.setState({
-    //       modalVisible: true,
-    //       modalHeader: "Please select a p5.js sketch folder.",
-    //       modalContent:
-    //         "It must have an index.html and sketch.js in the root. It doesn't need to have been created in Stamper.",
-    //       modalButtons: buttons
-    //     });
-    //   });
+    let maintenanceInterval = setInterval(
+      this.requestOnlineWorldCheck.bind(this),
+      180000
+    );
+    this.setState({ maintenanceInterval: maintenanceInterval });
 
     ipc &&
       ipc.on("openDirectory", (event, data) => {
@@ -276,48 +259,20 @@ export default class ModalManager extends Component {
 
     this.createInputElement();
 
-    // window.addEventListener("beforeunload", function (e){
-    //   this.sendSaveData()
-    //   localStorage.setItem("e", JSON.stringify(e))
-    // });
-
-    //     window.addEventListener('beforeunload', function (e) {
-    //   // Cancel the event
-    //   // this.sendSaveData()
-    //   // if(this.props.getWorldData().worldEdited){
-    //   e.preventDefault();
-    //   // Chrome requires returnValue to be set
-    //   e.returnValue = '';
-    //   // }
-
-    // });
-
-    // window.onbeforeunload = null;
-
-    window.addEventListener("beforeunload", this.sendSaveData);
-
-    // window.onbeforeunload = confirmExit;
-    // function confirmExit() {
-    //     return "You have attempted to leave this page. Are you sure?";
-    // }
+    if (ipc) {
+      window.onbeforeunload = this.sendSaveData;
+    } else {
+      window.onbeforeunload = this.protectAgainstClosed;
+    }
   }
 
   protectAgainstClosed(e) {
     console.log("PROTECTING");
-    //     console.log(e)
-    // e.preventDefault()
 
-    //     var zip = new JSZip();
-    //  zip.file("file", JSON.stringify(e), { base64: true });
-
-    //     zip.generateAsync({ type: "blob" }).then(function(content) {
-    //       saveAs(content, "stamper_sketch.zip");
-    //     });
-
-    var message = "You have not filled out the form yet";
-    e.returnValue = message;
-
-    return "You have not filled out the form yet";
+    this.sendSaveData(e);
+    if (this.props.getWorldData().worldEdited) {
+      return "Do you really want to leave our brilliant application?";
+    }
   }
 
   getWorldNamesAndKeys(callback = () => null) {
@@ -405,8 +360,8 @@ export default class ModalManager extends Component {
     window.removeEventListener("message", this.receiveMessage);
     window.removeEventListener("beforeunload", this.sendSaveData);
     this.state.inputElem.removeEventListener("change", this.receiveFiles);
-    clearInterval(this.state.saveInterval);
-    this.setState({ saveInterval: null });
+    clearInterval(this.state.maintenanceInterval);
+    this.setState({ maintenanceInterval: null });
   }
 
   requestFileUpload(type) {
@@ -637,7 +592,6 @@ export default class ModalManager extends Component {
 
   sendSaveData() {
     console.log("SAVING");
-    this.requestOnlineWorldCheck();
     var stamperObject = this.props.getStamperObject();
     var compressedStamperObj = LZUTF8.compress(JSON.stringify(stamperObject), {
       outputEncoding: "StorageBinaryString"
