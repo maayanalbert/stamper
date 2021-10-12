@@ -58,7 +58,7 @@
     "bootstrap": "^4.4.1",
     "concurrently": "^4.1.2",
     "devtron": "^1.4.0",
-    "electron": "^7.1.9",
+    "electron": "^11.5.0",
     "electron-builder": "^21.2.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-packager": "^14.2.0",
